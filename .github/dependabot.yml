@@ -1,0 +1,31 @@
+# https://docs.github.com/code-security/dependabot/working-with-dependabot/dependabot-options-reference
+
+# No cargo entry: every crate in Cargo.lock comes from Cabin's own
+# lockfile and moves with the Cabin pin (README.md, "Cabin revision"),
+# so it matches the versions the pinned `cabin` binary is built with.
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    # One pull request per month: each bump rewrites actions.lock.
+    groups:
+      actions:
+        patterns:
+          - "*"
+    commit-message:
+      prefix: "ci"
+      include: "scope"
+
+  - package-ecosystem: "rust-toolchain"
+    directory: "/"
+    schedule:
+      interval: monthly
+    cooldown:
+      default-days: 7
+    commit-message:
+      prefix: "ci"
+      include: "scope"
