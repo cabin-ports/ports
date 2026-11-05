@@ -122,6 +122,12 @@ To move the pin, in one pull request:
 
 3. Run the checks below with a `cabin` installed from the new commit.
 
+Nothing else moves the pin: it never follows Cabin's `main`, and Cabin's own CI runs no
+full-catalog dry-run, so the pull request's CI - the [checks](#checks) on Linux, macOS, and
+Windows, with `cabin` installed from the new commit - is the merge gate that checks that commit
+against every port.  Merge it once that CI and review pass; merging publishes nothing (see
+[Publishing](#publishing)).
+
 Publishing waits for a registry deploy that contains the pinned commit (see
 [Publishing](#publishing)), so a pin that a deployed registry does not yet serve cannot publish.
 
