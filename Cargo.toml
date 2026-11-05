@@ -1,0 +1,42 @@
+[package]
+name = "cabin-ports"
+version = "0.0.0"
+edition = "2024"
+license = "Apache-2.0"
+repository = "https://github.com/cabin-ports/ports"
+rust-version = "1.95"
+description = "Publishes the curated foundation ports as cabin-ports registry packages"
+# The tool reads this repository's `ports/` tree, so a published copy
+# would have nothing to operate on.
+publish = false
+
+[[bin]]
+name = "port-publish"
+path = "src/main.rs"
+
+# Every Cabin crate comes from one pinned commit of cabinpkg/cabin, and
+# the `cabin` binary the tool drives is installed from the same commit
+# (README.md, "Cabin revision").
+[dependencies]
+anyhow = "1"
+cabin-core = { package = "cabinpkg-core", git = "file:///Users/kmatsui/Downloads/cabin", rev = "146ab32f61764ac66941860fb916eefd96724a56" }
+cabin-env = { package = "cabinpkg-env", git = "file:///Users/kmatsui/Downloads/cabin", rev = "146ab32f61764ac66941860fb916eefd96724a56" }
+cabin-manifest = { package = "cabinpkg-manifest", git = "file:///Users/kmatsui/Downloads/cabin", rev = "146ab32f61764ac66941860fb916eefd96724a56" }
+cabin-publish = { package = "cabinpkg-publish", git = "file:///Users/kmatsui/Downloads/cabin", rev = "146ab32f61764ac66941860fb916eefd96724a56" }
+clap = { version = "4", features = ["derive"] }
+etcetera = "0.11"
+semver = "1"
+tempfile = "3"
+
+[dev-dependencies]
+assert_fs = "1"
+flate2 = "1"
+serde_json = "1"
+sha2 = "0.11"
+tar = "0.4"
+tiny_http = "0.12"
+
+[lints.clippy]
+pedantic = { level = "deny", priority = -1 }
+must_use_candidate = "allow"
+assert_is_empty = "allow"
