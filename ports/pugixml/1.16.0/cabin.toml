@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/zeux/pugixml/releases/download/v1.16/pugixml-1.16.tar.gz"
+checksum = "sha256:4cee1ca4aad395170f4c7a07824f3bdd41f28316c6e1e1090a1425b278ec0b4b"
+format = "tar.gz"
+strip-prefix = "pugixml-1.16"
+
+# Upstream versions are two-part (v1.16); Cabin versions are SemVer.
+[package]
+name = "cabin-ports/pugixml"
+version = "1.16.0"
+
+# The static library upstream's CMake builds by default: src/pugixml.cpp
+# with no option defines, so XPath, the STL interface, and exceptions
+# stay enabled.
+[target.pugixml]
+type = "library"
+sources = ["src/pugixml.cpp"]
+include-dirs = ["src"]
+# Upstream's CMake default; it compiles the std::string_view overloads,
+# which pugixml.hpp declares only to C++17 and later consumers.
+cxx-standard = "c++17"
+# "pugixml can be compiled with any version of the C++ standard starting
+# from C++98" (docs/manual.html); newer standards only add overloads.
+interface-cxx-standard = "c++98"
+links = "pugixml"
