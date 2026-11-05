@@ -1,0 +1,2 @@
+# Patches publish verbatim and apply byte-exactly: never convert their line endings.
+ports/**/*.patch -text
