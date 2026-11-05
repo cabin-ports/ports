@@ -1,0 +1,142 @@
+name: CI
+
+# The merge queue's run is the authoritative pre-merge validation;
+# `required` is the only required check.
+on:
+  pull_request:
+  merge_group:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  # The Cabin commit Cargo.lock pins; every job installs the `cabin`
+  # binary from it (README.md, "Cabin revision").
+  pin:
+    runs-on: ubuntu-slim
+    outputs:
+      cabin-rev: ${{ steps.rev.outputs.cabin-rev }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: Cargo.lock
+          sparse-checkout-cone-mode: false
+      # Every cabinpkg-* package and every git source must be one full
+      # commit on cabinpkg/cabin's main. A fork-only commit resolves
+      # through the parent URL too, and publish.yml runs the pinned
+      # cabin beside the OIDC token.
+      - id: rev
+        name: Check the pinned Cabin commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          sources="$(awk '
+            /^\[\[package\]\]/ { if (keep) print src; keep = 0; src = "none" }
+            /^name = "cabinpkg-/ { keep = 1 }
+            /^source = / { src = $3; if (src ~ /^"git\+/) keep = 1 }
+            END { if (keep) print src }
+          ' Cargo.lock | sort -u)"
+          echo "Cabin sources: ${sources:-none}"
+          re='^"git\+https://github\.com/cabinpkg/cabin\?rev=([0-9a-f]{40})#([0-9a-f]{40})"$'
+          if [[ ! "$sources" =~ $re || "${BASH_REMATCH[1]}" != "${BASH_REMATCH[2]}" ]]; then
+            echo "::error::Cargo.lock must lock every cabinpkg-* package to one full cabinpkg/cabin commit"
+            exit 1
+          fi
+          rev="${BASH_REMATCH[1]}"
+          status="$(gh api "repos/cabinpkg/cabin/compare/$rev...main" --jq .status)"
+          if [[ "$status" != identical && "$status" != ahead ]]; then
+            echo "::error::$rev is not on cabinpkg/cabin's main (compare: $status)"
+            exit 1
+          fi
+          echo "cabin-rev=$rev" >> "$GITHUB_OUTPUT"
+
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
+        with:
+          cache: false
+          rustflags: ""
+      - run: cargo fmt --check
+      - run: cargo clippy --locked --all-targets -- -D warnings
+      # .github/workflows/actions.lock is generated; see AGENTS.md.
+      - name: Verify the actions lockfile
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh extension install github/gh-actions-lock --pin v0.4.1
+          gh actions-lock --verify
+
+  # The publisher's tests, then the complete `--dry-run` preflight:
+  # every port is staged, built, and its consumer test run, on each
+  # platform the ports must support.
+  check:
+    needs: pin
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - macos-26
+          - windows-2025-vs2026
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      # No caches: a pull request's saves are restorable only by that
+      # pull request, so they almost never hit and only evict others.
+      - uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
+        with:
+          cache: false
+          rustflags: ""
+
+      # Before the MSVC environment: with it, Git Bash's `link.exe`
+      # would shadow MSVC's.
+      - name: Install the pinned cabin
+        shell: bash
+        env:
+          CABIN_REV: ${{ needs.pin.outputs.cabin-rev }}
+        run: cargo install --locked --debug --git https://github.com/cabinpkg/cabin --rev "$CABIN_REV" cabinpkg --root "$RUNNER_TEMP/cabin"
+
+      - name: Set up MSVC environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+
+      - name: Test the publisher
+        run: cargo test --locked
+        env:
+          PORT_PUBLISH_CABIN: ${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}
+          RUST_BACKTRACE: "1"
+
+      - name: Run the publisher dry-run
+        env:
+          CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache
+          # Windows' default %TEMP% sits on C:, slower than RUNNER_TEMP's
+          # D:; the publisher's scratch tree and MSVC's temporaries follow TMP.
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: cargo run --locked -- --dry-run --cabin "${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}"
+
+  # The required check: fails unless every job above succeeded, so a
+  # failed, cancelled, or skipped job never reads as green.
+  required:
+    needs: [pin, lint, check]
+    if: always()
+    runs-on: ubuntu-slim
+    steps:
+      - name: Fail unless every job succeeded
+        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
+        run: exit 1

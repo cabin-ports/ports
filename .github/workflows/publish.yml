@@ -1,0 +1,179 @@
+name: Publish
+
+# Publishes ports/ as `cabin-ports/*` registry packages (README.md,
+# "Publishing"). Only a manual dispatch from main publishes.
+on:
+  workflow_dispatch:
+    inputs:
+      exchange-check:
+        description: "Exchange and immediately revoke a trusted-publishing token; publish nothing"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  RUSTFLAGS: "-D warnings"
+
+jobs:
+  # Builds both binaries in a job without the OIDC permission, so no
+  # Rust build script runs beside the publish job's token. The
+  # repository guard keeps a fork from building for a publish the
+  # registry's trusted-publishing binding would refuse anyway.
+  build:
+    if: github.repository == 'cabin-ports/ports' && github.ref == 'refs/heads/main' && !inputs.exchange-check
+    runs-on: ubuntu-latest
+    outputs:
+      cabin-rev: ${{ steps.rev.outputs.cabin-rev }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - id: rev
+        name: Read the pinned Cabin commit
+        run: |
+          rev="$(sed -n 's|^source = "git+https://github.com/cabinpkg/cabin?rev=\([0-9a-f]\{40\}\)#.*|\1|p' Cargo.lock | sort -u)"
+          if [[ ! "$rev" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::Cargo.lock must lock exactly one cabinpkg/cabin commit; found: ${rev:-none}"
+            exit 1
+          fi
+          echo "cabin-rev=$rev" >> "$GITHUB_OUTPUT"
+      # No cache: these binaries run beside the publish job's token.
+      - uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
+        with:
+          cache: false
+          rustflags: ""
+      - name: Install the pinned cabin
+        env:
+          CABIN_REV: ${{ steps.rev.outputs.cabin-rev }}
+        run: cargo install --locked --debug --git https://github.com/cabinpkg/cabin --rev "$CABIN_REV" cabinpkg --root "$RUNNER_TEMP/tools"
+      - name: Build the publisher
+        run: |
+          cargo build --locked --bin port-publish
+          cp target/debug/port-publish "$RUNNER_TEMP/tools/bin/"
+      - uses: actions/upload-artifact@v7.0.2
+        with:
+          name: publish-tools
+          path: ${{ runner.temp }}/tools/bin/
+          retention-days: 1
+
+  # The pinned client can send metadata only a Worker built from a
+  # Cabin commit containing it accepts, and cabinpkg/cabin deploys the
+  # registry independently: wait for such a deploy with Cabin's own
+  # guard, from the pinned commit.
+  await-deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          repository: cabinpkg/cabin
+          ref: ${{ needs.build.outputs.cabin-rev }}
+          # The guard walks main's history for a deploy containing the
+          # pinned commit.
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
+        with:
+          cache: false
+          rustflags: ""
+      - name: Wait for a registry deploy containing the pinned Cabin commit
+        env:
+          CABIN_REV: ${{ needs.build.outputs.cabin-rev }}
+          GH_TOKEN: ${{ github.token }}
+        run: cargo workflow-await-deploy --repository cabinpkg/cabin --sha "$CABIN_REV"
+
+  publish:
+    needs: [build, await-deploy]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # `cabin publish` exchanges the run's OIDC token for its
+      # short-lived registry token; no stored secret exists.
+      id-token: write
+    # Serialize this repository's publish runs, queueing rather than
+    # cancelling pending ones. The registry's trusted-publishing binding
+    # admits exactly one repository, so no other repository publishes.
+    concurrency:
+      group: publish
+      queue: max
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      # Untrusted: the tool re-hashes each restored archive against its
+      # port's pinned SHA-256 and re-downloads on mismatch. Cache only
+      # archives/: extracted sources are not re-verified on reuse.
+      - name: Cache upstream archives
+        uses: actions/cache@v6.1.0
+        with:
+          path: ${{ runner.temp }}/cabin-cache/ports/archives
+          key: ports-archives-${{ hashFiles('ports/**/cabin.toml') }}
+          restore-keys: ports-archives-
+
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: publish-tools
+          path: ${{ runner.temp }}/tools
+      - run: chmod +x "$RUNNER_TEMP/tools/cabin" "$RUNNER_TEMP/tools/port-publish"
+
+      # Checked immediately before publishing: a stale run would
+      # publish an intermediate state of a version as an otherwise
+      # unnecessary packaging revision. A newer main commit's own
+      # dispatch publishes instead. A commit landing during the upload's
+      # own preflight is not detected; the next dispatch's upload
+      # supersedes what it published. Explicit bash for pipefail: a
+      # failed ls-remote must fail the run, not read as superseded.
+      - name: Skip when superseded by a newer main commit
+        id: freshness
+        shell: bash
+        run: |
+          head="$(git ls-remote --exit-code origin refs/heads/main | cut -f1)"
+          echo "main is at $head; this run publishes $GITHUB_SHA"
+          if [[ "$head" = "$GITHUB_SHA" ]]; then
+            echo "superseded=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "::warning::superseded by main's $head: published nothing; dispatch again on main"
+            echo "superseded=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # Builds every probe but never runs one: running upstream code
+      # next to the OIDC token would hand it the token.
+      - name: Publish to registry.cabinpkg.com
+        if: steps.freshness.outputs.superseded == 'false'
+        run: |
+          "$RUNNER_TEMP/tools/port-publish" --publish \
+            --index-url https://registry.cabinpkg.com \
+            --ports-dir ports \
+            --cabin "$RUNNER_TEMP/tools/cabin" \
+            --cache-dir "$RUNNER_TEMP/cabin-cache"
+
+  exchange-check:
+    # Dispatch-only probe of the registered binding end to end (config
+    # row, claimed scope, mint, revocation); publishes nothing. curl,
+    # because the cabin client exchanges only inside a real publish.
+    # The registered binding pins refs/heads/main, so any other ref gets
+    # the registry's uniform 401. No checkout: the probe needs only the
+    # run's OIDC identity.
+    if: inputs.exchange-check
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Exchange and immediately revoke a trusted-publishing token
+        # Explicit bash for pipefail, so a failed fetch cannot feed an
+        # empty value downstream; `jq -e` fails on a missing field for
+        # the same reason. The DELETE must answer the revocation's 204.
+        shell: bash
+        run: |
+          jwt="$(curl -sSf -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=cabinpkg.com" | jq -er .value)"
+          echo "::add-mask::$jwt"
+          token="$(curl -sSf -X PUT https://cabinpkg.com/api/v1/trusted_publishing/tokens -H "Content-Type: application/json" -d "{\"jwt\":\"$jwt\"}" | jq -er .token)"
+          echo "::add-mask::$token"
+          status="$(curl -sS -o /dev/null -w '%{http_code}' -X DELETE https://cabinpkg.com/api/v1/trusted_publishing/tokens -H "Authorization: Bearer $token")"
+          echo "revocation answered $status"
+          test "$status" = 204
