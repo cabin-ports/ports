@@ -3,6 +3,7 @@ name: Publish
 # Publishes ports/ as `cabin-ports/*` registry packages (README.md,
 # "Publishing"). Only a manual dispatch from main publishes.
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       exchange-check:
@@ -23,7 +24,7 @@ jobs:
   # repository guard keeps a fork from building for a publish the
   # registry's trusted-publishing binding would refuse anyway.
   build:
-    if: github.repository == 'cabin-ports/ports' && github.ref == 'refs/heads/main' && !inputs.exchange-check
+    if: github.repository == 'cabin-ports/ports' && (github.event_name == 'pull_request' || (github.ref == 'refs/heads/main' && !inputs.exchange-check))
     runs-on: ubuntu-latest
     outputs:
       cabin-rev: ${{ steps.rev.outputs.cabin-rev }}
