@@ -170,7 +170,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-artifact"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=8bd98f51aa6619dfb3360a17d5f0c53f62e88035#8bd98f51aa6619dfb3360a17d5f0c53f62e88035"
+source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
 dependencies = [
  "atomic-write-file",
  "cabinpkg-core",
@@ -188,7 +188,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-core"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=8bd98f51aa6619dfb3360a17d5f0c53f62e88035#8bd98f51aa6619dfb3360a17d5f0c53f62e88035"
+source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
 dependencies = [
  "cabinpkg-env",
  "cabinpkg-fs",
@@ -205,7 +205,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-credentials"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=8bd98f51aa6619dfb3360a17d5f0c53f62e88035#8bd98f51aa6619dfb3360a17d5f0c53f62e88035"
+source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
 dependencies = [
  "atomic-write-file",
  "cabinpkg-env",
@@ -222,7 +222,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-env"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=8bd98f51aa6619dfb3360a17d5f0c53f62e88035#8bd98f51aa6619dfb3360a17d5f0c53f62e88035"
+source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
 dependencies = [
  "shlex 2.0.1",
  "thiserror",
@@ -231,7 +231,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-fs"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=8bd98f51aa6619dfb3360a17d5f0c53f62e88035#8bd98f51aa6619dfb3360a17d5f0c53f62e88035"
+source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
 dependencies = [
  "atomic-write-file",
  "dunce",
@@ -240,7 +240,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-index"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=8bd98f51aa6619dfb3360a17d5f0c53f62e88035#8bd98f51aa6619dfb3360a17d5f0c53f62e88035"
+source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
 dependencies = [
  "cabinpkg-core",
  "semver",
@@ -253,7 +253,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-index-http"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=8bd98f51aa6619dfb3360a17d5f0c53f62e88035#8bd98f51aa6619dfb3360a17d5f0c53f62e88035"
+source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
 dependencies = [
  "cabinpkg-core",
  "cabinpkg-credentials",
@@ -269,7 +269,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-manifest"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=8bd98f51aa6619dfb3360a17d5f0c53f62e88035#8bd98f51aa6619dfb3360a17d5f0c53f62e88035"
+source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
 dependencies = [
  "cabinpkg-core",
  "camino",
@@ -285,7 +285,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-package"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=8bd98f51aa6619dfb3360a17d5f0c53f62e88035#8bd98f51aa6619dfb3360a17d5f0c53f62e88035"
+source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
 dependencies = [
  "cabinpkg-core",
  "cabinpkg-fs",
@@ -303,7 +303,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-publish"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=8bd98f51aa6619dfb3360a17d5f0c53f62e88035#8bd98f51aa6619dfb3360a17d5f0c53f62e88035"
+source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
 dependencies = [
  "cabinpkg-artifact",
  "cabinpkg-core",
@@ -319,7 +319,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-registry-file"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=8bd98f51aa6619dfb3360a17d5f0c53f62e88035#8bd98f51aa6619dfb3360a17d5f0c53f62e88035"
+source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
 dependencies = [
  "cabinpkg-core",
  "cabinpkg-fs",
