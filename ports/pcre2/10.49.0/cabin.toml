@@ -1,0 +1,191 @@
+[package.upstream]
+url = "https://github.com/PCRE2Project/pcre2/releases/download/pcre2-10.49/pcre2-10.49.tar.gz"
+checksum = "sha256:929f0b20e62879252a15886b06c89f1edef61a363cbd5826fb041080a5e557ae"
+format = "tar.gz"
+strip-prefix = "pcre2-10.49"
+
+# The hand-build steps of NON-AUTOTOOLS-BUILD: the generic config.h,
+# pcre2.h, and default character tables.  The two public headers go to
+# include/, the only directory CMake puts on consumers' include path, so
+# src/'s private headers (config.h among them) stay off it.
+[[package.upstream.copy]]
+from = "src/config.h.generic"
+to = "src/config.h"
+
+[[package.upstream.copy]]
+from = "src/pcre2.h.generic"
+to = "include/pcre2.h"
+
+[[package.upstream.copy]]
+from = "src/pcre2posix.h"
+to = "include/pcre2posix.h"
+
+[[package.upstream.copy]]
+from = "src/pcre2_chartables.c.dist"
+to = "src/pcre2_chartables.c"
+
+[package]
+name = "cabin-ports/pcre2"
+# Upstream 10.49; Cabin versions have three components.
+version = "10.49.0"
+include = ["COPYING", "LICENCE.md", "include", "src"]
+# Upstream compiles as C99 (CMakeLists.txt:122); C11 is the oldest
+# standard Cabin can lower for MSVC.
+c-standard = "c11"
+# pcre2.h includes <inttypes.h>, which C++ adopted in C++11.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# The four libraries vcpkg and ConanCenter build by default: the
+# 8-, 16- and 32-bit code-unit libraries and the POSIX wrapper over the
+# 8-bit one (upstream's own default builds only the 8-bit library and the
+# wrapper, CMakeLists.txt:307-311).  Unicode support is on, upstream's
+# default (:408); config.h.generic supplies the rest of upstream's
+# default configuration (LF newline, link size 2, match and heap limits).
+# Not ported: the JIT compiler (SUPPORT_JIT, off by default upstream and
+# in ConanCenter; vcpkg turns it on), pcre2grep, pcre2test, and the
+# Debug-only PCRE2_DEBUG assertions CMake adds.  config.h.generic leaves
+# the compiler-probe macros (HAVE_BUILTIN_*, HAVE_ATTRIBUTE_UNINITIALIZED)
+# undefined, so the sources use their portable fallbacks.
+[profile]
+defines = [
+  "HAVE_CONFIG_H",
+  "SUPPORT_PCRE2_16",
+  "SUPPORT_PCRE2_32",
+  "SUPPORT_PCRE2_8",
+  "SUPPORT_UNICODE",
+]
+
+# Each width library compiles PCRE2_SOURCES (CMakeLists.txt:821-853) with
+# its PCRE2_CODE_UNIT_WIDTH.  PCRE2_STATIC is public on the static
+# libraries (:928): on Windows it keeps pcre2.h from declaring the API
+# dllimport.
+[target.pcre2-8]
+type = "library"
+sources = [
+  "src/pcre2_auto_possess.c",
+  "src/pcre2_chartables.c",
+  "src/pcre2_chkdint.c",
+  "src/pcre2_compile.c",
+  "src/pcre2_compile_cgroup.c",
+  "src/pcre2_compile_class.c",
+  "src/pcre2_config.c",
+  "src/pcre2_context.c",
+  "src/pcre2_convert.c",
+  "src/pcre2_dfa_match.c",
+  "src/pcre2_error.c",
+  "src/pcre2_extuni.c",
+  "src/pcre2_find_bracket.c",
+  "src/pcre2_jit_compile.c",
+  "src/pcre2_maketables.c",
+  "src/pcre2_match.c",
+  "src/pcre2_match_data.c",
+  "src/pcre2_match_next.c",
+  "src/pcre2_newline.c",
+  "src/pcre2_ord2utf.c",
+  "src/pcre2_pattern_info.c",
+  "src/pcre2_script_run.c",
+  "src/pcre2_serialize.c",
+  "src/pcre2_string_utils.c",
+  "src/pcre2_study.c",
+  "src/pcre2_substitute.c",
+  "src/pcre2_substring.c",
+  "src/pcre2_tables.c",
+  "src/pcre2_ucd.c",
+  "src/pcre2_valid_utf.c",
+  "src/pcre2_xclass.c",
+]
+include-dirs = ["include"]
+defines = ["PCRE2_CODE_UNIT_WIDTH=8", "PCRE2_STATIC"]
+interface-defines = ["PCRE2_STATIC"]
+links = "pcre2-8"
+
+[target.pcre2-16]
+type = "library"
+sources = [
+  "src/pcre2_auto_possess.c",
+  "src/pcre2_chartables.c",
+  "src/pcre2_chkdint.c",
+  "src/pcre2_compile.c",
+  "src/pcre2_compile_cgroup.c",
+  "src/pcre2_compile_class.c",
+  "src/pcre2_config.c",
+  "src/pcre2_context.c",
+  "src/pcre2_convert.c",
+  "src/pcre2_dfa_match.c",
+  "src/pcre2_error.c",
+  "src/pcre2_extuni.c",
+  "src/pcre2_find_bracket.c",
+  "src/pcre2_jit_compile.c",
+  "src/pcre2_maketables.c",
+  "src/pcre2_match.c",
+  "src/pcre2_match_data.c",
+  "src/pcre2_match_next.c",
+  "src/pcre2_newline.c",
+  "src/pcre2_ord2utf.c",
+  "src/pcre2_pattern_info.c",
+  "src/pcre2_script_run.c",
+  "src/pcre2_serialize.c",
+  "src/pcre2_string_utils.c",
+  "src/pcre2_study.c",
+  "src/pcre2_substitute.c",
+  "src/pcre2_substring.c",
+  "src/pcre2_tables.c",
+  "src/pcre2_ucd.c",
+  "src/pcre2_valid_utf.c",
+  "src/pcre2_xclass.c",
+]
+include-dirs = ["include"]
+defines = ["PCRE2_CODE_UNIT_WIDTH=16", "PCRE2_STATIC"]
+interface-defines = ["PCRE2_STATIC"]
+links = "pcre2-16"
+
+[target.pcre2-32]
+type = "library"
+sources = [
+  "src/pcre2_auto_possess.c",
+  "src/pcre2_chartables.c",
+  "src/pcre2_chkdint.c",
+  "src/pcre2_compile.c",
+  "src/pcre2_compile_cgroup.c",
+  "src/pcre2_compile_class.c",
+  "src/pcre2_config.c",
+  "src/pcre2_context.c",
+  "src/pcre2_convert.c",
+  "src/pcre2_dfa_match.c",
+  "src/pcre2_error.c",
+  "src/pcre2_extuni.c",
+  "src/pcre2_find_bracket.c",
+  "src/pcre2_jit_compile.c",
+  "src/pcre2_maketables.c",
+  "src/pcre2_match.c",
+  "src/pcre2_match_data.c",
+  "src/pcre2_match_next.c",
+  "src/pcre2_newline.c",
+  "src/pcre2_ord2utf.c",
+  "src/pcre2_pattern_info.c",
+  "src/pcre2_script_run.c",
+  "src/pcre2_serialize.c",
+  "src/pcre2_string_utils.c",
+  "src/pcre2_study.c",
+  "src/pcre2_substitute.c",
+  "src/pcre2_substring.c",
+  "src/pcre2_tables.c",
+  "src/pcre2_ucd.c",
+  "src/pcre2_valid_utf.c",
+  "src/pcre2_xclass.c",
+]
+include-dirs = ["include"]
+defines = ["PCRE2_CODE_UNIT_WIDTH=32", "PCRE2_STATIC"]
+interface-defines = ["PCRE2_STATIC"]
+links = "pcre2-32"
+
+# The POSIX wrapper links the 8-bit library publicly, as CMake's
+# pcre2-posix-static does (:947).
+[target.pcre2-posix]
+type = "library"
+sources = ["src/pcre2posix.c"]
+include-dirs = ["include"]
+defines = ["PCRE2_CODE_UNIT_WIDTH=8"]
+deps = [{ name = "pcre2-8", public = true }]
+links = "pcre2-posix"
