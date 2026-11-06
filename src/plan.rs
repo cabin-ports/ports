@@ -664,7 +664,7 @@ fn order_by_dependencies(conversions: Vec<PortConversion>) -> Result<Vec<PortCon
 }
 
 #[cfg(test)]
-mod tests {
+pub(crate) mod tests {
     use super::*;
     #[test]
     fn scoped_names_spell_the_directory_exactly() {
@@ -695,13 +695,13 @@ mod tests {
     /// Scaffolding for the package-shape validation tests: one
     /// committed package directory under a temp ports tree, loaded
     /// through the real `load_conversions` entry.
-    fn write_package(dir: &std::path::Path, name: &str, version: &str, manifest: &str) {
+    pub(crate) fn write_package(dir: &std::path::Path, name: &str, version: &str, manifest: &str) {
         let package_dir = dir.join(name).join(version);
         std::fs::create_dir_all(&package_dir).unwrap();
         std::fs::write(package_dir.join("cabin.toml"), manifest).unwrap();
     }
 
-    fn package_manifest(scoped: &str, version: &str, extra: &str) -> String {
+    pub(crate) fn package_manifest(scoped: &str, version: &str, extra: &str) -> String {
         format!(
             "[package]\nname = \"{scoped}\"\nversion = \"{version}\"\n\n\
              [package.upstream]\nurl = \"https://ports.invalid/a.tar.gz\"\nchecksum = \"sha256:{}\"\n\

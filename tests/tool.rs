@@ -327,6 +327,7 @@ fn scrubbed(mut command: Command) -> Command {
         "NO_COLOR",
         "CLICOLOR",
         "CLICOLOR_FORCE",
+        "PORT_PUBLISH_CHANGED_SINCE",
     ] {
         command.env_remove(key);
     }
@@ -449,6 +450,193 @@ fn consumer_tests_run_in_the_dry_run_and_never_in_the_publish_run() {
         marker.path().exists(),
         "the dry run never executed the probe"
     );
+}
+
+/// Run `git` in a fixture repository, isolated from the developer's own
+/// Git configuration (signing, hooks, default branch).
+fn git(repo: &Path, args: &[&str]) {
+    let output = Command::new("git")
+        .current_dir(repo)
+        .env("GIT_CONFIG_GLOBAL", repo.with_file_name("gitconfig"))
+        .env("GIT_CONFIG_NOSYSTEM", "1")
+        .args(["-c", "user.name=t", "-c", "user.email=t@ports.invalid"])
+        .args(args)
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "git {args:?}: {}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+}
+
+/// A selected dry-run fetches, stages, and probes only its selection:
+/// `unfetched`'s archive is never seeded, so staging it would try - and
+/// fail - to download it, as the full dry-run shows.  A documentation
+/// edit alone preflights nothing, and a selected probe's failure fails
+/// the run.
+#[test]
+fn a_selected_dry_run_preflights_only_the_selection() {
+    require_build_tools();
+    let dir = TempDir::new().unwrap();
+    let repo = dir.child("repo");
+    let ports = repo.child("ports");
+    let cache = dir.child("cache");
+    seed_zlib(&ports, &cache);
+    write_port_package(
+        &ports,
+        "unfetched",
+        "1.0.0",
+        &"0".repeat(64),
+        &[],
+        "[target.u]\ntype = \"library\"\nsources = [\"u.c\"]\nc-standard = \"c11\"\n",
+    );
+    repo.child("README.md").write_str("ports\n").unwrap();
+    git(repo.path(), &["init", "-q"]);
+    git(repo.path(), &["add", "-A"]);
+    git(repo.path(), &["commit", "-q", "-m", "base"]);
+
+    let dry_run = |selection: &[&str], changed_since: Option<&str>| {
+        let mut command = scrubbed(tool());
+        command
+            .arg("--dry-run")
+            .args(selection)
+            .arg("--ports-dir")
+            .arg(ports.path())
+            .arg("--cache-dir")
+            .arg(cache.path())
+            .arg("--work-dir")
+            .arg(dir.child("work").path())
+            .arg("--cabin")
+            .arg(cabin_binary());
+        // CI hands the base over through the environment.
+        if let Some(base) = changed_since {
+            command.env("PORT_PUBLISH_CHANGED_SINCE", base);
+        }
+        let output = command.output().unwrap();
+        let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
+        let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
+        (output.status.success(), stdout, stderr)
+    };
+
+    repo.child("README.md")
+        .write_str("ports, edited\n")
+        .unwrap();
+    let (ok, stdout, stderr) = dry_run(&[], Some("HEAD"));
+    assert!(ok, "stdout:\n{stdout}\nstderr:\n{stderr}");
+    assert!(stdout.contains("nothing to preflight"), "{stdout}");
+    assert!(
+        stdout.contains("dry run complete: 0 of 2 packages"),
+        "{stdout}"
+    );
+
+    // The change under test: a new, untracked port depending on zlib.
+    let (bytes, hex) = make_tar_gz(&[
+        ("libpng-1.6.50/png.h", "int png_answer(void);\n"),
+        (
+            "libpng-1.6.50/png.c",
+            "#include \"png.h\"\n#include \"zlib.h\"\nint png_answer(void) { return \
+             zlib_answer(); }\n",
+        ),
+    ]);
+    seed_port_cache(cache.path(), &bytes, &hex);
+    write_port_package(
+        &ports,
+        "libpng",
+        "1.6.50",
+        &hex,
+        &[],
+        "[dependencies]\n\"cabin-ports/zlib\" = \"^1.3\"\n\n[target.png]\ntype = \
+         \"library\"\nsources = [\"png.c\"]\ninclude-dirs = [\".\"]\nc-standard = \
+         \"c11\"\ndeps = [\"cabin-ports/zlib\"]\n",
+    );
+    let (ok, stdout, stderr) = dry_run(&[], Some("HEAD"));
+    assert!(ok, "stdout:\n{stdout}\nstderr:\n{stderr}");
+    assert!(stdout.contains("preflighting 2 of 3 packages"), "{stdout}");
+    assert!(stdout.contains("staged cabin-ports/zlib 1.3.1"), "{stdout}");
+    assert!(
+        stdout.contains("built cabin-ports/libpng 1.6.50"),
+        "{stdout}"
+    );
+    assert!(!stdout.contains("staged cabin-ports/unfetched"), "{stdout}");
+
+    let (ok, _, stderr) = dry_run(&[], None);
+    assert!(!ok, "the full dry-run must try to fetch `unfetched`");
+    assert!(stderr.contains("unfetched"), "{stderr}");
+
+    ports
+        .child("libpng/1.6.50/tests/main.cc")
+        .write_str("int main() { return 3; }\n")
+        .unwrap();
+    let (ok, _, stderr) = dry_run(&["--port", "libpng"], None);
+    assert!(!ok, "a failing selected probe must fail the run");
+    assert!(
+        stderr.contains("preflight probe `port-probe` of cabin-ports/libpng 1.6.50"),
+        "{stderr}"
+    );
+}
+
+/// The cheap catalog-wide checks run whatever a dry-run selects: a
+/// misnamed consumer test in an unselected port fails the run before
+/// anything is staged.
+#[test]
+fn a_selected_dry_run_still_checks_every_consumer_test_name() {
+    let dir = TempDir::new().unwrap();
+    let (ports, cache) = zlib_only(&dir);
+    let ports_child = dir.child("ports");
+    write_port_package(
+        &ports_child,
+        "other",
+        "1.0.0",
+        &"0".repeat(64),
+        &[],
+        "[target.o]\ntype = \"library\"\nsources = [\"o.c\"]\nc-standard = \"c11\"\n",
+    );
+    ports_child
+        .child("other/1.0.0/tests/main.cpp")
+        .write_str("int main() { return 0; }\n")
+        .unwrap();
+    let output = scrubbed(tool())
+        .args(["--dry-run", "--port", "zlib", "--ports-dir"])
+        .arg(&ports)
+        .arg("--cache-dir")
+        .arg(&cache)
+        .arg("--work-dir")
+        .arg(dir.child("work").path())
+        // Never reached: the check fails before any build.
+        .arg("--cabin")
+        .arg(env!("CARGO_BIN_EXE_port-publish"))
+        .output()
+        .unwrap();
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(!output.status.success(), "{stderr}");
+    assert!(stderr.contains("is not a consumer test"), "{stderr}");
+    assert!(stderr.contains("main.cpp"), "{stderr}");
+}
+
+/// Selection is dry-run only: `--publish` refuses it while parsing its
+/// arguments, before any preflight or upload.
+#[test]
+fn publish_refuses_a_selection() {
+    for (args, changed_since) in [(&["--port", "zlib"][..], None), (&[][..], Some("HEAD"))] {
+        let mut command = scrubbed(tool());
+        command
+            .args([
+                "--publish",
+                "--index-url",
+                "http://127.0.0.1:9/",
+                "--cabin",
+                "cabin",
+            ])
+            .args(args);
+        if let Some(base) = changed_since {
+            command.env("PORT_PUBLISH_CHANGED_SINCE", base);
+        }
+        let output = command.output().unwrap();
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert_eq!(output.status.code(), Some(2), "{stderr}");
+        assert!(stderr.contains("cannot be used with"), "{stderr}");
+    }
 }
 
 /// Probes run in parallel, yet the reported failure is the earliest

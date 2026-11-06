@@ -7,13 +7,15 @@ use std::path::PathBuf;
 use std::process::ExitCode;
 
 use anyhow::{Context, Result};
+use cabin_ports::select::Selection;
 use cabin_ports::{Mode, Options, run};
 use clap::{ArgGroup, Parser};
 
 /// Publishes the committed foundation ports as `cabin-ports/<name>`
 /// registry packages, each from the `cabin.toml` committed in it,
-/// verbatim.  Both modes run the complete local preflight; --publish
-/// then uploads every package through the registry API.
+/// verbatim.  Both modes run the local preflight - of every port,
+/// unless a dry-run selects fewer; --publish then uploads every package
+/// through the registry API.
 #[derive(Parser)]
 #[command(group(ArgGroup::new("mode").required(true)))]
 struct Cli {
@@ -30,6 +32,25 @@ struct Cli {
     // --publish, and --publish requires the URL back.
     #[arg(long, conflicts_with = "dry_run")]
     index_url: Option<String>,
+    /// Dry-run only what the change since this Git revision needs:
+    /// when it only adds package names (and edits README.md or
+    /// AGENTS.md), every version of those names plus their
+    /// dependencies; when it only edits those two files, nothing.  Any
+    /// other change dry-runs every port.  Uncommitted and untracked
+    /// files count as changes.
+    // `conflicts_with`, not `requires`, for the reason above.
+    #[arg(
+        long,
+        value_name = "REV",
+        env = "PORT_PUBLISH_CHANGED_SINCE",
+        conflicts_with = "publish"
+    )]
+    changed_since: Option<String>,
+    /// Dry-run only this port (every committed version) and its
+    /// dependencies; repeatable.  A focused local check: CI selects
+    /// through --changed-since.
+    #[arg(long = "port", value_name = "NAME", conflicts_with_all = ["publish", "changed_since"])]
+    ports: Vec<String>,
     /// Ports directory (default: the repository's ports).
     #[arg(long)]
     ports_dir: Option<PathBuf>,
@@ -84,7 +105,11 @@ fn options(cli: Cli) -> Result<(Options, Option<tempfile::TempDir>)> {
     // `--publish` is.
     let mode = match cli.index_url {
         Some(index_url) => Mode::Publish { index_url },
-        None => Mode::DryRun,
+        None => Mode::DryRun(match cli.changed_since {
+            Some(base) => Selection::ChangedSince(base),
+            None if cli.ports.is_empty() => Selection::All,
+            None => Selection::Ports(cli.ports),
+        }),
     };
 
     let (work_dir, scratch) = if let Some(dir) = cli.work_dir {

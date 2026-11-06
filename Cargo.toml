@@ -23,7 +23,7 @@ cabin-core = { package = "cabinpkg-core", git = "https://github.com/cabinpkg/cab
 cabin-env = { package = "cabinpkg-env", git = "https://github.com/cabinpkg/cabin", rev = "8bd98f51aa6619dfb3360a17d5f0c53f62e88035" }
 cabin-manifest = { package = "cabinpkg-manifest", git = "https://github.com/cabinpkg/cabin", rev = "8bd98f51aa6619dfb3360a17d5f0c53f62e88035" }
 cabin-publish = { package = "cabinpkg-publish", git = "https://github.com/cabinpkg/cabin", rev = "8bd98f51aa6619dfb3360a17d5f0c53f62e88035" }
-clap = { version = "4", features = ["derive"] }
+clap = { version = "4", features = ["derive", "env"] }
 etcetera = "0.11"
 semver = "1"
 tempfile = "3"
