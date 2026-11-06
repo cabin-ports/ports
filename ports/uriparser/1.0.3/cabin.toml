@@ -1,0 +1,87 @@
+[package.upstream]
+# The release tarball (GitHub's release metadata lists the same SHA-256);
+# its tree is identical to the uriparser-1.0.3 tag's.
+url = "https://github.com/uriparser/uriparser/releases/download/uriparser-1.0.3/uriparser-1.0.3.tar.gz"
+checksum = "sha256:b5014a630e61e085787f760c83675a35ef8e719972b05e8f61ff2f48692b15dc"
+format = "tar.gz"
+strip-prefix = "uriparser-1.0.3"
+# CMake generates UriConfig.h from src/UriConfig.h.in
+# (CMakeLists.txt:141-183); of the shipped sources only src/UriMemory.c
+# includes it.  The patch adds it to src/ as configure writes it, except
+# that HAVE_REALLOCARRAY stays undefined everywhere: CMake sets it where a
+# program calling reallocarray() compiles and links (:145-181), a
+# property of the C library (glibc 2.26 and later have it, macOS and
+# Windows do not) that Cabin has no check for.  Without it the default
+# memory manager's reallocarray is upstream's portable one, the same
+# overflow check before realloc() (src/UriMemory.c:113-123).
+# PACKAGE_VERSION and HAVE_WPRINTF (ISO C's wprintf, :143) are as
+# configure sets them; no shipped source reads either.
+patches = ["patches/0001-add-the-generated-uriconfig-h.patch"]
+
+[package]
+name = "cabin-ports/uriparser"
+version = "1.0.3"
+# COPYING.BSD-3-Clause covers the library; the LGPL-2.1 and Apache-2.0
+# texts cover test/ and fuzz/, which are not shipped (README.md:14-20).
+include = ["COPYING.BSD-3-Clause", "include", "patches", "src"]
+# Upstream builds C99 without GNU extensions (CMakeLists.txt:45-47); C11
+# is the oldest standard Cabin can lower for MSVC.
+c-standard = "c11"
+# The public headers are C89 and C++98 clean.
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
+
+# The static library form of upstream's CMake build
+# (CMakeLists.txt:238-285), from the 29 sources of LIBRARY_CODE_FILES
+# (:196-236), with both the char and the wchar_t API
+# (URIPARSER_BUILD_CHAR and _WCHAR_T default on, :75-76).  Not ported:
+# the shared library CMake builds by default (:64-69), the uriparse tool,
+# the docs, the GoogleTest suite, the fuzzers, and the MSVC static CRT
+# option (off by default, :79).  Not reproduced: -fvisibility=hidden and
+# the URI_VISIBILITY define that accompanies it (:135-138, 275-277),
+# since Cabin drops a dependency's raw compiler flags; without the flag,
+# URI_VISIBILITY only marks the API with the default visibility it
+# already has (UriBase.h:97-101).
+[profile]
+defines = ["URI_LIBRARY_BUILD"]
+
+# URI_STATIC_BUILD is public, as in CMakeLists.txt:266-268: without it
+# UriBase.h:88-95 declares the API dllimport for an MSVC consumer, which
+# then fails to link against this static library.
+[target.uriparser]
+type = "library"
+sources = [
+  "src/UriCommon.c",
+  "src/UriCompare.c",
+  "src/UriCopy.c",
+  "src/UriEscape.c",
+  "src/UriFile.c",
+  "src/UriIp4.c",
+  "src/UriIp4Base.c",
+  "src/UriMemory.c",
+  "src/UriNormalize.c",
+  "src/UriNormalizeBase.c",
+  "src/UriParse.c",
+  "src/UriParseBase.c",
+  "src/UriQuery.c",
+  "src/UriRecompose.c",
+  "src/UriResolve.c",
+  "src/UriSetFragment.c",
+  "src/UriSetHostAuto.c",
+  "src/UriSetHostCommon.c",
+  "src/UriSetHostIp4.c",
+  "src/UriSetHostIp6.c",
+  "src/UriSetHostIpFuture.c",
+  "src/UriSetHostRegName.c",
+  "src/UriSetPath.c",
+  "src/UriSetPort.c",
+  "src/UriSetQuery.c",
+  "src/UriSetScheme.c",
+  "src/UriSetUserInfo.c",
+  "src/UriShorten.c",
+  "src/UriVersion.c",
+]
+include-dirs = ["include"]
+defines = ["URI_STATIC_BUILD"]
+interface-defines = ["URI_STATIC_BUILD"]
+links = "uriparser"
