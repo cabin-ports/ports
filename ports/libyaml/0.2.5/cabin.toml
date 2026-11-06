@@ -1,0 +1,55 @@
+[package.upstream]
+url = "https://github.com/yaml/libyaml/archive/refs/tags/0.2.5.tar.gz"
+checksum = "sha256:fa240dbf262be053f3898006d502d514936c818e422afdcf33921c63bed9bf2e"
+format = "tar.gz"
+strip-prefix = "libyaml-0.2.5"
+
+[package]
+name = "cabin-ports/libyaml"
+version = "0.2.5"
+include = ["License", "include", "src"]
+# Upstream's sources and yaml.h are C89; C11 is the oldest standard
+# Cabin can lower for MSVC.
+c-standard = "c11"
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
+
+# The static library upstream's CMake builds by default (OUTPUT_NAME
+# yaml).  Its generated config.h holds only the version macros
+# (cmake/config.h.in), so they are defined directly instead, without
+# HAVE_CONFIG_H.  Not ported: the shared library, the tests and examples,
+# and the _CRT_SECURE_NO_WARNINGS CMake adds on MSVC, which only silences
+# warnings.
+[profile]
+defines = [
+  "YAML_VERSION_MAJOR=0",
+  "YAML_VERSION_MINOR=2",
+  "YAML_VERSION_PATCH=5",
+  "YAML_VERSION_STRING=\"0.2.5\"",
+]
+
+# YAML_DECLARE_STATIC is public, as in CMakeLists.txt: on Windows it
+# keeps yaml.h from declaring the API dllimport.
+[target.yaml]
+type = "library"
+sources = [
+  "src/api.c",
+  "src/dumper.c",
+  "src/emitter.c",
+  "src/loader.c",
+  "src/parser.c",
+  "src/reader.c",
+  "src/scanner.c",
+  "src/writer.c",
+]
+include-dirs = ["include"]
+defines = ["YAML_DECLARE_STATIC"]
+interface-defines = ["YAML_DECLARE_STATIC"]
+links = "yaml"
+
+# Strict -std=c11 hides glibc's strdup, which yaml_strdup calls
+# (api.c:66); upstream compiles in the compiler's default GNU dialect.
+# MSVC's UCRT keeps declaring it, since Cabin does not define __STDC__
+# there, so vcpkg's Windows patch to _strdup is not needed.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_POSIX_C_SOURCE=200809L"]
