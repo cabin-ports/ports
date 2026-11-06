@@ -1,0 +1,41 @@
+[package.upstream]
+# xtensor-stack/xtl publishes no release assets; this is the 0.8.2 tag
+# archive, the bytes ConanCenter (SHA-256) and vcpkg (SHA-512) pin.
+url = "https://github.com/xtensor-stack/xtl/archive/refs/tags/0.8.2.tar.gz"
+checksum = "sha256:8fb38d6a5856aab5740d2ccb3d791d289f648d4cc506b94a1338fe5fce100c11"
+format = "tar.gz"
+strip-prefix = "xtl-0.8.2"
+# include/xtl/xspan_impl.hpp embeds tcb/span, "Distributed under the
+# Boost Software License, Version 1.0" with a pointer to an accompanying
+# LICENSE_1_0.txt (:9-12) that the archive does not ship, and that
+# license requires source copies to include it.  The patch adds the
+# license text, verbatim from https://www.boost.org/LICENSE_1_0.txt, as
+# LICENSE_1_0.txt.
+patches = ["patches/0001-add-boost-software-license-for-tcb-span.patch"]
+
+[package]
+name = "cabin-ports/xtl"
+version = "0.8.2"
+# LICENSE is xtl's BSD-3-Clause license; LICENSE_1_0.txt comes from the
+# patch above.
+include = ["LICENSE", "LICENSE_1_0.txt", "include", "patches"]
+
+[dependencies]
+"cabin-ports/nlohmann_json" = "^3.12"
+
+# The 30 headers under include/xtl (CMakeLists.txt:39-70), used as
+# <xtl/xoptional.hpp> and so on, with upstream's C++17 interface
+# requirement (:82).  xjson.hpp, the to_json and from_json overloads for
+# xoptional and xbasic_fixed_string, includes <nlohmann/json.hpp>;
+# upstream's CMake only looks for nlohmann_json (:32-34) and leaves it to
+# consumers, and vcpkg makes it a dependency, as here.  The other headers
+# include it only under __CLING__, for xeus-cling's mime_bundle_repr.
+# XTL_DISABLE_EXCEPTIONS only changes the tests' flags
+# (test/CMakeLists.txt:48-79); xtl_config.hpp detects a build without
+# exceptions itself.  Not ported: the tests, docs, and the CMake package
+# and pkg-config files.
+[target.xtl]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+deps = [{ name = "cabin-ports/nlohmann_json", public = true }]
