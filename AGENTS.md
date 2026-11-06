@@ -13,6 +13,18 @@ the pinned Cabin revision, the checks, and publishing; Cabin's
 - Patches apply byte-exactly.  `.gitattributes` disables line-ending conversion for them; never
   normalize, re-wrap, or re-generate a committed patch.
 - Keep C first-class alongside C++: probes and consumer tests cover both languages.
+- New ports must include a meaningful consumer test (`tests/main.c`
+  or `tests/main.cc`) that exercises a real public API and checks its
+  behavior. An empty `main` or a compile-only smoke test is not
+  sufficient evidence of correctness.
+- Preserve upstream functionality and intended build semantics. Never
+  omit required sources, disable features, introduce stubs, or weaken
+  tests merely to make a port pass CI. Explicitly document limitations;
+  block a port when Cabin cannot represent its required build model.
+- Verify dependencies, public include paths, link requirements,
+  platform assumptions, upstream checksums, and license obligations.
+  Do not assume that a successful default-feature probe validates
+  non-default features or unsupported configurations.
 
 ## Cabin revision
 
@@ -40,3 +52,17 @@ the pinned Cabin revision, the checks, and publishing; Cabin's
 - Run the checks in README.md ("Checks") before opening or updating a pull request.
 - Every change lands through a pull request and the merge queue as one squash commit; commit
   subjects follow Conventional Commits.
+- Prefer one port per pull request. Merge prerequisite ports separately
+  before their dependents. Keep unrelated ports, shared tooling changes,
+  and Cabin revision updates out of individual port PRs.
+- Do not bypass failing checks or weaken CI to make a port mergeable.
+  Merge only after the required checks and reviews pass.
+- When a candidate cannot be completed safely, record the blocker,
+  evidence, attempted fixes, and conditions for resuming it. Continue
+  with independent candidates rather than waiting for user input.
+- Keep campaign inventories, progress logs, review artifacts, and
+  temporary worktrees outside this repository. Do not commit
+  campaign-specific state.
+- Routine port contributions must not publish to the production
+  registry, yank packages, wipe data, or change deployment credentials.
+  Production operations require separate explicit authorization.
