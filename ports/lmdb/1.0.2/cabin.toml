@@ -1,0 +1,62 @@
+[package.upstream]
+# OpenLDAP's LMDB_1.0.2 tag (commit c279e0477c), whose tree holds only
+# libraries/liblmdb, as GitHub archives it: the bytes ConanCenter pins.
+# The LMDB/lmdb mirror's archive of the tag holds the same tree.
+url = "https://github.com/openldap/openldap/archive/refs/tags/LMDB_1.0.2.tar.gz"
+checksum = "sha256:38a029bb3e29820380e18a2dfdbe906bbc5b322132c63274c5e4ed7833821752"
+format = "tar.gz"
+strip-prefix = "openldap-LMDB_1.0.2"
+
+# The one header upstream's Makefile installs (IHDRS, :48); its
+# directory also holds the private midl.h, the tools and the tests.
+[[package.upstream.copy]]
+from = "libraries/liblmdb/lmdb.h"
+to = "include/lmdb.h"
+
+[package]
+name = "cabin-ports/lmdb"
+version = "1.0.2"
+include = [
+  "include",
+  "libraries/liblmdb/COPYRIGHT",
+  "libraries/liblmdb/LICENSE",
+  "libraries/liblmdb/lmdb.h",
+  "libraries/liblmdb/mdb.c",
+  "libraries/liblmdb/midl.c",
+  "libraries/liblmdb/midl.h",
+  "libraries/liblmdb/module.c",
+]
+
+# liblmdb.a as libraries/liblmdb/Makefile builds it (:86-87), with
+# upstream's defaults: mdb.c picks its locking and sync primitives per
+# platform and defines _GNU_SOURCE itself, and lmdb.h enables
+# MDB_RPAGE_CACHE, which carries the encryption and checksum hooks.
+# Unset, as by default: the tuning macros the Makefile lists for
+# CPPFLAGS (:6-17: MDB_USE_POSIX_SEM, MDB_USE_ROBUST, MDB_DSYNC, ...)
+# and MDB_VL32, which also changes lmdb.h's types.  Not ported: the
+# shared library, the mdb_* tools, mplay, the mtest programs and their
+# chacha8.c cipher, and the crypto.c and cryptoc.c example modules.
+[target.lmdb]
+type = "library"
+sources = [
+  "libraries/liblmdb/mdb.c",
+  "libraries/liblmdb/midl.c",
+  "libraries/liblmdb/module.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "lmdb"
+
+# The Makefile compiles and links with -pthread and lmdb.pc adds -ldl
+# for module.c's dlopen (:24-31, :157-158); both are separate libraries
+# before glibc 2.34.
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["pthread", "dl"]
+
+# mdb.c's InitializeSecurityDescriptor and SetSecurityDescriptorDacl
+# (:6032-6034).  The Makefile names no Windows library: MinGW's gcc
+# links advapi32 by default, and MSVC does not.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["advapi32"]
