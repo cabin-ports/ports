@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/taocpp/PEGTL/archive/refs/tags/3.2.8.tar.gz"
+checksum = "sha256:319e8238daebc3a163f60c88c78922a8012772076fdd64a8dafaf5619cd64773"
+format = "tar.gz"
+strip-prefix = "PEGTL-3.2.8"
+
+[package]
+name = "cabin-ports/pegtl"
+version = "3.2.8"
+# The headers and the MIT license they all refer to; doc/ and src/ (tests
+# and examples) are not needed.
+include = ["LICENSE", "include"]
+
+# Upstream's CMake target is header-only with include/ public and requires
+# C++17 (CMakeLists.txt:41-50); PEGTL has no C API.
+#
+# By default the headers use std::filesystem (internal/filesystem.hpp),
+# which GCC 9, Clang's libc++ 9 and MSVC provide without another library.
+# CMake also detects older toolchains, linking stdc++fs or c++fs or falling
+# back to std::experimental::filesystem or Boost.Filesystem through
+# TAO_PEGTL_STD_EXPERIMENTAL_FILESYSTEM or TAO_PEGTL_BOOST_FILESYSTEM
+# (CMakeLists.txt:52-118); those configurations are not ported.
+# include/tao/pegtl/contrib/icu needs ICU, which a consumer of those
+# headers provides itself.  Upstream notes that larger grammars often need
+# MSVC's /bigobj (doc/Installing-and-Using.md:41) in the consumer's build.
+[target.pegtl]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
