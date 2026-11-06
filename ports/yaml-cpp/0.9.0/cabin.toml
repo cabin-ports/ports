@@ -1,0 +1,77 @@
+[package.upstream]
+url = "https://github.com/jbeder/yaml-cpp/archive/refs/tags/yaml-cpp-0.9.0.tar.gz"
+checksum = "sha256:25cb043240f828a8c51beb830569634bc7ac603978e0f69d6b63558dadefd49a"
+format = "tar.gz"
+strip-prefix = "yaml-cpp-yaml-cpp-0.9.0"
+
+[package]
+name = "cabin-ports/yaml-cpp"
+version = "0.9.0"
+include = ["LICENSE", "include", "src"]
+
+# The static library upstream's CMake build produces: every src/*.cpp
+# plus the contrib graph builder in src/contrib/*.cpp, which
+# YAML_CPP_BUILD_CONTRIB includes by default.  The sources include
+# their private headers relative to themselves, so only include/ is an
+# include directory.  Not ported: the parse tools in util/
+# (YAML_CPP_BUILD_TOOLS) and the shared-library build, for which Cabin
+# has no target kind.
+#
+# Upstream defects this release keeps, unpatched:
+# - contrib/graphbuilder.h declares GraphBuilderInterface's destructor
+#   pure virtual and no upstream file defines it, so a program deriving
+#   a builder must define it; and its BuildGraphOfNextDocument<Impl>
+#   convenience template does not compile, so callers pass
+#   GraphBuilder<Impl>::AsBuilderInterface() to the non-template
+#   overload instead.
+# - src/contrib/dragonbox.h fails to compile with Visual Studio 2019
+#   16.11 (jbeder/yaml-cpp#1357, fixed after 0.9.0 by #1422); newer
+#   Visual Studio builds it.
+[target.yaml-cpp]
+type = "library"
+sources = [
+  "src/binary.cpp",
+  "src/contrib/graphbuilder.cpp",
+  "src/contrib/graphbuilderadapter.cpp",
+  "src/convert.cpp",
+  "src/depthguard.cpp",
+  "src/directives.cpp",
+  "src/emit.cpp",
+  "src/emitfromevents.cpp",
+  "src/emitter.cpp",
+  "src/emitterstate.cpp",
+  "src/emitterutils.cpp",
+  "src/exceptions.cpp",
+  "src/exp.cpp",
+  "src/fptostring.cpp",
+  "src/memory.cpp",
+  "src/node.cpp",
+  "src/node_data.cpp",
+  "src/nodebuilder.cpp",
+  "src/nodeevents.cpp",
+  "src/null.cpp",
+  "src/ostream_wrapper.cpp",
+  "src/parse.cpp",
+  "src/parser.cpp",
+  "src/regex_yaml.cpp",
+  "src/scanner.cpp",
+  "src/scanscalar.cpp",
+  "src/scantag.cpp",
+  "src/scantoken.cpp",
+  "src/simplekey.cpp",
+  "src/singledocparser.cpp",
+  "src/stream.cpp",
+  "src/tag.cpp",
+]
+include-dirs = ["include"]
+# Upstream builds the library as C++11 unless the builder sets
+# CMAKE_CXX_STANDARD; c++14 is the lowest implementation standard Cabin
+# accepts on MSVC.  Consumers need C++11.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+# CMake makes YAML_CPP_STATIC_DEFINE public on the static library:
+# without it, include/yaml-cpp/dll.h declares the API dllimport on
+# Windows.
+defines = ["YAML_CPP_STATIC_DEFINE"]
+interface-defines = ["YAML_CPP_STATIC_DEFINE"]
+links = "yaml-cpp"
