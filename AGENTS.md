@@ -42,14 +42,17 @@ the pinned Cabin revision, the checks, and publishing; Cabin's
   produced: it compiles each port's probe but never runs a port's code.
 - `ci.yml` runs on `pull_request` and `merge_group`.  Its `required` job is the only required
   check and must fail unless every job it gates succeeded; its `pin` job keeps the Cabin pin a
-  single commit on `cabinpkg/cabin`'s `main`.
+  single commit on `cabinpkg/cabin`'s `main`.  Its dry-run narrows only through `--changed-since`
+  from a verified event base; anything unverified checks every port, never none.
 - `.github/workflows/actions.lock` is generated: after adding or editing a workflow or `uses:`
   line, run `gh actions-lock --no-narrow` with the extension version `ci.yml` pins and commit the
   result; never edit it by hand.  `uses:` lines name an exact release tag.
 
 ## Checks and pull requests
 
-- Run the checks in README.md ("Checks") before opening or updating a pull request.
+- Run the checks in README.md ("Checks") before opening or updating a pull request.  A selective
+  dry-run proves only the selection it prints, and `--port` is a focused local check: before a pull
+  request, run `--changed-since` from the branch's merge base, or the full dry-run.
 - Every change lands through a pull request and the merge queue as one squash commit; commit
   subjects follow Conventional Commits.
 - Prefer one port per pull request. Merge prerequisite ports separately

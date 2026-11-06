@@ -91,7 +91,6 @@ pub fn preflight(request: &PreflightRequest<'_>) -> Result<PreflightReport> {
     if run_dir.exists() {
         fs::remove_dir_all(&run_dir).with_context(|| format!("clearing {}", run_dir.display()))?;
     }
-    ensure_consumer_tests_used(request.conversions)?;
     let registry_dir = run_dir.join("registry");
     let sources_dir = run_dir.join("src");
     let ports_cache = request.cache_dir.join("ports");
@@ -452,7 +451,11 @@ fn probe_source(conversion: &PortConversion, source: &str) -> Result<Vec<u8>> {
 /// Every entry of a port's `tests/` directory must be a source one of
 /// its probe consumers compiles: a misnamed or wrong-language test
 /// would otherwise fall back to the empty `main` without a word.
-fn ensure_consumer_tests_used(conversions: &[PortConversion]) -> Result<()> {
+///
+/// # Errors
+/// Returns an error naming the first unused entry, or an unreadable
+/// `tests/` directory.
+pub fn ensure_consumer_tests_used(conversions: &[PortConversion]) -> Result<()> {
     for conversion in conversions {
         let tests_dir = conversion.committed_dir.join("tests");
         let entries = match fs::read_dir(&tests_dir) {

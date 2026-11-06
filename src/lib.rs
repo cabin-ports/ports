@@ -3,12 +3,13 @@
 //! the `cabin-ports` scope.  Every committed port is a package
 //! directory, published verbatim apart from its consumer `tests/`.
 //!
-//! The tool has exactly two modes, both of which run the complete
-//! local preflight (materialize every port and publish it into a
-//! temporary file registry in publication order, building every
-//! port against the generated packages as soon as it is staged):
+//! The tool has exactly two modes, both of which run the local
+//! preflight (materialize every port and publish it into a temporary
+//! file registry in publication order, building every port against
+//! the generated packages as soon as it is staged):
 //!
-//! - `--dry-run` stops after the preflight;
+//! - `--dry-run` stops after the preflight, which a [`select::Selection`]
+//!   may narrow to the ports a change needs;
 //! - `--publish` additionally uploads every package through the
 //!   existing remote registry client, in consecutive batches of one
 //!   `cabin publish` invocation each, relying on the registry's
@@ -26,12 +27,13 @@ use anyhow::{Context, Result, bail};
 pub mod plan;
 pub mod preflight;
 pub mod remote;
+pub mod select;
 
 /// What to do after the local preflight.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Mode {
-    /// Stop after the complete local preflight.
-    DryRun,
+    /// Stop after the local preflight of the selected ports.
+    DryRun(select::Selection),
     /// Preflight, then upload every package to the registry whose
     /// sparse index lives at this URL.
     Publish {
@@ -89,6 +91,14 @@ pub fn run(options: &Options) -> Result<()> {
             .join(", ")
     );
 
+    // Cheap and catalog-wide whatever a dry-run selects.
+    preflight::ensure_consumer_tests_used(&conversions)?;
+    let total = conversions.len();
+    let conversions = match &options.mode {
+        Mode::DryRun(selection) => select::select(conversions, selection, &options.ports_dir)?,
+        Mode::Publish { .. } => conversions,
+    };
+
     let report = preflight::preflight(&preflight::PreflightRequest {
         conversions: &conversions,
         cache_dir: &options.cache_dir,
@@ -96,13 +106,13 @@ pub fn run(options: &Options) -> Result<()> {
         cabin: &options.cabin,
         // Probes run upstream code, so they never run beside the
         // publish job's OIDC token; the PR dry-run runs them.
-        run_probes: options.mode == Mode::DryRun,
+        run_probes: matches!(options.mode, Mode::DryRun(_)),
     })?;
 
     match &options.mode {
-        Mode::DryRun => {
+        Mode::DryRun(_) => {
             println!(
-                "dry run complete: {} packages staged in {} and built against it",
+                "dry run complete: {} of {total} packages staged in {} and built against it",
                 conversions.len(),
                 report.registry_dir.display()
             );

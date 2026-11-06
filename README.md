@@ -146,7 +146,40 @@ $ cargo run --locked -- --dry-run --cabin target/pinned-cabin/bin/cabin
 The tests that drive `cabin` read it from `PORT_PUBLISH_CABIN` and fail without it.  The dry-run
 downloads each pinned upstream archive once into Cabin's cache (`<cache>/ports/archives/`; see
 `--help`).  CI runs these on Linux, macOS, and Windows, plus `cargo fmt --check`,
-`cargo clippy --all-targets`, and `gh actions-lock --verify`.
+`cargo clippy --all-targets`, and `gh actions-lock --verify`; its dry-run is selective (below).
+
+### Selective dry-runs
+
+`--dry-run --changed-since <rev>` preflights only what the change since `<rev>` needs.  It compares
+`<rev>`, which must be an ancestor of `HEAD`, with the working tree, uncommitted and untracked files
+included:
+
+- A change that only adds package names - `ports/<name>/` directories `<rev>` lacks - preflights
+  every version of those names plus every committed version any of their requirements (normal,
+  optional, or dev) matches, transitively.
+- A change that only edits `README.md` or `AGENTS.md` preflights nothing.
+- Anything else preflights every port: a new version of an existing name (existing requirements
+  may resolve to it), any other change under an existing name, and every other file.
+
+Whatever it selects, the dry-run first loads and validates the whole catalog (manifests,
+identities, requirement satisfiability, publication order, consumer-test file names) and prints its
+selection and the reason before staging anything.  On a branch, compare with where it starts:
+
+```console
+$ cargo run --locked -- --dry-run --changed-since "$(git merge-base HEAD origin/main)" --cabin target/pinned-cabin/bin/cabin
+```
+
+`--port <name>` (repeatable) instead preflights the named ports and their dependencies without
+Git - a focused local check, not a replacement for the selection CI makes.
+
+CI sets `PORT_PUBLISH_CHANGED_SINCE` (the variable form of `--changed-since`) to the first parent
+of a pull request's test merge once its second parent is verified as the pull request's head, or
+to a merge group's base once `HEAD` is verified as the group's head; otherwise it warns and checks
+every port.  The narrowing is inductive: the base is `main` or the merge-queue entry ahead, a change
+reaches `main` only once its own run (full or selective) passed, and the merge queue requires every
+entry to pass, not just a group's head (its `ALLGREEN` grouping strategy).  So a selective run
+proves only its printed selection, and an existing port broken by newer runner images surfaces at
+the next full run.  Like every dry-run, it probes default features only.
 
 ## Publishing
 
@@ -163,7 +196,7 @@ registry at the next dispatch.  A dispatch on any other ref publishes nothing.
 - **Registry readiness.**  The `await-deploy` job runs Cabin's own `cargo workflow-await-deploy`
   guard from the pinned commit and waits until the registry has deployed a Cabin commit that
   contains it, so the client never sends metadata the running registry does not accept.
-- **Uploads.**  `port-publish --publish` performs the same preflight and then uploads every
+- **Uploads.**  `port-publish --publish` preflights every port and then uploads every
   package in publication order, in batches of 50.  Each batch is one `cabin publish` invocation,
   which exchanges the run's OIDC token for its own short-lived token confined to the `cabin-ports`
   scope and revokes it on exit.  Every upload passes `--new-revision`, so a merged change to a

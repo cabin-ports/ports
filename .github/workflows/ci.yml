@@ -79,9 +79,9 @@ jobs:
           gh extension install github/gh-actions-lock --pin v0.4.1
           gh actions-lock --verify
 
-  # The publisher's tests, then the complete `--dry-run` preflight:
-  # every port is staged, built, and its consumer test run, on each
-  # platform the ports must support.
+  # The publisher's tests, then the `--dry-run` preflight: every port
+  # the change needs is staged, built, and its consumer test run, on
+  # each platform the ports must support (README.md, "Checks").
   check:
     needs: pin
     runs-on: ${{ matrix.os }}
@@ -96,6 +96,8 @@ jobs:
       - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
+          # The dry-run compares the tested commit with its base.
+          fetch-depth: 0
       # No caches: a pull request's saves are restorable only by that
       # pull request, so they almost never hit and only evict others.
       - uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
@@ -120,6 +122,27 @@ jobs:
         env:
           PORT_PUBLISH_CABIN: ${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}
           RUST_BACKTRACE: "1"
+
+      # The test merge's first parent, or the merge group's base.
+      # Unverified, the variable stays unset and every port is checked.
+      - name: Find the dry-run's comparison base
+        shell: bash
+        env:
+          PR_HEAD: ${{ github.event.pull_request.head.sha }}
+          GROUP_BASE: ${{ github.event.merge_group.base_sha }}
+          GROUP_HEAD: ${{ github.event.merge_group.head_sha }}
+        run: |
+          case "$GITHUB_EVENT_NAME" in
+            pull_request)
+              [[ -n "$PR_HEAD" && "$(git rev-parse --verify --quiet HEAD^2)" == "$PR_HEAD" ]] && base="$(git rev-parse HEAD^1)" ;;
+            merge_group)
+              [[ -n "$GROUP_HEAD" && "$(git rev-parse HEAD)" == "$GROUP_HEAD" ]] && base="$GROUP_BASE" ;;
+          esac
+          if [[ -n "${base:-}" ]]; then
+            echo "PORT_PUBLISH_CHANGED_SINCE=$base" >> "$GITHUB_ENV"
+          else
+            echo "::warning::HEAD does not match the $GITHUB_EVENT_NAME event; the dry-run checks every port"
+          fi
 
       - name: Run the publisher dry-run
         env:
