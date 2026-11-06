@@ -1,0 +1,63 @@
+# Upstream released 25.12.19 twice: v25.12.19 and this later tag of
+# 2026-02-06, whose base.h still reads 25.12.19.  The later tag adds the
+# reflection::Verify check that a union vector's type vector is as long
+# as its value vector, without which Verify reads union types past the
+# end of a shorter type vector.  It also adds
+# Parser::HasCircularStructDependency (which only flatc calls), makes
+# FLATBUFFERS_DEFINE_BITMASK_OPERATORS' compound assignments compile as
+# C++11, and changes the layout of idl.h's StructDef and IDLOptions.
+[package.upstream]
+url = "https://github.com/google/flatbuffers/archive/refs/tags/v25.12.19-2026-02-06-03fffb2.tar.gz"
+checksum = "sha256:ccbce58684691de1e7d51f5e87786266b37d06ab66e9dfe2d0ec106fe50aace0"
+format = "tar.gz"
+strip-prefix = "flatbuffers-25.12.19-2026-02-06-03fffb2"
+
+[package]
+name = "cabin-ports/flatbuffers"
+version = "25.12.19"
+include = [
+  "LICENSE",
+  "include/flatbuffers",
+  "src/file_manager.cpp",
+  "src/file_name_manager.cpp",
+  "src/idl_gen_text.cpp",
+  "src/idl_gen_text.h",
+  "src/idl_parser.cpp",
+  "src/reflection.cpp",
+  "src/util.cpp",
+]
+
+# The static runtime library upstream's CMake builds (FLATBUFFERS_BUILD_FLATLIB):
+# the builder, verifier and FlexBuffers headers plus the schema and JSON
+# parser, text generator and reflection support, with include/flatbuffers
+# as CMake installs it.  Not ported: the flatc schema compiler, which
+# consumers run on the build host to generate *_generated.h headers and
+# which a Cabin build cannot run; flathash; the shared-library build;
+# the gRPC integration (flatbuffers/grpc.h includes gRPC's headers, which
+# this package does not depend on); and CMake's
+# FLATBUFFERS_MAX_PARSING_DEPTH override, so the parser keeps idl.h's
+# nesting limit of 64.
+#
+# CMake defines FLATBUFFERS_LOCALE_INDEPENDENT for the library from a
+# strtof_l/strtoull_l probe.  It is left to include/flatbuffers/base.h,
+# whose fallback gives the probe's answer on Linux (glibc), macOS and
+# Windows, so the library and its consumers agree.  Not reproduced:
+# CMake's -fsigned-char, which matters only where char is unsigned (Arm,
+# POWER and s390x Linux).  The sources cast explicitly where the sign
+# matters, and upstream's Bazel build omits the flag too.
+[target.flatbuffers]
+type = "library"
+sources = [
+  "src/file_manager.cpp",
+  "src/file_name_manager.cpp",
+  "src/idl_gen_text.cpp",
+  "src/idl_parser.cpp",
+  "src/reflection.cpp",
+  "src/util.cpp",
+]
+include-dirs = ["include"]
+# Upstream requires C++11 (FLATBUFFERS_CPP_STD); c++14 is the lowest
+# implementation standard Cabin accepts on MSVC.  Consumers need C++11.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "flatbuffers"
