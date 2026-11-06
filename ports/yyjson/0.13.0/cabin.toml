@@ -1,0 +1,36 @@
+[package.upstream]
+url = "https://github.com/ibireme/yyjson/archive/refs/tags/0.13.0.tar.gz"
+checksum = "sha256:34e0f62a2bc11ab20d601e8ca1cc2b2079503aa45119a19133d89d19b94a0fae"
+format = "tar.gz"
+strip-prefix = "yyjson-0.13.0"
+
+[package]
+name = "cabin-ports/yyjson"
+version = "0.13.0"
+include = ["LICENSE", "src"]
+
+# Upstream's library (CMakeLists.txt:56-57): src/yyjson.c, with src/ as
+# the public include directory.  The default build enables every
+# feature: each YYJSON_DISABLE_* option and both depth limits default to
+# off (:40-51), and only a set option becomes a define (:60-95), so none
+# is passed here.  Not ported: the shared library and its
+# YYJSON_EXPORTS/YYJSON_IMPORTS (:171-178); the install rules' CMake
+# package (yyjson-config.cmake, yyjson::yyjson) and yyjson.pc
+# (:180-197); the tests, fuzzer, misc programs and docs; and the
+# non-default options.  Not reproduced:
+# MSVC's /utf-8 (:131-141), which changes nothing for these all-ASCII
+# sources.
+[target.yyjson]
+type = "library"
+sources = ["src/yyjson.c"]
+include-dirs = ["src"]
+links = "yyjson"
+# Upstream sets no standard; the code is C89 (README.md:14), as which
+# the Xcode build compiles it with -pedantic-errors
+# (CMakeLists.txt:112-130).  C11 is the oldest standard Cabin can lower
+# for MSVC.
+c-standard = "c11"
+# yyjson.h is C89 and C++98: it takes its 64-bit integers from
+# <stdint.h> or compiler extensions (yyjson.h:436-510).
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
