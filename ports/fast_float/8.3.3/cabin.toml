@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/fastfloat/fast_float/archive/refs/tags/v8.3.3.tar.gz"
+checksum = "sha256:4dd695f051893c8218faf2ed9871fa4a4990aa6aee2d3190ed7bfa2e83092245"
+format = "tar.gz"
+strip-prefix = "fast_float-8.3.3"
+
+[package]
+name = "cabin-ports/fast_float"
+version = "8.3.3"
+
+# fast_float is header-only; consumers include <fast_float/fast_float.h>
+# from upstream's include/ root.
+[target.fast_float]
+type = "header-only"
+include-dirs = ["include"]
+# Upstream's interface requirement:
+# target_compile_features(fast_float INTERFACE cxx_std_11).
+interface-cxx-standard = "c++11"
