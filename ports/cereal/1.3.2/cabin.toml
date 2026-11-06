@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/USCiLab/cereal/archive/refs/tags/v1.3.2.tar.gz"
+checksum = "sha256:16a7ad9b31ba5880dac55d62b5d6f243c3ebc8d46a3514149e56b5e7ea81f85f"
+format = "tar.gz"
+strip-prefix = "cereal-1.3.2"
+
+[package]
+name = "cabin-ports/cereal"
+version = "1.3.2"
+# include/cereal is what upstream's CMake installs, with the licenses of
+# the bundled RapidJSON (and its msinttypes), RapidXML and base64 code
+# under external/.
+include = ["LICENSE", "include"]
+
+# Upstream's header-only cereal::cereal target.  Not ported: its tests,
+# sandbox and documentation.  cereal/types/optional.hpp and
+# cereal/types/variant.hpp need C++17, and cereal/types/boost_variant.hpp
+# needs Boost, which this package does not depend on.  CMake's UNIX-only
+# THREAD_SAFE option defines CEREAL_THREAD_SAFE=1 and links pthread for
+# cereal's own tests and sandbox, never on the installed target;
+# consumers that need the thread-safe static registries define
+# CEREAL_THREAD_SAFE=1 themselves, in every translation unit.
+[target.cereal]
+type = "header-only"
+include-dirs = ["include"]
+# target_compile_features(cereal INTERFACE cxx_std_11).
+interface-cxx-standard = "c++11"
