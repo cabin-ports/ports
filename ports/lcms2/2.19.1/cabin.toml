@@ -1,0 +1,86 @@
+[package.upstream]
+url = "https://github.com/mm2/Little-CMS/releases/download/lcms2.19.1/lcms2-2.19.1.tar.gz"
+checksum = "sha256:bfc54f7bab59fbc921012014a8032e4cba4abd46db47d46b76416a8c0b2815c8"
+format = "tar.gz"
+strip-prefix = "lcms2-2.19.1"
+
+[package]
+name = "cabin-ports/lcms2"
+version = "2.19.1"
+include = ["LICENSE", "include", "src"]
+
+# The static library upstream's CMake and Meson builds compile:
+# src/*.c (cmake/Lcms2Library.cmake:3-34, src/meson.build) with include/
+# public.  Not built: the GPLv3 plugins/ (fast_float, threaded), which
+# both builds leave off by default, and the utilities and testbed.  Not
+# reproduced: -fvisibility=hidden (Lcms2Library.cmake:63-65; Cabin drops
+# a dependency's raw compiler flags).
+[target.lcms2]
+type = "library"
+sources = [
+  "src/cmsalpha.c",
+  "src/cmscam02.c",
+  "src/cmscgats.c",
+  "src/cmscnvrt.c",
+  "src/cmserr.c",
+  "src/cmsgamma.c",
+  "src/cmsgmt.c",
+  "src/cmshalf.c",
+  "src/cmsintrp.c",
+  "src/cmsio0.c",
+  "src/cmsio1.c",
+  "src/cmslut.c",
+  "src/cmsmd5.c",
+  "src/cmsmtrx.c",
+  "src/cmsnamed.c",
+  "src/cmsopt.c",
+  "src/cmspack.c",
+  "src/cmspcs.c",
+  "src/cmsplugin.c",
+  "src/cmsps2.c",
+  "src/cmssamp.c",
+  "src/cmssm.c",
+  "src/cmstypes.c",
+  "src/cmsvirt.c",
+  "src/cmswtpnt.c",
+  "src/cmsxform.c",
+]
+include-dirs = ["include"]
+# Upstream sets no standard; the code is C99.  C11 is the oldest
+# standard Cabin can request from MSVC.
+c-standard = "c11"
+# include/lcms2.h uses // comments.
+interface-c-standard = "c99"
+# lcms2.h:87-91 drops the `register` keyword that its sampler typedefs
+# and lcms2_plugin.h use for C++17 and later consumers.
+interface-cxx-standard = "c++98"
+links = "lcms2"
+
+# CMake's feature probes on GCC and Clang (cmake/Lcms2Features.cmake,
+# cmake/Lcms2Library.cmake:44-61, 80-104): gmtime_r for the reentrant
+# profile timestamp (src/cmsplugin.c:1031-1045), the visibility
+# attribute, and POSIX threads, linked publicly with libm.  CMake also
+# defines WORDS_BIGENDIAN on big-endian hosts, and the fallback list in
+# include/lcms2.h:205-242 misses some (GCC on big-endian AArch64 defines
+# none of its macros), so CMS_USE_BIG_ENDIAN, which that header lets the
+# command line set, takes the compiler's byte order instead.  It stays
+# defined only when big endian: lcms2.h:210-212 undefines it when it
+# evaluates to 0.
+[target.'cfg(family = "unix")'.profile]
+defines = [
+  "CMS_USE_BIG_ENDIAN=(__BYTE_ORDER__==__ORDER_BIG_ENDIAN__)",
+  "HAVE_FUNC_ATTRIBUTE_VISIBILITY=1",
+  "HAVE_GMTIME_R=1",
+  "HasTHREADS=1",
+]
+link-libs = ["m", "pthread"]
+
+# Strict -std=c11 hides glibc's gmtime_r; upstream compiles in the
+# compiler's default GNU dialect.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_POSIX_C_SOURCE=200809L"]
+
+# MSVC: gmtime_s instead of gmtime_r, and Windows critical sections
+# instead of HasTHREADS (Lcms2Library.cmake:80-84).
+[target.'cfg(os = "windows")'.profile]
+defines = ["HAVE_GMTIME_S=1"]
