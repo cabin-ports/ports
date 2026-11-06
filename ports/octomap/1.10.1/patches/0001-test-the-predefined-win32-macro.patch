@@ -1,0 +1,20 @@
+--- a/octomap/include/octomap/MapCollection.hxx
++++ b/octomap/include/octomap/MapCollection.hxx
+@@ -283,7 +283,7 @@
+   template <class MAPNODE>
+   void MapCollection<MAPNODE>::splitPathAndFilename(std::string &filenamefullpath, 
+                                                     std::string* path, std::string *filename) {
+-#ifdef WIN32
++#ifdef _WIN32
+     std::string::size_type lastSlash = filenamefullpath.find_last_of('\\');
+ #else
+     std::string::size_type lastSlash = filenamefullpath.find_last_of('/');
+@@ -301,7 +301,7 @@
+   std::string MapCollection<MAPNODE>::combinePathAndFilename(std::string path, std::string filename) {
+     std::string result = path;
+     if(path != ""){
+-#ifdef WIN32
++#ifdef _WIN32
+       result.append("\\");
+ #else
+       result.append("/");
