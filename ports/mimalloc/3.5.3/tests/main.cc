@@ -54,6 +54,17 @@ int main() {
   }
   CHECK(threw && handler_calls == 1);
 
+  // mimalloc's own failure path consults the new_handler when the library
+  // is compiled as C++, as with MSVC (see cabin.toml); the GCC/Clang C
+  // build finds its hidden fallback instead.
+  std::set_new_handler(on_exhaustion);
+  handler_calls = 0;
+  CHECK(mi_new_nothrow(huge) == nullptr);
+#if defined(_MSC_VER)
+  CHECK(handler_calls == 1);
+#endif
+  std::set_new_handler(nullptr);
+
   // Containers on mi_stl_allocator.
   std::map<int, std::string, std::less<int>,
            mi_stl_allocator<std::pair<const int, std::string>>>
