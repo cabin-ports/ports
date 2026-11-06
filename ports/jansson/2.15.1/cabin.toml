@@ -1,0 +1,145 @@
+[package.upstream]
+# The release tarball on GitHub; its asset digest is this checksum.
+url = "https://github.com/akheron/jansson/releases/download/v2.15.1/jansson-2.15.1.tar.gz"
+checksum = "sha256:0c7114dc0b2d22a670724a1f95922029d7077c19dbf79a584cb8084d2f267f2f"
+format = "tar.gz"
+strip-prefix = "jansson-2.15.1"
+# The patch adds include/jansson_config.h, the public header CMake
+# configures from cmake/jansson_config.h.cmake (CMakeLists.txt:262-263),
+# as a macOS configure writes it, with the two values that differ
+# elsewhere left to the preprocessor: JSON_INTEGER_FORMAT, "I64d" where
+# CMake's WIN32 holds (:217-221), and the atomic and sync builtins its
+# compile checks find with GCC and Clang but not with cl (:244-257).
+# jansson.h counts references inline, so the library and its consumers
+# must agree on how; the header asks __GNUC__.  GCC and Clang define it,
+# except Clang targeting MSVC; cl and clang-cl, which Cabin may pair for
+# C and C++, do not.  So clang-cl and Clang targeting MSVC count
+# references without atomics, as cl must, although CMake's checks would
+# find the builtins with them.  A C and a C++ compiler that target two
+# Windows environments, such as MinGW-w64 GCC and Clang targeting MSVC,
+# disagree and are not supported; unless MinGW-w64 targets the UCRT,
+# they also mix two C runtimes.
+patches = ["patches/0001-add-the-generated-jansson-config-h.patch"]
+
+# jansson.h beside jansson_config.h, as CMake's build copies it
+# (CMakeLists.txt:266-267), so that src/, with private headers such as
+# utf.h and hashtable.h, stays off consumers' include path.
+[[package.upstream.copy]]
+from = "src/jansson.h"
+to = "include/jansson.h"
+
+[package]
+name = "cabin-ports/jansson"
+version = "2.15.1"
+# LICENSE carries the MIT terms and, as its exception, the notice
+# src/dtoa.c is distributed under.
+include = ["LICENSE", "include", "patches", "src"]
+# Upstream sets no standard; the code is C99.  C11 is the oldest
+# standard Cabin can lower for MSVC.
+c-standard = "c11"
+# jansson_config.h's json_int_t is long long, and jansson.h's reference
+# counting is in static inline functions.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# The static library CMake builds by default (CMakeLists.txt:5, 351-357)
+# from every source in src/, dtoa.c included as USE_DTOA is on by
+# default (:8, 279-282).  JANSSON_USING_CMAKE is public there (:362), as
+# here; jansson_config.h defines it too.  CMake also defines HAVE_CONFIG_H
+# (:363) so that the sources read jansson_private_config.h, configured
+# from cmake/jansson_private_config.h.cmake; this port passes the values
+# the sources read as defines instead.  Those below are what every
+# platform's configure finds (:78-95) or sets: the hash seed's
+# /dev/urandom and Windows CryptoAPI sources, each read only on its own
+# platform (src/hashtable_seed.c:58, 94), and dtoa (strconv.c:64).  The
+# CryptoAPI is resolved at run time (hashtable_seed.c:112-128), so no
+# library is linked for it.  INITIAL_HASHTABLE_ORDER keeps hashtable.c's
+# own default, 3 (hashtable.c:23-24), which is CMake's as well
+# (CMakeLists.txt:259).  No source reads the other private-config
+# values.
+#
+# Not ported: the shared library (JANSSON_BUILD_SHARED_LIBS) with its
+# jansson.def and symbol-version script, the examples, docs and test
+# suite, and JANSSON_STATIC_CRT.  Big-endian targets are not supported:
+# WORDS_BIGENDIAN, which CMake's TEST_BIG_ENDIAN sets there (:98), is
+# never set, so dtoa.c would assume little-endian doubles (:68-72) and
+# misformat reals.  Not reproduced:
+# position-independent code (:355-356) and the warning-only flags
+# (-Wno-format-truncation, and MSVC's /W3, /wd4005, /wd4996 and
+# _CRT_SECURE_NO_WARNINGS at :55-68).
+[target.jansson]
+type = "library"
+sources = [
+  "src/dtoa.c",
+  "src/dump.c",
+  "src/error.c",
+  "src/hashtable.c",
+  "src/hashtable_seed.c",
+  "src/load.c",
+  "src/memory.c",
+  "src/pack_unpack.c",
+  "src/strbuffer.c",
+  "src/strconv.c",
+  "src/utf.c",
+  "src/value.c",
+  "src/version.c",
+]
+include-dirs = ["include"]
+defines = [
+  "DTOA_ENABLED=1",
+  "HAVE_FCNTL_H=1",
+  "HAVE_STDINT_H=1",
+  "HAVE_SYS_STAT_H=1",
+  "HAVE_SYS_TYPES_H=1",
+  "JANSSON_USING_CMAKE",
+  "USE_URANDOM=1",
+  "USE_WINDOWS_CRYPTOAPI=1",
+]
+interface-defines = ["JANSSON_USING_CMAKE"]
+links = "jansson"
+
+# What CMake's header and function checks find on Linux and macOS but not
+# with MSVC (CMakeLists.txt:78-92): the POSIX headers, the /dev/urandom
+# reads and the time-and-pid fallback seed (hashtable_seed.c:58-92,
+# 145-165), and sched_yield.  MSVC's CRT has open, read, close and getpid
+# too, but the sources read those results only off Windows.
+[target.'cfg(family = "unix")'.profile]
+defines = [
+  "HAVE_CLOSE=1",
+  "HAVE_GETPID=1",
+  "HAVE_GETTIMEOFDAY=1",
+  "HAVE_OPEN=1",
+  "HAVE_READ=1",
+  "HAVE_SCHED_H=1",
+  "HAVE_SCHED_YIELD=1",
+  "HAVE_SYS_PARAM_H=1",
+  "HAVE_SYS_TIME_H=1",
+  "HAVE_UNISTD_H=1",
+]
+
+# glibc's <endian.h> (CMakeLists.txt:78), which lookup3.h reads for the
+# byte order of its hash (lookup3.h:52-74).
+[target.'cfg(os = "linux")'.profile]
+defines = ["HAVE_ENDIAN_H=1"]
+
+# MinGW-w64, where the same checks also find <unistd.h>, <sys/param.h>,
+# <sys/time.h> and gettimeofday (CMakeLists.txt:78-92), so json_dumpfd
+# and json_loadfd work as upstream builds them (dump.c:59-65,
+# load.c:995-1001); with cl they fail by design.  Every GCC that builds
+# on Windows has them, and env reads "gnu" under a MinGW --target.
+# Without --target, env reads "msvc" on any Windows build machine, so
+# Clang targeting MinGW gets cl's values there.
+[target.'cfg(all(os = "windows", any(cc = "gcc", env = "gnu")))'.profile]
+defines = [
+  "HAVE_GETTIMEOFDAY=1",
+  "HAVE_SYS_PARAM_H=1",
+  "HAVE_SYS_TIME_H=1",
+  "HAVE_UNISTD_H=1",
+]
+
+# The builtins CMake's compile checks find (CMakeLists.txt:244-245), for
+# hashtable_seed.c's one-time seeding (:196-244).  Without sched_yield,
+# Windows seeds through its own interlocked path either way (:245-263),
+# so Clang targeting MSVC, which gets them here, seeds as cl does.
+[target.'cfg(any(cc = "gcc", cc = "clang", cc = "apple-clang"))'.profile]
+defines = ["HAVE_ATOMIC_BUILTINS=1", "HAVE_SYNC_BUILTINS=1"]
