@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/microsoft/GSL/archive/refs/tags/v5.0.1.tar.gz"
+checksum = "sha256:733a87a7eea56db075ee060735ba7616a27c1c55955f264d5473bf9e83294ad0"
+format = "tar.gz"
+strip-prefix = "GSL-5.0.1"
+
+[package]
+name = "cabin-ports/ms-gsl"
+version = "5.0.1"
+# include/gsl is what upstream installs (CMakeLists.txt); include/
+# itself also holds a CMakeLists.txt.
+include = ["LICENSE", "ThirdPartyNotices.txt", "include/gsl"]
+
+# Microsoft's Guidelines Support Library, header-only.  Upstream's CMake
+# target requires C++14 (cxx_std_14).  Not ported: GSL.natvis, the
+# Visual Studio debugger visualizer, which upstream adds only to its
+# build-tree target and installs as a data file.
+[target.gsl]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
