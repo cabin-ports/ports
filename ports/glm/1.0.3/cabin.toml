@@ -1,0 +1,35 @@
+[package.upstream]
+url = "https://github.com/g-truc/glm/archive/refs/tags/1.0.3.tar.gz"
+checksum = "sha256:6775e47231a446fd086d660ecc18bcd076531cfedd912fbd66e576b118607001"
+format = "tar.gz"
+strip-prefix = "glm-1.0.3"
+
+[package]
+name = "cabin-ports/glm"
+version = "1.0.3"
+# Consumers include <glm/...> from the archive root; shipping only glm/
+# and the license keeps doc/, test/, util/ and cmake/ off their include
+# path.
+include = ["copying.txt", "glm"]
+
+# Upstream's default glm::glm target (GLM_BUILD_LIBRARY is ON): the
+# headers plus a static library built from glm/detail/glm.cpp, which
+# only explicitly instantiates the vector, matrix, quaternion and dual
+# quaternion templates.  Its glm::glm-header-only target is the same
+# headers without that library.  glm/glm.cppm, the C++20 module
+# interface, is not built by upstream's CMake either.  Not ported: the
+# shared-library build.  Not reproduced: upstream's directory-wide MSVC
+# /Za (strict conformance) for glm.cpp, which Cabin cannot express; the
+# other build options keep their OFF defaults.
+[target.glm]
+type = "library"
+sources = ["glm/detail/glm.cpp"]
+include-dirs = ["."]
+# Upstream leaves the library's standard to the compiler; c++14 is the
+# lowest implementation standard Cabin accepts on MSVC.  The headers
+# are written in C++98 (readme.md), except glm/gtx/hash.hpp and
+# glm/gtx/scalar_multiplication.hpp, which need C++11 (glm/ext.hpp
+# includes them only then).
+cxx-standard = "c++14"
+interface-cxx-standard = "c++98"
+links = "glm"
