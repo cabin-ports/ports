@@ -1,0 +1,115 @@
+[package.upstream]
+url = "https://github.com/simdjson/simdjson/archive/refs/tags/v5.1.1.tar.gz"
+checksum = "sha256:d669fa399613c20bbf7705f057a72984331b223cd5e8d20666ef063dbf97f3e6"
+format = "tar.gz"
+strip-prefix = "simdjson-5.1.1"
+# The archive ships only simdjson's own LICENSE (Apache-2.0) and
+# LICENSE-MIT.  0001 adds the Boost Software License 1.0 (from
+# https://www.boost.org/LICENSE_1_0.txt, as LICENSE_1_0.txt), whose
+# terms must accompany every source copy, for the code the files state
+# is under it: string-view-lite
+# (include/simdjson/nonstd/string_view.hpp:1-7) and the Dragonbox port
+# in src/to_chars.cpp (:22-26).  Other third-party notices are shipped
+# as upstream ships them.  Known upstream attribution issues, left to
+# upstream:
+# - src/to_chars.cpp's append_exponent and format_buffer (:1047-1147)
+#   match nlohmann/json's (MIT) number formatter, and the file cites
+#   that project's issues #362 and #378 (:1098, :1171), but it names
+#   neither the project nor its license.
+# - include/simdjson/internal/jeaiii.h:11 credits "James Edward Anhalt
+#   III's algorithm" without the MIT notice of jeaiii/itoa's
+#   include/itoa/jeaiii_to_text.h it adapts.
+# - src/fallback.cpp's UTF-8 validator (:450-511) is credited as
+#   Apache-licensed Google Fuchsia code, while Fuchsia's
+#   validate_string.cc it resembles is BSD-3-Clause.
+# - tools/vendor_fast_float.sh:45 renames the holder in the vendored
+#   include/simdjson/internal/fast_float.h notices (:46, :74) to "The
+#   simdjson_fast_float authors".
+patches = [
+  "patches/0001-add-boost-software-license-for-string-view-and-dragonbox-code.patch",
+]
+
+[package]
+name = "cabin-ports/simdjson"
+version = "5.1.1"
+# simdjson is Apache-2.0 or MIT, at the user's option;
+# LICENSE_1_0.txt comes from the patch above.  fast_float
+# (include/simdjson/internal/fast_float.h) and the PyTorch-derived CPU
+# detection (src/internal/isadetection.h,
+# include/simdjson/internal/instruction_set.h) carry their license
+# texts inline.
+include = [
+  "LICENSE",
+  "LICENSE-MIT",
+  "LICENSE_1_0.txt",
+  "include",
+  "patches",
+  "src",
+]
+
+# Upstream's simdjson library (CMakeLists.txt): src/simdjson.cpp, which
+# includes the rest of src/ and compiles the kernels the target allows
+# (include/simdjson/implementation_detection.h): westmere, haswell and
+# icelake on x86-64, lsx and lasx on LoongArch, arm64 on AArch64, ppc64
+# and rvv-vls only when the compile flags already enable VMX or RVV, and
+# fallback where no SIMD kernel can always run; it picks one at run
+# time.  On x86-64 and LoongArch, GCC and Clang compile each kernel for
+# its instruction set per function (SIMDJSON_TARGET_REGION in
+# include/simdjson/portability.h:144-161), and MSVC emits the intrinsics
+# without architecture flags, so the build needs no instruction-set
+# flags, as upstream's CMake passes none.  Consumers include
+# <simdjson.h> from include/, upstream's build-tree interface; its
+# install tree has the same headers amalgamated into one
+# singleheader/simdjson.h.  Not ported: the shared library; the
+# -mno-avx256-split-unaligned-load/-store flags CMake adds for GCC on
+# x86, which only tune code generation; the Debug configuration's -Og
+# and public SIMDJSON_DEVELOPMENT_CHECKS, because a registry package's
+# raw compiler flags are dropped and interface-defines cannot depend on
+# the profile.  The checks follow the header's own rule instead
+# (common_defs.h:319-338): on in unoptimized builds without NDEBUG on
+# GCC and Clang, and on MSVC only with _DEBUG, which Cabin's MSVC
+# lowering does not pass, so they stay off there.  Also not ported: the
+# non-default settings of upstream's options (SIMDJSON_EXCEPTIONS,
+# SIMDJSON_ENABLE_THREADS, SIMDJSON_AVX512_ALLOWED,
+# SIMDJSON_SKIPUTF8VALIDATION, SIMDJSON_ENABLE_NAN_INF,
+# SIMDJSON_MINUS_ZERO_AS_FLOAT, SIMDJSON_DISABLE_DEPRECATED_API,
+# SIMDJSON_ENABLE_MEMORY_FILE_MAPPING_ON_WINDOWS, SIMDJSON_CHECK_EOF,
+# SIMDJSON_STRUCTURAL_INDEXER_STEP, SIMDJSON_VERBOSE_LOGGING, forced
+# C++26 static reflection, the kernel selection lists); the tools,
+# tests, benchmarks, fuzzers and the single-header generation.
+[target.simdjson]
+type = "library"
+sources = ["src/simdjson.cpp"]
+include-dirs = ["include"]
+# SIMDJSON_ENABLE_THREADS (on by default) makes SIMDJSON_THREADS_ENABLED
+# public: parse_many then runs stage 1 of the next batch on a worker
+# thread.  The define changes the layout of both document_stream
+# classes (dom/document_stream.h:293-315,
+# generic/ondemand/document_stream.h:332-355), so every translation
+# unit that includes the headers must agree on it; the library gets it
+# too, as from CMake's PUBLIC definition.  Unoptimized Apple builds drop
+# it again everywhere (portability.h:176-187).
+defines = ["SIMDJSON_THREADS_ENABLED=1"]
+interface-defines = ["SIMDJSON_THREADS_ENABLED=1"]
+# CMake compiles the library as C++17 (cmake/developer-options.cmake:
+# 125-129) and asks consumers only for cxx_std_11 (CMakeLists.txt:335).
+# The interface stays at C++17 here: below it, a consumer on libstdc++
+# gets simdjson's nonstd::string_view backfill (common_defs.h:290-298),
+# whose members are laid out differently from the std::string_view the
+# library was built with, and the two meet in implementation's inline
+# members (implementation.h:56-66, :149-154).
+cxx-standard = "c++17"
+links = "simdjson"
+
+# The sources include one another from src/ by bare name
+# (src/simdjson.cpp includes <base.h>), so src/ joins the package's own
+# (private) include path, as upstream's CMake does.
+[profile]
+include-dirs = ["src"]
+
+# Upstream links Threads::Threads publicly for the parse_many worker
+# thread: the pthread library on Unix (folded into libc since glibc
+# 2.34, where the extra -lpthread is a harmless no-op); Windows needs
+# nothing.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
