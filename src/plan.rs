@@ -67,8 +67,8 @@ pub struct PortConversion {
 /// probe keeps its default.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct ProbeStandards {
-    /// Lowest C standard satisfying `c_targets`' declared
-    /// `interface-c-standard`.
+    /// Lowest C standard satisfying the declared `interface-c-standard`
+    /// of `c_targets` and `dual_targets`.
     pub c: Option<cabin_core::CStandard>,
     /// Lowest C++ standard satisfying the remaining probed targets'
     /// declared `interface-cxx-standard`.
@@ -78,6 +78,10 @@ pub struct ProbeStandards {
     /// consumer instead.  Every other probed target goes to the C++
     /// consumer, so a package mixing the two is probed from both.
     pub c_targets: Vec<String>,
+    /// C++-consumable probed targets that also declare an
+    /// `interface-c-standard` other than `"none"`: linked by the C
+    /// consumer as well as the C++ one.
+    pub dual_targets: Vec<String>,
 }
 
 /// One inter-port dependency edge.
@@ -428,6 +432,19 @@ fn probe_standards(
     let (c_targets, cxx_targets): (Vec<_>, Vec<_>) = targets
         .into_iter()
         .partition(|t| matches!(declared(t).1, Some(cabin_core::InterfaceRequirement::None)));
+    // A C++-consumable target that declares a C interface is linked
+    // by the C consumer as well, so its C claim is probed, not only
+    // stated.
+    let dual_targets: Vec<_> = cxx_targets
+        .iter()
+        .copied()
+        .filter(|t| {
+            matches!(
+                declared(t).0,
+                Some(cabin_core::InterfaceRequirement::Requirement(_))
+            )
+        })
+        .collect();
 
     // Only the language a given probe actually compiles is joined.
     // Each probe is a single `main.cc` / `main.c` consumer, so Cabin
@@ -441,9 +458,10 @@ fn probe_standards(
     // replicate that, so a composed floor above the probe's surfaces
     // as Cabin's own compatibility error at preflight.
     Ok(ProbeStandards {
-        c: join_interface(c_targets.iter().map(|t| declared(t).0))?,
+        c: join_interface(c_targets.iter().chain(&dual_targets).map(|t| declared(t).0))?,
         cxx: join_interface(cxx_targets.iter().map(|t| declared(t).1))?,
         c_targets: c_targets.iter().map(|t| t.name.to_string()).collect(),
+        dual_targets: dual_targets.iter().map(|t| t.name.to_string()).collect(),
     })
 }
 
@@ -1198,6 +1216,33 @@ mod tests {
             conversions[0].probe_standards.cxx,
             Some(cabin_core::CxxStandard::Cxx14)
         );
+    }
+
+    /// A C library consumable from C++ that declares its C interface
+    /// is probed from both languages, at the declared floors, whether
+    /// or not it also declares its C++ interface.
+    #[test]
+    fn a_declared_c_interface_is_probed_from_c_as_well() {
+        for (cxx_interface, cxx) in [
+            (
+                "interface-cxx-standard = \"c++11\"\n",
+                Some(cabin_core::CxxStandard::Cxx11),
+            ),
+            ("", None),
+        ] {
+            let dir = assert_fs::TempDir::new().unwrap();
+            let manifest = package_manifest("cabin-ports/lz4", "1.11.0", "").replace(
+                "c-standard = \"c11\"\n",
+                &format!("c-standard = \"c11\"\ninterface-c-standard = \"c99\"\n{cxx_interface}"),
+            );
+            write_package(dir.path(), "lz4", "1.11.0", &manifest);
+            let conversions = load_conversions(dir.path()).unwrap();
+            let standards = &conversions[0].probe_standards;
+            assert!(standards.c_targets.is_empty());
+            assert_eq!(standards.dual_targets, ["t"]);
+            assert_eq!(standards.c, Some(cabin_core::CStandard::C99));
+            assert_eq!(standards.cxx, cxx);
+        }
     }
 
     /// Nothing declared leaves the probe on its defaults.

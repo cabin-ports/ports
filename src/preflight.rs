@@ -474,8 +474,9 @@ fn ensure_consumer_tests_used(conversions: &[PortConversion]) -> Result<()> {
             if !sources.contains(&name.as_ref()) {
                 bail!(
                     "{} is not a consumer test this port's probe compiles: expected \
-                     tests/main.cc (tests/main.c only for a target declaring \
-                     `interface-cxx-standard = \"none\"`)",
+                     tests/main.cc, or tests/main.c for a target declaring an \
+                     `interface-c-standard` other than \"none\" or \
+                     `interface-cxx-standard = \"none\"`",
                     entry.path().display()
                 );
             }
@@ -496,15 +497,23 @@ struct ProbeConsumer<'a> {
 /// Split the probed targets across the consumers that can link them.
 /// Targets forbidding C++ consumption go to a C consumer and the rest
 /// to a C++ one, so a package mixing both shapes is still probed
-/// whole.  A package with no library-like targets keeps the C++
-/// consumer, leaving the dependency resolve-and-fetch-only.
+/// whole; one of the rest declaring a C interface goes to both.  A package
+/// with no library-like targets keeps the C++ consumer, leaving the
+/// dependency resolve-and-fetch-only.
 fn probe_consumers(conversion: &PortConversion) -> Vec<ProbeConsumer<'_>> {
-    let c_keys = &conversion.probe_standards.c_targets;
-    let (c, cxx): (Vec<&str>, Vec<&str>) = conversion
+    let standards = &conversion.probe_standards;
+    let listed = |list: &[String], key: &str| list.iter().any(|k| k == key);
+    let keys = conversion
         .library_like_target_keys
         .iter()
-        .map(String::as_str)
-        .partition(|key| c_keys.iter().any(|c| c == key));
+        .map(String::as_str);
+    let cxx: Vec<&str> = keys
+        .clone()
+        .filter(|key| !listed(&standards.c_targets, key))
+        .collect();
+    let c: Vec<&str> = keys
+        .filter(|key| listed(&standards.c_targets, key) || listed(&standards.dual_targets, key))
+        .collect();
     let mut consumers = Vec::new();
     if !cxx.is_empty() || c.is_empty() {
         consumers.push(ProbeConsumer {
@@ -771,5 +780,31 @@ mod tests {
             "{manifest}"
         );
         assert_eq!(probe_sources(&conversion), ["main.c"]);
+    }
+
+    /// A target declaring both interfaces is linked by both consumers,
+    /// so its committed C test is compiled rather than refused.
+    #[test]
+    fn a_dual_language_target_is_linked_by_both_consumers() {
+        let dir = assert_fs::TempDir::new().unwrap();
+        let mut conversion = conversion(&["z"]);
+        conversion.probe_standards.dual_targets = vec!["z".to_owned()];
+        let manifest = probe_manifest(&conversion);
+        for (target, source) in [("port-probe", "main.cc"), ("port-probe-c", "main.c")] {
+            assert!(
+                manifest.contains(&format!(
+                    "[target.{target}]\ntype = \"executable\"\nsources = \
+                     [\"{source}\"]\ndeps = [\"cabin-ports/zlib\"]\n"
+                )),
+                "{manifest}"
+            );
+        }
+
+        conversion.committed_dir = dir.path().join("ports/zlib/1.3.1");
+        let tests = conversion.committed_dir.join("tests");
+        fs::create_dir_all(&tests).unwrap();
+        fs::write(tests.join("main.cc"), "").unwrap();
+        fs::write(tests.join("main.c"), "").unwrap();
+        ensure_consumer_tests_used(&[conversion]).unwrap();
     }
 }
