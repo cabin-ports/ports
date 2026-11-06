@@ -1,0 +1,7 @@
+--- /dev/null
++++ b/src/ciphers/aes/aes_enc.c
+@@ -0,0 +1,4 @@
++/* aes.c compiled with ENCRYPT_ONLY, as the makefiles build aes_enc.o:
++   rijndael_enc_desc and aes_enc_desc. */
++#define ENCRYPT_ONLY
++#include "aes.c"
