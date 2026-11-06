@@ -1,0 +1,35 @@
+[package.upstream]
+url = "https://github.com/open-source-parsers/jsoncpp/archive/refs/tags/1.9.8.tar.gz"
+checksum = "sha256:51828cf3574281d2b79ec2a1c56a9e4c20cc1103711321ea96384cffb8d2d904"
+format = "tar.gz"
+strip-prefix = "jsoncpp-1.9.8"
+
+# LICENSE dedicates the code to the public domain where that is
+# recognized and licenses it under the MIT License elsewhere.
+[package]
+name = "cabin-ports/jsoncpp"
+version = "1.9.8"
+include = ["LICENSE", "include", "src/lib_json"]
+
+# The static library upstream's CMake builds (src/lib_json/CMakeLists.txt:
+# 43-49, 137-169).  Not reproduced: HAVE_MEMSET_S (CMakeLists.txt:92-96),
+# which only include/json/allocator.h tests, in the SecureAllocator that
+# JsonCpp uses only with JSONCPP_USE_SECURE_MEMORY (off by default), and
+# JSONCPP_NO_LOCALE_SUPPORT, which CMake defines only where <clocale>
+# lacks localeconv or lconv::decimal_point
+# (src/lib_json/CMakeLists.txt:11-26).
+[target.jsoncpp]
+type = "library"
+sources = [
+  "src/lib_json/json_reader.cpp",
+  "src/lib_json/json_value.cpp",
+  "src/lib_json/json_writer.cpp",
+]
+include-dirs = ["include"]
+# Upstream requires C++11 (cxx_std_11, src/lib_json/CMakeLists.txt:62);
+# C++14 is the oldest standard Cabin can request from MSVC.  The
+# std::string_view overloads include/json/value.h declares to C++17
+# consumers are inline, so the library's standard does not change them.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "jsoncpp"
