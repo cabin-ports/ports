@@ -1,0 +1,31 @@
+[package.upstream]
+# frozen publishes no release assets; this is the 1.2.0 tag archive
+# (commit 06bee5321c), the bytes vcpkg (SHA-512) and ConanCenter
+# (SHA-256) pin.
+url = "https://github.com/serge-sans-paille/frozen/archive/refs/tags/1.2.0.tar.gz"
+checksum = "sha256:ed8339c017d7c5fe019ac2c642477f435278f0dc643c1d69d3f3b1e95915e823"
+format = "tar.gz"
+strip-prefix = "frozen-1.2.0"
+
+[package]
+name = "cabin-ports/frozen"
+version = "1.2.0"
+include = ["LICENSE", "include"]
+
+# Upstream's header-only frozen::frozen target (CMakeLists.txt:61-86):
+# consumers include <frozen/*.h> from include/, with C++14 or newer
+# (cxx_std_14; README.rst, "Requirements").  The 1.2.0 tag still says
+# 1.1.1 in include/frozen/bits/version.h.  Newer standards turn on more
+# (include/frozen/bits/defines.h), which the C++14 probe does not reach:
+# with C++17, frozen::string from std::string_view and deduction guides
+# for set and unordered_set; with C++20, frozen::u8string.
+# frozen/bits/elsa_std.h, the hashers for std::string and (with C++17)
+# std::string_view keys, is included only on request.  Left to
+# consumers, as upstream does: FROZEN_NO_EXCEPTIONS, which makes at()
+# abort instead of throwing.  Not ported: the frozen::frozen-headers
+# target, the same target with the header list attached for IDEs; the
+# tests, examples and benchmarks.
+[target.frozen]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
