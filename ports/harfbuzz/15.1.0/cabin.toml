@@ -1,0 +1,159 @@
+[package.upstream]
+# GitHub's archive of the 15.1.0 tag: Cabin takes tar.gz or zip, and the
+# release asset is harfbuzz-15.1.0.tar.xz, whose src/ and COPYING are
+# byte-identical to this archive's.
+url = "https://github.com/harfbuzz/harfbuzz/archive/refs/tags/15.1.0.tar.gz"
+checksum = "sha256:5c057929413b8664592fea67edea5c2c47b4ffb0bf5f4accb5164bc6acc69d94"
+format = "tar.gz"
+strip-prefix = "harfbuzz-15.1.0"
+# meson configures and installs hb-features.h, which tells consumers the
+# library's optional parts (src/meson.build:587-619).  The patch adds it
+# to src/ as meson writes it for this port: HB_HAS_FREETYPE is defined
+# and every other HB_HAS_* is #undef, the subset, raster, vector, and gpu
+# libraries included, since this port does not build them.  No library
+# source includes it.
+patches = ["patches/0001-add-the-generated-hb-features-h.patch"]
+
+[package]
+name = "cabin-ports/harfbuzz"
+version = "15.1.0"
+# COPYING is the Old MIT license; the Unicode data tables in src/ keep
+# their own notices.
+include = ["COPYING", "patches", "src"]
+# Upstream builds C++11 (meson.build:7) and C++14 with MSVC's standard
+# library (:38-48); Cabin cannot lower C++11 for MSVC, so the library
+# builds as C++14 on every platform.
+cxx-standard = "c++14"
+# The public headers end an enumerator list with a comma (hb-draw.h:478),
+# a C99 and C++11 token; hb-cplusplus.hh needs C++11.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+[dependencies]
+"cabin-ports/freetype" = "^2.15"
+
+# meson's config.h entries that the library sources read (it passes
+# -DHAVE_CONFIG_H; there is no config.h here).  FreeType 2.15.0 has the
+# functions meson probes for (meson.build:280-296); no source reads
+# HAVE_FT_SET_VAR_BLEND_COORDINATES.
+[profile]
+defines = [
+  "HAVE_FREETYPE=1",
+  "HAVE_FT_DONE_MM_VAR=1",
+  "HAVE_FT_GET_TRANSFORM=1",
+  "HAVE_FT_GET_VAR_BLEND_COORDINATES=1",
+]
+
+# libharfbuzz as meson builds it when FreeType is the only optional
+# dependency found: hb_base_sources (src/meson.build:11-279) and
+# hb_ft_sources (:337, 505-509).  The ragel-generated state machines they
+# include are committed.  src/ is the include root, as in CMake's build
+# tree (CMakeLists.txt:615-617), so consumers write `#include <hb.h>`;
+# it also holds the private .hh headers, which are not installed.  Not
+# ported: the subset, raster, vector, and gpu libraries meson builds by
+# default (src/meson.build:687-912), harfbuzz-cairo, -icu, and -gobject,
+# the glib, ICU, graphite2, CoreText, DirectWrite, GDI, Uniscribe, wasm,
+# fontations, harfrust, and kbts backends (meson_options.txt; all but
+# glib and ICU are off by default), the shared library, the tools, and
+# the tests.  Not reproduced, since Cabin drops a dependency's raw
+# compiler flags: -fno-exceptions, -fno-rtti, -fno-threadsafe-statics,
+# and -fvisibility-inlines-hidden (meson.build:74-79), which only shrink
+# the library and keep it off the C++ runtime that Cabin links anyway,
+# and MSVC's /wd4244 and /bigobj (:50-61), a warning switch and a fix for
+# hb-subset.cc; Cabin passes MSVC /utf-8 itself.
+[target.harfbuzz]
+type = "library"
+sources = [
+  "src/hb-aat-layout.cc",
+  "src/hb-aat-map.cc",
+  "src/hb-blob.cc",
+  "src/hb-buffer-serialize.cc",
+  "src/hb-buffer-verify.cc",
+  "src/hb-buffer.cc",
+  "src/hb-common.cc",
+  "src/hb-draw.cc",
+  "src/hb-face-builder.cc",
+  "src/hb-face.cc",
+  "src/hb-fallback-shape.cc",
+  "src/hb-font.cc",
+  "src/hb-ft.cc",
+  "src/hb-map.cc",
+  "src/hb-number.cc",
+  "src/hb-ot-cff1-table.cc",
+  "src/hb-ot-cff2-table.cc",
+  "src/hb-ot-color.cc",
+  "src/hb-ot-face.cc",
+  "src/hb-ot-fetch.cc",
+  "src/hb-ot-font.cc",
+  "src/hb-ot-layout.cc",
+  "src/hb-ot-map.cc",
+  "src/hb-ot-math.cc",
+  "src/hb-ot-meta.cc",
+  "src/hb-ot-metrics.cc",
+  "src/hb-ot-name.cc",
+  "src/hb-ot-shape-fallback.cc",
+  "src/hb-ot-shape-normalize.cc",
+  "src/hb-ot-shape.cc",
+  "src/hb-ot-shaper-arabic.cc",
+  "src/hb-ot-shaper-default.cc",
+  "src/hb-ot-shaper-hangul.cc",
+  "src/hb-ot-shaper-hebrew.cc",
+  "src/hb-ot-shaper-indic-table.cc",
+  "src/hb-ot-shaper-indic.cc",
+  "src/hb-ot-shaper-khmer.cc",
+  "src/hb-ot-shaper-myanmar.cc",
+  "src/hb-ot-shaper-syllabic.cc",
+  "src/hb-ot-shaper-thai.cc",
+  "src/hb-ot-shaper-use.cc",
+  "src/hb-ot-shaper-vowel-constraints.cc",
+  "src/hb-ot-tag.cc",
+  "src/hb-ot-var.cc",
+  "src/hb-outline.cc",
+  "src/hb-paint-bounded.cc",
+  "src/hb-paint-extents.cc",
+  "src/hb-paint.cc",
+  "src/hb-set.cc",
+  "src/hb-shape-plan.cc",
+  "src/hb-shape.cc",
+  "src/hb-shaper.cc",
+  "src/hb-static.cc",
+  "src/hb-style.cc",
+  "src/hb-ucd.cc",
+  "src/hb-unicode.cc",
+  "src/OT/Var/VARC/VARC.cc",
+]
+include-dirs = ["src"]
+links = "harfbuzz"
+# hb-ft.h includes FreeType's headers.
+deps = [{ name = "cabin-ports/freetype", public = true }]
+
+# meson's header and function probes (meson.build:92-111, 363-406) as
+# they come out on Unix; the library links libm and the threads library
+# there (:113, 354-362).
+[target.'cfg(family = "unix")'.profile]
+defines = [
+  "HAVE_ATEXIT=1",
+  "HAVE_GETPAGESIZE=1",
+  "HAVE_MMAP=1",
+  "HAVE_MPROTECT=1",
+  "HAVE_NEWLOCALE=1",
+  "HAVE_PTHREAD=1",
+  "HAVE_SYSCONF=1",
+  "HAVE_SYS_MMAN_H=1",
+  "HAVE_UNISTD_H=1",
+  "HAVE_USELOCALE=1",
+]
+link-libs = ["m", "pthread"]
+
+# glibc and musl declare sincos and sincosf under _GNU_SOURCE.
+[target.'cfg(os = "linux")'.profile]
+defines = ["HAVE_SINCOS=1", "HAVE_SINCOSF=1"]
+
+# hb.hh:512-514 includes it for uselocale.
+[target.'cfg(os = "macos")'.profile]
+defines = ["HAVE_XLOCALE_H=1"]
+
+# meson looks for no threads library on Windows (:356), where
+# hb-mutex.hh:60-71 uses the Win32 API.
+[target.'cfg(os = "windows")'.profile]
+defines = ["HAVE_ATEXIT=1"]
