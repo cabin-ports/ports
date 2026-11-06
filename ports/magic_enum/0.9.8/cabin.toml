@@ -1,0 +1,28 @@
+[package.upstream]
+# The release asset; it has no top-level directory and holds the same
+# tree as the v0.9.8 tag archive vcpkg and ConanCenter pin.
+url = "https://github.com/Neargye/magic_enum/releases/download/v0.9.8/magic_enum-v0.9.8.tar.gz"
+checksum = "sha256:88709dc8a9697168a75e039470d73ed0cffbc17567976eb5e096f946a2c0d521"
+format = "tar.gz"
+
+[package]
+name = "cabin-ports/magic_enum"
+version = "0.9.8"
+include = ["LICENSE", "include"]
+
+# Upstream's magic_enum INTERFACE target (CMakeLists.txt:45-50):
+# consumers include <magic_enum/magic_enum.hpp> and the optional
+# magic_enum_*.hpp headers from include/.  The headers need C++17
+# (README.md:13; meson.build:3).  The std::formatter specialization in
+# magic_enum_format.hpp exists only with a C++20 <format>
+# (__cpp_lib_format), which the C++17 probe does not reach.  Left to
+# consumers, as upstream does: the configuration macros such as
+# MAGIC_ENUM_RANGE_MIN/MAX and MAGIC_ENUM_ENABLE_HASH (Meson's `hash`
+# option, default off), and the fmt::formatter specialization, which
+# magic_enum_format.hpp adds when fmt is included first.  Not ported:
+# module/magic_enum.cppm, the C++20 module interface, which upstream's
+# CMake does not build either.
+[target.magic_enum]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
