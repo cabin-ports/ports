@@ -1,0 +1,58 @@
+[package.upstream]
+url = "https://github.com/cameron314/concurrentqueue/archive/refs/tags/v1.0.5.tar.gz"
+checksum = "sha256:4d6368a27492d86011fde5ca0cf386dce7c49cd425aa3d9b063ca6ec373a6ef3"
+format = "tar.gz"
+strip-prefix = "concurrentqueue-1.0.5"
+
+# The three headers upstream's CMake build installs, under the
+# moodycamel/ directory it installs them in (CMakeLists.txt:55-63), so
+# consumers write <moodycamel/concurrentqueue.h> as with its installed
+# package (:9-13).  The bare "concurrentqueue.h" of upstream's build tree
+# and README examples is not offered: the archive root, with the tests,
+# benchmarks and c_api/, stays off the include path.
+[[package.upstream.copy]]
+from = "blockingconcurrentqueue.h"
+to = "include/moodycamel/blockingconcurrentqueue.h"
+
+[[package.upstream.copy]]
+from = "concurrentqueue.h"
+to = "include/moodycamel/concurrentqueue.h"
+
+[[package.upstream.copy]]
+from = "lightweightsemaphore.h"
+to = "include/moodycamel/lightweightsemaphore.h"
+
+[package]
+name = "cabin-ports/concurrentqueue"
+version = "1.0.5"
+# LICENSE.md holds the BSD-2-Clause and Boost licenses the queue is
+# offered under; lightweightsemaphore.h carries its zlib notice itself.
+include = ["LICENSE.md", "include"]
+
+# Header-only, as upstream's CMake target is (CMakeLists.txt:7).  Not
+# ported: the C wrapper in c_api/, which upstream builds only into its
+# unit tests (build/makefile:35-38) and installs neither as a header nor
+# as a library, and internal/concurrentqueue_internal_debug.h, which
+# concurrentqueue.h includes only under the MOODYCAMEL_QUEUE_INTERNAL_DEBUG
+# debugging switch (concurrentqueue.h:286-288) and upstream does not
+# install.
+[target.concurrentqueue]
+type = "header-only"
+include-dirs = ["include"]
+# concurrentqueue.h requires C++11 (:1, :67).
+interface-cxx-standard = "c++11"
+
+# Off Apple, lightweightsemaphore.h uses POSIX semaphores (:182-266), and
+# where thread_local is enabled the queue's thread-exit notifier takes
+# std::mutex locks (concurrentqueue.h:213-225, 625, 639-643): pthreads,
+# which upstream's own build compiles with (build/makefile:7) and
+# ConanCenter's recipe links.  Folded into libc since glibc 2.34, where
+# the extra -lpthread is a harmless no-op.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# The semaphore's timed wait calls clock_gettime
+# (lightweightsemaphore.h:233-235), in librt before glibc 2.17; upstream's
+# build links -lrt on Linux (build/makefile:16-19).
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["rt"]
