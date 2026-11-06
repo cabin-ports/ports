@@ -33,11 +33,12 @@ struct Cli {
     #[arg(long, conflicts_with = "dry_run")]
     index_url: Option<String>,
     /// Dry-run only what the change since this Git revision needs:
-    /// when it only adds package names (and edits README.md or
-    /// AGENTS.md), every version of those names plus their
-    /// dependencies; when it only edits those two files, nothing.  Any
-    /// other change dry-runs every port.  Uncommitted and untracked
-    /// files count as changes.
+    /// when it only adds files under `<name>/<version>/` for new
+    /// names (and edits README.md or AGENTS.md), every version of
+    /// those names plus their dependencies; when it edits nothing but
+    /// those two files, nothing.  Any other change dry-runs every
+    /// port.  Uncommitted and untracked files count as changes, as do
+    /// ignored files in the ports directory.
     // `conflicts_with`, not `requires`, for the reason above.
     #[arg(
         long,
