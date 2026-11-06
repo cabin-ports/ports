@@ -1,0 +1,63 @@
+# The release tarball upstream attached to v1.26, as ConanCenter pins
+# it.  vcpkg builds the GitHub tag archive instead; both unpack to the
+# same libdeflate-1.26/ tree.
+[package.upstream]
+url = "https://github.com/ebiggers/libdeflate/releases/download/v1.26/libdeflate-1.26.tar.gz"
+checksum = "sha256:125856d4656e0feab660f94842f835923410c9281fedbcee64598c918da42b5a"
+format = "tar.gz"
+strip-prefix = "libdeflate-1.26"
+
+# The one header upstream's CMake installs.  The library sources reach
+# the root copy through common_defs.h's relative include, so the root,
+# which also holds the private common_defs.h, stays off consumers'
+# include path.
+[[package.upstream.copy]]
+from = "libdeflate.h"
+to = "include/libdeflate.h"
+
+[package]
+name = "cabin-ports/libdeflate"
+# Upstream 1.26; Cabin versions have three components.
+version = "1.26.0"
+include = ["COPYING", "common_defs.h", "include", "lib", "libdeflate.h"]
+
+# The static library upstream's CMake builds (libdeflate_static) with
+# its four feature options at their default, on: raw DEFLATE, zlib and
+# gzip compression and decompression, plus the Adler-32 and CRC-32
+# checksums.  SIMD code beyond the target's baseline is compiled per
+# function (through target attributes on GCC and Clang) and chosen at run
+# time from detected CPU features, so the build needs no instruction-set
+# flags.  Not ported: the libdeflate-gzip program, the shared library,
+# the Apple framework, and the FREESTANDING build.  Nor are CMake's
+# assembler probes (CMakeLists.txt:135-182), which define
+# LIBDEFLATE_ASSEMBLER_DOES_NOT_SUPPORT_* when GCC is paired with a
+# binutils too old for the instructions it emits; as upstream's comment
+# there says of builds without CMake, such a toolchain must define them
+# itself.
+[target.deflate]
+type = "library"
+sources = [
+  "lib/adler32.c",
+  "lib/arm/cpu_features.c",
+  "lib/crc32.c",
+  "lib/deflate_compress.c",
+  "lib/deflate_decompress.c",
+  "lib/gzip_compress.c",
+  "lib/gzip_decompress.c",
+  "lib/utils.c",
+  "lib/x86/cpu_features.c",
+  "lib/zlib_compress.c",
+  "lib/zlib_decompress.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+# libdeflate.h includes <stdint.h>, which C++ adopted in C++11.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "deflate"
+
+# Strict -std=c11 hides glibc's O_CLOEXEC, which the Linux Arm feature
+# detection in lib/arm/cpu_features.c opens /proc/self/auxv with;
+# upstream's CMake compiles in GCC's default GNU dialect.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_POSIX_C_SOURCE=200809L"]
