@@ -1,0 +1,40 @@
+[package.upstream]
+url = "https://gitlab.com/libeigen/eigen/-/archive/5.0.1/eigen-5.0.1.tar.gz"
+checksum = "sha256:e9c326dc8c05cd1e044c71f30f1b2e34a6161a3b6ecf445d56b53ff1669e3dec"
+format = "tar.gz"
+strip-prefix = "eigen-5.0.1"
+
+[package]
+name = "cabin-ports/eigen3"
+version = "5.0.1"
+# The header directories upstream's CMake installs into include/eigen3,
+# plus the license files; the rest of the archive (tests, benchmarks,
+# the BLAS/LAPACK sources, docs) would otherwise sit on consumers'
+# include path.
+include = [
+    "COPYING.APACHE",
+    "COPYING.BSD",
+    "COPYING.MINPACK",
+    "COPYING.MPL2",
+    "COPYING.README",
+    "Eigen",
+    "LICENSE",
+    "signature_of_eigen3_matrix_library",
+    "unsupported/Eigen",
+]
+
+# Eigen is header-only; consumers include <Eigen/...> and
+# <unsupported/Eigen/...> from the archive root.  Eigen/Version is the
+# release's own header: upstream's CMake install regenerates it from
+# cmake/Version.in with a "-dev" prerelease suffix unless the builder
+# sets EIGEN_PRERELEASE_VERSION.  Not ported: the separate BLAS/LAPACK
+# libraries built from blas/ and lapack/, which upstream builds by
+# default only as the top-level project (EIGEN_BUILD_BLAS /
+# EIGEN_BUILD_LAPACK default to PROJECT_IS_TOP_LEVEL,
+# CMakeLists.txt:63-64) and vcpkg and Conan turn off.
+[target.eigen]
+type = "header-only"
+include-dirs = ["."]
+# Upstream's interface requirement:
+# target_compile_features(eigen INTERFACE cxx_std_14).
+interface-cxx-standard = "c++14"
