@@ -1,0 +1,32 @@
+[package.upstream]
+url = "https://github.com/JuliaStrings/utf8proc/releases/download/v2.12.0/utf8proc-2.12.0.tar.gz"
+checksum = "sha256:a393fbef160835fb315bc3e91ba8d86f7a73a7cec9e6198b6c60b848b498bfeb"
+format = "tar.gz"
+strip-prefix = "utf8proc-2.12.0"
+
+[package]
+name = "cabin-ports/utf8proc"
+version = "2.12.0"
+# LICENSE.md carries both the MIT terms and the Unicode data license
+# that covers utf8proc_data.c.
+include = ["LICENSE.md", "utf8proc.c", "utf8proc.h", "utf8proc_data.c"]
+
+# The static library upstream's CMake builds by default: utf8proc.c,
+# which #includes the Unicode tables in utf8proc_data.c.  The defines
+# are CMakeLists.txt's.  UTF8PROC_STATIC is public: without it,
+# utf8proc.h declares the API dllimport on Windows.  Not ported: the
+# shared library, the tests, the fuzzer and the benchmarks.  Upstream's
+# CMake names the MSVC static library utf8proc_static.lib; this port
+# keeps utf8proc.lib, the name every other build uses.
+[target.utf8proc]
+type = "library"
+sources = ["utf8proc.c"]
+include-dirs = ["."]
+# The Makefile compiles with -std=c99; C11 is the oldest standard Cabin
+# can lower for MSVC.  utf8proc.h needs <stdbool.h> and <stdint.h>.
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+defines = ["UTF8PROC_EXPORTS", "UTF8PROC_STATIC"]
+interface-defines = ["UTF8PROC_STATIC"]
+links = "utf8proc"
