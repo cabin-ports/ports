@@ -3,12 +3,24 @@ url = "https://github.com/sammycage/lunasvg/archive/refs/tags/v3.5.0.tar.gz"
 checksum = "sha256:1abf1472ee6c4d19797916e8cc3c2e4b628e0d81178ffac60bdb0d457e32c690"
 format = "tar.gz"
 strip-prefix = "lunasvg-3.5.0"
+# Upstream's fix for an infinite loop in :first-of-type and :last-of-type,
+# made after 3.5.0:
+# https://github.com/sammycage/lunasvg/commit/021ab7e3a3410127fabd4025d4649ef1c10588cb
+# 3.5.0 steps the sibling scan with element->previousElement()
+# (nextElement()) rather than the sibling's, so a style sheet or
+# querySelectorAll() using either selector never returns on an element
+# whose nearest preceding (following) element sibling is of another type,
+# a denial of service on untrusted SVG.  The patch takes just those two
+# lines of the commit's diff, not its CSS specificity change.  It changes
+# behavior, which README.md otherwise keeps out of port patches: a
+# one-time exception Ken Matsui approved for lunasvg 3.5.0 only.
+patches = ["patches/0001-fix-of-type-selector-loop.patch"]
 
 [package]
 name = "cabin-ports/lunasvg"
 version = "3.5.0"
 # plutovg/ is upstream's vendored plutovg 1.3.1, not used here.
-include = ["LICENSE", "include", "source"]
+include = ["LICENSE", "include", "patches", "source"]
 
 # plutovg from its port rather than the vendored copy, as with upstream's
 # USE_SYSTEM_PLUTOVG (CMakeLists.txt:9-21) and Meson's
@@ -24,12 +36,7 @@ include = ["LICENSE", "include", "source"]
 # system font loading on (its LUNASVG_DISABLE_LOAD_SYSTEM_FONTS option
 # is off by default, :75-78).  Not ported: the shared library, the
 # svg2png example, and hidden symbol visibility (CXX_VISIBILITY_PRESET;
-# Cabin drops a dependency's raw compiler flags).  Known 3.5.0 defect,
-# kept as released: the :first-of-type (:last-of-type) selector loops
-# forever on an element whose nearest preceding (following) element
-# sibling is of another type (source/svgparser.cpp:212-230), so a style
-# sheet or querySelectorAll() using them can hang on such a document;
-# upstream fixed it after the release, in 021ab7e3.
+# Cabin drops a dependency's raw compiler flags).
 [profile]
 defines = ["LUNASVG_BUILD"]
 

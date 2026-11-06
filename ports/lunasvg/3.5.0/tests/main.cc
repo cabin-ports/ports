@@ -3,12 +3,17 @@
 // lunasvg takes its fonts from the system font directories.
 #include <lunasvg.h>
 
+#include <chrono>
 #include <cmath>
+#include <condition_variable>
 #include <cstdint>
 #include <cstdio>
+#include <cstdlib>
 #include <cstring>
 #include <memory>
+#include <mutex>
 #include <string>
+#include <thread>
 #include <vector>
 
 namespace {
@@ -138,6 +143,53 @@ int main() {
         close_to(tri.h, 8));
   CHECK(pixel(gradient, 1, 14) == 0xff000000u);  // black, the default fill
   CHECK(pixel(gradient, 6, 9) == 0);             // outside the triangle
+
+  // :first-of-type and :last-of-type where the nearest preceding
+  // (following) element sibling has another type: without
+  // patches/0001 these loop forever, so a watchdog fails the test.
+  {
+    std::mutex mutex;
+    std::condition_variable finished;
+    bool done = false;
+    std::thread watchdog([&] {
+      std::unique_lock<std::mutex> lock(mutex);
+      if (!finished.wait_for(lock, std::chrono::seconds(5), [&] { return done; })) {
+        std::fputs("main.cc: :first-of-type/:last-of-type hung for 5s\n", stderr);
+        std::_Exit(1);
+      }
+    });
+
+    const char siblings[] =
+        "<svg xmlns='http://www.w3.org/2000/svg' width='30' height='10'>"
+        "<rect x='0' y='0' width='10' height='10' fill='black'/>"
+        "<path d='M10 0H20V10H10Z' fill='black'/>"
+        "<rect x='20' y='0' width='10' height='10' fill='black'/>"
+        "</svg>";
+    std::unique_ptr<lunasvg::Document> first = lunasvg::Document::loadFromData(siblings);
+    std::unique_ptr<lunasvg::Document> last = lunasvg::Document::loadFromData(siblings);
+    CHECK(first && last);
+    if (first && last) {
+      CHECK(first->querySelectorAll("rect:first-of-type").size() == 1);
+      CHECK(first->querySelectorAll("rect:last-of-type").size() == 1);
+      CHECK(first->querySelectorAll("path:first-of-type").size() == 1);
+      CHECK(first->querySelectorAll("path:last-of-type").size() == 1);
+      first->applyStyleSheet(":first-of-type { fill: #00ff00 }");
+      last->applyStyleSheet(":last-of-type { fill: #00ff00 }");
+      lunasvg::Bitmap a = first->renderToBitmap();
+      lunasvg::Bitmap b = last->renderToBitmap();
+      CHECK(pixel(a, 5, 5) == 0xff00ff00u && pixel(a, 15, 5) == 0xff00ff00u);
+      CHECK(pixel(a, 25, 5) == 0xff000000u);  // the second rect
+      CHECK(pixel(b, 5, 5) == 0xff000000u);   // the first rect
+      CHECK(pixel(b, 15, 5) == 0xff00ff00u && pixel(b, 25, 5) == 0xff00ff00u);
+    }
+
+    {
+      std::lock_guard<std::mutex> lock(mutex);
+      done = true;
+    }
+    finished.notify_one();
+    watchdog.join();
+  }
 
   // PNG through the callback, and the size of the image it holds.
   std::vector<unsigned char> png;
