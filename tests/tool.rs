@@ -618,24 +618,62 @@ fn a_selected_dry_run_still_checks_every_consumer_test_name() {
 /// arguments, before any preflight or upload.
 #[test]
 fn publish_refuses_a_selection() {
-    for (args, changed_since) in [(&["--port", "zlib"][..], None), (&[][..], Some("HEAD"))] {
+    let new = ["--receipts", "r", "--receipts-out", "r", "--main", "HEAD"];
+    for (mode, args, changed_since) in [
+        ("--publish", &["--port", "zlib"][..], None),
+        ("--publish", &[][..], Some("HEAD")),
+        ("--publish-new", &["--port", "zlib"][..], None),
+        ("--publish-new", &[][..], Some("HEAD")),
+        ("--plan-new", &["--port", "zlib"][..], None),
+    ] {
         let mut command = scrubbed(tool());
         command
             .args([
-                "--publish",
+                mode,
                 "--index-url",
                 "http://127.0.0.1:9/",
                 "--cabin",
                 "cabin",
             ])
             .args(args);
+        match mode {
+            "--publish-new" => command.args(new),
+            "--plan-new" => command.args(&new[..2]),
+            _ => &mut command,
+        };
         if let Some(base) = changed_since {
             command.env("PORT_PUBLISH_CHANGED_SINCE", base);
         }
         let output = command.output().unwrap();
         let stderr = String::from_utf8_lossy(&output.stderr);
-        assert_eq!(output.status.code(), Some(2), "{stderr}");
+        assert_eq!(output.status.code(), Some(2), "{mode} {args:?}: {stderr}");
         assert!(stderr.contains("cannot be used with"), "{stderr}");
+    }
+}
+
+/// Each new mode demands its whole contract: a missing receipts log,
+/// output log, or `main` is a usage error, and only `--publish-new`
+/// takes `--main` (the preview never uploads).
+#[test]
+fn the_new_modes_require_their_state() {
+    let base = ["--index-url", "http://127.0.0.1:9/", "--cabin", "cabin"];
+    for args in [
+        &["--publish-new", "--receipts-out", "o", "--main", "HEAD"][..],
+        &["--publish-new", "--receipts", "r", "--main", "HEAD"],
+        &["--publish-new", "--receipts", "r", "--receipts-out", "o"],
+        &["--plan-new"],
+        &["--plan-new", "--receipts", "r", "--main", "HEAD"],
+        &["--plan-new", "--receipts", "r", "--receipts-out", "o"],
+        &["--publish", "--receipts", "r"],
+        &["--dry-run", "--retry-failed"],
+    ] {
+        let output = scrubbed(tool()).args(base).args(args).output().unwrap();
+        assert_eq!(
+            output.status.code(),
+            Some(2),
+            "{args:?}: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
     }
 }
 
@@ -700,6 +738,22 @@ fn the_earliest_failing_port_is_reported_when_a_later_one_fails_first() {
     );
 }
 
+/// How the fake registry's publish API answers.
+#[derive(Default)]
+struct Behavior {
+    /// The first this many uploads answer `429` with a one-second
+    /// `Retry-After` - the shape of a drained publish token bucket.
+    limited_puts: u32,
+    /// The registry's idempotency contract instead of accepting every
+    /// upload: identical bytes for a stored version are a `200` no-op,
+    /// different ones a `409` unless `?new-revision=true`.
+    stateful: bool,
+    /// Uploads already stored, by path without the query.
+    stored: Vec<(String, Vec<u8>)>,
+    /// The upload with this 1-based number answers `500`.
+    fail_put: Option<usize>,
+}
+
 /// Fake remote registry: the sparse index serves `config.json` and a
 /// `cabin-ports/zlib` entry (404 otherwise), the publish API accepts
 /// authorized PUTs, and every request is recorded.
@@ -712,19 +766,19 @@ struct FakeRegistry {
 
 impl FakeRegistry {
     fn start() -> Self {
-        Self::start_rate_limiting_puts(0)
+        Self::start_with(Behavior::default())
     }
 
-    /// Like [`FakeRegistry::start`], but the first `limited_puts`
-    /// uploads answer `429` with a one-second `Retry-After` before
-    /// the registry starts accepting - the shape of a drained publish
-    /// token bucket.
-    fn start_rate_limiting_puts(limited_puts: u32) -> Self {
+    #[allow(clippy::too_many_lines)] // one request loop answering every route
+    fn start_with(behavior: Behavior) -> Self {
         let server = tiny_http::Server::http("127.0.0.1:0").unwrap();
         let url = format!("http://{}", server.server_addr());
         let requests: Arc<Mutex<Vec<(String, String, usize)>>> = Arc::default();
         let shutdown = Arc::new(std::sync::atomic::AtomicBool::new(false));
-        let remaining_429s = Arc::new(std::sync::atomic::AtomicU32::new(limited_puts));
+        let remaining_429s = Arc::new(std::sync::atomic::AtomicU32::new(behavior.limited_puts));
+        let mut stored: std::collections::HashMap<String, Vec<u8>> =
+            behavior.stored.into_iter().collect();
+        let mut puts = 0;
         let handle = {
             let base = url.clone();
             let requests = Arc::clone(&requests);
@@ -799,13 +853,43 @@ impl FakeRegistry {
                             respond_rate_limited(request);
                             continue;
                         }
-                        let version = path.rsplit('/').next().unwrap_or_default().to_owned();
+                        puts += 1;
+                        if behavior.fail_put == Some(puts) {
+                            respond(request, 500, "{\"errors\":[{\"detail\":\"injected\"}]}");
+                            continue;
+                        }
+                        let (route, query) = path.split_once('?').unwrap_or((&path, ""));
+                        let revision = &cabin_core::hash::hex_digest(&Sha256::digest(&body))[..16];
+                        if behavior.stateful {
+                            if stored.get(route) == Some(&body) {
+                                respond(
+                                    request,
+                                    200,
+                                    &format!(
+                                        "{{\"ok\":true,\"no_op\":true,\"revision\":\
+                                         \"{revision}\",\"verification\":\"verified\"}}"
+                                    ),
+                                );
+                                continue;
+                            }
+                            if stored.contains_key(route) && query != "new-revision=true" {
+                                respond(
+                                    request,
+                                    409,
+                                    "{\"errors\":[{\"detail\":\"the version is already \
+                                     published with different bytes\"}]}",
+                                );
+                                continue;
+                            }
+                            stored.insert(route.to_owned(), body);
+                        }
+                        let version = route.rsplit('/').next().unwrap_or_default().to_owned();
                         respond(
                             request,
                             201,
                             &format!(
-                                "{{\"ok\":true,\"version\":\"{version}\",\"verification\":\
-                                 \"pending\"}}"
+                                "{{\"ok\":true,\"version\":\"{version}\",\"revision\":\
+                                 \"{revision}\",\"verification\":\"pending\"}}"
                             ),
                         );
                     } else {
@@ -855,11 +939,14 @@ fn publish_uploads_every_package_in_dependency_order() {
     let (ports, cache) = fake_ports(&dir);
     let work = dir.child("work").to_path_buf();
     let registry = FakeRegistry::start();
+    let receipts = dir.child("receipts.jsonl");
 
     let output = scrubbed(tool())
         .arg("--publish")
         .arg("--index-url")
         .arg(&registry.url)
+        .arg("--receipts-out")
+        .arg(receipts.path())
         .arg("--ports-dir")
         .arg(&ports)
         .arg("--cache-dir")
@@ -898,12 +985,21 @@ fn publish_uploads_every_package_in_dependency_order() {
         ]
     );
     assert!(puts.iter().all(|(_, len)| *len > 500), "{puts:?}");
-    // The upload runs through `cabin publish` itself.
+    // The upload runs through `cabin publish` itself, whose report of
+    // each upload becomes its receipt.
     assert!(
-        stdout.contains("Published cabin-ports/zlib 1.3.1"),
+        stdout.contains("cabin-ports/zlib 1.3.1 published (revision "),
         "{stdout}"
     );
     assert!(stdout.contains("verification: pending"), "{stdout}");
+    assert_eq!(
+        receipt_lines(receipts.path()),
+        [
+            "cabin-ports/fastlz 0.5.0 uploaded",
+            "cabin-ports/zlib 1.3.1 uploaded",
+            "cabin-ports/libpng 1.6.50 uploaded",
+        ]
+    );
 
     // The preflight's own products, asserted here where the three-port
     // build cost is already paid.
@@ -1000,7 +1096,10 @@ fn publish_retries_a_rate_limited_package() {
     let dir = TempDir::new().unwrap();
     let (ports, cache) = zlib_only(&dir);
     let work = dir.child("work").to_path_buf();
-    let registry = FakeRegistry::start_rate_limiting_puts(1);
+    let registry = FakeRegistry::start_with(Behavior {
+        limited_puts: 1,
+        ..Behavior::default()
+    });
 
     let output = scrubbed(tool())
         .arg("--publish")
@@ -1112,6 +1211,296 @@ fn a_failed_preflight_makes_no_remote_mutation() {
         "no request may reach the registry after a failed preflight: {:?}",
         registry.requests()
     );
+}
+
+/// `<name> <version> <outcome>` per receipts-log line, after checking
+/// every line is a complete receipt for one registry.
+fn receipt_lines(log: &Path) -> Vec<String> {
+    let text = fs::read_to_string(log).unwrap_or_default();
+    let mut registries = std::collections::BTreeSet::new();
+    let lines = text
+        .lines()
+        .map(|line| {
+            let receipt: serde_json::Value = serde_json::from_str(line).unwrap();
+            registries.insert(receipt["registry"].as_str().unwrap().to_owned());
+            assert!(
+                receipt["checksum"]
+                    .as_str()
+                    .is_some_and(|c| c.starts_with("sha256:") && c.len() == 71),
+                "{line}"
+            );
+            format!(
+                "{} {} {}",
+                receipt["name"].as_str().unwrap(),
+                receipt["version"].as_str().unwrap(),
+                receipt["outcome"].as_str().unwrap()
+            )
+        })
+        .collect();
+    assert!(registries.len() <= 1, "{registries:?}");
+    lines
+}
+
+/// The `fake_ports` catalog committed in a Git repository (the
+/// `--publish-new` freshness check compares commits), returning the
+/// ports dir, the seeded cache, and the commit.
+fn committed_fake_ports(dir: &TempDir) -> (PathBuf, PathBuf, String) {
+    let (ports, cache) = fake_ports(dir);
+    git(dir.path(), &["init", "-q"]);
+    git(dir.path(), &["add", "ports"]);
+    git(dir.path(), &["commit", "-q", "-m", "ports"]);
+    let head = Command::new("git")
+        .current_dir(dir.path())
+        .args(["rev-parse", "HEAD"])
+        .output()
+        .unwrap();
+    let head = String::from_utf8(head.stdout).unwrap().trim().to_owned();
+    (ports, cache, head)
+}
+
+/// One `--plan-new` or `--publish-new` run over `ports` against
+/// `registry`, reading the receipts log `log` and, for an upload,
+/// appending to it: `(succeeded, stdout, stderr)`.
+fn new_run(
+    mode: &str,
+    dir: &TempDir,
+    (ports, cache, head): (&Path, &Path, &str),
+    registry: &FakeRegistry,
+    log: &Path,
+    extra: &[&str],
+) -> (bool, String, String) {
+    if !log.exists() {
+        fs::write(log, "").unwrap();
+    }
+    let mut command = scrubbed(tool());
+    command
+        .arg(mode)
+        .arg("--index-url")
+        .arg(&registry.url)
+        .arg("--receipts")
+        .arg(log)
+        .arg("--ports-dir")
+        .arg(ports)
+        .arg("--cache-dir")
+        .arg(cache)
+        .arg("--work-dir")
+        .arg(dir.child("work").path())
+        .arg("--cabin")
+        .arg(cabin_binary())
+        .args(extra)
+        .env("CABIN_REGISTRY_TOKEN", "cabin_testtoken1234");
+    if mode == "--publish-new" {
+        command
+            .arg("--receipts-out")
+            .arg(log)
+            .arg("--main")
+            .arg(head);
+    }
+    let output = command.output().unwrap();
+    (
+        output.status.success(),
+        String::from_utf8_lossy(&output.stdout).into_owned(),
+        String::from_utf8_lossy(&output.stderr).into_owned(),
+    )
+}
+
+fn puts(registry: &FakeRegistry) -> Vec<String> {
+    registry
+        .requests()
+        .into_iter()
+        .filter(|(method, _, _)| method == "PUT")
+        .map(|(_, path, _)| path)
+        .collect()
+}
+
+/// `--publish-new` uploads only what has no receipt, skips a held
+/// version, never asks for a packaging revision, and resumes a partial
+/// failure from its receipts, resubmitting the failed upload only on
+/// --retry-failed.  The preview makes no request at all.
+#[test]
+#[allow(clippy::too_many_lines)] // one resumable scenario, run by run
+fn publish_new_uploads_each_version_once_and_resumes_from_its_receipts() {
+    require_build_tools();
+    let dir = TempDir::new().unwrap();
+    let (ports, cache, head) = committed_fake_ports(&dir);
+    dir.child("publish-holds.txt")
+        .write_str("# held for the test\nfastlz 0.5.0 awaiting a decision\n")
+        .unwrap();
+    let snapshot = (ports.as_path(), cache.as_path(), head.as_str());
+    let log = dir.child("receipts.jsonl");
+    // The second upload, libpng's, answers 500.
+    let registry = FakeRegistry::start_with(Behavior {
+        stateful: true,
+        fail_put: Some(2),
+        ..Behavior::default()
+    });
+
+    let (ok, stdout, stderr) = new_run("--plan-new", &dir, snapshot, &registry, log.path(), &[]);
+    assert!(ok, "stdout:\n{stdout}\nstderr:\n{stderr}");
+    assert!(
+        stdout.contains("upload, in order: cabin-ports/zlib 1.3.1, cabin-ports/libpng 1.6.50"),
+        "{stdout}"
+    );
+    assert!(
+        stdout.contains("not uploading cabin-ports/fastlz 0.5.0: held: awaiting a decision"),
+        "{stdout}"
+    );
+    assert!(
+        stdout.contains("plan complete: 2 versions to upload"),
+        "{stdout}"
+    );
+    assert!(!stdout.contains("staged cabin-ports/fastlz"), "{stdout}");
+    assert!(registry.requests().is_empty(), "{:?}", registry.requests());
+    assert_eq!(receipt_lines(log.path()), Vec::<String>::new());
+
+    let (ok, stdout, stderr) = new_run("--publish-new", &dir, snapshot, &registry, log.path(), &[]);
+    assert!(!ok, "a failed upload fails the run: {stdout}");
+    assert!(
+        // `exit status: 1` on Unix, `exit code: 1` on Windows.
+        stderr.contains(": 1) at cabin-ports/libpng 1.6.50"),
+        "{stderr}"
+    );
+    assert_eq!(
+        receipt_lines(log.path()),
+        [
+            "cabin-ports/zlib 1.3.1 uploaded",
+            "cabin-ports/libpng 1.6.50 failed"
+        ]
+    );
+
+    // A requirement whose last receipt names other bytes than it stages
+    // blocks what was validated against it.
+    let receipts = fs::read_to_string(log.path()).unwrap();
+    let first = receipts.lines().next().unwrap();
+    let staged: serde_json::Value = serde_json::from_str(first).unwrap();
+    let staged = staged["checksum"].as_str().unwrap();
+    let diverged = dir.child("diverged.jsonl");
+    diverged
+        .write_str(&receipts.replace(staged, &format!("sha256:{}", "0".repeat(64))))
+        .unwrap();
+    let (ok, stdout, stderr) = new_run(
+        "--publish-new",
+        &dir,
+        snapshot,
+        &registry,
+        diverged.path(),
+        &["--retry-failed"],
+    );
+    assert!(ok, "stdout:\n{stdout}\nstderr:\n{stderr}");
+    assert!(
+        stdout.contains("cabin-ports/zlib 1.3.1 awaits a manual packaging revision"),
+        "{stdout}"
+    );
+    assert!(stdout.contains("nothing to upload"), "{stdout}");
+    assert_eq!(puts(&registry).len(), 2);
+
+    // The failed upload may have landed: only an operator's
+    // --retry-failed resubmits it.
+    let (ok, stdout, stderr) = new_run("--publish-new", &dir, snapshot, &registry, log.path(), &[]);
+    assert!(ok, "stdout:\n{stdout}\nstderr:\n{stderr}");
+    assert!(
+        stdout.contains("not uploading cabin-ports/libpng 1.6.50: its upload failed"),
+        "{stdout}"
+    );
+    assert!(stdout.contains("nothing to upload"), "{stdout}");
+    assert_eq!(puts(&registry).len(), 2);
+    let (ok, stdout, stderr) = new_run(
+        "--publish-new",
+        &dir,
+        snapshot,
+        &registry,
+        log.path(),
+        &["--retry-failed"],
+    );
+    assert!(ok, "stdout:\n{stdout}\nstderr:\n{stderr}");
+    assert_eq!(
+        puts(&registry),
+        [
+            "/api/v1/packages/cabin-ports/zlib/1.3.1",
+            "/api/v1/packages/cabin-ports/libpng/1.6.50",
+            "/api/v1/packages/cabin-ports/libpng/1.6.50",
+        ]
+    );
+    assert_eq!(
+        receipt_lines(log.path()),
+        [
+            "cabin-ports/zlib 1.3.1 uploaded",
+            "cabin-ports/libpng 1.6.50 failed",
+            "cabin-ports/libpng 1.6.50 uploaded",
+        ]
+    );
+
+    // Nothing left: no staging, no build, no request.
+    let (ok, stdout, stderr) = new_run("--publish-new", &dir, snapshot, &registry, log.path(), &[]);
+    assert!(ok, "stdout:\n{stdout}\nstderr:\n{stderr}");
+    assert!(stdout.contains("nothing to upload"), "{stdout}");
+    assert!(!stdout.contains("preflight:"), "{stdout}");
+    assert_eq!(puts(&registry).len(), 3);
+}
+
+/// A lost response or a lost receipts log resubmits identical bytes,
+/// which the registry answers as a no-op; different bytes for a
+/// version the registry has are refused, never respun.
+#[test]
+fn publish_new_resubmits_identical_bytes_and_never_respins() {
+    require_build_tools();
+    let dir = TempDir::new().unwrap();
+    let (ports, cache) = zlib_only(&dir);
+    git(dir.path(), &["init", "-q"]);
+    git(dir.path(), &["add", "ports"]);
+    git(dir.path(), &["commit", "-q", "-m", "ports"]);
+    let snapshot = (ports.as_path(), cache.as_path(), "HEAD");
+    let registry = FakeRegistry::start_with(Behavior {
+        stateful: true,
+        ..Behavior::default()
+    });
+
+    let first = dir.child("first.jsonl");
+    let (ok, stdout, stderr) = new_run(
+        "--publish-new",
+        &dir,
+        snapshot,
+        &registry,
+        first.path(),
+        &[],
+    );
+    assert!(ok, "stdout:\n{stdout}\nstderr:\n{stderr}");
+    let lost = dir.child("lost.jsonl");
+    let (ok, stdout, stderr) =
+        new_run("--publish-new", &dir, snapshot, &registry, lost.path(), &[]);
+    assert!(ok, "stdout:\n{stdout}\nstderr:\n{stderr}");
+    assert!(
+        stdout.contains("cabin-ports/zlib 1.3.1 was already published with identical bytes"),
+        "{stdout}"
+    );
+    let receipt: serde_json::Value =
+        serde_json::from_str(fs::read_to_string(lost.path()).unwrap().trim()).unwrap();
+    assert_eq!(receipt["outcome"], "uploaded");
+    assert_eq!(receipt["no_op"], true);
+
+    let other = FakeRegistry::start_with(Behavior {
+        stateful: true,
+        stored: vec![(
+            "/api/v1/packages/cabin-ports/zlib/1.3.1".to_owned(),
+            b"other bytes".to_vec(),
+        )],
+        ..Behavior::default()
+    });
+    let conflict = dir.child("conflict.jsonl");
+    let (ok, stdout, _) = new_run(
+        "--publish-new",
+        &dir,
+        snapshot,
+        &other,
+        conflict.path(),
+        &[],
+    );
+    assert!(!ok, "a 409 must fail the run: {stdout}");
+    assert_eq!(
+        receipt_lines(conflict.path()),
+        ["cabin-ports/zlib 1.3.1 failed"]
+    );
+    assert_eq!(puts(&other), ["/api/v1/packages/cabin-ports/zlib/1.3.1"]);
 }
 
 /// The clap wiring is the mode contract, so its two fail-opens are

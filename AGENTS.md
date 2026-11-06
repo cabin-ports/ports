@@ -39,7 +39,16 @@ the pinned Cabin revision, the checks, and publishing; Cabin's
 
 - In `publish.yml`, only the `publish` job and the curl-only `exchange-check` probe request
   `id-token: write`.  The `publish` job runs only the binaries the credential-free `build` job
-  produced: it compiles each port's probe but never runs a port's code.
+  produced: it compiles each port's probe but never runs a port's code, and no other job of the
+  workflow runs one either.  Only the `lock` and `record` jobs request `contents: write`; they run
+  only `git`, `gh`, and `jq` and push only the receipts branch.
+- The schedule uploads only while the `PORTS_AUTO_PUBLISH` variable is exactly `true`.  Setting
+  it, initializing or editing the receipts log, and dispatching an upload are operator decisions,
+  never part of routine work, and so are deleting the receipts log's lock and retrying a failed
+  upload.  `--publish-new` never passes `--new-revision`: a correction to an uploaded version
+  ships only through an `all` dispatch.  While the variable is `true`, a port
+  merges only with its publication decision settled or its `publish-holds.txt` line added in the
+  same pull request.
 - `ci.yml` runs on `pull_request` and `merge_group`.  Its `required` job is the only required
   check and must fail unless every job it gates succeeded; its `pin` job keeps the Cabin pin a
   single commit on `cabinpkg/cabin`'s `main`.  Its dry-run narrows only through `--changed-since`

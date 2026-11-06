@@ -13,17 +13,37 @@ use clap::{ArgGroup, Parser};
 
 /// Publishes the committed foundation ports as `cabin-ports/<name>`
 /// registry packages, each from the `cabin.toml` committed in it,
-/// verbatim.  Both modes run the local preflight - of every port,
+/// verbatim.  Every mode runs the local preflight - of every port,
 /// unless a dry-run selects fewer; --publish then uploads every package
-/// through the registry API.
+/// through the registry API, changed bytes as packaging revisions.
+/// --publish-new uploads only the versions the registry's receipts log
+/// records no upload of, never as a packaging revision, staging only
+/// those and what they require; --plan-new previews it.
 #[derive(Parser)]
 #[command(group(ArgGroup::new("mode").required(true)))]
+#[allow(clippy::struct_excessive_bools)] // the mode flags form one required group
 struct Cli {
     #[arg(long, group = "mode")]
     dry_run: bool,
     #[arg(long, group = "mode", requires = "index_url")]
     publish: bool,
-    /// Registry index URL (required with --publish).
+    /// Preview --publish-new: stage and build what it would upload,
+    /// running no consumer test, uploading nothing, and contacting no
+    /// registry.
+    #[arg(long, group = "mode", requires_all = ["index_url", "receipts"])]
+    plan_new: bool,
+    /// Upload only versions the --receipts log records no upload of,
+    /// skipping held ones and what requires them, never passing
+    /// --new-revision; each receipt is appended to --receipts-out.
+    #[arg(
+        long,
+        group = "mode",
+        requires_all = ["index_url", "receipts", "receipts_out", "main"]
+    )]
+    publish_new: bool,
+    /// Registry index URL (required with --publish, --plan-new, and
+    /// --publish-new; --plan-new uses it only to name the registry the
+    /// receipts log belongs to).
     // `conflicts_with`, not `requires = "publish"`: clap excuses a
     // missing required argument that conflicts with a present one, and
     // the `mode` group makes --publish conflict with --dry-run, so
@@ -32,11 +52,30 @@ struct Cli {
     // --publish, and --publish requires the URL back.
     #[arg(long, conflicts_with = "dry_run")]
     index_url: Option<String>,
+    /// The registry's receipts log (--plan-new, --publish-new): one JSON
+    /// receipt per line, for that registry only.
+    // `conflicts_with`, not `requires`, for the reason above.
+    #[arg(long, value_name = "FILE", conflicts_with_all = ["dry_run", "publish"])]
+    receipts: Option<PathBuf>,
+    /// Append each upload's receipt to this file (--publish,
+    /// --publish-new).
+    #[arg(long, value_name = "FILE", conflicts_with_all = ["dry_run", "plan_new"])]
+    receipts_out: Option<PathBuf>,
+    /// main's current commit (--publish-new): candidates whose ports,
+    /// requirements, or hold main changed since the checked-out commit
+    /// wait for a later run, and all do when main changed anything
+    /// outside the ports directory.
+    #[arg(long, value_name = "REV", conflicts_with_all = ["dry_run", "publish", "plan_new"])]
+    main: Option<String>,
+    /// Also retry versions whose upload failed, which may have landed:
+    /// check the registry first (--plan-new, --publish-new).
+    #[arg(long, conflicts_with_all = ["dry_run", "publish"])]
+    retry_failed: bool,
     /// Dry-run only what the change since this Git revision needs:
     /// when it only adds files under `<name>/<version>/` for new
-    /// names (and edits README.md or AGENTS.md), every version of
-    /// those names plus their dependencies; when it edits nothing but
-    /// those two files, nothing.  Any other change dry-runs every
+    /// names (and edits README.md, AGENTS.md, or publish-holds.txt),
+    /// every version of those names plus their dependencies; when it
+    /// edits nothing but those three files, nothing.  Any other change dry-runs every
     /// port.  Uncommitted and untracked files count as changes, as do
     /// ignored files in the ports directory.
     // `conflicts_with`, not `requires`, for the reason above.
@@ -44,13 +83,17 @@ struct Cli {
         long,
         value_name = "REV",
         env = "PORT_PUBLISH_CHANGED_SINCE",
-        conflicts_with = "publish"
+        conflicts_with_all = ["publish", "plan_new", "publish_new"]
     )]
     changed_since: Option<String>,
     /// Dry-run only this port (every committed version) and its
     /// dependencies; repeatable.  A focused local check: CI selects
     /// through --changed-since.
-    #[arg(long = "port", value_name = "NAME", conflicts_with_all = ["publish", "changed_since"])]
+    #[arg(
+        long = "port",
+        value_name = "NAME",
+        conflicts_with_all = ["publish", "plan_new", "publish_new", "changed_since"]
+    )]
     ports: Vec<String>,
     /// Ports directory (default: the repository's ports).
     #[arg(long)]
@@ -102,11 +145,18 @@ fn run_with_workdir_notice(options: &Options, scratch: Option<tempfile::TempDir>
 }
 
 fn options(cli: Cli) -> Result<(Options, Option<tempfile::TempDir>)> {
-    // Clap enforces the pairing: `--index-url` is present exactly when
-    // `--publish` is.
-    let mode = match cli.index_url {
-        Some(index_url) => Mode::Publish { index_url },
-        None => Mode::DryRun(match cli.changed_since {
+    // Clap enforces the pairings: `--index-url` is present exactly when
+    // an uploading or planning mode is, `--receipts` with the planning
+    // ones, and `--main` exactly with `--publish-new`.
+    let mode = match (cli.index_url, cli.receipts) {
+        (Some(index_url), Some(receipts)) => Mode::New(cabin_ports::batch::New {
+            index_url,
+            receipts,
+            retry_failed: cli.retry_failed,
+            main: cli.main,
+        }),
+        (Some(index_url), None) => Mode::Publish { index_url },
+        (None, _) => Mode::DryRun(match cli.changed_since {
             Some(base) => Selection::ChangedSince(base),
             None if cli.ports.is_empty() => Selection::All,
             None => Selection::Ports(cli.ports),
@@ -129,6 +179,7 @@ fn options(cli: Cli) -> Result<(Options, Option<tempfile::TempDir>)> {
         },
         work_dir,
         cabin: cli.cabin,
+        receipts_out: cli.receipts_out,
     };
     Ok((options, scratch))
 }

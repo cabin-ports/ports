@@ -63,6 +63,10 @@ pub struct PreflightReport {
     /// Scratch package directory per port, in publication order
     /// (parallel to the request's `conversions`).
     pub package_dirs: Vec<PathBuf>,
+    /// The staged archive's checksum per port (`sha256:<hex>`),
+    /// parallel to `package_dirs`: the bytes an upload of that
+    /// directory sends.
+    pub checksums: Vec<String>,
 }
 
 /// Run the full local preflight.  This thread materializes each
@@ -118,7 +122,7 @@ pub fn preflight(request: &PreflightRequest<'_>) -> Result<PreflightReport> {
     let (queue, inbox) = mpsc::channel::<usize>();
     let inbox = Mutex::new(inbox);
 
-    let package_dirs = thread::scope(|scope| {
+    let staged: Vec<(PathBuf, String)> = thread::scope(|scope| {
         // Owned by this closure, so leaving it - by any path - closes
         // the queue and lets the workers drain and exit.
         let queue = queue;
@@ -155,7 +159,7 @@ pub fn preflight(request: &PreflightRequest<'_>) -> Result<PreflightReport> {
             });
         }
 
-        let mut package_dirs = Vec::with_capacity(request.conversions.len());
+        let mut staged = Vec::with_capacity(request.conversions.len());
         for (index, conversion) in request.conversions.iter().enumerate() {
             if failed_before(index) {
                 break;
@@ -171,7 +175,7 @@ pub fn preflight(request: &PreflightRequest<'_>) -> Result<PreflightReport> {
                         conversion.published_version
                     );
                     lock(timings)[index] = timing;
-                    package_dirs.push(package_dir);
+                    staged.push((package_dir, report.checksum.to_string()));
                     // Cannot fail: `inbox` outlives the scope.
                     let _ = queue.send(index);
                 }
@@ -181,8 +185,9 @@ pub fn preflight(request: &PreflightRequest<'_>) -> Result<PreflightReport> {
                 }
             }
         }
-        package_dirs
+        staged
     });
+    let (package_dirs, checksums) = staged.into_iter().unzip();
 
     if let Some((_, err)) = failure.into_inner().unwrap_or_else(PoisonError::into_inner) {
         return Err(err);
@@ -195,6 +200,7 @@ pub fn preflight(request: &PreflightRequest<'_>) -> Result<PreflightReport> {
     Ok(PreflightReport {
         registry_dir,
         package_dirs,
+        checksums,
     })
 }
 

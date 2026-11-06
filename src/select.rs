@@ -22,7 +22,7 @@
 //! match it - preflights every port.
 
 use std::collections::BTreeSet;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use anyhow::{Context, Result, bail};
@@ -30,8 +30,9 @@ use anyhow::{Context, Result, bail};
 use crate::plan::PortConversion;
 
 /// Repository-root files that reach no build and no published archive.
-/// Anything else outside the ports directory is a shared input.
-const DOCUMENTATION: &[&str] = &["README.md", "AGENTS.md"];
+/// Anything else outside the ports directory is a shared input.  The
+/// hold list only gates `--publish-new`, and every mode validates it.
+pub(crate) const NOT_BUILD_INPUTS: &[&str] = &["README.md", "AGENTS.md", crate::batch::HOLDS_FILE];
 
 /// Which ports a dry-run preflights.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -102,20 +103,8 @@ enum Change {
 /// Compare `base` with the working tree of the repository holding
 /// `ports_dir`.
 fn changed_since(ports_dir: &Path, base: &str) -> Result<Change> {
-    let located = git(
-        ports_dir,
-        &["rev-parse", "--show-toplevel", "--show-prefix"],
-    )?;
-    let mut lines = located.lines();
-    let (Some(top), Some(prefix)) = (lines.next(), lines.next()) else {
-        bail!(
-            "git rev-parse printed no repository root for {}",
-            ports_dir.display()
-        );
-    };
-    // Every later command runs from the root, so each path it prints is
-    // root-relative whatever `diff.relative` says.
-    let top = Path::new(top);
+    let (top, prefix) = locate(ports_dir)?;
+    let (top, prefix) = (top.as_path(), prefix.as_str());
     let base_commit = format!("{base}^{{commit}}");
     let base = git(
         top,
@@ -164,6 +153,25 @@ fn changed_since(ports_dir: &Path, base: &str) -> Result<Change> {
     Ok(classify(prefix, &base_names, &changes))
 }
 
+/// The root of the repository holding `ports_dir`, and the ports
+/// directory's root-relative path with its trailing `/`.  Commands run
+/// from the root print root-relative paths whatever `diff.relative`
+/// says.
+pub(crate) fn locate(ports_dir: &Path) -> Result<(PathBuf, String)> {
+    let located = git(
+        ports_dir,
+        &["rev-parse", "--show-toplevel", "--show-prefix"],
+    )?;
+    let mut lines = located.lines();
+    let (Some(top), Some(prefix)) = (lines.next(), lines.next()) else {
+        bail!(
+            "git rev-parse printed no repository root for {}",
+            ports_dir.display()
+        );
+    };
+    Ok((PathBuf::from(top), prefix.to_owned()))
+}
+
 /// Classify changed `(status, root-relative path)` pairs; `prefix` is
 /// the ports directory's root-relative path with its trailing `/`, and
 /// `base_names` the entries the base has directly under it.  One path
@@ -172,7 +180,7 @@ fn classify(prefix: &str, base_names: &BTreeSet<&str>, changes: &[(&str, &str)])
     let mut names = BTreeSet::new();
     for &(status, path) in changes {
         let Some(port_path) = path.strip_prefix(prefix) else {
-            if DOCUMENTATION.contains(&path) {
+            if NOT_BUILD_INPUTS.contains(&path) {
                 continue;
             }
             return Change::Other(format!("{path} is a shared input"));
@@ -207,7 +215,6 @@ fn closure(
     conversions: Vec<PortConversion>,
     roots: &BTreeSet<String>,
 ) -> Result<Vec<PortConversion>> {
-    let mut selected = vec![false; conversions.len()];
     let mut pending = Vec::new();
     for root in roots {
         let before = pending.len();
@@ -222,22 +229,7 @@ fn closure(
             bail!("no committed port version is named `{root}`");
         }
     }
-    while let Some(index) = pending.pop() {
-        if std::mem::replace(&mut selected[index], true) {
-            continue;
-        }
-        for req in &conversions[index].declared_requirements {
-            pending.extend(
-                conversions
-                    .iter()
-                    .enumerate()
-                    .filter(|(_, c)| {
-                        c.scoped_name == req.scoped && req.req.matches(&c.published_version)
-                    })
-                    .map(|(index, _)| index),
-            );
-        }
-    }
+    let selected = closure_of(&conversions, pending);
 
     let total = conversions.len();
     let chosen: Vec<PortConversion> = conversions
@@ -267,9 +259,43 @@ fn closure(
     Ok(chosen)
 }
 
+/// Which conversions `roots` reach, themselves included: every version
+/// any reached package's declared requirements match, transitively (see
+/// [`closure`] for why optional and dev requirements count).
+pub(crate) fn closure_of(
+    conversions: &[PortConversion],
+    roots: impl IntoIterator<Item = usize>,
+) -> Vec<bool> {
+    let mut selected = vec![false; conversions.len()];
+    let mut pending: Vec<usize> = roots.into_iter().collect();
+    while let Some(index) = pending.pop() {
+        if std::mem::replace(&mut selected[index], true) {
+            continue;
+        }
+        pending.extend(requirements_of(conversions, index));
+    }
+    selected
+}
+
+/// The versions `conversions[index]`'s declared requirements match.
+pub(crate) fn requirements_of(
+    conversions: &[PortConversion],
+    index: usize,
+) -> impl Iterator<Item = usize> + '_ {
+    conversions[index]
+        .declared_requirements
+        .iter()
+        .flat_map(move |req| {
+            conversions.iter().enumerate().filter(move |(_, c)| {
+                c.scoped_name == req.scoped && req.req.matches(&c.published_version)
+            })
+        })
+        .map(|(index, _)| index)
+}
+
 /// Run `git` in `dir` and return its stdout, failing on a non-zero
 /// exit or a non-UTF-8 path (no port path can be one).
-fn git(dir: &Path, args: &[&str]) -> Result<String> {
+pub(crate) fn git(dir: &Path, args: &[&str]) -> Result<String> {
     let output = Command::new("git")
         .current_dir(dir)
         .args(args)
@@ -319,6 +345,11 @@ mod tests {
             (
                 vec![("M", "README.md"), ("D", "AGENTS.md")],
                 new_packages(&[]),
+            ),
+            // The hold list reaches no build; every mode validates it.
+            (
+                vec![fmt, ("M", "publish-holds.txt")],
+                new_packages(&["fmt"]),
             ),
             (vec![], new_packages(&[])),
         ] {

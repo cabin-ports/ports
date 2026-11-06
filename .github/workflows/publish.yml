@@ -1,29 +1,233 @@
 name: Publish
 
 # Publishes ports/ as `cabin-ports/*` registry packages (README.md,
-# "Publishing"). Only a manual dispatch from main publishes.
+# "Publishing"). Only main publishes: a manual dispatch, or the
+# schedule once the PORTS_AUTO_PUBLISH repository variable is exactly
+# `true`.
 on:
   workflow_dispatch:
     inputs:
+      mode:
+        description: "all: every port, changed bytes as packaging revisions. new: only versions without an upload receipt, never a revision. plan: preview new, uploading nothing"
+        type: choice
+        options:
+          - all
+          - new
+          - plan
+        default: all
+      retry-failed:
+        description: "new and plan: also retry versions whose upload failed and may have landed; check the registry's admin listings first"
+        type: boolean
+        default: false
       exchange-check:
         description: "Exchange and immediately revoke a trusted-publishing token; publish nothing"
         type: boolean
         default: false
+  # Automatic first publication (README.md, "Automatic publishing"),
+  # off the hour, when GitHub's scheduler is least loaded.
+  schedule:
+    - cron: "17,47 * * * *"
 
 permissions:
   contents: read
 
+# Explicit bash for pipefail: a failed read must fail its step, never
+# feed an empty value downstream.
+defaults:
+  run:
+    shell: bash
+
 env:
   CARGO_TERM_COLOR: always
   RUSTFLAGS: "-D warnings"
+  REGISTRY: https://registry.cabinpkg.com
+  # The registry's receipts log is `receipts.jsonl` on this branch.
+  RECEIPTS_BRANCH: publish-receipts
 
 jobs:
+  # Decides what the run does before anything is built, and takes the
+  # receipts log's lock for a run that may upload. A scheduled run
+  # starts no job at all unless the variable is `true`; expressions
+  # compare case-insensitively, so the step insists on the exact bytes.
+  gate:
+    if: >-
+      github.repository == 'cabin-ports/ports' && github.ref == 'refs/heads/main' &&
+      !inputs.exchange-check && (github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'schedule' && vars.PORTS_AUTO_PUBLISH == 'true'))
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: read
+    outputs:
+      mode: ${{ steps.mode.outputs.mode }}
+      work: ${{ steps.gate.outputs.work }}
+      receipts: ${{ steps.gate.outputs.receipts }}
+    steps:
+      - id: mode
+        name: Resolve the mode
+        env:
+          ENABLED: ${{ vars.PORTS_AUTO_PUBLISH }}
+          INPUT: ${{ inputs.mode }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == schedule ]]; then
+            if [[ "$ENABLED" != true ]]; then
+              echo "::notice::PORTS_AUTO_PUBLISH is not exactly 'true'; automatic publishing is off"
+              echo "mode=off" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            mode=new
+          else
+            mode="$INPUT"
+          fi
+          case "$mode" in
+            all | new | plan) echo "mode=$mode" >> "$GITHUB_OUTPUT" ;;
+            *) echo "::error::unknown mode '$mode'"; exit 1 ;;
+          esac
+
+      - if: steps.mode.outputs.mode == 'new' || steps.mode.outputs.mode == 'plan'
+        uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+
+      # An unattended upload needs the merge queue's evidence for exactly
+      # this commit: main points at the merge group commit CI tested.
+      - name: Require this commit's passing CI
+        if: steps.mode.outputs.mode == 'new'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          passed="$(gh api "repos/$GITHUB_REPOSITORY/commits/$GITHUB_SHA/check-runs?check_name=required" \
+            --jq '[.check_runs[] | select(.conclusion == "success")] | length')"
+          if [[ "$passed" == 0 ]]; then
+            echo "::error::$GITHUB_SHA has no successful 'required' check run; uploading nothing"
+            exit 1
+          fi
+
+      # Reads the receipts log, and spares a `new` or `plan` run with
+      # nothing to upload from building the tools: every version has an
+      # upload receipt, a failed one (unless retrying), or a hold.
+      # port-publish alone decides what uploads. A missing or unreadable
+      # log fails the run; it never reads as "nothing uploaded".
+      - id: gate
+        name: Look for versions without an upload receipt
+        if: steps.mode.outputs.mode != 'off'
+        env:
+          MODE: ${{ steps.mode.outputs.mode }}
+          RETRY_FAILED: ${{ inputs.retry-failed }}
+          LC_ALL: C
+        run: |
+          state="$RUNNER_TEMP/state"
+          git init -q "$state"
+          git -C "$state" remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          found=0
+          git -C "$state" ls-remote --exit-code origin "refs/heads/$RECEIPTS_BRANCH" > /dev/null || found=$?
+          if [[ "$found" == 2 && "$MODE" == all ]]; then
+            echo "::notice::no $RECEIPTS_BRANCH branch: this run's receipts are not recorded"
+            echo "work=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          elif [[ "$found" != 0 ]]; then
+            echo "::error::cannot read the $RECEIPTS_BRANCH branch; is the receipts log initialized (README.md, \"Automatic publishing\")?"
+            exit 1
+          fi
+          git -C "$state" fetch -q --no-tags --depth=1 origin "refs/heads/$RECEIPTS_BRANCH"
+          git -C "$state" checkout -q FETCH_HEAD
+          echo "receipts=true" >> "$GITHUB_OUTPUT"
+          if [[ "$MODE" != all ]]; then
+            accounted="$RUNNER_TEMP/accounted"
+            jq -r --arg r "$REGISTRY" --arg retry "$RETRY_FAILED" \
+              'select(.registry == $r and (.outcome == "uploaded" or $retry != "true")) | "\(.name) \(.version)"' \
+              "$state/receipts.jsonl" > "$accounted"
+            if [[ -f publish-holds.txt ]]; then
+              awk '!/^[[:space:]]*(#|$)/ { print "cabin-ports/" $1 " " $2 }' publish-holds.txt >> "$accounted"
+            fi
+            sort -u -o "$accounted" "$accounted"
+            find ports -mindepth 3 -maxdepth 3 -name cabin.toml |
+              awk -F/ '{ print "cabin-ports/" $2 " " $3 }' | sort -u > "$RUNNER_TEMP/catalog"
+            pending="$(comm -23 "$RUNNER_TEMP/catalog" "$accounted")"
+            if [[ -z "$pending" ]]; then
+              echo "every version is uploaded, failed, or held; nothing to do"
+              exit 0
+            fi
+            printf 'without an upload receipt:\n%s\n' "$pending"
+          fi
+          echo "work=true" >> "$GITHUB_OUTPUT"
+
+  # Every run that may upload, with a receipts log to add to, holds its
+  # lock: a `lock` file naming the run and attempt, committed on the
+  # receipts branch on top of the tip this job read, so of two runs
+  # racing for it one push fails. A rerun attempt never inherits it. Only `record` releases it, once the run's receipts are
+  # in the log, so no run reads the log while another may still add to
+  # it; a run that cannot account for its uploads keeps it, which stops
+  # both modes until an operator reconciles the log (README.md,
+  # "Automatic publishing"). Git alone, so it may push that branch.
+  lock:
+    needs: gate
+    if: needs.gate.outputs.work == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    outputs:
+      go: ${{ steps.lock.outputs.go }}
+      locked: ${{ steps.lock.outputs.locked }}
+    steps:
+      - id: lock
+        name: Take the receipts log's lock
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODE: ${{ needs.gate.outputs.mode }}
+          RECEIPTS: ${{ needs.gate.outputs.receipts }}
+        run: |
+          if [[ "$MODE" == plan || "$RECEIPTS" != true ]]; then
+            echo "go=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # A later scheduled run resumes a skipped one; a dispatch must
+          # say that it did nothing.
+          skip() {
+            if [[ "$GITHUB_EVENT_NAME" == schedule ]]; then
+              echo "::notice::$1; this run uploads nothing and a later one resumes"
+              exit 0
+            fi
+            echo "::error::$1; this run uploads nothing, dispatch again later"
+            exit 1
+          }
+          git init -q "$RUNNER_TEMP/state"
+          cd "$RUNNER_TEMP/state"
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          echo "::add-mask::$auth"
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          git -c http.extraheader="$auth" fetch -q --no-tags --depth=1 origin "refs/heads/$RECEIPTS_BRANCH"
+          git checkout -q FETCH_HEAD
+          if [[ -e lock ]]; then
+            read -r holder attempt < lock
+            url="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$holder"
+            # An earlier attempt of this run kept it: never inherited.
+            if [[ "$holder" != "$GITHUB_RUN_ID" ]]; then
+              status="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$holder" --jq .status)"
+              if [[ "$status" != completed ]]; then
+                skip "$url is publishing"
+              fi
+            fi
+            echo "::error::$url (attempt $attempt) ended without recording all its uploads; reconcile the receipts log, then delete its lock (README.md, \"Automatic publishing\")"
+            exit 1
+          fi
+          echo "$GITHUB_RUN_ID $GITHUB_RUN_ATTEMPT" > lock
+          git add lock
+          git -c user.name='github-actions[bot]' \
+            -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+            commit -q -m "Lock for $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          if ! git -c http.extraheader="$auth" push -q origin "HEAD:refs/heads/$RECEIPTS_BRANCH"; then
+            skip "the $RECEIPTS_BRANCH branch moved"
+          fi
+          echo "locked=true" >> "$GITHUB_OUTPUT"
+          echo "go=true" >> "$GITHUB_OUTPUT"
+
   # Builds both binaries in a job without the OIDC permission, so no
-  # Rust build script runs beside the publish job's token. The
-  # repository guard keeps a fork from building for a publish the
-  # registry's trusted-publishing binding would refuse anyway.
+  # Rust build script runs beside the publish job's token.
   build:
-    if: github.repository == 'cabin-ports/ports' && github.ref == 'refs/heads/main' && !inputs.exchange-check
+    needs: lock
+    if: needs.lock.outputs.go == 'true'
     runs-on: ubuntu-latest
     outputs:
       cabin-rev: ${{ steps.rev.outputs.cabin-rev }}
@@ -59,12 +263,44 @@ jobs:
           path: ${{ runner.temp }}/tools/bin/
           retention-days: 1
 
+  # The `plan` preview: stages and builds what `new` would upload,
+  # without any credential. Like every job of this workflow, it runs no
+  # port code: the merge queue ran the consumer tests.
+  preview:
+    needs: [gate, build]
+    if: needs.gate.outputs.mode == 'plan'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: publish-tools
+          path: ${{ runner.temp }}/tools
+      - run: chmod +x "$RUNNER_TEMP/tools/cabin" "$RUNNER_TEMP/tools/port-publish"
+      - name: Preview the upload of new versions
+        env:
+          RETRY_FAILED: ${{ inputs.retry-failed }}
+        run: |
+          flags=()
+          if [[ "$RETRY_FAILED" == true ]]; then flags+=(--retry-failed); fi
+          git fetch --no-tags --depth=1 origin "refs/heads/$RECEIPTS_BRANCH"
+          git show FETCH_HEAD:receipts.jsonl > "$RUNNER_TEMP/receipts.jsonl"
+          "$RUNNER_TEMP/tools/port-publish" --plan-new "${flags[@]}" \
+            --index-url "$REGISTRY" \
+            --receipts "$RUNNER_TEMP/receipts.jsonl" \
+            --ports-dir ports \
+            --cabin "$RUNNER_TEMP/tools/cabin" \
+            --cache-dir "$RUNNER_TEMP/cabin-cache"
+
   # The pinned client can send metadata only a Worker built from a
   # Cabin commit containing it accepts, and cabinpkg/cabin deploys the
   # registry independently: wait for such a deploy with Cabin's own
   # guard, from the pinned commit.
   await-deploy:
-    needs: build
+    needs: [gate, build]
+    if: needs.gate.outputs.mode == 'all' || needs.gate.outputs.mode == 'new'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -86,16 +322,19 @@ jobs:
         run: cargo workflow-await-deploy --repository cabinpkg/cabin --sha "$CABIN_REV"
 
   publish:
-    needs: [build, await-deploy]
+    needs: [gate, lock, build, await-deploy]
     runs-on: ubuntu-latest
     permissions:
       contents: read
       # `cabin publish` exchanges the run's OIDC token for its
       # short-lived registry token; no stored secret exists.
       id-token: write
-    # Serialize this repository's publish runs, queueing rather than
-    # cancelling pending ones. The registry's trusted-publishing binding
-    # admits exactly one repository, so no other repository publishes.
+    outputs:
+      attempt: ${{ steps.attempt.outputs.attempt }}
+    # Serializes every upload of this repository - manual or
+    # scheduled, either mode - queueing rather than cancelling pending
+    # ones. The registry's trusted-publishing binding admits exactly one
+    # repository, so no other repository publishes.
     concurrency:
       group: publish
       queue: max
@@ -119,7 +358,38 @@ jobs:
         with:
           name: publish-tools
           path: ${{ runner.temp }}/tools
-      - run: chmod +x "$RUNNER_TEMP/tools/cabin" "$RUNNER_TEMP/tools/port-publish"
+      # One receipts file per attempt, existing even when nothing
+      # uploads: `record` releases the lock only on this job's success
+      # in the lock's attempt and on finding that attempt's file.
+      - id: attempt
+        run: |
+          chmod +x "$RUNNER_TEMP/tools/cabin" "$RUNNER_TEMP/tools/port-publish"
+          : > "$RUNNER_TEMP/receipts-$GITHUB_RUN_ATTEMPT.jsonl"
+          echo "attempt=$GITHUB_RUN_ATTEMPT" >> "$GITHUB_OUTPUT"
+
+      # A rerun of this job reuses the lock job's outputs, so the lock
+      # itself must name this very attempt: a rerun never uploads under
+      # an earlier attempt's lock, which may already be released. Only
+      # an `all` run that found no receipts log, and still finds none,
+      # uploads without it.
+      - name: Check that this attempt holds the receipts log's lock
+        env:
+          RECEIPTS: ${{ needs.gate.outputs.receipts }}
+        run: |
+          found=0
+          git ls-remote --exit-code origin "refs/heads/$RECEIPTS_BRANCH" > /dev/null || found=$?
+          if [[ "$found" == 2 && "$RECEIPTS" != true ]]; then
+            exit 0
+          elif [[ "$found" != 0 ]]; then
+            echo "::error::cannot read the $RECEIPTS_BRANCH branch; uploading nothing"
+            exit 1
+          fi
+          git fetch --no-tags --depth=1 origin \
+            "+refs/heads/$RECEIPTS_BRANCH:refs/remotes/origin/$RECEIPTS_BRANCH"
+          if [[ "$(git show "origin/$RECEIPTS_BRANCH:lock" 2> /dev/null)" != "$GITHUB_RUN_ID $GITHUB_RUN_ATTEMPT" ]]; then
+            echo "::error::this attempt does not hold the $RECEIPTS_BRANCH lock; uploading nothing (README.md, \"Automatic publishing\")"
+            exit 1
+          fi
 
       # Checked immediately before publishing: a stale run would
       # publish an intermediate state of a version as an otherwise
@@ -129,6 +399,7 @@ jobs:
       # supersedes what it published. Explicit bash for pipefail: a
       # failed ls-remote must fail the run, not read as superseded.
       - name: Skip when superseded by a newer main commit
+        if: needs.gate.outputs.mode == 'all'
         id: freshness
         shell: bash
         run: |
@@ -144,13 +415,121 @@ jobs:
       # Builds every probe but never runs one: running upstream code
       # next to the OIDC token would hand it the token.
       - name: Publish to registry.cabinpkg.com
-        if: steps.freshness.outputs.superseded == 'false'
+        if: needs.gate.outputs.mode == 'all' && steps.freshness.outputs.superseded == 'false'
         run: |
           "$RUNNER_TEMP/tools/port-publish" --publish \
-            --index-url https://registry.cabinpkg.com \
+            --index-url "$REGISTRY" \
+            --receipts-out "$RUNNER_TEMP/receipts-$GITHUB_RUN_ATTEMPT.jsonl" \
             --ports-dir ports \
             --cabin "$RUNNER_TEMP/tools/cabin" \
             --cache-dir "$RUNNER_TEMP/cabin-cache"
+
+      # Under the lock, so the log holds every earlier run's receipts; a
+      # scheduled run rechecks the switch (turning it off stops queued
+      # runs here). A moved main does not stop the run: --publish-new
+      # defers only what main changed. Like `all`, it builds every probe
+      # it stages but runs none.
+      - name: Publish new versions to registry.cabinpkg.com
+        if: needs.gate.outputs.mode == 'new'
+        env:
+          ENABLED: ${{ vars.PORTS_AUTO_PUBLISH }}
+          RETRY_FAILED: ${{ inputs.retry-failed }}
+        run: |
+          if [[ "$GITHUB_EVENT_NAME" == schedule && "$ENABLED" != true ]]; then
+            echo "::notice::PORTS_AUTO_PUBLISH is no longer exactly 'true'; uploading nothing"
+            exit 0
+          fi
+          flags=()
+          if [[ "$RETRY_FAILED" == true ]]; then flags+=(--retry-failed); fi
+          git fetch --no-tags --depth=1 origin "+refs/heads/main:refs/remotes/origin/main"
+          git show "origin/$RECEIPTS_BRANCH:receipts.jsonl" > "$RUNNER_TEMP/receipts.jsonl"
+          "$RUNNER_TEMP/tools/port-publish" --publish-new "${flags[@]}" \
+            --index-url "$REGISTRY" \
+            --receipts "$RUNNER_TEMP/receipts.jsonl" \
+            --receipts-out "$RUNNER_TEMP/receipts-$GITHUB_RUN_ATTEMPT.jsonl" \
+            --main origin/main \
+            --ports-dir ports \
+            --cabin "$RUNNER_TEMP/tools/cabin" \
+            --cache-dir "$RUNNER_TEMP/cabin-cache"
+
+      # Whatever happened above: the receipts of uploads before a
+      # failure or a cancellation must reach the log too.
+      - if: always()
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: receipts-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/receipts-${{ github.run_attempt }}.jsonl
+          if-no-files-found: error
+          retention-days: 30
+
+  # Appends the receipts of the attempt holding the lock to the log and
+  # releases the lock. No OIDC and no port code - only git and jq - so
+  # it may push the receipts branch. It records only while this run
+  # holds the lock, so rerunning an old run's job cannot replay its
+  # receipts, and releases the lock only when the publish job of the
+  # lock's attempt succeeded and left its receipts, or when the lock's
+  # attempt skipped it. After a failure or a cancellation an upload may
+  # have landed without its receipt, so the lock stays until an operator
+  # reconciles the log (README.md, "Automatic publishing"). After a
+  # failed push, rerun this job alone; the artifacts last 30 days.
+  record:
+    needs: [lock, build, publish]
+    if: always() && needs.lock.outputs.locked == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - id: download
+        continue-on-error: true
+        uses: actions/download-artifact@v8.0.2
+        with:
+          pattern: receipts-*
+          path: ${{ runner.temp }}/receipts
+          merge-multiple: true
+      - name: Record the receipts and release the lock
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PUBLISH: ${{ needs.publish.result }}
+          PUBLISHED_IN: ${{ needs.publish.outputs.attempt }}
+          DOWNLOAD: ${{ steps.download.outcome }}
+          CABIN_REV: ${{ needs.build.outputs.cabin-rev }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          git init -q "$RUNNER_TEMP/state"
+          cd "$RUNNER_TEMP/state"
+          auth="AUTHORIZATION: basic $(printf 'x-access-token:%s' "$GH_TOKEN" | base64 -w0)"
+          echo "::add-mask::$auth"
+          git remote add origin "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY"
+          git -c http.extraheader="$auth" fetch -q --no-tags --depth=1 origin "refs/heads/$RECEIPTS_BRANCH"
+          git checkout -q FETCH_HEAD
+          holder='' attempt=''
+          if [[ -e lock ]]; then read -r holder attempt < lock; fi
+          if [[ "$holder" != "$GITHUB_RUN_ID" ]]; then
+            echo "::error::this run does not hold the $RECEIPTS_BRANCH lock; recording nothing"
+            exit 1
+          fi
+          receipts="$RUNNER_TEMP/receipts/receipts-$attempt.jsonl"
+          if [[ -f "$receipts" ]]; then
+            jq -c --arg source "$GITHUB_SHA" --arg cabin "$CABIN_REV" --arg run "$RUN_URL" \
+              '. + {source: $source, cabin: $cabin, run: $run}' "$receipts" >> receipts.jsonl
+          fi
+          released=false
+          if [[ ("$PUBLISH" == success && "$PUBLISHED_IN" == "$attempt" && "$DOWNLOAD" == success && -f "$receipts") ||
+                ("$PUBLISH" == skipped && "$GITHUB_RUN_ATTEMPT" == "$attempt") ]]; then
+            git rm -q lock
+            released=true
+          fi
+          git add receipts.jsonl
+          if ! git diff --cached --quiet; then
+            git -c user.name='github-actions[bot]' \
+              -c user.email='41898282+github-actions[bot]@users.noreply.github.com' \
+              commit -q -m "Record the receipts of $RUN_URL (attempt $attempt)"
+            git -c http.extraheader="$auth" push -q origin "HEAD:refs/heads/$RECEIPTS_BRANCH"
+          fi
+          if [[ "$released" != true ]]; then
+            echo "::error::the publish job under the lock of attempt $attempt ended '$PUBLISH', or its receipts are missing, so an upload may lack its receipt: the lock stays until the log is reconciled (README.md, \"Automatic publishing\")"
+            exit 1
+          fi
 
   exchange-check:
     # Dispatch-only probe of the registered binding end to end (config

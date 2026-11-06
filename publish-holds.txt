@@ -1,0 +1,18 @@
+# Port versions the automatic publisher must not upload (README.md,
+# "Automatic publishing"), one per line: <name> <version> <reason>.
+# A hold binds `--publish-new` only - the scheduled run and the `new`
+# dispatch - and versions that require a held version wait with it.
+# Remove a line through a pull request once its decision is made.
+minizip 1.3.2 licence text added by a patch; awaiting a publication decision
+doctest 2.5.3 licence text added by a patch; awaiting a publication decision
+xsimd 14.3.0 licence text added by a patch; awaiting a publication decision
+simdjson 5.1.1 notice patch and upstream attribution questions awaiting a publication decision
+flatbuffers 25.12.19 upstream tag choice awaiting a publication decision
+span-lite 0.11.0 non-upstream <stddef.h> patch awaiting a publication decision
+optional-lite 3.6.0 non-upstream <new> and <algorithm> include patch awaiting a publication decision
+pcre2 10.49.0 two-component upstream version mapping not yet confirmed
+pugixml 1.16.0 two-component upstream version mapping not yet confirmed
+libdeflate 1.26.0 two-component upstream version mapping not yet confirmed
+pcre 8.45.0 two-component upstream version mapping not yet confirmed
+libsquish 1.15.0 two-component upstream version mapping not yet confirmed
+freetype 2.15.0 Linux-only HarfBuzz run-time loading awaiting a publication decision
