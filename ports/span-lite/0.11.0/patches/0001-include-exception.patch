@@ -1,0 +1,13 @@
+--- a/include/nonstd/span.hpp
++++ b/include/nonstd/span.hpp
+@@ -494,6 +494,10 @@
+ 
+ #if ! span_CONFIG( NO_EXCEPTIONS )
+ # include <stdexcept>
++#endif
++
++#if ! span_CONFIG( CONTRACT_VIOLATION_THROWS_V )
++# include <exception> // std::terminate
+ #endif
+ 
+ // Contract violation
