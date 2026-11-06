@@ -17,7 +17,7 @@ use semver::Version;
 const REGISTRY_SCOPE: &str = "cabin-ports";
 
 /// One committed port, ready to materialize and publish.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct PortConversion {
     /// `ports/<name>/<version>/` source directory.
     pub committed_dir: PathBuf,
@@ -114,7 +114,7 @@ pub struct DeclaredRequirement {
 /// # Errors
 /// Returns an error when the directory name is not a valid package
 /// name (`[a-z0-9][a-z0-9_-]*`).
-fn scoped_package_name(port_name: &str) -> Result<PackageName> {
+pub(crate) fn scoped_package_name(port_name: &str) -> Result<PackageName> {
     Ok(PackageName::new(format!("{REGISTRY_SCOPE}/{port_name}"))?)
 }
 

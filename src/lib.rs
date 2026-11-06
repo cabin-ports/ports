@@ -3,10 +3,9 @@
 //! the `cabin-ports` scope.  Every committed port is a package
 //! directory, published verbatim apart from its consumer `tests/`.
 //!
-//! The tool has exactly two modes, both of which run the local
-//! preflight (materialize every port and publish it into a temporary
-//! file registry in publication order, building every port against
-//! the generated packages as soon as it is staged):
+//! Every mode runs the local preflight (materialize ports and publish
+//! them into a temporary file registry in publication order, building
+//! every port against the generated packages as soon as it is staged):
 //!
 //! - `--dry-run` stops after the preflight, which a [`select::Selection`]
 //!   may narrow to the ports a change needs;
@@ -15,7 +14,11 @@
 //!   `cabin publish` invocation each, relying on the registry's
 //!   byte-identical idempotency instead of skipping versions (the
 //!   public index hides pending versions, so it cannot be used to
-//!   decide what is already published).
+//!   decide what is already published), and respinning changed bytes
+//!   as packaging revisions;
+//! - `--publish-new` uploads only the versions a receipts log records
+//!   no upload of, never as a packaging revision, and `--plan-new`
+//!   previews it ([`batch`]).
 //!
 //! The committed tree is an input only: every port materializes into
 //! a scratch directory, never in place.
@@ -24,6 +27,7 @@ use std::path::PathBuf;
 
 use anyhow::{Context, Result, bail};
 
+pub mod batch;
 pub mod plan;
 pub mod preflight;
 pub mod remote;
@@ -41,6 +45,8 @@ pub enum Mode {
         /// `config.json`).
         index_url: String,
     },
+    /// Plan, or upload, the first publication of new versions only.
+    New(batch::New),
 }
 
 /// Resolved tool invocation.
@@ -57,6 +63,8 @@ pub struct Options {
     pub work_dir: PathBuf,
     /// `cabin` binary for the preflight builds and the uploads.
     pub cabin: PathBuf,
+    /// Receipts log each upload appends to.
+    pub receipts_out: Option<PathBuf>,
 }
 
 /// Run the tool.
@@ -91,12 +99,15 @@ pub fn run(options: &Options) -> Result<()> {
             .join(", ")
     );
 
-    // Cheap and catalog-wide whatever a dry-run selects.
+    // Cheap and catalog-wide whatever a dry-run selects; every mode
+    // validates the hold list, so none merges that --publish-new refuses.
     preflight::ensure_consumer_tests_used(&conversions)?;
+    let holds = batch::load_holds(&options.ports_dir, &conversions)?;
     let total = conversions.len();
     let conversions = match &options.mode {
         Mode::DryRun(selection) => select::select(conversions, selection, &options.ports_dir)?,
         Mode::Publish { .. } => conversions,
+        Mode::New(new) => return batch::run(new, &conversions, &holds, options),
     };
 
     let report = preflight::preflight(&preflight::PreflightRequest {
@@ -118,11 +129,26 @@ pub fn run(options: &Options) -> Result<()> {
             );
         }
         Mode::Publish { index_url } => {
-            let package_dirs: Vec<&std::path::Path> =
-                report.package_dirs.iter().map(PathBuf::as_path).collect();
-            remote::publish_all(&package_dirs, index_url, &options.cabin)?;
+            let uploads: Vec<remote::Upload<'_>> = conversions
+                .iter()
+                .zip(report.package_dirs.iter().zip(&report.checksums))
+                .map(|(conversion, (package_dir, checksum))| remote::Upload {
+                    package_dir,
+                    name: conversion.scoped_name.as_str(),
+                    version: conversion.published_version.to_string(),
+                    checksum,
+                })
+                .collect();
+            remote::publish_all(
+                &uploads,
+                index_url,
+                &options.cabin,
+                true,
+                options.receipts_out.as_deref(),
+            )?;
             println!("published {} packages", conversions.len());
         }
+        Mode::New(_) => unreachable!("returned above"),
     }
     Ok(())
 }
