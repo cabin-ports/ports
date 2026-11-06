@@ -1,0 +1,36 @@
+[package.upstream]
+# The release asset on GitHub, byte-identical to the tarball on
+# downloads.xiph.org/releases/ogg (its SHA256SUMS lists this checksum).
+url = "https://github.com/xiph/ogg/releases/download/v1.3.6/libogg-1.3.6.tar.gz"
+checksum = "sha256:83e6704730683d004d20e21b8f7f55dcb3383cdf84c0daedf30bde175f774638"
+format = "tar.gz"
+strip-prefix = "libogg-1.3.6"
+# Both upstream builds generate include/ogg/config_types.h from
+# config_types.h.in (CMakeLists.txt:52-67, configure.ac:78-143); the
+# patch adds the file both produce wherever <inttypes.h>, <stdint.h>,
+# <sys/types.h> and the exact-width integer types exist, as on every
+# platform Cabin targets.  os_types.h includes it only outside Windows
+# and Apple (os_types.h:152-154), which typedef the types themselves.
+patches = ["patches/0001-add-config-types-h.patch"]
+
+[package]
+name = "cabin-ports/libogg"
+version = "1.3.6"
+include = ["COPYING", "include", "patches", "src"]
+c-standard = "c11"
+# ogg.h's integer types are the C99 exact-width ones (os_types.h).
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# The static library upstream's CMake build produces (CMakeLists.txt:75-95),
+# with no defines.  Not ported: the shared library and its win32/ogg.def,
+# the macOS framework, the _V_SELFTEST test programs, configure's
+# --disable-crc (meant for fuzzing), and the flags configure adds for GCC
+# (configure.ac:45-68: -O2 or -O4, -ffast-math, -fsigned-char, warnings,
+# and -fno-common on Darwin), which CMake does not set; the library does
+# no floating-point or plain-char arithmetic.
+[target.ogg]
+type = "library"
+sources = ["src/bitwise.c", "src/framing.c"]
+include-dirs = ["include"]
+links = "ogg"
