@@ -1,0 +1,185 @@
+[package.upstream]
+url = "https://github.com/oatpp/oatpp/archive/refs/tags/1.3.1.tar.gz"
+checksum = "sha256:9dd31f005ab0b3e8895a478d750d7dbce99e42750a147a3c42a9daecbddedd64"
+format = "tar.gz"
+strip-prefix = "oatpp-1.3.1"
+
+# Upstream's 1.3.1 tag leaves OATPP_VERSION at "1.3.0"
+# (src/oatpp/core/base/Environment.hpp:42), so the macro and the default
+# Server / User-Agent headers built from it read 1.3.0; this port keeps
+# the tag as released.
+[package]
+name = "cabin-ports/oatpp"
+version = "1.3.1"
+include = ["LICENSE", "src/oatpp", "src/oatpp-test"]
+
+# The two static libraries upstream's CMake builds and installs by
+# default (src/CMakeLists.txt; OATPP_LINK_TEST_LIBRARY is ON), with
+# upstream's default options (CMakeLists.txt:17-50): object counters and
+# every log level on, thread_local and CPU affinity enabled.  Like upstream,
+# this lists every IOEventWorker backend; IOEventWorker.hpp enables one
+# per platform and the others compile empty.  Not reproduced: the
+# warning and GCC-only hardening flags cmake/compiler-flags.cmake adds to
+# CMAKE_CXX_FLAGS; the /permissive- MSVC builds pass
+# (src/CMakeLists.txt:305-307), which Cabin cannot pass, so MSVC compiles
+# oatpp in its default permissive mode; and upstream's default dynamic
+# MSVC runtime (/MD, OATPP_MSVC_LINK_STATIC_RUNTIME OFF,
+# cmake/msvc-runtime.cmake): Cabin passes no runtime flag, so cl uses its
+# static default (/MT).
+[target.oatpp]
+type = "library"
+sources = [
+  "src/oatpp/algorithm/CRC.cpp",
+  "src/oatpp/core/IODefinitions.cpp",
+  "src/oatpp/core/async/ConditionVariable.cpp",
+  "src/oatpp/core/async/Coroutine.cpp",
+  "src/oatpp/core/async/CoroutineWaitList.cpp",
+  "src/oatpp/core/async/Error.cpp",
+  "src/oatpp/core/async/Executor.cpp",
+  "src/oatpp/core/async/Lock.cpp",
+  "src/oatpp/core/async/Processor.cpp",
+  "src/oatpp/core/async/worker/IOEventWorker_common.cpp",
+  "src/oatpp/core/async/worker/IOEventWorker_epoll.cpp",
+  "src/oatpp/core/async/worker/IOEventWorker_kqueue.cpp",
+  "src/oatpp/core/async/worker/IOEventWorker_stub.cpp",
+  "src/oatpp/core/async/worker/IOWorker.cpp",
+  "src/oatpp/core/async/worker/TimerWorker.cpp",
+  "src/oatpp/core/async/worker/Worker.cpp",
+  "src/oatpp/core/base/CommandLineArguments.cpp",
+  "src/oatpp/core/base/Countable.cpp",
+  "src/oatpp/core/base/Environment.cpp",
+  "src/oatpp/core/concurrency/SpinLock.cpp",
+  "src/oatpp/core/concurrency/Thread.cpp",
+  "src/oatpp/core/data/Bundle.cpp",
+  "src/oatpp/core/data/buffer/FIFOBuffer.cpp",
+  "src/oatpp/core/data/buffer/IOBuffer.cpp",
+  "src/oatpp/core/data/buffer/Processor.cpp",
+  "src/oatpp/core/data/mapping/ObjectMapper.cpp",
+  "src/oatpp/core/data/mapping/TypeResolver.cpp",
+  "src/oatpp/core/data/mapping/type/Any.cpp",
+  "src/oatpp/core/data/mapping/type/Enum.cpp",
+  "src/oatpp/core/data/mapping/type/List.cpp",
+  "src/oatpp/core/data/mapping/type/Object.cpp",
+  "src/oatpp/core/data/mapping/type/PairList.cpp",
+  "src/oatpp/core/data/mapping/type/Primitive.cpp",
+  "src/oatpp/core/data/mapping/type/Type.cpp",
+  "src/oatpp/core/data/mapping/type/UnorderedMap.cpp",
+  "src/oatpp/core/data/mapping/type/UnorderedSet.cpp",
+  "src/oatpp/core/data/mapping/type/Vector.cpp",
+  "src/oatpp/core/data/resource/File.cpp",
+  "src/oatpp/core/data/resource/InMemoryData.cpp",
+  "src/oatpp/core/data/resource/TemporaryFile.cpp",
+  "src/oatpp/core/data/share/MemoryLabel.cpp",
+  "src/oatpp/core/data/share/StringTemplate.cpp",
+  "src/oatpp/core/data/stream/BufferStream.cpp",
+  "src/oatpp/core/data/stream/FIFOStream.cpp",
+  "src/oatpp/core/data/stream/FileStream.cpp",
+  "src/oatpp/core/data/stream/Stream.cpp",
+  "src/oatpp/core/data/stream/StreamBufferedProxy.cpp",
+  "src/oatpp/core/parser/Caret.cpp",
+  "src/oatpp/core/parser/ParsingError.cpp",
+  "src/oatpp/core/utils/Binary.cpp",
+  "src/oatpp/core/utils/ConversionUtils.cpp",
+  "src/oatpp/core/utils/Random.cpp",
+  "src/oatpp/core/utils/String.cpp",
+  "src/oatpp/encoding/Base64.cpp",
+  "src/oatpp/encoding/Hex.cpp",
+  "src/oatpp/encoding/Unicode.cpp",
+  "src/oatpp/encoding/Url.cpp",
+  "src/oatpp/network/Address.cpp",
+  "src/oatpp/network/ConnectionPool.cpp",
+  "src/oatpp/network/ConnectionProvider.cpp",
+  "src/oatpp/network/ConnectionProviderSwitch.cpp",
+  "src/oatpp/network/Server.cpp",
+  "src/oatpp/network/Url.cpp",
+  "src/oatpp/network/monitor/ConnectionInactivityChecker.cpp",
+  "src/oatpp/network/monitor/ConnectionMaxAgeChecker.cpp",
+  "src/oatpp/network/monitor/ConnectionMonitor.cpp",
+  "src/oatpp/network/tcp/Connection.cpp",
+  "src/oatpp/network/tcp/client/ConnectionProvider.cpp",
+  "src/oatpp/network/tcp/server/ConnectionProvider.cpp",
+  "src/oatpp/network/virtual_/Interface.cpp",
+  "src/oatpp/network/virtual_/Pipe.cpp",
+  "src/oatpp/network/virtual_/Socket.cpp",
+  "src/oatpp/network/virtual_/client/ConnectionProvider.cpp",
+  "src/oatpp/network/virtual_/server/ConnectionProvider.cpp",
+  "src/oatpp/orm/DbClient.cpp",
+  "src/oatpp/orm/Executor.cpp",
+  "src/oatpp/orm/QueryResult.cpp",
+  "src/oatpp/orm/SchemaMigration.cpp",
+  "src/oatpp/orm/Transaction.cpp",
+  "src/oatpp/parser/json/Beautifier.cpp",
+  "src/oatpp/parser/json/Utils.cpp",
+  "src/oatpp/parser/json/mapping/Deserializer.cpp",
+  "src/oatpp/parser/json/mapping/ObjectMapper.cpp",
+  "src/oatpp/parser/json/mapping/Serializer.cpp",
+  "src/oatpp/web/client/ApiClient.cpp",
+  "src/oatpp/web/client/HttpRequestExecutor.cpp",
+  "src/oatpp/web/client/RequestExecutor.cpp",
+  "src/oatpp/web/client/RetryPolicy.cpp",
+  "src/oatpp/web/mime/multipart/FileProvider.cpp",
+  "src/oatpp/web/mime/multipart/InMemoryDataProvider.cpp",
+  "src/oatpp/web/mime/multipart/Multipart.cpp",
+  "src/oatpp/web/mime/multipart/Part.cpp",
+  "src/oatpp/web/mime/multipart/PartList.cpp",
+  "src/oatpp/web/mime/multipart/PartReader.cpp",
+  "src/oatpp/web/mime/multipart/Reader.cpp",
+  "src/oatpp/web/mime/multipart/StatefulParser.cpp",
+  "src/oatpp/web/mime/multipart/TemporaryFileProvider.cpp",
+  "src/oatpp/web/protocol/CommunicationError.cpp",
+  "src/oatpp/web/protocol/http/Http.cpp",
+  "src/oatpp/web/protocol/http/encoding/Chunked.cpp",
+  "src/oatpp/web/protocol/http/encoding/ProviderCollection.cpp",
+  "src/oatpp/web/protocol/http/incoming/BodyDecoder.cpp",
+  "src/oatpp/web/protocol/http/incoming/Request.cpp",
+  "src/oatpp/web/protocol/http/incoming/RequestHeadersReader.cpp",
+  "src/oatpp/web/protocol/http/incoming/Response.cpp",
+  "src/oatpp/web/protocol/http/incoming/ResponseHeadersReader.cpp",
+  "src/oatpp/web/protocol/http/incoming/SimpleBodyDecoder.cpp",
+  "src/oatpp/web/protocol/http/outgoing/Body.cpp",
+  "src/oatpp/web/protocol/http/outgoing/BufferBody.cpp",
+  "src/oatpp/web/protocol/http/outgoing/MultipartBody.cpp",
+  "src/oatpp/web/protocol/http/outgoing/Request.cpp",
+  "src/oatpp/web/protocol/http/outgoing/Response.cpp",
+  "src/oatpp/web/protocol/http/outgoing/ResponseFactory.cpp",
+  "src/oatpp/web/protocol/http/outgoing/StreamingBody.cpp",
+  "src/oatpp/web/protocol/http/utils/CommunicationUtils.cpp",
+  "src/oatpp/web/server/AsyncHttpConnectionHandler.cpp",
+  "src/oatpp/web/server/HttpConnectionHandler.cpp",
+  "src/oatpp/web/server/HttpProcessor.cpp",
+  "src/oatpp/web/server/HttpRouter.cpp",
+  "src/oatpp/web/server/api/ApiController.cpp",
+  "src/oatpp/web/server/api/Endpoint.cpp",
+  "src/oatpp/web/server/handler/AuthorizationHandler.cpp",
+  "src/oatpp/web/server/handler/ErrorHandler.cpp",
+  "src/oatpp/web/server/interceptor/AllowCorsGlobal.cpp",
+  "src/oatpp/web/url/mapping/Pattern.cpp",
+]
+include-dirs = ["src"]
+# Upstream requires C++11 (CXX_STANDARD 11 without extensions); C++14 is
+# the oldest standard Cabin can request from MSVC.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "oatpp"
+
+# oatpp-test: the UnitTest and ClientServerTestRunner helpers that oatpp's
+# own tests and its add-on modules' tests build on.
+[target.oatpp-test]
+type = "library"
+sources = ["src/oatpp-test/Checker.cpp", "src/oatpp-test/UnitTest.cpp"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "oatpp-test"
+deps = [{ name = "oatpp", public = true }]
+
+# Upstream links Threads publicly, Winsock on Windows, and libatomic on
+# every other system except Apple and FreeBSD (src/CMakeLists.txt:309-330);
+# this port links libatomic on Linux only.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["atomic"]
+
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32", "wsock32"]
