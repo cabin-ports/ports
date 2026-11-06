@@ -1,0 +1,32 @@
+[package.upstream]
+url = "https://github.com/xtensor-stack/xsimd/archive/refs/tags/14.3.0.tar.gz"
+checksum = "sha256:b3d50e7a73fbf4642ceef30131c93414901d69eee41c2a5302db650b03e2c792"
+format = "tar.gz"
+strip-prefix = "xsimd-14.3.0"
+# Four headers embed NumScale code "Distributed under the Boost Software
+# License, Version 1.0" (for example
+# include/xsimd/arch/common/xsimd_common_details.hpp:323-328), and the
+# archive ships no copy of that license, which it requires source
+# copies to include.  The patch adds the license text, verbatim from
+# https://www.boost.org/LICENSE_1_0.txt, as LICENSE_1_0.txt.
+patches = ["patches/0001-add-boost-software-license-for-numscale-code.patch"]
+
+[package]
+name = "cabin-ports/xsimd"
+version = "14.3.0"
+# include/xsimd is what upstream's CMake installs; LICENSE is xsimd's
+# BSD-3-Clause license, and LICENSE_1_0.txt comes from the patch above.
+include = ["LICENSE", "LICENSE_1_0.txt", "include", "patches"]
+
+# Upstream's header-only xsimd::xsimd target.  The instruction sets come
+# from the consumer's compiler target and flags: xsimd::default_arch is
+# SSE2 for a baseline x86-64 target, such as GCC's usual default or MSVC
+# x64, and NEON64 on arm64, and wider sets such as AVX2 need -mavx2 or
+# /arch:AVX2 on the consumer's compiles.  Not ported: the
+# ENABLE_XTL_COMPLEX option (off by default), which needs the xtl
+# library; the tests, benchmarks and examples.
+[target.xsimd]
+type = "header-only"
+include-dirs = ["include"]
+# target_compile_features(xsimd INTERFACE cxx_std_14).
+interface-cxx-standard = "c++14"
