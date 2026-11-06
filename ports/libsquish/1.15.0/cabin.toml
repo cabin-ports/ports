@@ -1,0 +1,90 @@
+[package.upstream]
+# The 1.15 release tarball, the bytes ConanCenter pins (SHA-256) and
+# vcpkg pins (SHA-512).  Its files sit at the archive root.
+url = "https://sourceforge.net/projects/libsquish/files/libsquish-1.15.tgz"
+checksum = "sha256:628796eeba608866183a61d080d46967c9dda6723bc0a3ec52324c85d2147269"
+format = "tar.gz"
+
+# Upstream installs only squish.h (Makefile:24, CMakeLists.txt:116); the
+# archive root also holds the private headers (config.h, maths.h, ...).
+# The public header moves to include/ so the root stays off consumers'
+# include path; the sources' "squish.h" includes find it there.
+[[package.upstream.copy]]
+from = "squish.h"
+to = "include/squish.h"
+
+# Upstream calls this release 1.15 (Makefile:3).
+[package]
+name = "cabin-ports/libsquish"
+version = "1.15.0"
+include = [
+  "LICENSE.txt",
+  "include",
+  "alpha.cpp",
+  "alpha.h",
+  "clusterfit.cpp",
+  "clusterfit.h",
+  "colourblock.cpp",
+  "colourblock.h",
+  "colourfit.cpp",
+  "colourfit.h",
+  "colourset.cpp",
+  "colourset.h",
+  "config.h",
+  "maths.cpp",
+  "maths.h",
+  "rangefit.cpp",
+  "rangefit.h",
+  "simd.h",
+  "simd_float.h",
+  "simd_sse.h",
+  "simd_ve.h",
+  "singlecolourfit.cpp",
+  "singlecolourfit.h",
+  "singlecolourlookup.inl",
+  "squish.cpp",
+]
+
+# The static library libsquish.a the GNU Makefile builds and installs by
+# default (Makefile:6, :16, :25): its nine sources with OpenMP, SSE2 and
+# AltiVec off (config:4-13), the portable scalar code path config.h
+# selects by default.  vcpkg's and ConanCenter's default options also turn
+# SSE2 and OpenMP off.  Not ported: the OpenMP parallelism that is 1.15's
+# change (ChangeLog.txt:1-3), which runs the CompressImage and
+# DecompressImage row loops in parallel without changing their output and
+# which CMake's BUILD_SQUISH_WITH_OPENMP default (when OpenMP is found)
+# and the qmake build (libSquish.pro:31) turn on; CMake's
+# BUILD_SQUISH_WITH_SSE2 default, which adds -DSQUISH_USE_SSE=2 -msse2 off
+# Windows (CMakeLists.txt:16-18, :25-39); AltiVec; the shared library; the
+# Xcode i386/ppc build; libsquish.pc; and the extra/ programs.  Not
+# reproduced: the position-independent code the Makefile compiles every
+# object with (Makefile:15; Cabin drops a dependency's raw compiler
+# flags), so the archive is not built for linking into a shared object,
+# and the warning flag -Wall (config:16).  Upstream defects kept as
+# released: FixFlags drops kSourceBGRA (squish.cpp:38-57), so the image
+# functions read and write RGBA regardless; Decompress, DecompressImage
+# and ComputeMSE decode kBc4 and kBc5 blocks as DXT colour blocks
+# (:126-145), and ComputeMSE steps through BC4 data 16 bytes per block
+# (:353), though a BC4 block, and each half of a BC5 block, is a DXT5
+# alpha block; and the range and cluster fits find a block's colour axis
+# by power iteration from grey (maths.cpp:235-255), which can fail when
+# the colours vary only orthogonally to grey, as red against blue does.
+[target.squish]
+type = "library"
+sources = [
+  "alpha.cpp",
+  "clusterfit.cpp",
+  "colourblock.cpp",
+  "colourfit.cpp",
+  "colourset.cpp",
+  "maths.cpp",
+  "rangefit.cpp",
+  "singlecolourfit.cpp",
+  "squish.cpp",
+]
+include-dirs = ["include"]
+# Upstream requests no standard (config:16) and the code is C++98; C++14
+# is the oldest standard Cabin can request from MSVC.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++98"
+links = "squish"
