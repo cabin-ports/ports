@@ -1,0 +1,61 @@
+[package.upstream]
+url = "https://github.com/sammycage/lunasvg/archive/refs/tags/v3.5.0.tar.gz"
+checksum = "sha256:1abf1472ee6c4d19797916e8cc3c2e4b628e0d81178ffac60bdb0d457e32c690"
+format = "tar.gz"
+strip-prefix = "lunasvg-3.5.0"
+
+[package]
+name = "cabin-ports/lunasvg"
+version = "3.5.0"
+# plutovg/ is upstream's vendored plutovg 1.3.1, not used here.
+include = ["LICENSE", "include", "source"]
+
+# plutovg from its port rather than the vendored copy, as with upstream's
+# USE_SYSTEM_PLUTOVG (CMakeLists.txt:9-21) and Meson's
+# dependency('plutovg', version: '>=1.3.0') (meson.build:8-12).
+# lunasvg.h only forward-declares plutovg's types, so the edge is
+# private, as upstream links it (CMakeLists.txt:52); consumers still
+# link plutovg transitively.
+[dependencies]
+"cabin-ports/plutovg" = "^1.3"
+
+# The static library form of upstream's CMake and Meson builds, from the
+# ten source/ files (CMakeLists.txt:23-34), with include/ public and
+# system font loading on (its LUNASVG_DISABLE_LOAD_SYSTEM_FONTS option
+# is off by default, :75-78).  Not ported: the shared library, the
+# svg2png example, and hidden symbol visibility (CXX_VISIBILITY_PRESET;
+# Cabin drops a dependency's raw compiler flags).  Known 3.5.0 defect,
+# kept as released: the :first-of-type (:last-of-type) selector loops
+# forever on an element whose nearest preceding (following) element
+# sibling is of another type (source/svgparser.cpp:212-230), so a style
+# sheet or querySelectorAll() using them can hang on such a document;
+# upstream fixed it after the release, in 021ab7e3.
+[profile]
+defines = ["LUNASVG_BUILD"]
+
+# LUNASVG_BUILD_STATIC is public, as in CMakeLists.txt:71-73 and Meson's
+# dependency: without it lunasvg.h:31-49 declares the API dllimport for a
+# Windows consumer, which then fails to link against this static library.
+[target.lunasvg]
+type = "library"
+sources = [
+  "source/graphics.cpp",
+  "source/lunasvg.cpp",
+  "source/svgelement.cpp",
+  "source/svggeometryelement.cpp",
+  "source/svglayoutstate.cpp",
+  "source/svgpaintelement.cpp",
+  "source/svgparser.cpp",
+  "source/svgproperty.cpp",
+  "source/svgrenderstate.cpp",
+  "source/svgtextelement.cpp",
+]
+include-dirs = ["include"]
+defines = ["LUNASVG_BUILD_STATIC"]
+interface-defines = ["LUNASVG_BUILD_STATIC"]
+# Upstream builds with C++17 (CMakeLists.txt:56-57, meson.build:5);
+# lunasvg.h itself needs C++11.
+cxx-standard = "c++17"
+interface-cxx-standard = "c++11"
+links = "lunasvg"
+deps = ["cabin-ports/plutovg"]
