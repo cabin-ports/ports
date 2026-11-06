@@ -1,0 +1,36 @@
+[package.upstream]
+url = "https://github.com/nodejs/llhttp/archive/refs/tags/release/v9.3.1.tar.gz"
+checksum = "sha256:c14a93f287d3dbd6580d08af968294f8bcc61e1e1e3c34301549d00f3cf09365"
+format = "tar.gz"
+strip-prefix = "llhttp-release-v9.3.1"
+
+[package]
+name = "cabin-ports/llhttp"
+version = "9.3.1"
+include = ["LICENSE", "include", "src"]
+# Upstream's CMake builds C99; C11 is the oldest standard Cabin can lower
+# for MSVC.  llhttp.h includes <stdint.h>, which C++ has from C++11.
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# The release/v9.3.1 tag holds the C that llparse generated from the
+# TypeScript sources on v9.3.1, built here as the static library
+# upstream's CMake offers (OUTPUT_NAME llhttp), with no definitions.  Not
+# ported: the shared library, upstream's default.  The SSE4.2, NEON and
+# WASM SIMD paths in src/llhttp.c stay gated on the compiler's own
+# target macros.  On Windows llhttp.h declares the API
+# __declspec(dllexport) whether the library is static or shared, so a
+# static consumer's binary exports it too; that is upstream behavior.
+# Likewise upstream: llhttp.h declares llhttp_alloc and llhttp_free on
+# every target, but src/api.c defines them only for WASM, so native
+# consumers provide the llhttp_t storage themselves.
+[target.llhttp]
+type = "library"
+sources = [
+  "src/api.c",
+  "src/http.c",
+  "src/llhttp.c",
+]
+include-dirs = ["include"]
+links = "llhttp"
