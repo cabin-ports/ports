@@ -1,0 +1,32 @@
+[package.upstream]
+url = "https://github.com/nonstd-lite/optional-lite/archive/refs/tags/v3.6.0.tar.gz"
+checksum = "sha256:2be17fcfc764809612282c3e728cabc42afe703b9dc333cc87c48d882fcfc2c2"
+format = "tar.gz"
+strip-prefix = "optional-lite-3.6.0"
+# Where nonstd::optional is optional lite's own, the header uses placement
+# new (optional.hpp:780, 792, 804, 810) and std::swap (:1363) without
+# including <new>, or <algorithm>, where C++98 declares std::swap.  At
+# C++98 only <stdexcept> (:427), skipped with exceptions off, can bring
+# them in, and with LLVM 23's libc++ it does not: the header does not
+# compile at C++98 there, nor, with exceptions off (-fno-exceptions or
+# optional_CONFIG_NO_EXCEPTIONS), with Apple's libc++ or libstdc++.  The
+# patch includes both; upstream's master still lacks them.
+patches = ["patches/0001-include-new-and-algorithm.patch"]
+
+[package]
+name = "cabin-ports/optional-lite"
+version = "3.6.0"
+include = ["LICENSE.txt", "include", "patches"]
+
+# Header-only, as upstream's CMake interface target nonstd::optional-lite
+# (CMakeLists.txt:66-76): include/ is the include root, so consumers write
+# `#include <nonstd/optional.hpp>`.  The header supports C++98 and later
+# and takes the standard from _MSVC_LANG on cl.exe (optional.hpp:69-75).
+# Where C++17's <optional> exists, nonstd::optional is std::optional
+# unless a consumer defines
+# optional_CONFIG_SELECT_OPTIONAL=optional_OPTIONAL_NONSTD (:43-45,
+# 91-101); every optional_CONFIG_* option keeps upstream's default.
+[target.optional-lite]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++98"

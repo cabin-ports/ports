@@ -1,0 +1,14 @@
+--- a/include/nonstd/optional.hpp
++++ b/include/nonstd/optional.hpp
+@@ -218,7 +218,11 @@
+ #else // optional_USES_STD_OPTIONAL
+ 
+ #include <cassert>
++#include <new>
+ #include <utility>
++#if ! optional_CPP11_OR_GREATER
++# include <algorithm> // std::swap before C++11
++#endif
+ 
+ // optional-lite alignment configuration:
+ 
