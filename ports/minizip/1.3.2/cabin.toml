@@ -1,0 +1,131 @@
+[package.upstream]
+url = "https://github.com/madler/zlib/releases/download/v1.3.2/zlib-1.3.2.tar.gz"
+checksum = "sha256:bb329a0a2cd0274d05519d61c667c062e06990d72e125ee2dfa8de64f0119d16"
+format = "tar.gz"
+strip-prefix = "zlib-1.3.2"
+# skipset.h embeds PCG32 code it marks "Licensed under Apache License
+# 2.0" (contrib/minizip/skipset.h:74-75), and the release ships no copy
+# of that license, which Apache-2.0 section 4(a) requires redistributors
+# to give.  The patch adds the license text, verbatim from
+# https://www.apache.org/licenses/LICENSE-2.0.txt, beside
+# LICENSE.Info-Zip.
+patches = ["patches/0001-add-apache-2.0-license-for-pcg.patch"]
+
+# The headers upstream's CMake build installs (LIBMINIZIP_HDRS,
+# contrib/minizip/CMakeLists.txt:112), under include/minizip as its
+# autotools build (Makefile.am:27) and vcpkg place them, so consumers
+# write <minizip/unzip.h>.  contrib/minizip itself is not exported: its
+# crypt.h would shadow the C library's <crypt.h>, and it holds the
+# private skipset.h.
+[[package.upstream.copy]]
+from = "contrib/minizip/crypt.h"
+to = "include/minizip/crypt.h"
+
+[[package.upstream.copy]]
+from = "contrib/minizip/ints.h"
+to = "include/minizip/ints.h"
+
+[[package.upstream.copy]]
+from = "contrib/minizip/ioapi.h"
+to = "include/minizip/ioapi.h"
+
+[[package.upstream.copy]]
+from = "contrib/minizip/mztools.h"
+to = "include/minizip/mztools.h"
+
+[[package.upstream.copy]]
+from = "contrib/minizip/unzip.h"
+to = "include/minizip/unzip.h"
+
+[[package.upstream.copy]]
+from = "contrib/minizip/zip.h"
+to = "include/minizip/zip.h"
+
+[package]
+name = "cabin-ports/minizip"
+version = "1.3.2"
+# minizip is under the zlib license (contrib/minizip/MiniZip64_info.txt);
+# crypt.h derives from Info-ZIP code (contrib/minizip/LICENSE.Info-Zip),
+# and skipset.h's random-number generator is Apache-2.0 PCG32 code
+# (contrib/minizip/LICENSE.Apache-2.0, added by the patch above).
+include = [
+  "LICENSE",
+  "contrib/minizip/LICENSE.Apache-2.0",
+  "contrib/minizip/LICENSE.Info-Zip",
+  "contrib/minizip/MiniZip64_info.txt",
+  "contrib/minizip/crypt.h",
+  "contrib/minizip/ints.h",
+  "contrib/minizip/ioapi.c",
+  "contrib/minizip/ioapi.h",
+  "contrib/minizip/mztools.c",
+  "contrib/minizip/mztools.h",
+  "contrib/minizip/skipset.h",
+  "contrib/minizip/unzip.c",
+  "contrib/minizip/unzip.h",
+  "contrib/minizip/zip.c",
+  "contrib/minizip/zip.h",
+  "include",
+  "patches",
+]
+
+[dependencies]
+"cabin-ports/zlib" = "^1.3"
+
+# libminizip as upstream's CMake build compiles it (LIBMINIZIP_SRCS,
+# CMakeLists.txt:110, 180-204), with traditional PKWARE encryption on
+# (NOCRYPT and NOUNCRYPT unset).  The public headers include zlib.h.
+# Not ported: the minizip and miniunzip programs; iowin32.c, which
+# CMake compiles only into those programs (:114-129); and bzip2 entries
+# (MINIZIP_ENABLE_BZIP2, off by default, :39): Cabin cannot gate a
+# target's dependency on a feature, and turning it on for everyone would
+# make zip.h include bzlib.h, and with it <windows.h> on Windows.  CMake
+# refuses 32-bit targets other than MinGW (:10-13); only 64-bit ones are
+# tested here.  zlib 1.3.1's z_off_t is a 32-bit long on Windows (its
+# zconf.h:512-514), so unztell() returns one there; unztell64() does not
+# depend on it.
+[target.minizip]
+type = "library"
+sources = [
+  "contrib/minizip/ioapi.c",
+  "contrib/minizip/mztools.c",
+  "contrib/minizip/unzip.c",
+  "contrib/minizip/zip.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+# ints.h falls back to `long long` where `long` has 32 bits (Windows),
+# a C99 and C++11 type; the C floor is cabin-ports/zlib 1.3.1's, whose
+# zlib.h the headers include and which accepts C consumers at c11.
+interface-c-standard = "c11"
+interface-cxx-standard = "c++11"
+links = "minizip"
+deps = [{ name = "cabin-ports/zlib", public = true }]
+
+# The definitions CMake's configure checks yield (CMakeLists.txt:72-89,
+# 143-150, 187-194) on each platform.  CMake makes _LARGEFILE64_SOURCE
+# and USE_FILE32API public; Cabin's interface-defines cannot vary by
+# platform, so they stay private here.  No minizip declaration depends on
+# either.  ioapi.h defines _LARGEFILE64_SOURCE itself off Windows, Apple
+# and Android (ioapi.h:24-42), but only after zip.h and unzip.h have
+# included zlib.h, and USE_FILE32API only aliases fopen64, ftello64 and
+# fseeko64 to their 32-bit names (ioapi.h:48-51) for ioapi.c.  So, unlike
+# with CMake's package, Linux consumers do not get zlib.h's *64
+# declarations (gzopen64, gzseek64, ...) or glibc's off64_t from it, and
+# macOS consumers do not get the three aliases.  HAVE_HIDDEN is read by no
+# minizip source.
+[target.'cfg(family = "unix")'.profile]
+defines = ["HAVE_UNISTD_H=1"]
+
+# glibc has fopen64 and off64_t.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_LARGEFILE64_SOURCE=1"]
+
+# Neither macOS nor the MSVC runtime has fopen64, so CMake selects the
+# 32-bit stdio names; on macOS ioapi.c uses fopen/ftello/fseeko anyway,
+# and on Windows this caps the stdio file functions at 2 GiB offsets, as
+# in upstream's build.
+[target.'cfg(os = "macos")'.profile]
+defines = ["USE_FILE32API=1"]
+
+[target.'cfg(env = "msvc")'.profile]
+defines = ["USE_FILE32API=1", "_CRT_SECURE_NO_WARNINGS"]
