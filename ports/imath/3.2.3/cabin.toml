@@ -1,0 +1,60 @@
+[package.upstream]
+url = "https://github.com/AcademySoftwareFoundation/Imath/releases/download/v3.2.3/Imath-3.2.3.tar.gz"
+checksum = "sha256:72f498e7073890a2a1b870e453908a07c9725f9d1384527043a38578bfb4ef31"
+format = "tar.gz"
+strip-prefix = "Imath-3.2.3"
+# Every Imath header includes ImathConfig.h, which upstream's CMake
+# build generates from config/ImathConfig.h.in (config/CMakeLists.txt:13)
+# and installs beside the other headers in include/Imath.  The patch adds
+# it to src/Imath exactly as a default configure writes it: the half
+# lookup table on, no large stack, the Imath_3_2 internal namespace
+# under Imath, noexcept on, and API visibility tagging on
+# (config/ImathSetup.cmake:12-36, config/CMakeLists.txt:4-11).  Its
+# IMATH_VERSION_HEX uses C++ functional casts, so C code reads the
+# version from IMATH_VERSION_MAJOR, _MINOR, _PATCH or
+# IMATH_VERSION_STRING; upstream's C interface is half.h's float
+# conversions (src/ImathTest/half_c_main.c:6-9).
+patches = ["patches/0001-add-the-generated-imathconfig-h.patch"]
+
+[package]
+name = "cabin-ports/imath"
+version = "3.2.3"
+include = ["LICENSE.md", "patches", "src/Imath"]
+
+# The Imath library as upstream's CMake build compiles it statically
+# (src/Imath/CMakeLists.txt:10-17, 80-84): its five sources, with
+# half.cpp's half-to-float table (toFloat.h) behind half.h's
+# half-to-float conversion.  Consumers include <Imath/ImathVec.h> or, as
+# Imath.pc's Cflags and CMake's ImathConfig target allow, <ImathVec.h>.
+# Not ported: the shared library CMake builds by default
+# (config/ImathSetup.cmake:65) and its IMATH_DLL/IMATH_EXPORTS, the
+# Python bindings, and the tests.  Not reproduced: position-independent
+# code and the hidden visibility presets
+# (src/Imath/CMakeLists.txt:97-108; Cabin drops a dependency's raw
+# compiler flags), so the archive is not built for linking into a shared
+# object.
+[target.imath]
+type = "library"
+sources = [
+  "src/Imath/half.cpp",
+  "src/Imath/ImathColorAlgo.cpp",
+  "src/Imath/ImathFun.cpp",
+  "src/Imath/ImathMatrixAlgo.cpp",
+  "src/Imath/ImathRandom.cpp",
+]
+include-dirs = ["src", "src/Imath"]
+# Upstream compiles with C++14 (IMATH_CXX_STANDARD) and declares C++11
+# for consumers (src/Imath/CMakeLists.txt:92-95), but ImathFrame.h's
+# firstFrame, nextFrame and lastFrame are constexpr templates with C++14
+# bodies (ImathFrame.h:80, 145, 209), which C++11 accepts at most as an
+# extension.  half.h's C interface uses // comments, <stdint.h> and
+# static inline functions.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++14"
+interface-c-standard = "c99"
+links = "Imath"
+
+# Upstream links libm publicly wherever the toolchain has one
+# (src/Imath/CMakeLists.txt:127-131), macOS included.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
