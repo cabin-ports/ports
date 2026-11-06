@@ -1,0 +1,67 @@
+[package.upstream]
+# The Apache source release; its published .sha512 and vcpkg's frozen
+# port pin the same archive.
+url = "https://github.com/apache/arrow-nanoarrow/releases/download/apache-arrow-nanoarrow-0.9.0/apache-arrow-nanoarrow-0.9.0.tar.gz"
+checksum = "sha256:801200a0e95e869d5c4bdeb5b535dba58551482bb782b7dc8bd599c8b6e8cacf"
+format = "tar.gz"
+strip-prefix = "apache-arrow-nanoarrow-0.9.0"
+# The patch adds src/nanoarrow/nanoarrow_config.h, the public header
+# CMake configures from nanoarrow_config.h.in (CMakeLists.txt:138) with
+# version 0.9.0 and NANOARROW_NAMESPACE left unset, its default
+# (:33, :79-83).
+patches = ["patches/0001-add-the-generated-nanoarrow-config-h.patch"]
+
+[package]
+name = "cabin-ports/nanoarrow"
+version = "0.9.0"
+# The core library's sources and the headers upstream installs
+# (CMakeLists.txt:150-172), at the paths they include each other by, so
+# that src/ is the include root and the unit tests beside them stay out.
+include = [
+  "LICENSE.txt",
+  "NOTICE.txt",
+  "patches",
+  "src/nanoarrow/common/array.c",
+  "src/nanoarrow/common/array_stream.c",
+  "src/nanoarrow/common/inline_array.h",
+  "src/nanoarrow/common/inline_buffer.h",
+  "src/nanoarrow/common/inline_types.h",
+  "src/nanoarrow/common/schema.c",
+  "src/nanoarrow/common/utils.c",
+  "src/nanoarrow/hpp/array_stream.hpp",
+  "src/nanoarrow/hpp/buffer.hpp",
+  "src/nanoarrow/hpp/exception.hpp",
+  "src/nanoarrow/hpp/operators.hpp",
+  "src/nanoarrow/hpp/unique.hpp",
+  "src/nanoarrow/hpp/view.hpp",
+  "src/nanoarrow/nanoarrow.h",
+  "src/nanoarrow/nanoarrow.hpp",
+  "src/nanoarrow/nanoarrow_config.h",
+]
+# Upstream builds the core as C99 (CMakeLists.txt:67-77); C11 is the
+# oldest standard Cabin can lower for MSVC.  nanoarrow.h is C99, and the
+# C++ helpers in nanoarrow.hpp need C++11 (noexcept, override).
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# The nanoarrow library of upstream's default build, which enables none
+# of its extensions.  Not ported: the IPC (with flatcc, ZSTD and LZ4),
+# device (Metal, CUDA) and testing (nlohmann_json) extensions, the
+# utility applications, bundling, the NANOARROW_NAMESPACE symbol prefix,
+# NANOARROW_DEBUG, which upstream defines publicly only in Debug builds
+# (:510-511), and shared libraries (NANOARROW_BUILD_DLL, :513-518).
+[target.nanoarrow]
+type = "library"
+sources = [
+  "src/nanoarrow/common/array.c",
+  "src/nanoarrow/common/array_stream.c",
+  "src/nanoarrow/common/schema.c",
+  "src/nanoarrow/common/utils.c",
+]
+include-dirs = ["src"]
+# C11 would otherwise switch shared buffers to stdatomic reference counts
+# on GCC and Clang (src/nanoarrow/common/utils.c:28-46), which upstream's
+# C99 build never does; this is the override utils.c offers (:26-27).
+defines = ["NANOARROW_USE_STDATOMIC=0"]
+links = "nanoarrow"
