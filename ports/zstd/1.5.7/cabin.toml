@@ -1,0 +1,108 @@
+[package.upstream]
+url = "https://github.com/facebook/zstd/releases/download/v1.5.7/zstd-1.5.7.tar.gz"
+checksum = "sha256:eb33e51f49a15e023950cd7825ca74a4a2b43db8354825ac24fc1b7ee09e6fa3"
+format = "tar.gz"
+strip-prefix = "zstd-1.5.7"
+
+# The public headers upstream installs (lib/*.h).  lib/ itself also
+# holds module.modulemap and the private source tree, so it is not the
+# consumer include root.
+[[package.upstream.copy]]
+from = "lib/zstd.h"
+to = "include/zstd.h"
+
+[[package.upstream.copy]]
+from = "lib/zdict.h"
+to = "include/zdict.h"
+
+[[package.upstream.copy]]
+from = "lib/zstd_errors.h"
+to = "include/zstd_errors.h"
+
+[package]
+name = "cabin-ports/zstd"
+version = "1.5.7"
+# zstd is dual-licensed: BSD (LICENSE) or GPLv2 (COPYING), at the
+# user's choice.
+include = ["COPYING", "LICENSE", "include", "lib"]
+
+# libzstd as upstream's CMake build compiles it (build/cmake): the
+# common, compress, decompress, dictBuilder and legacy sources, with
+# multithreading (ZSTD_MULTITHREAD; on by default except on Android),
+# legacy-format decoding back to v0.5 (ZSTD_LEGACY_SUPPORT=5), and the
+# bundled xxHash renamed to ZSTD_XXH*.  Not ported: the deprecated zbuff
+# API (lib/deprecated, ZSTD_BUILD_DEPRECATED is off by default) and the
+# zstd CLI.  Upstream's Make build differs in two defaults: its static
+# library is single-threaded, and it compiles only the v05-v07 legacy
+# decoders.  Upstream's CMake MSVC build also sets ZSTD_HEAPMODE=0
+# (ZSTD_decompress's context on the stack); this port keeps the heap
+# default of every other build.
+[target.zstd]
+type = "library"
+sources = [
+  "lib/common/debug.c",
+  "lib/common/entropy_common.c",
+  "lib/common/error_private.c",
+  "lib/common/fse_decompress.c",
+  "lib/common/pool.c",
+  "lib/common/threading.c",
+  "lib/common/xxhash.c",
+  "lib/common/zstd_common.c",
+  "lib/compress/fse_compress.c",
+  "lib/compress/hist.c",
+  "lib/compress/huf_compress.c",
+  "lib/compress/zstd_compress.c",
+  "lib/compress/zstd_compress_literals.c",
+  "lib/compress/zstd_compress_sequences.c",
+  "lib/compress/zstd_compress_superblock.c",
+  "lib/compress/zstd_double_fast.c",
+  "lib/compress/zstd_fast.c",
+  "lib/compress/zstd_lazy.c",
+  "lib/compress/zstd_ldm.c",
+  "lib/compress/zstd_opt.c",
+  "lib/compress/zstd_preSplit.c",
+  "lib/compress/zstdmt_compress.c",
+  "lib/decompress/huf_decompress.c",
+  "lib/decompress/zstd_ddict.c",
+  "lib/decompress/zstd_decompress.c",
+  "lib/decompress/zstd_decompress_block.c",
+  "lib/dictBuilder/cover.c",
+  "lib/dictBuilder/divsufsort.c",
+  "lib/dictBuilder/fastcover.c",
+  "lib/dictBuilder/zdict.c",
+  "lib/legacy/zstd_v01.c",
+  "lib/legacy/zstd_v02.c",
+  "lib/legacy/zstd_v03.c",
+  "lib/legacy/zstd_v04.c",
+  "lib/legacy/zstd_v05.c",
+  "lib/legacy/zstd_v06.c",
+  "lib/legacy/zstd_v07.c",
+]
+include-dirs = ["include"]
+defines = ["XXH_NAMESPACE=ZSTD_", "ZSTD_LEGACY_SUPPORT=5", "ZSTD_MULTITHREAD"]
+c-standard = "c11"
+# The public headers use `unsigned long long`.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "zstd"
+
+# The BMI2 Huffman decoding loops.  huf_decompress.c calls into them
+# whenever ZSTD_ENABLE_ASM_X86_64_BMI2 holds (a GNU-compatible compiler
+# targeting x86-64 Linux, macOS, or Windows, MinGW included), and the
+# file assembles to nothing elsewhere.  Upstream's Make build assembles
+# it on every target; its CMake build leaves it out, defining
+# ZSTD_DISABLE_ASM instead, under MSVC, off x86-64, and wherever the
+# linker rejects `-z noexecstack`, macOS included.
+[target.'cfg(all(arch = "x86_64", not(env = "msvc")))'.sources]
+zstd = ["lib/decompress/huf_decompress_amd64.S"]
+
+# Where the file is left out, ZSTD_DISABLE_ASM keeps huf_decompress.c
+# from calling into it: Cabin evaluates env "msvc" for any compiler on a
+# Windows host without --target, MinGW-w64 GCC included.
+[target.'cfg(any(not(arch = "x86_64"), env = "msvc"))'.profile]
+defines = ["ZSTD_DISABLE_ASM"]
+
+# ZSTD_MULTITHREAD's worker pool uses pthreads (Windows threads on
+# Windows); upstream's CMake links Threads on UNIX.
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["pthread"]
