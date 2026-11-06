@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/nemtrif/utfcpp/archive/refs/tags/v4.2.1.tar.gz"
+checksum = "sha256:6d6a5493a111884cc085ee31babfe6d9960c8fb08fc80a64852eaeea8323dbc1"
+format = "tar.gz"
+strip-prefix = "utfcpp-4.2.1"
+
+[package]
+name = "cabin-ports/utfcpp"
+version = "4.2.1"
+include = ["LICENSE", "source"]
+
+# Header-only, as upstream's CMake interface target utf8cpp: source/
+# (utf8.h and utf8/) is the include root, so consumers write
+# `#include <utf8.h>`; the `<utf8cpp/utf8.h>` spelling that ConanCenter's
+# extra include root also allows is not provided.  The headers pick the
+# C++11/17/20 overloads (utf8/cpp11.h, cpp17.h, cpp20.h) and code-unit
+# types from __cplusplus, or from UTF_CPP_CPLUSPLUS when a consumer
+# defines it; cl.exe reports 199711L unless /Zc:__cplusplus is given, so
+# its consumers get the C++98 API by default, as with upstream's CMake
+# target.
+[target.utf8cpp]
+type = "header-only"
+include-dirs = ["source"]
+interface-cxx-standard = "c++98"
