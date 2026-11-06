@@ -1,0 +1,57 @@
+[package.upstream]
+url = "https://sourceware.org/pub/bzip2/bzip2-1.0.8.tar.gz"
+checksum = "sha256:ab5a03176ee106d3f0fa90e381da478ddae405918153cca248e682cd0c4a2269"
+format = "tar.gz"
+strip-prefix = "bzip2-1.0.8"
+
+# The one public header.  The archive root also holds the private
+# bzlib_private.h, the sources, and the CLI, so it is not the consumer
+# include root.
+[[package.upstream.copy]]
+from = "bzlib.h"
+to = "include/bzlib.h"
+
+[package]
+name = "cabin-ports/bzip2"
+version = "1.0.8"
+include = [
+  "LICENSE",
+  "include",
+  "blocksort.c",
+  "bzlib.c",
+  "bzlib.h",
+  "bzlib_private.h",
+  "compress.c",
+  "crctable.c",
+  "decompress.c",
+  "huffman.c",
+  "randtable.c",
+]
+
+# libbz2 as upstream's Makefile and makefile.msc build it, with their
+# large-file define.  Not ported: the bzip2 and bzip2recover programs and
+# the bzdiff/bzgrep/bzmore scripts.  bzlib.h includes <windows.h> on
+# Windows, and declares the API as WINAPI functions unless the consumer
+# defines BZ_IMPORT for a DLL, which this static library is not.
+[target.bz2]
+type = "library"
+sources = [
+  "blocksort.c",
+  "bzlib.c",
+  "compress.c",
+  "crctable.c",
+  "decompress.c",
+  "huffman.c",
+  "randtable.c",
+]
+include-dirs = ["include"]
+defines = ["_FILE_OFFSET_BITS=64"]
+c-standard = "c11"
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
+links = "bz2"
+
+# Strict -std=c11 hides glibc's fdopen, which BZ2_bzdopen calls;
+# upstream's Makefile compiles in GCC's default GNU dialect.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_POSIX_C_SOURCE=200809L"]
