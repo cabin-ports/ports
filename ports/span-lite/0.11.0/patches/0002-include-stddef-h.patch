@@ -1,0 +1,10 @@
+--- a/include/nonstd/span.hpp
++++ b/include/nonstd/span.hpp
+@@ -224,6 +224,7 @@
+ #if span_USES_STD_SPAN
+ 
+ #include <span>
++#include <stddef.h> // size_t
+ 
+ namespace nonstd {
+ 

@@ -1,0 +1,36 @@
+[package.upstream]
+url = "https://github.com/martinmoene/span-lite/archive/refs/tags/v0.11.0.tar.gz"
+checksum = "sha256:ef4e028e18ff21044da4b4641ca1bc8a2e2d656e2028322876c0e1b9b6904f9d"
+format = "tar.gz"
+strip-prefix = "span-lite-0.11.0"
+# Two missing includes in span.hpp, each fatal where no other standard
+# header it includes declares the name, as with LLVM 23's libc++:
+# 0001 includes <exception> for the std::terminate() that its own span
+# calls on a contract violation (its default), also needed with libstdc++
+# when exceptions are off; upstream fixed this after 0.11.0 (954f5db,
+# 4dde281 and 5ac676a, its PR #88), and the patch takes just the include,
+# under the same condition as that call.  0002 includes <stddef.h> where
+# nonstd::span is std::span, for the global size_t that make_span() and
+# the non-member first(), last() and subspan() use there; upstream's
+# master still lacks it.
+patches = [
+  "patches/0001-include-exception.patch",
+  "patches/0002-include-stddef-h.patch",
+]
+
+[package]
+name = "cabin-ports/span-lite"
+version = "0.11.0"
+include = ["LICENSE.txt", "include", "patches"]
+
+# Header-only, as upstream's CMake interface target nonstd::span-lite:
+# include/ is the include root, so consumers write
+# `#include <nonstd/span.hpp>`.  The header supports C++98 and later and
+# takes the standard from _MSVC_LANG on cl.exe (span.hpp:182-185).  Where
+# C++20's <span> exists, nonstd::span is std::span unless a consumer
+# defines span_CONFIG_SELECT_SPAN; every span_CONFIG_* and span_FEATURE_*
+# option keeps upstream's default.
+[target.span-lite]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++98"
