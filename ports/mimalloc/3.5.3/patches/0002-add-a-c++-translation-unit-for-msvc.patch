@@ -1,0 +1,6 @@
+--- /dev/null
++++ b/src/static-cxx.cpp
+@@ -0,0 +1,3 @@
++// Added by the Cabin port: the library as one C++ translation unit, as
++// upstream's CMake build compiles it with MSVC (see cabin.toml).
++#include "static.c"
