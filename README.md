@@ -152,12 +152,13 @@ downloads each pinned upstream archive once into Cabin's cache (`<cache>/ports/a
 
 `--dry-run --changed-since <rev>` preflights only what the change since `<rev>` needs.  It compares
 `<rev>`, which must be an ancestor of `HEAD`, with the working tree, uncommitted and untracked files
-included:
+included, and ignored files under `ports/` too:
 
-- A change that only adds package names - `ports/<name>/` directories `<rev>` lacks - preflights
-  every version of those names plus every committed version any of their requirements (normal,
-  optional, or dev) matches, transitively.
-- A change that only edits `README.md` or `AGENTS.md` preflights nothing.
+- A change that only adds files under `ports/<name>/<version>/` for names `<rev>` lacks, besides
+  editing the root `README.md` or `AGENTS.md`, preflights every version of those names plus every
+  committed version any of their requirements (optional and dev ones included) matches,
+  transitively.  An added name with no `cabin.toml` under it is an error.
+- A change that edits nothing but the root `README.md` or `AGENTS.md` preflights nothing.
 - Anything else preflights every port: a new version of an existing name (existing requirements
   may resolve to it), any other change under an existing name, and every other file.
 
