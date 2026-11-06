@@ -1,0 +1,58 @@
+[package.upstream]
+url = "https://github.com/lz4/lz4/releases/download/v1.11.0/lz4-1.11.0.tar.gz"
+checksum = "sha256:247e5fa64da5f7b75ee3dd3bed484076396c9ebe8254d9ccf693eb62800c5e26"
+format = "tar.gz"
+strip-prefix = "lz4-1.11.0"
+
+# The public headers upstream's `make install` places in its include
+# directory.  lib/ also holds lz4's private copy of xxHash 0.6, whose
+# xxhash.h would shadow cabin-ports/xxhash's for every consumer if lib/
+# itself were the include root.
+[[package.upstream.copy]]
+from = "lib/lz4.h"
+to = "include/lz4.h"
+
+[[package.upstream.copy]]
+from = "lib/lz4hc.h"
+to = "include/lz4hc.h"
+
+[[package.upstream.copy]]
+from = "lib/lz4frame.h"
+to = "include/lz4frame.h"
+
+[[package.upstream.copy]]
+from = "lib/lz4frame_static.h"
+to = "include/lz4frame_static.h"
+
+[[package.upstream.copy]]
+from = "lib/lz4file.h"
+to = "include/lz4file.h"
+
+[package]
+name = "cabin-ports/lz4"
+version = "1.11.0"
+# lib/ is the BSD-2-Clause library and carries its LICENSE; the rest of
+# the repository (the CLI, tests, examples) is GPL-2.0-or-later unless a
+# file states otherwise, and is not part of liblz4.
+include = ["include", "lib"]
+
+# liblz4 as upstream's Make and CMake builds compile it: every lib/*.c,
+# with the bundled xxHash renamed to LZ4_XXH* so its symbols cannot
+# collide with a separately linked xxHash.  Upstream's static library is
+# single-threaded by default, so LZ4F_MULTITHREAD stays unset.
+[target.lz4]
+type = "library"
+sources = [
+  "lib/lz4.c",
+  "lib/lz4file.c",
+  "lib/lz4frame.c",
+  "lib/lz4hc.c",
+  "lib/xxhash.c",
+]
+include-dirs = ["include"]
+defines = ["XXH_NAMESPACE=LZ4_"]
+c-standard = "c11"
+# lz4frame.h and lz4file.h use `long long`, which needs C99 / C++11.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "lz4"
