@@ -1,6 +1,6 @@
 // As hwy/per_target.cc does, so that this TU's HWY_TARGETS matches the
-// targets the library generates, including the EMU128 fallback every CPU
-// supports.
+// targets the library generates, including the portable fallback every
+// CPU supports (EMU128, or SCALAR under GCC before 16).
 #define HWY_COMPILE_ALL_ATTAINABLE
 
 #include <stdint.h>
@@ -109,7 +109,7 @@ int main() {
   CheckStaticTarget();
   const size_t tested = CheckLibraryDispatch();
 #if HWY_ARCH_X86_64 || HWY_ARCH_ARM_A64
-  // SSE2 or NEON is the baseline there, besides the EMU128 fallback.
+  // SSE2 or NEON is the baseline there, besides the portable fallback.
   CHECK(tested >= 2);
 #else
   CHECK(tested >= 1);
