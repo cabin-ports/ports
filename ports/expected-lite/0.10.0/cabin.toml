@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/nonstd-lite/expected-lite/archive/refs/tags/v0.10.0.tar.gz"
+checksum = "sha256:cfe082e4ffedeeedac47763504102646a39c080599c7c1fe99299d6a1f99af92"
+format = "tar.gz"
+strip-prefix = "expected-lite-0.10.0"
+
+[package]
+name = "cabin-ports/expected-lite"
+version = "0.10.0"
+include = ["LICENSE.txt", "include"]
+
+# Header-only, as upstream's CMake interface target nonstd::expected-lite
+# (CMakeLists.txt:81-91): include/ is the include root, so consumers write
+# `#include <nonstd/expected.hpp>`.  The header needs C++11 and takes the
+# standard from _MSVC_LANG on cl.exe (expected.hpp:124-130).  Where
+# C++23's <expected> exists, nonstd::expected is std::expected unless a
+# consumer defines nsel_CONFIG_SELECT_EXPECTED=nsel_EXPECTED_NONSTD
+# (:44-46, 141-151); every nsel_CONFIG_* option and the nsel_P0323R /
+# nsel_P2505R revisions keep upstream's defaults.  Upstream's documented
+# nsel_P2505R=3 does not compile (:1250 uses an alias template without
+# its arguments); it is left unpatched.
+[target.expected-lite]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
