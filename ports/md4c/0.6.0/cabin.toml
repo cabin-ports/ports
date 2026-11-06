@@ -1,0 +1,65 @@
+[package.upstream]
+url = "https://github.com/mity/md4c/archive/refs/tags/v0.6.0.tar.gz"
+checksum = "sha256:4d151298125a81da3b2efa2e0eed8bdb7a9318569804e4fa4d7a2375ab83ef70"
+format = "tar.gz"
+strip-prefix = "md4c-0.6.0"
+
+# Upstream installs md4c.h and md4c-html.h flat into include/
+# (src/CMakeLists.txt:19, 42); copying them to public/ keeps the private
+# entity.h, which sits beside them in src/, off the include path.
+[[package.upstream.copy]]
+from = "src/md4c.h"
+to = "public/md4c.h"
+
+[[package.upstream.copy]]
+from = "src/md4c-html.h"
+to = "public/md4c-html.h"
+
+[package]
+name = "cabin-ports/md4c"
+version = "0.6.0"
+include = [
+  "LICENSE.md",
+  "public",
+  "src/entity.c",
+  "src/entity.h",
+  "src/md4c-html.c",
+  "src/md4c.c",
+]
+# Upstream sets no standard; md4c.c uses C11 anonymous unions
+# (md4c.c:146-150), and C11 is also the oldest standard Cabin can lower
+# for MSVC.  Both headers are C89 and wrap their declarations in
+# extern "C" for C++.
+c-standard = "c11"
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
+
+# The two libraries upstream's CMake builds by default: the md4c parser
+# and the md4c-html renderer, which links md4c publicly
+# (src/CMakeLists.txt:44).  Both use MD4C's default UTF-8 encoding
+# (md4c.c:40-43); the MD4C_USE_ASCII and MD4C_USE_UTF16 alternatives are
+# not offered (UTF-16 is Windows-only, parser-only, and must also be
+# defined by every consumer, md4c.h:33-45).  Not ported: the md2html
+# command-line tool (BUILD_MD2HTML_EXECUTABLE, CMakeLists.txt:75-79);
+# DEBUG, which upstream defines for md4c only in Debug builds to turn
+# MD_ASSERT into a logged exit (src/CMakeLists.txt:15, md4c.c:71-81);
+# shared libraries, CMake's default outside Windows
+# (CMakeLists.txt:50-57); upstream's warning flags; and its forced
+# static C runtime (/MT) for MSVC (CMakeLists.txt:107-115).
+[target.md4c]
+type = "library"
+sources = ["src/md4c.c"]
+include-dirs = ["public"]
+links = "md4c"
+
+[target.md4c-html]
+type = "library"
+sources = ["src/entity.c", "src/md4c-html.c"]
+include-dirs = ["public"]
+links = "md4c-html"
+deps = [{ name = "md4c", public = true }]
+
+# As upstream's CMakeLists.txt:102-104 does for MSVC; clang-cl takes its
+# Clang branch (:95), which defines nothing.
+[target.'cfg(cc = "msvc")'.profile]
+defines = ["_CRT_SECURE_NO_WARNINGS"]
