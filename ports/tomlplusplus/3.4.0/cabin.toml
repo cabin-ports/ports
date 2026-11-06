@@ -1,0 +1,33 @@
+[package.upstream]
+# Conan Center's conandata pins this sha256 and vcpkg's port the same
+# archive's SHA-512.
+url = "https://github.com/marzer/tomlplusplus/archive/refs/tags/v3.4.0.tar.gz"
+checksum = "sha256:8517f65938a4faae9ccf8ebb36631a38c1cadfb5efa85d9a72e15b9e97d25155"
+format = "tar.gz"
+strip-prefix = "tomlplusplus-3.4.0"
+
+[package]
+name = "cabin-ports/tomlplusplus"
+version = "3.4.0"
+# The headers under include/toml++, which both of upstream's builds
+# install, and the MIT license.
+include = ["LICENSE", "include/toml++"]
+
+# toml++ in its default header-only mode, as upstream's CMake interface
+# target tomlplusplus::tomlplusplus: include/ is the include root, so
+# consumers write `#include <toml++/toml.hpp>`, and C++17 is required
+# (CMakeLists.txt:16-31, include/toml++/impl/preprocessor.hpp:52-54).
+# TOML_HEADER_ONLY defaults to 1 (preprocessor.hpp:911-913) and
+# TOML_EXCEPTIONS follows whether the consumer compiles with exceptions
+# (:1116-1127).  toml++ has no C API.
+# Not ported: the compiled mode (src/toml.cpp with TOML_HEADER_ONLY=0),
+# which upstream's Meson build, and so vcpkg, uses by default because
+# the deprecated compile_library option has no value and Meson booleans
+# default to true (meson_options.txt:13, meson.build:56); the single-file
+# toml.hpp at the archive root, a generated copy of the same headers; and
+# toml++.natvis and cpp.hint, IDE helpers CMake installs
+# (cmake/install-rules.cmake:4-8).
+[target.tomlplusplus]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
