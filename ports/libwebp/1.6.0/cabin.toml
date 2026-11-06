@@ -1,0 +1,370 @@
+[package.upstream]
+url = "https://storage.googleapis.com/downloads.webmproject.org/releases/webp/libwebp-1.6.0.tar.gz"
+checksum = "sha256:e4ab7009bf0629fd11982d4c2aa83964cf244cffba7347ecd39019a9e38c4564"
+format = "tar.gz"
+strip-prefix = "libwebp-1.6.0"
+
+# The public headers, where upstream's install places them.  src/ and
+# the archive root also hold the private dec/, dsp/, enc/, utils/ and
+# sharpyuv/ trees, so neither is a consumer include root.
+[[package.upstream.copy]]
+from = "src/webp/decode.h"
+to = "include/webp/decode.h"
+
+[[package.upstream.copy]]
+from = "src/webp/demux.h"
+to = "include/webp/demux.h"
+
+[[package.upstream.copy]]
+from = "src/webp/encode.h"
+to = "include/webp/encode.h"
+
+[[package.upstream.copy]]
+from = "src/webp/mux.h"
+to = "include/webp/mux.h"
+
+[[package.upstream.copy]]
+from = "src/webp/mux_types.h"
+to = "include/webp/mux_types.h"
+
+[[package.upstream.copy]]
+from = "src/webp/types.h"
+to = "include/webp/types.h"
+
+[[package.upstream.copy]]
+from = "sharpyuv/sharpyuv.h"
+to = "include/webp/sharpyuv/sharpyuv.h"
+
+[[package.upstream.copy]]
+from = "sharpyuv/sharpyuv_csp.h"
+to = "include/webp/sharpyuv/sharpyuv_csp.h"
+
+[package]
+name = "cabin-ports/libwebp"
+version = "1.6.0"
+# COPYING is the BSD-3-Clause license; PATENTS grants the additional
+# patent rights and AUTHORS lists the contributors both refer to.
+include = ["AUTHORS", "COPYING", "PATENTS", "include", "sharpyuv", "src"]
+
+# The five libraries upstream's CMake build installs by default, each
+# from the source lists in the Makefile.am files it parses: sharpyuv,
+# webpdecoder (a decode-only subset of webp; link one or the other),
+# webp, webpdemux and webpmux.  Several library targets make the bare
+# package name ambiguous, so consumers name one, as in
+# `cabin-ports/libwebp:webp`.  Not ported: the command-line tools,
+# examples, extras and image I/O helpers, which need libpng, libjpeg,
+# libtiff and giflib, and the shared-library build.  Not reproduced:
+# -fvisibility=hidden (CMakeLists.txt:173-175; Cabin drops a
+# dependency's raw compiler flags), so a shared object linking these
+# archives also exports libwebp's internal symbols, and the
+# warning-only _CRT_SECURE_NO_WARNINGS.
+#
+# Without the generated config.h, upstream's CMake defaults become
+# private defines: threading (WEBP_USE_THREAD) is on.  Near-lossless
+# encoding is on too, as src/enc/vp8li_enc.h defaults it, and the
+# off-by-default WEBP_ENABLE_SWAP_16BIT_CSP and
+# WEBP_ENABLE_WUNUSED_RESULT stay off.  The sources include their
+# headers as "src/..." and "sharpyuv/..." from the archive root.
+[profile]
+include-dirs = ["."]
+defines = ["WEBP_USE_THREAD"]
+
+# As cmake/cpu.cmake does on x86, each *_sse2, *_sse41 and *_avx2
+# source is compiled with its instruction set (the instruction-sets
+# tables below), and config.h's WEBP_HAVE_* let the portable code call
+# those kernels after a runtime CPUID check.  cl.exe needs neither:
+# src/dsp/cpu.h enables them by compiler version.  Every SIMD source
+# guards its body, so off its architecture it compiles to an empty
+# init stub, as in upstream's makefile.unix and Makefile.vc builds.
+[target.'cfg(any(arch = "x86", arch = "x86_64"))'.profile]
+defines = ["WEBP_HAVE_AVX2", "WEBP_HAVE_SSE2", "WEBP_HAVE_SSE41"]
+
+# libm for sharpyuv's gamma tables and the encoder; pthread for
+# WEBP_USE_THREAD (cmake/deps.cmake).
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["m", "pthread"]
+
+[target.sharpyuv]
+type = "library"
+sources = [
+  "sharpyuv/sharpyuv.c",
+  "sharpyuv/sharpyuv_cpu.c",
+  "sharpyuv/sharpyuv_csp.c",
+  "sharpyuv/sharpyuv_dsp.c",
+  "sharpyuv/sharpyuv_gamma.c",
+  "sharpyuv/sharpyuv_neon.c",
+  "sharpyuv/sharpyuv_sse2.c",
+]
+# Upstream installs these headers with both include/ and include/webp/
+# as include directories: sharpyuv_csp.h includes "sharpyuv/sharpyuv.h".
+# As there, include/webp/ also exposes webp's headers by bare name.
+include-dirs = ["include", "include/webp"]
+c-standard = "c11"
+# The headers use // comments and include no other header.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+links = "sharpyuv"
+
+[target.sharpyuv.instruction-sets]
+"sharpyuv/sharpyuv_sse2.c" = ["sse2"]
+
+[target.webpdecoder]
+type = "library"
+sources = [
+  "src/dec/alpha_dec.c",
+  "src/dec/buffer_dec.c",
+  "src/dec/frame_dec.c",
+  "src/dec/idec_dec.c",
+  "src/dec/io_dec.c",
+  "src/dec/quant_dec.c",
+  "src/dec/tree_dec.c",
+  "src/dec/vp8_dec.c",
+  "src/dec/vp8l_dec.c",
+  "src/dec/webp_dec.c",
+  "src/dsp/alpha_processing.c",
+  "src/dsp/alpha_processing_mips_dsp_r2.c",
+  "src/dsp/alpha_processing_neon.c",
+  "src/dsp/alpha_processing_sse2.c",
+  "src/dsp/alpha_processing_sse41.c",
+  "src/dsp/cpu.c",
+  "src/dsp/dec.c",
+  "src/dsp/dec_clip_tables.c",
+  "src/dsp/dec_mips32.c",
+  "src/dsp/dec_mips_dsp_r2.c",
+  "src/dsp/dec_msa.c",
+  "src/dsp/dec_neon.c",
+  "src/dsp/dec_sse2.c",
+  "src/dsp/dec_sse41.c",
+  "src/dsp/filters.c",
+  "src/dsp/filters_mips_dsp_r2.c",
+  "src/dsp/filters_msa.c",
+  "src/dsp/filters_neon.c",
+  "src/dsp/filters_sse2.c",
+  "src/dsp/lossless.c",
+  "src/dsp/lossless_avx2.c",
+  "src/dsp/lossless_mips_dsp_r2.c",
+  "src/dsp/lossless_msa.c",
+  "src/dsp/lossless_neon.c",
+  "src/dsp/lossless_sse2.c",
+  "src/dsp/lossless_sse41.c",
+  "src/dsp/rescaler.c",
+  "src/dsp/rescaler_mips32.c",
+  "src/dsp/rescaler_mips_dsp_r2.c",
+  "src/dsp/rescaler_msa.c",
+  "src/dsp/rescaler_neon.c",
+  "src/dsp/rescaler_sse2.c",
+  "src/dsp/upsampling.c",
+  "src/dsp/upsampling_mips_dsp_r2.c",
+  "src/dsp/upsampling_msa.c",
+  "src/dsp/upsampling_neon.c",
+  "src/dsp/upsampling_sse2.c",
+  "src/dsp/upsampling_sse41.c",
+  "src/dsp/yuv.c",
+  "src/dsp/yuv_mips32.c",
+  "src/dsp/yuv_mips_dsp_r2.c",
+  "src/dsp/yuv_neon.c",
+  "src/dsp/yuv_sse2.c",
+  "src/dsp/yuv_sse41.c",
+  "src/utils/bit_reader_utils.c",
+  "src/utils/color_cache_utils.c",
+  "src/utils/filters_utils.c",
+  "src/utils/huffman_utils.c",
+  "src/utils/palette.c",
+  "src/utils/quant_levels_dec_utils.c",
+  "src/utils/random_utils.c",
+  "src/utils/rescaler_utils.c",
+  "src/utils/thread_utils.c",
+  "src/utils/utils.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+# types.h includes <inttypes.h>, which C++ has from C++11.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "webpdecoder"
+
+[target.webpdecoder.instruction-sets]
+"src/dsp/alpha_processing_sse2.c" = ["sse2"]
+"src/dsp/alpha_processing_sse41.c" = ["sse4.1"]
+"src/dsp/dec_sse2.c" = ["sse2"]
+"src/dsp/dec_sse41.c" = ["sse4.1"]
+"src/dsp/filters_sse2.c" = ["sse2"]
+"src/dsp/lossless_avx2.c" = ["avx2"]
+"src/dsp/lossless_sse2.c" = ["sse2"]
+"src/dsp/lossless_sse41.c" = ["sse4.1"]
+"src/dsp/rescaler_sse2.c" = ["sse2"]
+"src/dsp/upsampling_sse2.c" = ["sse2"]
+"src/dsp/upsampling_sse41.c" = ["sse4.1"]
+"src/dsp/yuv_sse2.c" = ["sse2"]
+"src/dsp/yuv_sse41.c" = ["sse4.1"]
+
+[target.webp]
+type = "library"
+sources = [
+  "src/dec/alpha_dec.c",
+  "src/dec/buffer_dec.c",
+  "src/dec/frame_dec.c",
+  "src/dec/idec_dec.c",
+  "src/dec/io_dec.c",
+  "src/dec/quant_dec.c",
+  "src/dec/tree_dec.c",
+  "src/dec/vp8_dec.c",
+  "src/dec/vp8l_dec.c",
+  "src/dec/webp_dec.c",
+  "src/dsp/alpha_processing.c",
+  "src/dsp/alpha_processing_mips_dsp_r2.c",
+  "src/dsp/alpha_processing_neon.c",
+  "src/dsp/alpha_processing_sse2.c",
+  "src/dsp/alpha_processing_sse41.c",
+  "src/dsp/cost.c",
+  "src/dsp/cost_mips32.c",
+  "src/dsp/cost_mips_dsp_r2.c",
+  "src/dsp/cost_neon.c",
+  "src/dsp/cost_sse2.c",
+  "src/dsp/cpu.c",
+  "src/dsp/dec.c",
+  "src/dsp/dec_clip_tables.c",
+  "src/dsp/dec_mips32.c",
+  "src/dsp/dec_mips_dsp_r2.c",
+  "src/dsp/dec_msa.c",
+  "src/dsp/dec_neon.c",
+  "src/dsp/dec_sse2.c",
+  "src/dsp/dec_sse41.c",
+  "src/dsp/enc.c",
+  "src/dsp/enc_mips32.c",
+  "src/dsp/enc_mips_dsp_r2.c",
+  "src/dsp/enc_msa.c",
+  "src/dsp/enc_neon.c",
+  "src/dsp/enc_sse2.c",
+  "src/dsp/enc_sse41.c",
+  "src/dsp/filters.c",
+  "src/dsp/filters_mips_dsp_r2.c",
+  "src/dsp/filters_msa.c",
+  "src/dsp/filters_neon.c",
+  "src/dsp/filters_sse2.c",
+  "src/dsp/lossless.c",
+  "src/dsp/lossless_avx2.c",
+  "src/dsp/lossless_enc.c",
+  "src/dsp/lossless_enc_avx2.c",
+  "src/dsp/lossless_enc_mips32.c",
+  "src/dsp/lossless_enc_mips_dsp_r2.c",
+  "src/dsp/lossless_enc_msa.c",
+  "src/dsp/lossless_enc_neon.c",
+  "src/dsp/lossless_enc_sse2.c",
+  "src/dsp/lossless_enc_sse41.c",
+  "src/dsp/lossless_mips_dsp_r2.c",
+  "src/dsp/lossless_msa.c",
+  "src/dsp/lossless_neon.c",
+  "src/dsp/lossless_sse2.c",
+  "src/dsp/lossless_sse41.c",
+  "src/dsp/rescaler.c",
+  "src/dsp/rescaler_mips32.c",
+  "src/dsp/rescaler_mips_dsp_r2.c",
+  "src/dsp/rescaler_msa.c",
+  "src/dsp/rescaler_neon.c",
+  "src/dsp/rescaler_sse2.c",
+  "src/dsp/ssim.c",
+  "src/dsp/ssim_sse2.c",
+  "src/dsp/upsampling.c",
+  "src/dsp/upsampling_mips_dsp_r2.c",
+  "src/dsp/upsampling_msa.c",
+  "src/dsp/upsampling_neon.c",
+  "src/dsp/upsampling_sse2.c",
+  "src/dsp/upsampling_sse41.c",
+  "src/dsp/yuv.c",
+  "src/dsp/yuv_mips32.c",
+  "src/dsp/yuv_mips_dsp_r2.c",
+  "src/dsp/yuv_neon.c",
+  "src/dsp/yuv_sse2.c",
+  "src/dsp/yuv_sse41.c",
+  "src/enc/alpha_enc.c",
+  "src/enc/analysis_enc.c",
+  "src/enc/backward_references_cost_enc.c",
+  "src/enc/backward_references_enc.c",
+  "src/enc/config_enc.c",
+  "src/enc/cost_enc.c",
+  "src/enc/filter_enc.c",
+  "src/enc/frame_enc.c",
+  "src/enc/histogram_enc.c",
+  "src/enc/iterator_enc.c",
+  "src/enc/near_lossless_enc.c",
+  "src/enc/picture_csp_enc.c",
+  "src/enc/picture_enc.c",
+  "src/enc/picture_psnr_enc.c",
+  "src/enc/picture_rescale_enc.c",
+  "src/enc/picture_tools_enc.c",
+  "src/enc/predictor_enc.c",
+  "src/enc/quant_enc.c",
+  "src/enc/syntax_enc.c",
+  "src/enc/token_enc.c",
+  "src/enc/tree_enc.c",
+  "src/enc/vp8l_enc.c",
+  "src/enc/webp_enc.c",
+  "src/utils/bit_reader_utils.c",
+  "src/utils/bit_writer_utils.c",
+  "src/utils/color_cache_utils.c",
+  "src/utils/filters_utils.c",
+  "src/utils/huffman_encode_utils.c",
+  "src/utils/huffman_utils.c",
+  "src/utils/palette.c",
+  "src/utils/quant_levels_dec_utils.c",
+  "src/utils/quant_levels_utils.c",
+  "src/utils/random_utils.c",
+  "src/utils/rescaler_utils.c",
+  "src/utils/thread_utils.c",
+  "src/utils/utils.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+deps = ["sharpyuv"]
+links = "webp"
+
+[target.webp.instruction-sets]
+"src/dsp/alpha_processing_sse2.c" = ["sse2"]
+"src/dsp/alpha_processing_sse41.c" = ["sse4.1"]
+"src/dsp/cost_sse2.c" = ["sse2"]
+"src/dsp/dec_sse2.c" = ["sse2"]
+"src/dsp/dec_sse41.c" = ["sse4.1"]
+"src/dsp/enc_sse2.c" = ["sse2"]
+"src/dsp/enc_sse41.c" = ["sse4.1"]
+"src/dsp/filters_sse2.c" = ["sse2"]
+"src/dsp/lossless_avx2.c" = ["avx2"]
+"src/dsp/lossless_enc_avx2.c" = ["avx2"]
+"src/dsp/lossless_enc_sse2.c" = ["sse2"]
+"src/dsp/lossless_enc_sse41.c" = ["sse4.1"]
+"src/dsp/lossless_sse2.c" = ["sse2"]
+"src/dsp/lossless_sse41.c" = ["sse4.1"]
+"src/dsp/rescaler_sse2.c" = ["sse2"]
+"src/dsp/ssim_sse2.c" = ["sse2"]
+"src/dsp/upsampling_sse2.c" = ["sse2"]
+"src/dsp/upsampling_sse41.c" = ["sse4.1"]
+"src/dsp/yuv_sse2.c" = ["sse2"]
+"src/dsp/yuv_sse41.c" = ["sse4.1"]
+
+# demux.h and mux.h include webp's decode.h, mux_types.h and types.h.
+[target.webpdemux]
+type = "library"
+sources = ["src/demux/anim_decode.c", "src/demux/demux.c"]
+include-dirs = ["include"]
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+deps = [{ name = "webp", public = true }]
+links = "webpdemux"
+
+[target.webpmux]
+type = "library"
+sources = [
+  "src/mux/anim_encode.c",
+  "src/mux/muxedit.c",
+  "src/mux/muxinternal.c",
+  "src/mux/muxread.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+deps = [{ name = "webp", public = true }]
+links = "webpmux"
