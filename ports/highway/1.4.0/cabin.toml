@@ -1,0 +1,92 @@
+[package.upstream]
+url = "https://github.com/google/highway/archive/refs/tags/1.4.0.tar.gz"
+checksum = "sha256:e72241ac9524bb653ae52ced768b508045d4438726a303f10181a38f764a453c"
+format = "tar.gz"
+strip-prefix = "highway-1.4.0"
+
+# LICENSE offers Apache-2.0 or BSD-3-Clause.  Only the core library
+# below is published.  hwy/stats.h is left out with hwy/stats.cc, which
+# only upstream's Bazel build compiles (BUILD:200-207), not its CMake one.
+[package]
+name = "cabin-ports/highway"
+version = "1.4.0"
+include = [
+  "LICENSE",
+  "hwy/abort.h",
+  "hwy/aligned_allocator.h",
+  "hwy/auto_tune.h",
+  "hwy/base.h",
+  "hwy/bit_set.h",
+  "hwy/cache_control.h",
+  "hwy/detect_compiler_arch.h",
+  "hwy/detect_targets.h",
+  "hwy/foreach_target.h",
+  "hwy/highway.h",
+  "hwy/highway_export.h",
+  "hwy/nanobenchmark.h",
+  "hwy/per_target.h",
+  "hwy/perf_counters.h",
+  "hwy/print-inl.h",
+  "hwy/print.h",
+  "hwy/profiler.h",
+  "hwy/robust_statistics.h",
+  "hwy/targets.h",
+  "hwy/timer-inl.h",
+  "hwy/timer.h",
+  "hwy/x86_cpuid.h",
+  "hwy/ops",
+  "hwy/abort.cc",
+  "hwy/aligned_allocator.cc",
+  "hwy/nanobenchmark.cc",
+  "hwy/per_target.cc",
+  "hwy/perf_counters.cc",
+  "hwy/print.cc",
+  "hwy/profiler.cc",
+  "hwy/targets.cc",
+  "hwy/timer.cc",
+]
+
+# The static hwy library upstream's CMake builds (HWY_SOURCES,
+# CMakeLists.txt:251-304).  Runtime dispatch needs no per-file flags:
+# under GCC and Clang, hwy/ops/set_macros-inl.h gives each target's code
+# its own target attributes, and MSVC exposes every intrinsic without
+# one.  Not ported: the hwy_contrib library (HWY_ENABLE_CONTRIB,
+# CMakeLists.txt:215-249: VQSort, thread_pool, image, math, ...), so
+# hwy/auto_tune.h needs HWY_AUTOTUNE_STDSORT defined; and the hwy_test
+# library, tests and examples.
+#
+# Not reproduced: upstream's private compile flags (CMakeLists.txt:
+# 313-507).  No core source depends on the warnings, __DATE__ redaction,
+# -fmerge-all-constants, -fmath-errno, Clang's -fno-vectorize
+# -fno-slp-vectorize, /bigobj, or exceptions and RTTI off
+# (-fno-exceptions; /GR- /EHs-c- -D_HAS_EXCEPTIONS=0).  The whole-build
+# -march flags of HWY_CMAKE_RVV (on by default, CMakeLists.txt:75-76,
+# 473-485) make RVV the RISC-V baseline, as the opt-in HWY_CMAKE_ARM7
+# does NEON for 32-bit Arm; Cabin cannot raise a package's baseline ISA,
+# so on RISC-V this port reaches RVV only through runtime dispatch, which
+# needs Clang 19 or later (hwy/detect_targets.h:791-798).
+[target.hwy]
+type = "library"
+sources = [
+  "hwy/abort.cc",
+  "hwy/aligned_allocator.cc",
+  "hwy/nanobenchmark.cc",
+  "hwy/per_target.cc",
+  "hwy/perf_counters.cc",
+  "hwy/print.cc",
+  "hwy/profiler.cc",
+  "hwy/targets.cc",
+  "hwy/timer.cc",
+]
+include-dirs = ["."]
+# Upstream compiles the library as C++17 where available and requires
+# only C++11 of consumers (CMakeLists.txt:96-109, 551-554).
+cxx-standard = "c++17"
+interface-cxx-standard = "c++11"
+links = "hwy"
+
+# Upstream links libatomic where 1- or 8-byte std::atomic operations are
+# not lock-free (cmake/FindAtomics.cmake, CMakeLists.txt:558): GCC on
+# riscv64 and 32-bit Arm, MIPS and PowerPC, but not x86 or AArch64.
+[target.'cfg(all(os = "linux", not(any(arch = "x86", arch = "x86_64", arch = "aarch64"))))'.profile]
+link-libs = ["atomic"]
