@@ -1,0 +1,32 @@
+[package.upstream]
+# mapbox/variant publishes no release assets; this is the v1.2.0 tag
+# archive (commit a2a4858345), the bytes ConanCenter pins.
+url = "https://github.com/mapbox/variant/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:7059f4420d504c4bc96f8a462a0f6d029c5be914ba55cc030a0a773366dd7bc8"
+format = "tar.gz"
+strip-prefix = "variant-1.2.0"
+
+[package]
+name = "cabin-ports/mapbox-variant"
+version = "1.2.0"
+# LICENSE (BSD-3-Clause) covers the library; recursive_wrapper.hpp,
+# derived from Boost's, also carries the Boost Software License in
+# LICENSE_1_0.txt.
+include = ["LICENSE", "LICENSE_1_0.txt", "include"]
+
+# The six headers under include/mapbox, used as <mapbox/variant.hpp> and
+# so on, at the C++11 upstream's Makefile and README target (Makefile:5,
+# README.md:3).  variant_cast.hpp includes neither variant.hpp nor
+# <typeinfo>, so consumers include variant.hpp first.  variant.hpp's
+# version macros still read 1.1.0 (:55-59).  Upstream defects, as
+# shipped: dynamic_variant_cast<T*> of a const variant does not compile
+# (variant_cast.hpp:64-69), and variant_alternative<I, const V>::type is
+# a const variant_alternative<I, V>, not the const alternative
+# (variant.hpp:1026-1036).  MAPBOX_VARIANT_MINIMIZE_SIZE and
+# MAPBOX_VARIANT_OPTIMIZE_FOR_SPEED, which change type_index_t and so the
+# layout (:78-86), are left to consumers.  Not ported: the tests,
+# benchmarks and gyp, Boost.Build and npm build files.
+[target.mapbox-variant]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
