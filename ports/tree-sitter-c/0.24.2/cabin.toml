@@ -1,0 +1,48 @@
+[package.upstream]
+url = "https://github.com/tree-sitter/tree-sitter-c/archive/refs/tags/v0.24.2.tar.gz"
+checksum = "sha256:2eeb4db31f8fa0865e45488503d13403923bcb485a1bdb637abff8c42dd97364"
+format = "tar.gz"
+strip-prefix = "tree-sitter-c-0.24.2"
+
+[package]
+name = "cabin-ports/tree-sitter-c"
+version = "0.24.2"
+include = ["LICENSE", "bindings/c/tree_sitter", "src/parser.c", "src/tree_sitter"]
+
+[dependencies]
+"cabin-ports/tree-sitter" = "^0.27"
+
+# The C grammar library upstream's CMake builds (CMakeLists.txt): the
+# generated src/parser.c; the grammar has no external scanner.  CMake's
+# rules may regenerate src/grammar.json and src/parser.c with
+# tree-sitter-cli (TREE_SITTER_ABI_VERSION, default 14); this port, like
+# upstream's Makefile and its language bindings, builds the parser
+# upstream generated and committed, which is ABI version 15, so it
+# needs a runtime that accepts ABI 15, as cabin-ports/tree-sitter 0.27
+# does.  Consumers include <tree_sitter/tree-sitter-c.h> for
+# tree_sitter_c() and parse through the runtime's <tree_sitter/api.h>,
+# so that dependency is public.  On Windows parser.c declares
+# tree_sitter_c() __declspec(dllexport) whether the library is static or
+# shared, so a static consumer's binary exports it too; that is
+# upstream behavior.  Not ported: the TREE_SITTER_REUSE_ALLOCATOR option
+# (off by default; without a scanner the parser allocates nothing); the
+# shared library; the position-independent code upstream compiles every
+# build with; the pkg-config file; the queries; the Node, Python, Rust,
+# Go, Swift and Zig bindings.
+[target.tree-sitter-c]
+type = "library"
+sources = ["src/parser.c"]
+include-dirs = ["bindings/c"]
+# Upstream's C_STANDARD 11; its Makefile compiles with -std=c11.
+c-standard = "c11"
+# tree-sitter-c.h repeats api.h's TSLanguage typedef, which C allows
+# only from C11 on.
+interface-c-standard = "c11"
+interface-cxx-standard = "c++11"
+links = "tree-sitter-c"
+deps = [{ name = "cabin-ports/tree-sitter", public = true }]
+
+# src holds tree_sitter/parser.h, which CMake adds as a private include
+# directory.
+[profile]
+include-dirs = ["src"]
