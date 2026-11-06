@@ -1356,7 +1356,8 @@ fn publish_new_uploads_each_version_once_and_resumes_from_its_receipts() {
     let (ok, stdout, stderr) = new_run("--publish-new", &dir, snapshot, &registry, log.path(), &[]);
     assert!(!ok, "a failed upload fails the run: {stdout}");
     assert!(
-        stderr.contains("failed (exit status: 1) at cabin-ports/libpng 1.6.50"),
+        // `exit status: 1` on Unix, `exit code: 1` on Windows.
+        stderr.contains(": 1) at cabin-ports/libpng 1.6.50"),
         "{stderr}"
     );
     assert_eq!(
