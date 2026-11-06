@@ -258,29 +258,30 @@ pub fn classify(
         .collect()
 }
 
-/// A candidate requiring a blocked or diverged version is blocked.
-/// Every declared requirement counts, as in the staging closure.
+/// A candidate whose staging closure reaches a blocked or diverged
+/// version, through uploaded versions too, is blocked: it would be
+/// validated against bytes the registry does not serve.
 pub fn propagate(conversions: &[PortConversion], status: &mut [Status]) {
-    let mut changed = true;
-    while changed {
-        changed = false;
-        for index in 0..status.len() {
-            if status[index] != Status::Candidate {
-                continue;
-            }
-            for dep in select::requirements_of(conversions, index) {
-                let why = match &status[dep] {
-                    Status::Blocked(_) => "is blocked",
-                    Status::Diverged(_) => "awaits a manual packaging revision",
-                    _ => continue,
-                };
-                status[index] = Status::Blocked(format!(
-                    "requires {}, which {why}",
-                    label(&conversions[dep])
-                ));
-                changed = true;
-                break;
-            }
+    let before = status.to_vec();
+    for (index, status) in status.iter_mut().enumerate() {
+        if *status != Status::Candidate {
+            continue;
+        }
+        let reach = select::closure_of(conversions, [index]);
+        let cause = (0..before.len()).find_map(|dep| {
+            let why = match &before[dep] {
+                _ if dep == index || !reach[dep] => return None,
+                Status::Blocked(_) => "is blocked",
+                Status::Diverged(_) => "awaits a manual packaging revision",
+                _ => return None,
+            };
+            Some(format!(
+                "requires {}, which {why}",
+                label(&conversions[dep])
+            ))
+        });
+        if let Some(cause) = cause {
+            *status = Status::Blocked(cause);
         }
     }
 }
@@ -661,7 +662,7 @@ mod tests {
         );
         assert_eq!(
             plan[3],
-            "app blocked: requires cabin-ports/libpng 1.0.0, which is blocked"
+            "app blocked: requires cabin-ports/zlib 1.0.0, which is blocked"
         );
 
         for (holds, error) in [
@@ -744,7 +745,26 @@ mod tests {
                 "zlib diverged",
                 "libpng blocked: requires cabin-ports/zlib 1.0.0, which awaits a manual \
                  packaging revision",
-                "app blocked: requires cabin-ports/libpng 1.0.0, which is blocked",
+                "app blocked: requires cabin-ports/zlib 1.0.0, which awaits a manual \
+                 packaging revision",
+            ]
+        );
+
+        // Through an uploaded requirement too: app reaches zlib's bytes
+        // through libpng's.
+        let log = receipt("zlib", "1.0.0", "uploaded", 'a')
+            + &receipt("libpng", "1.0.0", "uploaded", 'b');
+        let receipts = Receipts::parse(&log, REGISTRY).unwrap();
+        let mut status = classify(&conversions, &receipts, &BTreeMap::new(), false);
+        let other = format!("sha256:{}", "f".repeat(64));
+        check_staged_bytes(&conversions, &mut status, &receipts, [(zlib, other)]);
+        propagate(&conversions, &mut status);
+        assert_eq!(
+            statuses(&conversions, &status)[2..],
+            [
+                "libpng uploaded",
+                "app blocked: requires cabin-ports/zlib 1.0.0, which awaits a manual packaging \
+                 revision",
             ]
         );
     }

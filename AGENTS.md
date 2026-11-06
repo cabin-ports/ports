@@ -47,7 +47,8 @@ the pinned Cabin revision, the checks, and publishing; Cabin's
   never part of routine work, and so are deleting the receipts log's lock and retrying a failed
   upload.  `--publish-new` never passes `--new-revision`: a correction to an uploaded version
   ships only through an `all` dispatch.  While the variable is `true`, a port
-  merges only with its publication decision settled or its `publish-holds.txt` line added.
+  merges only with its publication decision settled or its `publish-holds.txt` line added in the
+  same pull request.
 - `ci.yml` runs on `pull_request` and `merge_group`.  Its `required` job is the only required
   check and must fail unless every job it gates succeeded; its `pin` job keeps the Cabin pin a
   single commit on `cabinpkg/cabin`'s `main`.  Its dry-run narrows only through `--changed-since`
