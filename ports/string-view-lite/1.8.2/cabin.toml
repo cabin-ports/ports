@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/nonstd-lite/string-view-lite/archive/refs/tags/v1.8.2.tar.gz"
+checksum = "sha256:62852addccb3b73b72030c6afd130e8b63f9b2a00b032b0af4048b0cc6b49f82"
+format = "tar.gz"
+strip-prefix = "string-view-lite-1.8.2"
+
+[package]
+name = "cabin-ports/string-view-lite"
+version = "1.8.2"
+include = ["LICENSE.txt", "include"]
+
+# Header-only, as upstream's CMake interface target
+# nonstd::string-view-lite (CMakeLists.txt:70-80): include/ is the include
+# root, so consumers write `#include <nonstd/string_view.hpp>`.  The header
+# supports C++98 and later and takes the standard from _MSVC_LANG on cl.exe
+# (string_view.hpp:92-98).  Where C++17's <string_view> exists,
+# nonstd::string_view is std::string_view unless a consumer defines
+# nssv_CONFIG_SELECT_STRING_VIEW=nssv_STRING_VIEW_NONSTD (:43-45, 108-120);
+# every nssv_CONFIG_* option keeps upstream's default.  Unlike
+# std::string_view's, the header's own operator<< pads after the text when
+# neither std::left nor std::right is set (:1463), and before C++11 an
+# ordering (<, <=, >, >=) with a std::string on the left does not compile
+# (:1255-1259, 1281-1285, 1307-1311, 1333-1337); both remain on master.
+[target.string-view-lite]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++98"
