@@ -15,10 +15,10 @@
 #               read Git's objects, never the checkout, so a symlink on
 #               the branch cannot make them read a runner's file.
 #   acquire     (lock) Commits this attempt's lock on the tip and appends
-#               `locked=true` and `go=true`, or only `go=true` for a
-#               `plan` run or a run without a log (RECEIPTS).  A running
-#               run's lock, or a lost race, skips a scheduled run and
-#               fails a dispatch; any other lock fails the run.
+#               `locked=true` and `go=true`, or only `go=true` for a run
+#               without a log (RECEIPTS).  A running run's lock, or a
+#               lost race, skips a scheduled run and fails a dispatch;
+#               any other lock fails the run.
 #   held FILE   (publish) Fails unless the tip's lock names this attempt,
 #               then writes that tip's log, if any, to FILE.  Without the
 #               branch, passes only a run that found no log (RECEIPTS).
@@ -105,7 +105,7 @@ read_log() {
 }
 
 acquire() {
-  if [[ $MODE == plan || $RECEIPTS != true ]]; then
+  if [[ $RECEIPTS != true ]]; then
     echo "go=true" >>"$GITHUB_OUTPUT"
     return
   fi
