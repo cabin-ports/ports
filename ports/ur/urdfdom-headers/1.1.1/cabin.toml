@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/ros/urdfdom_headers/archive/refs/tags/1.1.1.tar.gz"
+checksum = "sha256:b2ee5bffa51eea4958f64479b4fa273881d82a3bfa1d98686a16f8d8ca6c2350"
+format = "tar.gz"
+strip-prefix = "urdfdom_headers-1.1.1"
+
+[package]
+name = "cabin-ports/urdfdom-headers"
+version = "1.1.1"
+# LICENSE is BSD-3-Clause, and every header carries the same notice.
+# pose.h:202-249 is "copied from gazebo", whose Apache-2.0 terms do not
+# ship.
+include = ["LICENSE", "include"]
+
+# The INTERFACE target urdfdom_headers::urdfdom_headers and the whole
+# include/ tree upstream's CMake installs (CMakeLists.txt:29, :62-65),
+# which consumers reach as <urdf_model/model.h>: the install goes to
+# include/urdfdom_headers by default and the target points there
+# (:6-13).  The tree keeps the deprecated forwarder
+# urdf_model_state/twist.h, which includes urdf_model/twist.h after a
+# #warning (twist.h:38-40) that MSVC accepts only from Build Tools 14.50
+# under /std:c++latest; elsewhere on MSVC include <urdf_model/twist.h>.
+# The headers use std::shared_ptr and std::to_string and upstream's
+# CMake sets no standard, so C++11 is the floor.  Not ported: the CMake
+# config, pkg-config and uninstall files.
+[target.urdfdom-headers]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
