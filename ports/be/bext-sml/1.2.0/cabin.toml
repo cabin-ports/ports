@@ -1,0 +1,61 @@
+[package.upstream]
+url = "https://github.com/boost-ext/sml/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:d584375bc8b4b391f0d94d57bc126a7cbb0f8c2bf810f5602400206b62eaf280"
+format = "tar.gz"
+strip-prefix = "sml-1.2.0"
+
+[package]
+name = "cabin-ports/bext-sml"
+version = "1.2.0"
+include = ["LICENSE.md", "include"]
+
+# boost-ext/sml ([Boost::ext].SML), a header-only C++14 state machine
+# library (namespace boost::sml); it is not part of Boost and needs none of
+# it.  Upstream's CMake target sml is an INTERFACE library on include/ with
+# cxx_std_14 (CMakeLists.txt:90-98), and its install rule copies
+# include/boost whole (CMakeLists.txt:224-226), so consumers write
+# `#include <boost/sml.hpp>` and, for the runtime-id dispatch table,
+# `#include <boost/sml/utility/dispatch_table.hpp>`.  sml.hpp includes no
+# other header and stops with an error before C++14 (sml.hpp:9-10).  For
+# MSVC, CMakeLists.txt:100-107 also adds the interface definitions
+# NOMINMAX, _SCL_SECURE_NO_WARNINGS, _CRT_SECURE_NO_WARNINGS and, from
+# C++17, _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS; the headers call no min
+# or max function and need none of them, so like the vcpkg and Conan
+# packages this port does not export them.  Upstream builds its tests at
+# C++20 when the compiler has it, builds its examples other than
+# hello_world only with Clang and GCC (example/CMakeLists.txt:13-57), and
+# leaves its dispatch table, logger, exception and visitor tests out on
+# MSVC.  Consumers may define BOOST_SML_DISABLE_EXCEPTIONS as true or false
+# (true leaves exception rows inert and lets exceptions leave
+# process_event; by default it follows whether exceptions are enabled,
+# sml.hpp:1952-1957), BOOST_SML_CFG_ENABLE_MIN_SIZE (off by default: it
+# shrinks state machines on Clang and GCC with a zero-length array, which
+# upstream reports as undefined behaviour at -O2, sml.hpp:30-36, 51-57,
+# doc/overview.md:57-61) and BOOST_SML_CREATE_DEFAULT_CONSTRUCTIBLE_DEPS (a
+# missing reference dependency gets an object the state machine owns, and
+# an aggregate's first member is value-initialized, ignoring its default
+# member initializer, sml.hpp:728-747); they change the types they touch,
+# so every translation unit sharing a state machine must agree on them.  On
+# MSVC, sml.hpp:79-80 disables warnings C4503 and C4200 without restoring
+# them, so they stay off for the rest of the including translation unit.
+# GCC 16 with -Wall and without optimization reports -Wmaybe-uninitialized
+# at sml.hpp:2019 for each state machine class without data members: a
+# const member function that reads no member is called during construction.
+# The "name"_s and "name"_e literals are not declared on MSVC before C++20
+# (sml.hpp:3559-3581); state<T> and event<T> work on every compiler.  The
+# dispatch table does not range-check the id it is given
+# (dispatch_table.hpp:108), so an id outside the inclusive range passed to
+# make_dispatch_table is undefined behaviour.  A dependency taken by value
+# or by pointer that the constructor does not receive is value-initialized,
+# so a pointer arrives null, with no diagnostic (sml.hpp:763-767; upstream
+# #737, open).  Fixes merged on upstream master after 1.2.0 are not in this
+# release, among them #711: a state machine constructed from a const lvalue
+# dependency fails to compile, a 1.2.0 regression, so pass a non-const
+# object.  Licence: BSL-1.0 (LICENSE.md, sml.hpp:1-5).  Not ported:
+# benchmark/, doc/, example/, test/ and zephyr/; the CMake, Conan,
+# Makefile, cppcheck, clang-format, clang-tidy, Codacy, MkDocs and CI
+# files; and README.md.
+[target.bext-sml]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
