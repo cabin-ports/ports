@@ -1,0 +1,61 @@
+[package.upstream]
+url = "https://github.com/kthohr/gcem/archive/refs/tags/v1.18.0.tar.gz"
+checksum = "sha256:8e71a9f5b62956da6c409dda44b483f98c4a98ae72184f3aa4659ae5b3462e61"
+format = "tar.gz"
+strip-prefix = "gcem-1.18.0"
+
+# NOTICE.txt travels with the Apache-2.0 LICENSE (LICENSE section 4(d)),
+# and contributors.txt keeps upstream's attributions for the atan2 and
+# binomial_coef code (section 4(c)).
+[package]
+name = "cabin-ports/gcem"
+version = "1.18.0"
+include = ["LICENSE", "NOTICE.txt", "contributors.txt", "include"]
+
+# GCE-Math, header-only, as upstream's CMake interface target gcem:
+# include/ is the include root, so consumers write `#include <gcem.hpp>`
+# (CMakeLists.txt:61-63, README.md:56-59).  C++11 is upstream's floor
+# (README.md:8, :56; CMakeLists.txt:43-53).  Every function is constexpr
+# and also callable at run time.  Functions typed by return_t return double
+# for integral arguments (README.md:130), but abs and factorial return
+# their argument type and binomial_coef, gcd, lcm and pow the common type,
+# so integral arguments stay integral there (abs.hpp:31-34,
+# factorial.hpp:91-94, binomial_coef.hpp:82-85, gcd.hpp:73-76,
+# lcm.hpp:56-59, pow.hpp:73-76).
+#
+# As upstream ships it:
+# - gcem.hpp #undefs any abs, min, max, round and signbit macros already
+#   defined, such as <windows.h>'s min and max without NOMINMAX, for the
+#   rest of the translation unit (gcem_options.hpp:25-46).
+# - exp, log, atan, erf and tanh switch to iterative forms when
+#   __cplusplus >= 201402L (exp.hpp:33, log.hpp:34, atan.hpp:47 and :118,
+#   erf.hpp:34 and :84, tanh.hpp:31).  MSVC reports __cplusplus as 199711L
+#   unless the consumer passes /Zc:__cplusplus, which Cabin does not, so
+#   MSVC builds keep the recursive C++11 forms.
+# - On MSVC signbit() tests the sign of a zero with _fpclass
+#   (signbit.hpp:37-38), which is not constexpr, so signbit(+-0), copysign
+#   with a zero argument, and atan2 at the origin (atan2.hpp:41-46) are
+#   not constant expressions there; elsewhere signbit is __builtin_signbit
+#   (signbit.hpp:40, gcem_options.hpp:206-208).
+# - Evaluation recurses: to the GCEM_*_MAX_ITER counts
+#   (gcem_options.hpp:133-194), which a consumer may predefine, identically
+#   in every translation unit; to fixed depths (tan.hpp:79-83,
+#   atan.hpp:161-165); or with the argument: one level per unit below zero
+#   in tgamma (tgamma.hpp:51), Pascal's rule in binomial_coef
+#   (binomial_coef.hpp:37), and factorial above 20 (factorial.hpp:68).
+#   Large arguments can exceed a compiler's default constexpr depth or
+#   step limit, which upstream's test notes raise (tests/sqrt.cpp:21).
+# - lgamma returns +inf for every argument below DBL_MIN, negative ones
+#   included (lgamma.hpp:106-107), so lbeta and beta, which add and
+#   subtract lgamma values (lbeta.hpp:39, beta.hpp:39), give +inf or NaN
+#   there (lbeta(-1.0, 1.0) is inf - inf);
+#   fmod is x - trunc(x/y)*y (fmod.hpp:40), so a quotient that rounds to
+#   an integer gives 0 where std::fmod is exact (fmod(1.0, 0.1) is 0.0,
+#   not 0.0999...).
+#
+# Not ported: upstream's tests, documentation, notebooks and CMake package
+# files, none of which consumers build against.
+[target.gcem]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
