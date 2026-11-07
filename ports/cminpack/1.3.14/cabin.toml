@@ -1,0 +1,109 @@
+[package.upstream]
+# The GitHub tag archive; the release publishes no other artifact.
+url = "https://github.com/devernay/cminpack/archive/refs/tags/v1.3.14.tar.gz"
+checksum = "sha256:10a76d214e01baa0480828fa473c2ef6209983c80941eca10b5a69df4de02cee"
+format = "tar.gz"
+strip-prefix = "cminpack-1.3.14"
+
+[package]
+name = "cabin-ports/cminpack"
+version = "1.3.14"
+# CopyrightMINPACK.txt carries the Minpack licence, unmodified, with its
+# acknowledgment clause.  The headers are the three CMake installs
+# (CMakeLists.txt:51-52).
+include = [
+  "CopyrightMINPACK.txt",
+  "include/cminpack.h",
+  "include/cminpackcpp.hpp",
+  "include/minpack.h",
+  "src",
+]
+# Upstream sets no standard; C11 is the oldest Cabin can lower for MSVC.
+c-standard = "c11"
+# cminpack.h and minpack.h are C89; cminpackcpp.hpp forwards callables
+# through rvalue references and std::addressof.
+interface-c-standard = "c89"
+interface-cxx-standard = "c++11"
+
+# The double-precision library CMake builds as `cminpack` (CMakeLists.txt:
+# 41-50, 134), static as by default (:30), from its source list: the C API
+# of cminpack.h and the Fortran-style API of minpack.h (src/f2c).  Static,
+# CMake defines CMINPACK_NO_DLL publicly (:152-156), for the library's own
+# compiles and its consumers', so that cminpack.h declares no dllimport on
+# Windows (cminpack.h:72-80).  The double variant needs no precision define:
+# cminpack.h defaults to double (:105-107).
+# CMake names the static file with its per-configuration postfix, _s in the
+# default Release build (:6-8, 87-103); the library is cminpack.
+#
+# Not ported: the float (cminpacks) and long double (cminpackld) variants of
+# the default CMINPACK_PRECISION "all" (:33, 58-80), the shared library, the
+# optional BLAS and LAPACK paths (USE_BLAS, USE_LAPACK; off by default,
+# :31-32), the CUDA sources, the Fortran and C examples and their tests.
+# Not reproduced: position-independent code (:205-209).
+[target.cminpack]
+type = "library"
+sources = [
+  "src/chkder.c",
+  "src/covar.c",
+  "src/covar1.c",
+  "src/dogleg.c",
+  "src/dpmpar.c",
+  "src/enorm.c",
+  "src/f2c/chkder_.c",
+  "src/f2c/covar_.c",
+  "src/f2c/dogleg_.c",
+  "src/f2c/dpmpar_.c",
+  "src/f2c/enorm_.c",
+  "src/f2c/fdjac1_.c",
+  "src/f2c/fdjac2_.c",
+  "src/f2c/hybrd1_.c",
+  "src/f2c/hybrd_.c",
+  "src/f2c/hybrj1_.c",
+  "src/f2c/hybrj_.c",
+  "src/f2c/lmder1_.c",
+  "src/f2c/lmder_.c",
+  "src/f2c/lmdif1_.c",
+  "src/f2c/lmdif_.c",
+  "src/f2c/lmpar_.c",
+  "src/f2c/lmstr1_.c",
+  "src/f2c/lmstr_.c",
+  "src/f2c/qform_.c",
+  "src/f2c/qrfac_.c",
+  "src/f2c/qrsolv_.c",
+  "src/f2c/r1mpyq_.c",
+  "src/f2c/r1updt_.c",
+  "src/f2c/rwupdt_.c",
+  "src/fdjac1.c",
+  "src/fdjac2.c",
+  "src/hybrd.c",
+  "src/hybrd1.c",
+  "src/hybrj.c",
+  "src/hybrj1.c",
+  "src/lmder.c",
+  "src/lmder1.c",
+  "src/lmdif.c",
+  "src/lmdif1.c",
+  "src/lmpar.c",
+  "src/lmstr.c",
+  "src/lmstr1.c",
+  "src/qform.c",
+  "src/qrfac.c",
+  "src/qrsolv.c",
+  "src/r1mpyq.c",
+  "src/r1updt.c",
+  "src/rwupdt.c",
+]
+include-dirs = ["include"]
+defines = ["CMINPACK_NO_DLL"]
+interface-defines = ["CMINPACK_NO_DLL"]
+links = "cminpack"
+
+# src/, private to the library's compiles as in CMake (CMakeLists.txt:
+# 158-163), for the minpackP.h that src/f2c includes.
+[profile]
+include-dirs = ["src"]
+
+# libm, which CMake links publicly where sqrt needs it (CMakeLists.txt:
+# 165-177).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
