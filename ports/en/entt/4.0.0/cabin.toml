@@ -1,0 +1,68 @@
+[package.upstream]
+# The v4.0.0 tag archive, the bytes ConanCenter's entt 4.0.0 recipe pins
+# (SHA-256) and vcpkg's entt port pins (SHA-512, REF v${VERSION}); the
+# release has no assets.
+url = "https://github.com/skypjack/entt/archive/refs/tags/v4.0.0.tar.gz"
+checksum = "sha256:32a2ff2c72cb047dfd57306006ef238820b70da7c6ce4e7e8a507ac63365212e"
+format = "tar.gz"
+strip-prefix = "entt-4.0.0"
+
+[package]
+name = "cabin-ports/entt"
+version = "4.0.0"
+include = ["LICENSE", "src"]
+
+# Header-only, as upstream's CMake interface target EnTT::EnTT
+# (CMakeLists.txt:86-96): src/ is the include root in the build tree, and
+# the install copies it to the include directory (:92-93, :336-343), so
+# consumers write `#include <entt/entt.hpp>`, or a module's header such as
+# <entt/entity/registry.hpp> (README.md:196-215).  C++20 is upstream's
+# interface requirement (:96, README.md:217-220).  "src" also ships the
+# MSVC debugger visualizers src/entt/natvis/*.natvis, which the install
+# copies too (:342) and ENTT_INCLUDE_NATVIS adds to the target (:120,
+# :234-268), and src/BUILD.bazel; no header includes them.  EnTT has no C
+# API.
+#
+# <entt/tools/davey.hpp>, and <entt/tools.hpp>, which includes it, are an
+# inspector for registries, storages, views and meta objects drawn with
+# Dear ImGui, outside <entt/entt.hpp>: davey.hpp includes <imgui.h> only
+# when the include path has it (src/entt/tools/davey.hpp:20-22) but calls
+# ImGui regardless, so their consumer supplies Dear ImGui's headers and
+# compiled sources itself, as upstream's testbed does
+# (testbed/CMakeLists.txt:21-28, :31-64).  The package declares no
+# Dear ImGui dependency, and the consumer test does not include them.
+#
+# The configuration macros keep their defaults, and a consumer defines them
+# before the first include (src/entt/config/config.h): ENTT_ID_TYPE,
+# ENTT_SPARSE_PAGE, ENTT_PACKED_PAGE, ENTT_USE_ATOMIC, ENTT_NO_EXCEPTION,
+# ENTT_ASSERT, ENTT_ASSERT_CONSTEXPR and ENTT_DISABLE_ASSERT, ENTT_NO_ETO,
+# ENTT_NO_MIXIN, ENTT_STANDARD_CPP, ENTT_USE_STL, ENTT_EXPORT with
+# ENTT_IMPORT and ENTT_HIDDEN, and ENTT_API or ENTT_API_EXPORT and
+# ENTT_API_IMPORT.  A consumer can also supply <entt/ext/config.h> and
+# <entt/ext/stl/*.hpp> on its own include path, which config.h:4-6 and the
+# src/entt/stl/ headers pick up with __has_include; the package ships none.
+# Under MSVC, every translation unit must agree on the version, the
+# exception mode, the spelling of ENTT_ID_TYPE, and ENTT_STANDARD_CPP
+# (#pragma detect_mismatch, config.h:125-130).
+# Upstream compiles its own tests with /bigobj, /EHsc, NOMINMAX and
+# _ENABLE_EXTENDED_ALIGNED_STORAGE (test/CMakeLists.txt:46-93); none of
+# them is part of the EnTT target, and the package adds none, so an MSVC
+# consumer whose translation unit exceeds the object file's section limit
+# (C1128) adds /bigobj itself.
+#
+# entt::radix_sort (src/entt/core/algorithm.hpp:72-139) cites the
+# Physically Based Rendering book's radix sort as its inspiration; it
+# shares the textbook LSD radix sort's structure but no code with pbrt-v3's
+# RadixSort.
+#
+# Not ported: single_include/entt/entt.hpp, the amalgamation of src/ that
+# scripts/amalgamate.py generates (scripts/config.json); the CMake package
+# files and the pkg-config file (ENTT_INSTALL, :272-346); the
+# off-by-default options that add -stdlib=libc++ (ENTT_USE_LIBCPP, :37,
+# :98-100) or sanitizer flags (ENTT_USE_SANITIZER, :38, :102-105) to the
+# target; the tests, the testbed, the docs, the include-what-you-use
+# mapping entt.imp, and the Bazel and Conan files.
+[target.entt]
+type = "header-only"
+include-dirs = ["src"]
+interface-cxx-standard = "c++20"
