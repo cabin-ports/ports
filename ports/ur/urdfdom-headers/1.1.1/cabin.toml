@@ -1,0 +1,42 @@
+[package.upstream]
+url = "https://github.com/ros/urdfdom_headers/archive/refs/tags/1.1.1.tar.gz"
+checksum = "sha256:b2ee5bffa51eea4958f64479b4fa273881d82a3bfa1d98686a16f8d8ca6c2350"
+format = "tar.gz"
+strip-prefix = "urdfdom_headers-1.1.1"
+# The headers ship code copied from gazebo, which is under Apache-2.0, but
+# the release ships no copy of that license, which Apache-2.0 section 4(a)
+# requires redistributors to give; gazebo-classic has no NOTICE file for
+# section 4(d).  The patch adds the license text, verbatim from
+# https://www.apache.org/licenses/LICENSE-2.0.txt, as LICENSE.Apache-2.0.
+patches = ["patches/0001-add-apache-2.0-license-for-gazebo-code.patch"]
+
+[package]
+name = "cabin-ports/urdfdom-headers"
+version = "1.1.1"
+# LICENSE is BSD-3-Clause, and every header carries the same terms.  Code
+# derived from gazebo-classic, Copyright 2011 Nate Koenig & Andrew Howard,
+# licensed under the Apache License 2.0 (LICENSE.Apache-2.0):
+# - include/urdf_model/pose.h:202-249 ("copied from gazebo", :202), from
+#   src/common/Quatern.cc's operator*, RotateVector and GetInverse
+#   (c2dd9b61);
+# - include/urdf_model/pose.h:105-113, :128-129 and :143-152, from
+#   Quatern.cc's GetAsEuler and SetFromEuler (c2dd9b61);
+# - include/urdf_model_state/model_state.h:62-103, from
+#   gazebo/common/Time.cc and Time.hh (4cbe0ceaf3).
+include = ["LICENSE", "LICENSE.Apache-2.0", "include", "patches"]
+
+# The INTERFACE target urdfdom_headers::urdfdom_headers and the whole
+# include/ tree upstream's CMake installs (CMakeLists.txt:29, :62-65),
+# which consumers reach as <urdf_model/model.h>: the install goes to
+# include/urdfdom_headers by default and the target points there
+# (:6-13).  The tree keeps the deprecated forwarder
+# urdf_model_state/twist.h, which includes urdf_model/twist.h after a
+# #warning (twist.h:38-40) that MSVC accepts only from Build Tools 14.50
+# under /std:c++latest; elsewhere on MSVC include <urdf_model/twist.h>.
+# The headers use std::shared_ptr and std::to_string and upstream's
+# CMake sets no standard, so C++11 is the floor.  Not ported: the CMake
+# config, pkg-config and uninstall files.
+[target.urdfdom-headers]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
