@@ -1,0 +1,57 @@
+[package.upstream]
+url = "https://github.com/ArashPartow/exprtk/archive/refs/tags/0.0.3.tar.gz"
+checksum = "sha256:f9dec6975e86c702033d6a65ba9a0368eba31a61b89d74f2b5d24457c02c8439"
+format = "tar.gz"
+strip-prefix = "exprtk-0.0.3"
+
+[package]
+name = "cabin-ports/exprtk"
+version = "0.0.3"
+include = ["license.txt", "exprtk.hpp"]
+
+# ExprTk, the single header exprtk.hpp at the top of upstream's tree, which
+# upstream asks to be placed on an include path (readme.txt:140-142), so
+# consumers write `#include <exprtk.hpp>`.  Upstream has no build system for
+# the library; its Makefile only builds the examples and tests
+# (Makefile:19-36).  C++11 is the floor here: upstream claims compilers
+# back to GCC 3.5 and MSVC 7.1 (readme.txt:158-171) and switches C++11
+# keywords on with __cplusplus (exprtk.hpp:70-90), but the header uses
+# long long throughout (exprtk.hpp:100-101, :1405-1406), which C++98 lacks
+# and upstream's Makefile tolerates with -Wno-long-long (Makefile:22), and
+# its Windows timer initializes members with C++11 braces
+# (exprtk.hpp:43597-43598).
+#
+# As upstream ships it:
+# - On Windows, near its end, the header defines NOMINMAX and
+#   WIN32_LEAN_AND_MEAN, unless already defined, and includes <windows.h>
+#   for exprtk::timer (exprtk.hpp:43573-43586), so both macros, and
+#   <windows.h>'s own macros such as near and far, stay defined in every
+#   translation unit that includes it.  A translation unit that includes
+#   <windows.h> before exprtk.hpp without NOMINMAX fails to compile, since
+#   the header calls std::min and std::max (e.g. exprtk.hpp:217, :936).
+# - MSVC reports __cplusplus as 199711L unless the consumer passes
+#   /Zc:__cplusplus, which Cabin does not, so MSVC builds take the header's
+#   pre-C++11 branches, including its own acosh, asinh and atanh formulas
+#   instead of std:: (exprtk.hpp:1341-1377).
+# - Build options are macros a consumer defines before the include,
+#   identically in every translation unit: exprtk_enable_debugging, the
+#   exprtk_disable_* switches and exprtk_enable_range_runtime_checks
+#   (readme.txt:5812-5903).  The language standard must match too, since
+#   __cplusplus selects inline definitions such as those above.
+# - The header throws exceptions, including to implement break, continue
+#   and return (exprtk.hpp:7340, :7374, :15355), and uses dynamic_cast, so
+#   consumers need exceptions and RTTI enabled.
+# - The file I/O package (exprtk::rtl::io::file, readme.txt:4303-4377)
+#   opens whatever path an expression names; exprtk_disable_rtl_io_file
+#   removes it (exprtk.hpp:43859).  It keeps a stream pointer in a T, so
+#   package<T> works only where sizeof(T) == sizeof(void*): constructing it
+#   throws std::runtime_error for a narrower T, such as float on 64-bit
+#   targets, and fails an assert for a wider one (exprtk.hpp:44073-44086,
+#   :44103-44105, :44322-44329).
+#
+# Not ported: upstream's examples, tests, benchmark, readme and Makefile,
+# none of which consumers build against.
+[target.exprtk]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
