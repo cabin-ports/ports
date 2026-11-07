@@ -14,7 +14,6 @@ qhull 8.0.2 upstream-commit backport with a COPYING cond. 3 modification notice 
 octomap 1.10.1 non-upstream WIN32 -> _WIN32 patch in a consumer-compiled header; awaiting a publication decision
 xtl 0.8.2 licence text added by a patch; awaiting a publication decision
 json-schema-validator 2.4.1 upstream attribution questions (embedded JSON Patch and draft-07 schemas) awaiting a publication decision
-mimalloc 3.5.3 non-upstream weak get_new_handler visibility patch; option A vs B awaiting a publication decision
 parallel-hashmap 2.0.0 licence text added by a patch; awaiting a publication decision
 mapbox-geometry 2.0.3 non-upstream patch (unmerged upstream PR mapbox/geometry.hpp#75, clang ambiguity in geometry_io.hpp) awaiting a publication decision
 variant-lite 3.0.0 non-upstream include patch awaiting a publication decision; upstream converting operator= skips the replaced value's destructor (nonstd variant, C++11+, variant.hpp:1594-1600)
