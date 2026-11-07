@@ -10,46 +10,9 @@ version = "1.6.0"
 # LICENSE names AUTHORS for the contributors.
 include = ["AUTHORS", "LICENSE", "include"]
 
-# maddy, a Markdown-to-HTML parser, header-only.  Upstream's CMake installs
-# include/ (CMakeLists.txt:73) and its INTERFACE target adds only that
-# directory; consumers write `#include <maddy/parser.h>` (blockparser.h,
-# htmlparser.h and paragraphparser.h use std::shared_ptr without including
-# <memory>).  It requires C++14 (CMakeLists.txt:32-39; parserconfig.h uses
-# binary literals) and parses with std::regex; it has no dependencies or
-# link libraries.  Without a ParserConfig, or with a default one, every
-# parser except the HTML and LaTeX block parsers runs (parserconfig.h:47,
-# parser.h:238-243, parser.h:305-309); a config's enabledParsers turns
-# parsers on and off.  Upstream limitations, not patched.  Do not feed it
-# untrusted input: maddy escapes no HTML, in text or in code
-# (docs/definitions.md:3-5, upstream issue #89), and its inline parsers run
-# std::regex lookaheads over the rest of the line from every position
-# (strongparser.h:45-48, emphasizedparser.h:44, italicparser.h:42,
-# strikethroughparser.h:42), so parsing time grows quadratically with line
-# length: in local -O2 runs a 10,000-character line took 19-39 s as plain
-# text and 64-112 s with markup, with libc++ and libstdc++ alike.  The same
-# lookaheads leave a marker unparsed when a backtick or <code> follows it
-# later in the line, and an `_..._` pair becomes <em> even inside words and
-# link or image URLs, as emphasis runs after the link and image parsers
-# (parser.h:185-203).  The table parser does not validate table structure,
-# so it must not be used on untrusted Markdown or on tables not known to be
-# well formed; consumers turn it off by clearing maddy::types::TABLE_PARSER
-# from a ParserConfig's enabledParsers (parserconfig.h:43,
-# parser.h:279-281).  A quote whose last paragraph or list ends the input
-# produces no output unless an empty line follows it (parser.h:155-165,
-# quoteparser.h:92-103, upstream issue #87).  A code block, table or LaTeX
-# block left unclosed at the end is dropped, as is an HTML block, which
-# runs until a line ending in `>` is followed by an empty line
-# (htmlparser.h:81-96).  Tables use maddy's own `|table>` ... `|<table`
-# syntax with `- | - | -` as the only header and footer separator
-# (docs/definitions.md:341-386); an ordered list has to start at `1.`
-# (orderedlistparser.h:58); and a `$$` line on its own opens and closes a
-# LaTeX block at once (latexblockparser.h:101-112).  Input is split at "\n"
-# only, so convert CRLF to LF first: a "\r" left at a line end keeps
-# headlines, lists, quotes, code blocks and rules from being recognised and
-# empty lines from ending a paragraph, so with the default parsers the
-# input becomes one paragraph, with each "\r" turned into "<br>"
-# (breaklineparser.h:41-44).  Not ported: upstream's tests, benchmarks,
-# documentation and CMake files.
+# Do not feed maddy untrusted input: it escapes no HTML, its table parser
+# does not validate table structure, and its inline parsers take time
+# quadratic in line length.
 [target.maddy]
 type = "header-only"
 include-dirs = ["include"]
