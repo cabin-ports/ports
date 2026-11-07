@@ -92,8 +92,7 @@ int main() {
 
   // Edits reach the next render.  A style sheet overrides the markup's
   // presentation attributes, but not an attribute set through the API,
-  // which lunasvg ranks like an !important declaration
-  // (svgelement.cpp:148-154, svgparser.cpp:524).
+  // which lunasvg ranks like an !important declaration.
   left.setAttribute("fill", "#00ff00");
   CHECK(pixel(doc->renderToBitmap(), 5, 5) == 0xff00ff00u);
   doc->applyStyleSheet("rect { fill: yellow; fill-opacity: 1 }");

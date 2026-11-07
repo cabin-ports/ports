@@ -94,7 +94,7 @@ int main() {
   CHECK(meshopt_decodeIndexBuffer(decoded.data(), decoded.size(),
                                   encoded.data(), encoded.size()) == 0);
   // The codec keeps the triangle order but may rotate each triangle,
-  // keeping its winding (README.md:447).
+  // keeping its winding.
   bool same_triangles = true;
   for (size_t t = 0; t < decoded.size(); t += 3) {
     bool match = false;
@@ -107,7 +107,7 @@ int main() {
   }
   CHECK(same_triangles);
 
-  // The quantizers round to nearest and clamp (meshoptimizer.h:1170-1192).
+  // The quantizers round to nearest and clamp.
   CHECK(meshopt_quantizeUnorm(1.0f, 10) == 1023);
   CHECK(meshopt_quantizeUnorm(0.5f, 8) == 128);
   CHECK(meshopt_quantizeUnorm(-2.0f, 8) == 0);

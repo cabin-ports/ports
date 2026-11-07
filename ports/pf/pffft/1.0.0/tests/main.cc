@@ -21,7 +21,7 @@ void check(bool ok, int line, const char *what) {
 
 const double kPi = 3.14159265358979323846;
 
-// pffft wants SIMD-aligned buffers (pffft.h:67-73).
+// pffft wants SIMD-aligned buffers.
 class Floats {
  public:
   explicit Floats(int count)
@@ -50,7 +50,7 @@ bool near(float actual, double expected, double tolerance) {
 
 int main() {
   // A unit impulse at n = 1 has X[k] = e^(-2 pi i k/N) under the forward
-  // transform (fftpack.h:745).
+  // transform.
   const int N = 32;
   PFFFT_Setup *setup = pffft_new_setup(N, PFFFT_COMPLEX);
   CHECK(setup != NULL);
@@ -63,7 +63,7 @@ int main() {
     CHECK(near(spectrum[2 * k + 1], -std::sin(2 * kPi * k / N), 1e-5));
   }
 
-  // Input and output may alias (pffft.h:125, :134).
+  // Input and output may alias.
   Floats in_place(2 * N);
   std::memcpy(in_place.get(), x.get(), 2 * N * sizeof(float));
   pffft_transform_ordered(setup, in_place.get(), in_place.get(), NULL,
@@ -71,7 +71,7 @@ int main() {
   CHECK(std::memcmp(in_place.get(), spectrum.get(), 2 * N * sizeof(float)) ==
         0);
 
-  // Unscaled: the inverse yields N times the impulse (pffft.h:117).
+  // Unscaled: the inverse yields N times the impulse.
   pffft_transform_ordered(setup, spectrum.get(), back.get(), NULL,
                           PFFFT_BACKWARD);
   for (int n = 0; n < 2 * N; ++n) {

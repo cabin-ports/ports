@@ -1,12 +1,4 @@
-// Parses a document into the DOM and queries it (numbers at the int,
-// int64 and uint64 boundaries, escapes decoded to UTF-8), parses doubles
-// at full precision, builds and edits a document, writes it with Writer
-// (round-trip doubles) and PrettyWriter and parses the output back,
-// parses in situ, checks parse errors with their offsets and English
-// messages, UTF-8 validation and transcoding to UTF-16, addresses values
-// by JSON Pointer, validates against a JSON Schema with a pattern, and
-// drives a SAX handler and a Writer through Reader, with early
-// termination.  C++98, the floor of the headers.
+// C++98, the floor of the headers.
 #include "rapidjson/document.h"
 #include "rapidjson/error/en.h"
 #include "rapidjson/pointer.h"

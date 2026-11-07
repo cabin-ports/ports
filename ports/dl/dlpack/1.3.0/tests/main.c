@@ -19,7 +19,7 @@ static int failures = 0;
         }                                                                   \
     } while (0)
 
-/* The size of a tensor's contents, as dlpack.h:237-244 defines it. */
+/* The size of a tensor's contents, as dlpack.h defines it. */
 static size_t data_size(const DLTensor *t) {
     size_t size = 1;
     int32_t i;

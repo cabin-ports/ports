@@ -1,11 +1,5 @@
-// itlib at its C++11 floor: small_vector's static and dynamic buffers,
-// static_vector's capacity error, flat_map (also over a static_vector) and
-// flat_set ordering and lookup, expected, span and stride_span views,
-// dynamic_bitset, pod_vector recasts, the qalgorithm wrappers, ufunction with
-// a move-only callable, sentry, any with move-only and over-aligned values,
-// ref_ptr, time_t's UTC conversions, the stream buffers, throw_ex, bit_cast,
-// make_ptr, data_mutex, and atomic_shared_ptr_storage.  The other C++11
-// headers are included so that each compiles at the floor.
+// itlib at its C++11 floor.  The C++11 headers not exercised below are
+// included so that each compiles at the floor.
 #include <chrono>
 #include <cstddef>
 #include <cstdint>
@@ -73,7 +67,7 @@ std::vector<int> ints(const Range& r) {
 }
 
 void test_small_vector() {
-  // The walk-through in small_vector.hpp:74-81: a static capacity of 4 and
+  // small_vector.hpp's walk-through: a static capacity of 4 and
   // a return to the static buffer once the size drops below 5.
   itlib::small_vector<int, 4, 5> v;
   v.resize(2);
@@ -99,7 +93,7 @@ void test_static_vector() {
   s.push_back(2);
   s.push_back(3);
   CHECK(s.size() == 3 && s.capacity() == 3);
-  // Exceeding the capacity throws by default (static_vector.hpp:126-127).
+  // Exceeding the capacity throws by default.
   bool threw = false;
   try {
     s.push_back(4);
@@ -130,7 +124,7 @@ void test_flat_containers() {
   m.erase("fig");
   CHECK(m.find("fig") == m.end() && m.size() == 2);
 
-  // A static_vector as the underlying container (flat_map.hpp:69-70).
+  // A static_vector as the underlying container.
   itlib::flat_map<int, char, std::less<int>,
                   itlib::static_vector<std::pair<int, char>, 4>>
       sm;
@@ -282,7 +276,7 @@ void test_any_and_pointers() {
   CHECK(*copy.tdata<std::string>() == "hello" && copy.data() != a.data());
   a.emplace<std::unique_ptr<int>>(new int(9));
   CHECK(**a.tdata<std::unique_ptr<int>>() == 9);
-  // Copying a non-copyable value throws std::bad_cast (any.hpp:46-47).
+  // Copying a non-copyable value throws std::bad_cast.
   bool threw = false;
   try {
     itlib::any<> again = a;

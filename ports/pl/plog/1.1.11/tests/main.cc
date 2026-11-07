@@ -1,11 +1,4 @@
-// The C++ consumer: plog in C++11 - severity filtering that skips the
-// stream expression, the conditional macros, separate and chained logger
-// instances, DynamicAppender, record streaming (containers, pairs, null
-// strings, printf, PLOG_PRINT_VAR, hexdump and ascdump), the text, CSV,
-// function and message-only formatters, severity names, a
-// RollingFileAppender that keeps a bounded set of CSV files, the file
-// initializer that picks its formatter by extension, and, on Windows, the
-// event-log source registry that EventLogAppender uses.
+// The C++ consumer: plog in C++11.
 #include <plog/Appenders/DynamicAppender.h>
 #include <plog/Appenders/RollingFileAppender.h>
 #include <plog/Formatters/CsvFormatter.h>

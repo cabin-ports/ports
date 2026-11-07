@@ -62,7 +62,7 @@ int main() {
   CHECK(gsl_lite::narrow_failfast<short>(1000) == 1000);
 #if gsl_HAVE(EXCEPTIONS)
   // narrow<>() throws narrowing_error when the value changes, so it needs
-  // exceptions (gsl-lite.hpp:3001).
+  // exceptions.
   CHECK(gsl_lite::narrow<int>(42L) == 42);
   bool threw = false;
   try {

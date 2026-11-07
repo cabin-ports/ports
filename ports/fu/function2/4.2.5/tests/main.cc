@@ -1,10 +1,4 @@
-// The C++ consumer: function2 in C++14 - fu2::function with a const
-// signature and with several overloads, copies that clone their state,
-// assignment and swap, fu2::unique_function owning a move-only callable,
-// an rvalue-qualified signature, a non-owning fu2::function_view,
-// conversion to and from std::function with its empty state, in-place
-// storage against fu2::capacity_none counted through an allocator,
-// fu2::overload, and fu2::bad_function_call from an empty call.
+// The C++ consumer: function2 in C++14.
 #include <function2/function2.hpp>
 
 #include <cstddef>

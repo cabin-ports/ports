@@ -43,13 +43,12 @@ static float *floats(int count) {
 static void check_real(void) {
   /* x[n] = 1 + 2 cos(2 pi 5n/N) + sin(2 pi 3n/N) + 0.5 (-1)^n
             + 0.75 sin(2 pi 13n/N) + 1.5 cos(2 pi 20n/N) - sin(2 pi 27n/N).
-     With the forward transform X[k] = sum x[n] e^(-2 pi i kn/N)
-     (fftpack.h:205-211), its spectrum is X[0] = N, X[5] = N, X[3] = -iN/2,
-     X[N/2] = N/2, X[13] = -3iN/8, X[20] = 3N/4 and X[27] = iN/2: energy
-     in each quarter of the spectrum, which pffft_zreorder places
-     separately (pffft.c:1331-1337).  The canonical real order holds X[0]
-     and X[N/2] first, then (Re, Im) of X[1] .. X[N/2-1]
-     (pffft.h:139-146). */
+     With the forward transform X[k] = sum x[n] e^(-2 pi i kn/N), its
+     spectrum is X[0] = N, X[5] = N, X[3] = -iN/2, X[N/2] = N/2,
+     X[13] = -3iN/8, X[20] = 3N/4 and X[27] = iN/2: energy in each quarter
+     of the spectrum, which pffft_zreorder places separately.  The canonical
+     real order holds X[0] and X[N/2] first, then (Re, Im) of
+     X[1] .. X[N/2-1]. */
   enum { N = 64 };
   PFFFT_Setup *setup = pffft_new_setup(N, PFFFT_REAL);
   float *x = floats(N), *spectrum = floats(N), *expected = floats(N);
@@ -75,14 +74,14 @@ static void check_real(void) {
   pffft_transform_ordered(setup, x, spectrum, NULL, PFFFT_FORWARD);
   CHECK(near_all(spectrum, expected, N, 1e-3f * N));
 
-  /* The ordered transform is the internal one followed by pffft_zreorder
-     (pffft.c:1663-1664), so the two agree bit for bit; a caller's work
-     area in place of the stack changes nothing. */
+  /* The ordered transform is the internal one followed by pffft_zreorder,
+     so the two agree bit for bit; a caller's work area in place of the
+     stack changes nothing. */
   pffft_transform(setup, x, internal, work, PFFFT_FORWARD);
   pffft_zreorder(setup, internal, reordered, PFFFT_FORWARD);
   CHECK(memcmp(reordered, spectrum, N * sizeof(float)) == 0);
 
-  /* Unscaled: backward(forward(x)) = N x (pffft.h:117). */
+  /* Unscaled: backward(forward(x)) = N x. */
   pffft_transform_ordered(setup, spectrum, back, NULL, PFFFT_BACKWARD);
   for (n = 0; n < N; ++n) {
     scaled[n] = x[n] * N;
@@ -137,7 +136,7 @@ static void check_complex(void) {
 
 static void check_convolution(void) {
   /* Circular convolution through the internal-order spectra, accumulated
-     in two halves (pffft.h:152-164), against the direct sum. */
+     in two halves, against the direct sum. */
   enum { N = 96 };
   PFFFT_Setup *setup = pffft_new_setup(N, PFFFT_REAL);
   float *a = floats(N), *b = floats(N), *fa = floats(N), *fb = floats(N);
@@ -177,15 +176,15 @@ static void check_convolution(void) {
 static void check_setup_rules(void) {
   void *p = pffft_aligned_malloc(100);
 
-  /* Lengths must factor into 2, 3 and 5 (pffft.h:62-65, :104-105). */
+  /* Lengths must factor into 2, 3 and 5. */
   CHECK(pffft_new_setup(32 * 7, PFFFT_REAL) == NULL);
   CHECK(pffft_new_setup(-32, PFFFT_REAL) == NULL);
-  /* SIMD-compatible alignment: 16 bytes on x86 (pffft.h:67-69). */
+  /* SIMD-compatible alignment: 16 bytes on x86. */
   CHECK(p != NULL && (uintptr_t)p % 16 == 0);
   pffft_aligned_free(p);
 #if defined(__x86_64__) || defined(_M_X64) || defined(__aarch64__) || \
     defined(_M_ARM64)
-  /* SSE or NEON is chosen on these targets (pffft.c:99-112). */
+  /* SSE or NEON is chosen on these targets. */
   CHECK(pffft_simd_size() == 4);
 #endif
 }

@@ -1,9 +1,9 @@
-/* The C consumer: upstream's own small test fields (tests/testzfp.cpp:
- * 43-267, 293-308) compressed in each mode and held to the data checksums,
- * compressed sizes and maximum errors upstream's test expects
- * (testzfp.cpp:792-961); bit-exact reversible round trips of both integer
- * types in one to four dimensions; a full-header round trip and a
- * corrupt header; the low-level block calls; and the serial build. */
+/* The C consumer: upstream's own small test fields (tests/testzfp.cpp)
+ * compressed in each mode and held to the data checksums, compressed sizes
+ * and maximum errors upstream's test expects; bit-exact reversible round
+ * trips of both integer types in one to four dimensions; a full-header round
+ * trip and a corrupt header; the low-level block calls; and the serial
+ * build. */
 #include <zfp.h>
 
 #include <float.h>
@@ -157,7 +157,7 @@ static size_t round_trip(zfp_stream* zfp, zfp_field* in, void* out, unsigned cha
   return bytes;
 }
 
-/* testzfp.cpp:792-961, the small arrays: [type][dims][...]. */
+/* testzfp.cpp's small arrays: [type][dims][...]. */
 static const uint32 checksums[2][4] = {
   { 0x54174c44u, 0x86609589u, 0xfc0a6a76u, 0xa3481e00u },
   { 0x7d257bb6u, 0x294bb210u, 0x68614d26u, 0xf6bd3a21u },

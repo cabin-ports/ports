@@ -227,7 +227,7 @@ static void test_image(void)
 
 int main(void)
 {
-    /* Upstream's version string was not updated for 1.2 (lib/quirc.c:23). */
+    /* Upstream's version string was not updated for 1.2. */
     CHECK(strcmp(quirc_version(), "1.0") == 0);
     test_bitmap();
     test_image();

@@ -152,8 +152,7 @@ void ownership() {
         "a move-only alternative moves");
 
   // Visiting an rvalue variant hands the visitor an rvalue alternative,
-  // 1.2.0's "moving values out" (variant.hpp:304-310); a copy would not
-  // compile.
+  // 1.2.0's "moving values out"; a copy would not compile.
   struct take {
     std::unique_ptr<int> operator()(std::unique_ptr<int>&& p) const {
       return std::move(p);
@@ -207,7 +206,7 @@ void optional() {
   check(!o, "an empty optional is false");
   o = std::string("set");
   check(bool(o) && o.get() == "set", "an assigned optional holds its value");
-  // emplace() brace-initializes T (optional.hpp:61-65).
+  // emplace() brace-initializes T.
   o.emplace("zz");
   check(*o == "zz", "emplace()");
   o.reset();
@@ -217,7 +216,7 @@ void optional() {
 }  // namespace
 
 int main() {
-  // The 1.2.0 tag's header still reports 1.1.0 (variant.hpp:55-59).
+  // The 1.2.0 tag's header still reports 1.1.0.
   static_assert(VARIANT_MAJOR_VERSION == 1 && VARIANT_MINOR_VERSION == 1 &&
                     VARIANT_PATCH_VERSION == 0 && (VARIANT_VERSION) == 100100,
                 "version macros");

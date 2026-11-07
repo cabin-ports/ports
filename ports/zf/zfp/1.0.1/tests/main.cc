@@ -1,10 +1,6 @@
 // The C++ consumer: zfp's compressed arrays built from upstream's small
-// test fields and held to the construction errors and differencing results
-// upstream's test expects (tests/testzfp.cpp:595-632, 701-747, 964-1005);
-// fixed-rate storage; serialization through a header's bytes and
-// zfp::array::construct; mismatched headers and short buffers thrown as
-// zfp::exception; a read-only fixed-accuracy const_array3; and zfp.hpp's
-// templated block codec.
+// test fields and held to the results upstream's test expects
+// (tests/testzfp.cpp), and zfp.hpp's templated block codec.
 #include <zfp.hpp>
 #include <zfp/array2.hpp>
 #include <zfp/array3.hpp>
@@ -31,7 +27,7 @@ void check(bool pass, const char* what)
   }
 }
 
-// testzfp.cpp's refinement and gen_array_2d and gen_array_3d (:43-236) for
+// testzfp.cpp's refinement and gen_array_2d and gen_array_3d for
 // 2^12 scalars: 64^2 or 16^3.
 template <typename Scalar>
 std::vector<Scalar> generate(unsigned dims, size_t edge)

@@ -47,10 +47,9 @@ template <> struct into<app::endpoint> {
 
 }  // namespace toml
 
-// TOML11_DEFINE_CONVERSION_NON_INTRUSIVE (conversion.hpp:113-201) needs a
-// conforming preprocessor: upstream gives MSVC consumers /Zc:preprocessor
-// (src/CMakeLists.txt:147-150) and drops the macro where there is none
-// (:144-146).  A Cabin manifest cannot pass the flag, so the macro is
+// TOML11_DEFINE_CONVERSION_NON_INTRUSIVE needs a conforming preprocessor:
+// upstream gives MSVC consumers /Zc:preprocessor and drops the macro where
+// there is none.  A Cabin manifest cannot pass the flag, so the macro is
 // tested only where _MSVC_TRADITIONAL is unset or 0; the output says which.
 #if !defined(_MSVC_TRADITIONAL) || !_MSVC_TRADITIONAL
 #define TEST_NON_INTRUSIVE 1

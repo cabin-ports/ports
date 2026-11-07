@@ -30,7 +30,7 @@ void check(bool ok, int line, const char* what) {
 #define CHECK(expr) check((expr), __LINE__, #expr)
 
 void lexical() {
-  // Redundant separators are dropped on construction (README.md:606-608).
+  // Redundant separators are dropped on construction.
   const fs::path archive("pkg/./lib//libz.tar.gz");
   CHECK(archive.generic_string() == "pkg/./lib/libz.tar.gz");
   CHECK(archive.filename().string() == "libz.tar.gz");
@@ -70,7 +70,7 @@ void lexical() {
 const std::string kUnicodeName = "\xe2\x82\xac-\xe6\x97\xa5\xe6\x9c\xac.txt";
 
 void unicode() {
-  // std::string is UTF-8 on every platform (README.md:551-559).
+  // std::string is UTF-8 on every platform.
   const fs::path name = fs::u8path(kUnicodeName);
   CHECK(name.u8string() == kUnicodeName);
   CHECK(name.wstring() == L"\u20ac-\u65e5\u672c.txt");
@@ -79,8 +79,7 @@ void unicode() {
   const fs::path emoji(U"\U0001F600");
   CHECK(emoji.u8string() == "\xf0\x9f\x98\x80");
   CHECK(emoji.u16string() == u"\U0001F600");
-  // Invalid UTF-8 becomes U+FFFD unless GHC_RAISE_UNICODE_ERRORS is defined
-  // (filesystem.hpp:1584-1598).
+  // Invalid UTF-8 becomes U+FFFD unless GHC_RAISE_UNICODE_ERRORS is defined.
   CHECK(fs::path(std::string(1, '\xff')).u16string() == u"\ufffd");
 }
 
@@ -155,7 +154,7 @@ void files() {
   CHECK(drift < std::chrono::seconds(1) && drift > -std::chrono::seconds(1));
 
 #ifndef _WIN32
-  // Windows permissions are synthesized (README.md:643-653).
+  // Windows permissions are synthesized.
   fs::permissions(hello, fs::perms::owner_read | fs::perms::owner_write,
                   fs::perm_options::replace);
   CHECK(fs::status(hello).permissions() ==

@@ -40,7 +40,7 @@ std::vector<unsigned char> encode() {
   check(vorbis_encode_setup_managed(&vi, 1, kRate, -1, 48000, -1) == 0,
         "encode_setup_managed");
   // vorbis_encode_ctl() refuses this request once setup_init has run: its
-  // low nibble is nonzero, which vorbisenc.c:1026-1028 takes for a write.
+  // low nibble is nonzero, which vorbisenc.c takes for a write.
   ovectl_ratemanage2_arg manage;
   check(vorbis_encode_ctl(&vi, OV_ECTL_RATEMANAGE2_GET, &manage) == 0,
         "OV_ECTL_RATEMANAGE2_GET");

@@ -99,8 +99,7 @@ int main() {
   CHECK(close_to(box.y, -10) && close_to(box.h, 20));
   CHECK(close_to(box.x, 0) && close_to(box.w, 10, 0.01f));
 
-  // UTF-16 within the BMP (1.3.3 does not join surrogate pairs:
-  // source/plutovg-font.c:92-93 tests the lead unit twice) and UTF-32.
+  // UTF-16 within the BMP (1.3.3 does not join surrogate pairs) and UTF-32.
   const char16_t utf16[] = u"A€ж";
   const char32_t utf32[] = U"\U0001F600z";
   std::vector<plutovg_codepoint_t> codepoints;

@@ -1,4 +1,4 @@
-// Opt into the vector API the host has, as README.md:106-133 shows.
+// Opt into the vector API the host has, as the README shows.
 #if defined(__x86_64__) || defined(_M_X64)
 #define LIBDIVIDE_SSE2
 #elif defined(__aarch64__)
@@ -88,7 +88,7 @@ void check_type(std::uint64_t bits) {
     T d = static_cast<T>(bits);
     if (d == 0) return;
     check<T, libdivide::BRANCHFULL>(d);
-    // An unsigned branchfree divider rejects 1 (libdivide.h:833).
+    // An unsigned branchfree divider rejects 1.
     if (std::numeric_limits<T>::is_signed || d != 1) check<T, libdivide::BRANCHFREE>(d);
 }
 
@@ -148,7 +148,7 @@ int main() {
         ++failures;
     }
 
-    // README.md:14-50: one divider reused across a vector.
+    // The README's example: one divider reused across a vector.
     std::vector<std::int64_t> numbers;
     for (std::int64_t i = 0; i < 100; ++i) numbers.push_back(i * i * 7919 - 40000);
     const libdivide::divider<std::int64_t> fast_d(-37);
