@@ -1,0 +1,41 @@
+[package.upstream]
+url = "https://github.com/Neargye/nameof/archive/refs/tags/v0.11.0.tar.gz"
+checksum = "sha256:df6b6c30dfd7dd41995af4fc30d341b318d048465aceebbf861fc441fa6b051d"
+format = "tar.gz"
+strip-prefix = "nameof-0.11.0"
+
+[package]
+name = "cabin-ports/nameof"
+version = "0.11.0"
+include = ["LICENSE", "include"]
+
+# Neargye's nameof, header-only, as upstream's CMake interface target
+# nameof::nameof: include/ is the include root, so consumers write
+# `#include <nameof.hpp>` (CMakeLists.txt:18-26).  C++17 is upstream's
+# floor: README.md:9 and :153, and the target requires cxx_std_17
+# (CMakeLists.txt:28).
+#
+# What works depends on the compiler, as upstream documents it.  Type,
+# member and pointer names come from compiler-specific function signatures,
+# so full type spellings differ between compilers (README.md:76,
+# doc/limitations.md:3).  The header defines NAMEOF_*_SUPPORTED for each
+# feature, and an unsupported API fails to compile (doc/reference.md:26-36).
+# NAMEOF_MEMBER and NAMEOF_POINTER need C++20 on MSVC, so a consumer at
+# C++17 there does not get them; the RTTI APIs need RTTI
+# (doc/reference.md:91).  Automatic run-time lookup of ordinary enum values
+# (NAMEOF_ENUM, NAMEOF_ENUM_OR) covers only [NAMEOF_ENUM_RANGE_MIN,
+# NAMEOF_ENUM_RANGE_MAX], -128 to 127 by default and clamped to the
+# underlying type; flag names and customize::enum_name are not limited by it.
+# A consumer widens the range by defining those macros identically in every
+# translation unit, or for one enum by specializing
+# nameof::customize::enum_range (doc/limitations.md:41-77).  With C++26
+# standard reflection the enum APIs ignore the range unless every
+# translation unit defines NAMEOF_FORCE_COMPILER_SPECIFIC_REFLECTION; mixing
+# the two violates the ODR (doc/limitations.md:7-17).
+#
+# Not ported: upstream's examples, tests and CMake/pkg-config package files,
+# none of which consumers build against.
+[target.nameof]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
