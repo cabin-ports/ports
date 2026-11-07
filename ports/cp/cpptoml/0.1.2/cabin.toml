@@ -1,0 +1,46 @@
+[package.upstream]
+url = "https://github.com/chadaustin/cpptoml/archive/refs/tags/v0.1.2.tar.gz"
+checksum = "sha256:beda37e94f9746874436c8090c045fd80ae6f8a51f7c668c932a2b110a4fc277"
+format = "tar.gz"
+strip-prefix = "cpptoml-0.1.2"
+
+[package]
+name = "cabin-ports/cpptoml"
+version = "0.1.2"
+include = ["LICENSE", "include"]
+
+# cpptoml, a header-only TOML parser targeting TOML v0.5.0 (README.md:4):
+# an array must hold one type, except that integers may follow a float
+# (cpptoml.h:3045-3054).  Version 0.1.2 exists only on the fork
+# chadaustin/cpptoml, which vcpkg builds: its v0.1.2 tag is the original
+# skystrife/cpptoml's last release, v0.1.1, plus one commit (2cf2150)
+# adding `#include <limits>` to include/cpptoml.h.  Upstream's CMake
+# INTERFACE target adds only include/, so consumers write
+# `#include <cpptoml.h>`; the README requires C++11 and the examples build
+# as C++11.  It has no link libraries: ENABLE_LIBCXX, which makes upstream's
+# CMake build with libc++ and link libdl and libc++abi under clang, is a
+# build-environment option that vcpkg also turns off.  The consumer may
+# define CPPTOML_USE_MAP (std::map tables instead of std::unordered_map,
+# cpptoml.h:44-53; every translation unit has to agree) and CPPTOML_NO_RTTI
+# (cpptoml.h:57).  parse_file opens the file with boost::nowide::ifstream
+# or nowide::ifstream only when BOOST_NOWIDE_FSTREAM_INCLUDED_HPP or
+# NOWIDE_FSTREAM_INCLUDED_HPP is defined (cpptoml.h:3222-3228);
+# Boost.Nowide (1.92.0, as in cabin-ports/boost-nowide) guards its
+# fstream.hpp with BOOST_NOWIDE_FSTREAM_HPP_INCLUDED instead, so including
+# it leaves parse_file on std::ifstream.  get_as<double> also returns an
+# integer as a double (cpptoml.h:693-716), a narrower integer type throws
+# std::overflow_error or std::underflow_error for a value it cannot hold
+# (cpptoml.h:1218-1263), and the *_qualified lookups split their key at
+# every "." (README.md:146-148).  Floats are parsed with the current C
+# locale's decimal point (cpptoml.h:2818-2822).  The writer escapes control
+# characters other than \b, \t, \n, \f and \r as "\u" and unpadded hex
+# (cpptoml.h:3449-3455), so a string holding one is written as an invalid
+# or different string.  Licence: MIT (LICENSE); cpptoml.h:1838-1872 credits
+# SO question 6089231; compared with answer 6089413, no copied comments or
+# identifiers, different control flow and lone-CR behaviour.  Not ported:
+# upstream's README, examples, Doxygen, CMake and CI files, and its
+# deps/meta-cmake submodule, which the archive leaves empty.
+[target.cpptoml]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
