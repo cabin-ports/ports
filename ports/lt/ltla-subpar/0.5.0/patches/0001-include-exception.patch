@@ -1,0 +1,20 @@
+--- a/include/subpar/range.hpp
++++ b/include/subpar/range.hpp
+@@ -7,6 +7,7 @@
+ #ifndef SUBPAR_CUSTOM_PARALLELIZE_RANGE
+ #include <vector>
+ #include <stdexcept>
++#include <exception>
+ #include <thread>
+ #endif
+ 
+--- a/include/subpar/simple.hpp
++++ b/include/subpar/simple.hpp
+@@ -6,6 +6,7 @@
+ #ifndef SUBPAR_CUSTOM_PARALLELIZE_SIMPLE
+ #include <vector>
+ #include <stdexcept>
++#include <exception>
+ #include <thread>
+ #include <type_traits>
+ #endif

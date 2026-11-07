@@ -1,0 +1,55 @@
+[package.upstream]
+# The v0.5.0 tag archive, the bytes vcpkg's ltla-subpar port pins
+# (SHA-512, REF v${VERSION}); the release has no assets.
+url = "https://github.com/LTLA/subpar/archive/refs/tags/v0.5.0.tar.gz"
+checksum = "sha256:e86fc2af25625653cfaa0eca583f935ae3c5d1104868ff55df508472972cf8ac"
+format = "tar.gz"
+strip-prefix = "subpar-0.5.0"
+# range.hpp and simple.hpp use std::exception_ptr, current_exception and
+# rethrow_exception but do not include <exception>, so with libc++ above
+# C++20, which drops transitive includes, std::exception_ptr is
+# incomplete and the headers do not compile.  The
+# patch adds the `#include <exception>` lines of upstream commit 9dea49e,
+# released as v0.5.2, and nothing else.
+patches = ["patches/0001-include-exception.patch"]
+
+# Named after vcpkg's port and upstream's CMake package, ltla_subpar
+# (CMakeLists.txt:52-67).
+[package]
+name = "cabin-ports/ltla-subpar"
+version = "0.5.0"
+include = ["LICENSE", "include", "patches"]
+
+# subpar's headers include "sanisizer/sanisizer.hpp" (range.hpp:13), and
+# upstream's target links ltla::sanisizer (CMakeLists.txt:19-27) at
+# version 0.2.0 or later (:24; cmake/Config.cmake.in:4), which its
+# fetched copy annotates as ^0.2.0 (extern/CMakeLists.txt:6).
+[dependencies]
+"cabin-ports/ltla-sanisizer" = "^0.2"
+
+# Header-only, as upstream's CMake interface target ltla::subpar
+# (CMakeLists.txt:8-17): include/ is the include root in the build tree
+# (:15) and the installed headers keep their subpar/ directory (:16,
+# :46-47), so consumers write `#include <subpar/subpar.hpp>`, as
+# upstream's README and tests do (README.md:21,
+# tests/src/range.cpp:39).  C++17 is upstream's interface requirement
+# (target_compile_features cxx_std_17, :11): the headers use
+# `if constexpr` (range.hpp:105, :146).  subpar has no C API.
+#
+# The default scheme runs on OpenMP when the consumer compiles with it
+# and on std::thread otherwise (range.hpp:153-219, simple.hpp:82-137);
+# the SUBPAR_NO_OPENMP* and SUBPAR_CUSTOM_PARALLELIZE_* switches stay the
+# consumer's to define.  Not ported: the tests, the docs, and the CMake
+# package files.
+[target.ltla-subpar]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+deps = [{ name = "cabin-ports/ltla-sanisizer", public = true }]
+
+# The std::thread scheme needs pthreads, which upstream's target does not
+# link: its tests get them through GoogleTest (tests/CMakeLists.txt:26-30).
+# Folded into libc since glibc 2.34, where the extra -lpthread is a
+# harmless no-op.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
