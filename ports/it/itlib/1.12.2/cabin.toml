@@ -59,11 +59,11 @@ include = ["LICENSE.txt", "include/itlib"]
 #   static_vector.hpp:271-274, :465-484, pod_vector.hpp:538-548).  Erasing an
 #   empty range from a small_vector or static_vector, or inserting no
 #   elements into a small_vector, destroys live elements in place
-#   (small_vector.hpp:775-780, :844-847, static_vector.hpp:657-660).  An
+#   (small_vector.hpp:775-780, :844-848, static_vector.hpp:657-661).  An
 #   element constructor that throws can leave them counting unconstructed
 #   elements.
 #   pod_vector::resize(n, value) writes n copies from the old end after
-#   reserving only n elements (pod_vector.hpp:606-612), the default
+#   reserving only n elements (pod_vector.hpp:607-613), the default
 #   pod_vector allocator's malloc and realloc results are never checked
 #   (:128-143, :450-455), recast_take_from checks only that both allocators
 #   align alike, not the element alignments (:267-278), and == compares
@@ -71,7 +71,7 @@ include = ["LICENSE.txt", "include/itlib"]
 # - any's converting constructor and assignment store an lvalue argument by
 #   reference, not as a copy (any.hpp:101-108, :174-186; a.emplace<T>(x)
 #   copies), copy-assigning an any to itself empties it (:169-172,
-#   :236-240), and move assignment keeps the target's allocator (:156-162).
+#   :237-240), and move assignment keeps the target's allocator (:156-162).
 # - expected's emplace and expected<T, void>'s copy assignment leave a
 #   destroyed or unconstructed value marked live if the new value's
 #   constructor throws (expected.hpp:248-261, :572-575).
@@ -89,7 +89,7 @@ include = ["LICENSE.txt", "include/itlib"]
 #   (flat_set.hpp:285-294, flat_map.hpp:317-326, :412-423).
 # - mem_streambuf's seeks do not check the position against the buffer
 #   (mem_streambuf.hpp:177-187, :243-250), and an output buffer over a
-#   static_vector is not reusable after get_container (:118-137).
+#   static_vector is not reusable after get_container (:119-137).
 # - transparent_umap.hpp (0.10) enables its heterogeneous overloads only for
 #   lookup types that themselves define is_transparent, not through the hash
 #   and key-equality types (:59-64, :84-96), and its hinted try_emplace
