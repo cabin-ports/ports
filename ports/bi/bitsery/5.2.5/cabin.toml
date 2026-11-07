@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/fraillt/bitsery/archive/refs/tags/v5.2.5.tar.gz"
+checksum = "sha256:22a6d92ac030e999b53d57a0c9afe28723766595c6d00c91ab9c5637d4ed0eec"
+format = "tar.gz"
+strip-prefix = "bitsery-5.2.5"
+
+[package]
+name = "cabin-ports/bitsery"
+version = "5.2.5"
+include = ["LICENSE", "include"]
+
+# Upstream's bitsery INTERFACE target: include/ (CMakeLists.txt:17-19),
+# whose compile features (:20-25) set a C++11 floor; README.md:97 states
+# C++11.  The C++17 extensions ship as upstream installs them (:40-41) and
+# work for consumers that build as C++17: ext/std_optional.h,
+# ext/std_variant.h, ext/std_tuple.h and ext/utils/composite_type_overloads.h,
+# and the brief_syntax wrappers of the first three.  The overloads header
+# checks __cplusplus (composite_type_overloads.h:29), so on MSVC everything
+# that includes it (the variant and tuple headers and their wrappers) also
+# needs /Zc:__cplusplus, as upstream's own tests note
+# (tests/CMakeLists.txt:79).  The consumer test builds at the C++11 floor,
+# so it does not reach the C++17 extensions.  Not ported: the tests,
+# examples, docs, scripts and the CMake package files.
+[target.bitsery]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
