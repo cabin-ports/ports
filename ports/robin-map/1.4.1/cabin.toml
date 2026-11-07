@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/Tessil/robin-map/archive/refs/tags/v1.4.1.tar.gz"
+checksum = "sha256:0e3f53a377fdcdc5f9fed7a4c0d4f99e82bbb64175233bd13427fef9a771f4a1"
+format = "tar.gz"
+strip-prefix = "robin-map-1.4.1"
+
+[package]
+name = "cabin-ports/robin-map"
+version = "1.4.1"
+include = ["LICENSE", "include"]
+
+# Tessil's robin hood hash map and set, header-only, as upstream's CMake
+# interface target tsl::robin_map: include/ is the include root, so
+# consumers write `#include <tsl/robin_map.h>` (CMakeLists.txt:21-23).
+# C++17 is upstream's floor: README.md:95 asks for a C++17 compiler, its
+# tests build as C++17 (tests/CMakeLists.txt:11), and the headers use
+# std::launder and inline variables.
+# Not ported: tsl-robin-map.natvis, a Visual Studio debugger visualizer
+# that upstream attaches to the target and installs on MSVC
+# (CMakeLists.txt:31-35, 45-48); it is not a build input.
+[target.robin-map]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
