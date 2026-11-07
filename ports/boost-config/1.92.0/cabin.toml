@@ -12,4 +12,3 @@ version = "1.92.0"
 type = "header-only"
 include-dirs = ["include"]
 interface-cxx-standard = "c++98"
-interface-defines = ["BOOST_ALL_NO_LIB"]

@@ -6,12 +6,9 @@
 #include <cstdio>
 #include <cstring>
 
-// audit probe (never merged): boost_config's interface define must reach
-// this consumer TU; the patch defined BOOST_ALL_NO_LIB as empty in
-// user.hpp, the interface define passes it as 1 on the command line.
-#ifndef BOOST_ALL_NO_LIB
-#error "audit-probe: BOOST_ALL_NO_LIB is not defined in this consumer TU"
-#endif
+// audit probe (never merged), negative run: neither the patch nor the
+// interface define, so MSVC consumers of compiled Boost libraries see
+// auto-link requests.  The line below prints the bare macro name.
 
 #if BOOST_VERSION != 109200
 #error "expected Boost 1.92.0"
