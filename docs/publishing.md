@@ -133,9 +133,10 @@ loses nothing, because each run starts from the log, not from the previous run.
 
 - **Enable**, with the operator's approval: initialize the log (below), review a `plan` dispatch,
   then set `PORTS_AUTO_PUBLISH` to `true` (repository variables; needs admin).  Once it is on, a
-  merged port is distribution-ready: settle its publication decision before it merges, or add its
-  hold in the same pull request (a hold must name a committed version, and a later pull request
-  can lose the race with a scheduled run).
+  merged port is distribution-ready and publishes by default.  A hold
+  ([CONTRIBUTING.md](../CONTRIBUTING.md#pull-requests)) lands in the port's own pull request (a
+  hold must name a committed version, and a later pull request can lose the race with a scheduled
+  run).
 - **Disable**: set it to anything else or delete it.  Queued runs then upload nothing; a running
   upload finishes its batch unless the run is cancelled (which keeps the lock), and everything a
   stopped run uploaded stays in the registry.  Turning it off never retracts an accepted package.

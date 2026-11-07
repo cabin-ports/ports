@@ -107,12 +107,23 @@ normalize, re-wrap, or regenerate a committed patch.  See
   limitations explicitly, for example in a `cabin.toml` comment; a library whose required build
   model Cabin cannot represent is not ported.
 - Patches under `patches/` (if any) should be limited to what is strictly required to make a port
-  build through Cabin: build-system fixes and portability tweaks, never feature changes or
-  divergence from upstream behavior.
+  build through Cabin - build-system fixes and portability tweaks - or to add a license text or
+  notice the package must carry (below), never feature changes or divergence from upstream behavior.
+  Upstream bugs and quality concerns are not a reason to patch; document a limitation instead
+  when it matters to consumers.
 - Verify dependencies, public include paths, link requirements, platform assumptions, upstream
   checksums, and license obligations.  The published package keeps the license and attribution
   notices its upstream requires; when `[package] include` narrows the published files, keep the
   upstream license file, if there is one, among them.
+- The published package also carries the terms of third-party code that upstream copied or
+  adapted without them, once a comparison with the original source shows the copy.  Ship a
+  missing license text as a new file added by a patch, keep that file among the published files
+  when `[package] include` narrows them, and name the code (path and lines), its origin,
+  copyright holder, and license in a `cabin.toml` comment, which ships with every copy.  Such a
+  patch edits no upstream file, except to add the comment lines of a notice whose terms require
+  it in that file.  Never claim a permission that no source grants: code copied or adapted from a
+  source that grants none is a legal restriction on redistribution unless it is too slight to
+  carry copyright, such as a few lines of a common idiom; the `cabin.toml` comment records which.
 
 ## Consumer tests
 
@@ -172,9 +183,15 @@ and [CI](docs/maintaining.md#ci) what pull-request CI runs.
   `feat(ports): add zlib 1.3.1`).
 - A pull request merges only once CI passes on Linux, macOS, and Windows and review approves it.
   Never weaken a check to make a port mergeable.
-- While automatic publishing is on, a merged port is distribution-ready: settle its publication
-  decision before it merges, or add its `publish-holds.txt` line in the same pull request
-  ([Enabling and disabling](docs/publishing.md#enabling-and-disabling)).
+- While automatic publishing is on, a merged port is distribution-ready and publishes by default
+  ([Enabling and disabling](docs/publishing.md#enabling-and-disabling)).  Upstream bugs and
+  vulnerabilities short of a concrete critical security risk, quality concerns, and open
+  questions are not holds: investigate, decide, and fix packaging gaps as above.  Add a
+  `publish-holds.txt` line, in the same pull request, only for a blocker packaging cannot
+  resolve: a legal restriction on redistribution, a concrete critical security risk, or a failure
+  to produce a valid package.  The line states the evidence, the remediation attempted, and the
+  exact blocking condition.  The operator's hold for a version with a rejected revision
+  ([Failures](docs/publishing.md#failures)) is separate.
 
 ## Published versions
 
