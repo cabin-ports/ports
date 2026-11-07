@@ -1,0 +1,48 @@
+[package.upstream]
+# The v3.5.0 tag archive, the bytes Conan Center's inja 3.5.0 recipe pins
+# (SHA-256) and vcpkg's inja port pins (SHA-512, REF v${VERSION}).  The
+# release's one asset is the amalgamated inja.hpp, the same content as
+# single_include/.  CMakeLists.txt:8 declares
+# project(inja LANGUAGES CXX VERSION 3.5.0).
+url = "https://github.com/pantor/inja/archive/refs/tags/v3.5.0.tar.gz"
+checksum = "sha256:a5f0266673c59028eab6ceeddd8b862c70abfeb32fb7a5387c16bf46f3269ab2"
+format = "tar.gz"
+strip-prefix = "inja-3.5.0"
+
+[package]
+name = "cabin-ports/inja"
+version = "3.5.0"
+include = ["LICENSE", "include"]
+
+[dependencies]
+# nlohmann/json >= 3.8.0 (README.md:35), as Conan Center requires it
+# (nlohmann_json/[^3.8]).
+"cabin-ports/nlohmann_json" = "^3.8.0"
+
+# Header-only, as upstream's INTERFACE target inja (pantor::inja,
+# CMakeLists.txt:32-33): include/ is the include root in the build and
+# install trees (:36-39, :186-190), so consumers write
+# `#include <inja/inja.hpp>` (test/benchmark.cpp:4).  README.md:38's
+# `#include <inja.hpp>` assumes a directory holding inja.hpp itself (the
+# release's single header, single_include/inja, or include/inja) on the
+# include path, which upstream's target does not provide.  C++17 (:40; std::string_view,
+# std::filesystem).  include/inja/json.hpp:4 includes <nlohmann/json.hpp>,
+# which comes from the nlohmann_json dependency, a public one since inja's
+# API takes and returns nlohmann::json (json.hpp:6-11); this is upstream's
+# INJA_USE_EMBEDDED_JSON=OFF configuration (:63-73), the one vcpkg and Conan
+# Center build.  The consumer opt-ins INJA_DATA_TYPE (json.hpp:7-11),
+# INJA_NOEXCEPTION and INJA_THROW (throw.hpp:4-17) are left to consumers.
+# MSVC's /utf-8 and /Zc:__cplusplus (:26-29) are directory options for
+# upstream's own tests, not interface requirements; the headers are ASCII
+# and test no __cplusplus value.
+#
+# Not ported: third_party/, that is the bundled nlohmann/json 3.11.3 (the
+# INJA_USE_EMBEDDED_JSON=ON fallback, :43-62, :193-199), doctest and hayai
+# (for the tests and benchmark only, :89, :111, :118), and the amalgamate
+# script; single_include/ and INJA_INSTALL_SINGLE_HEADER (:179-185); the
+# CMake package files, the Meson build, the tests, benchmark, and docs.
+[target.inja]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+deps = [{ name = "cabin-ports/nlohmann_json", public = true }]
