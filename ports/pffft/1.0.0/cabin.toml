@@ -1,0 +1,62 @@
+[package.upstream]
+# Bitbucket's archive of tag v1.0.0, the bytes vcpkg pins (SHA-512); its
+# top directory is named after the tagged commit.
+url = "https://bitbucket.org/jpommier/pffft/get/v1.0.0.tar.gz"
+checksum = "sha256:9adeb18ac7bb52e9fb921c31c0c6a4e9ae150cc6fcb20a899d4b3a2275176ded"
+format = "tar.gz"
+strip-prefix = "jpommier-pffft-02fe7715a5bf"
+
+# The public header moves to include/ so the archive root, which also
+# holds fftpack.h for code this package does not build, stays off
+# consumers' include path; pffft.c's "pffft.h" include finds it there.
+[[package.upstream.copy]]
+from = "pffft.h"
+to = "include/pffft.h"
+
+# Upstream ships no license file: pffft.c and pffft.h carry the FFTPACK
+# license they are distributed under (pffft.c:1-46, pffft.h:1-45).
+[package]
+name = "cabin-ports/pffft"
+version = "1.0.0"
+include = ["include", "pffft.c"]
+
+# The library is pffft.c with pffft.h as its API (README.md:66-67);
+# upstream ships no build files, and vcpkg's CMakeLists.txt also builds
+# pffft.c alone.  pffft.c picks its SIMD code from the compiler's
+# predefined macros (pffft.c:100-112) and otherwise falls back to scalar
+# code (pffft.c:193-197).  This port passes no target flags, so it gets
+# NEON on AArch64 and MSVC ARM64, SSE on x86-64 and MSVC x64, and SIMD
+# elsewhere only where the compiler enables it by default.  Not ported:
+# fftpack.c, the f2c FFTPACK translation that test_pffft.c benchmarks
+# against (README.md:43-56); test_pffft.c with its FFTW, vDSP and MKL
+# comparisons; the PFFFT_SIMD_DISABLE scalar build; SIMD that takes a
+# compiler flag, such as -msse on 32-bit x86 (README.md:233-237),
+# -mfpu=neon on ARMv7 (README.md:260-264) or -msimd128 on WebAssembly
+# (pffft.c:105-106); and AltiVec, whose ld_ps1 is a C99 inline function
+# with no external definition (pffft.c:126), so an unoptimized C11 build
+# cannot link it.
+[target.pffft]
+type = "library"
+sources = ["pffft.c"]
+include-dirs = ["include"]
+links = "pffft"
+# pffft.c mixes declarations and statements and, on GCC and Clang,
+# allocates scratch space as a variable-length array (pffft.c:81).  C11
+# is the oldest standard Cabin can lower for MSVC.
+c-standard = "c11"
+# pffft.h uses // comments (:80, :181).
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+
+# cos() and sin() build the twiddle factors (pffft.c:1125-1126, :1262).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
+
+# Upstream's build lines (README.md:106, :237) compile in the compiler's
+# default GNU dialect, where <math.h> defines the M_PI and M_SQRT2
+# pffft.c uses (:1107, :1503).  Under Cabin's strict -std=c11 glibc does
+# not; _DEFAULT_SOURCE restores the GNU dialect's view.  macOS defines
+# both under -std=c11, and pffft.c asks MSVC for them with
+# _USE_MATH_DEFINES (:60-62).
+[target.'cfg(os = "linux")'.profile]
+defines = ["_DEFAULT_SOURCE"]
