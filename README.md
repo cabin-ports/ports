@@ -279,7 +279,7 @@ verdicts.
 - **Dependents and verification.**  The registry accepts a dependent before what it requires is
   verified, but a consumer resolves it only once all of that is.  The plan lists the required
   versions not recorded as verified.  Verification is the cabinpkg/cabin **Registry Verify**
-  workflow's, dispatched separately; nothing here renders or waits for a verdict.
+  workflow's, which runs every 5 minutes; nothing here renders or waits for a verdict.
 
 The schedule (`17,47 * * * *`) runs `new` only while the repository variable `PORTS_AUTO_PUBLISH`
 is exactly `true`.  Unset, empty, or `false` starts no job; another spelling such as `TRUE` starts
