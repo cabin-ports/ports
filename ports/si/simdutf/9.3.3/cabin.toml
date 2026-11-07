@@ -1,7 +1,6 @@
 [package.upstream]
-# The v9.3.3 tag archive, the bytes vcpkg pins (SHA-512).  The release
-# assets hold only the generated single-file amalgamation
-# (singleheader/amalgamate.py), not the sources CMake builds.
+# The tag archive: the release assets hold only the generated single-file
+# amalgamation, not the sources CMake builds.
 url = "https://github.com/simdutf/simdutf/archive/refs/tags/v9.3.3.tar.gz"
 checksum = "sha256:441e374e8629bd8469f6d5cde9f0fa17ef3ad158aeb077791606d8aa73b565ef"
 format = "tar.gz"
@@ -18,50 +17,27 @@ name = "cabin-ports/simdutf"
 version = "9.3.3"
 include = ["LICENSE-APACHE", "LICENSE-MIT", "include", "src"]
 
-# The sources src/simdutf.cpp includes reach their private headers by
-# paths relative to src/ (src/simdutf/arm64.h:30 includes
-# "simdutf/arm64/implementation.h"), which upstream's CMake puts on the
-# private include path (src/CMakeLists.txt:23).
+# The sources src/simdutf.cpp includes reach their private headers by paths
+# relative to src/.
 [profile]
 include-dirs = ["src"]
 
-# The static library upstream's CMake builds by default
-# (src/CMakeLists.txt:6, 24): src/simdutf.cpp, a single translation unit
-# that compiles every kernel and the C API of include/simdutf_c.h
-# (simdutf.cpp:122-155), with include/ public.  Each kernel enables its
-# instruction set in the source (SIMDUTF_TARGET_REGION,
-# include/simdutf/portability.h:213-235, a GCC or Clang target pragma;
-# cl compiles the intrinsics as they are), and the best one the CPU
-# supports is chosen at run time, so no source needs its own flags.  The
-# default feature set is every SIMDUTF_FEATURE_* macro on
-# (include/simdutf/implementation.h:32-52), as here.
-# Not ported: the shared library
-# (SIMDUTF_BUILDING/USING_WINDOWS_DYNAMIC_LIBRARY, src/CMakeLists.txt:7-13);
-# the command-line tools and the simdutf-base64 and simdutf-nobase64
-# libraries built only for them (:62-92); simdutf-nostdlibcxx, built with
-# -fno-exceptions -fno-rtti for linking without the C++ standard library
-# (:102-121); the options off by default (CMakeLists.txt:28-40:
-# SIMDUTF_LOGGING, SIMDUTF_USE_STATIC_INITIALIZATION,
-# SIMDUTF_INTERNAL_TESTS, FUZZING_BUILD_MODE_UNSAFE_FOR_PRODUCTION;
-# cmake/simdutf-flags.cmake:2-5: the sanitizers and
-# SIMDUTF_ALWAYS_INCLUDE_FALLBACK); the CMake package and pkg-config files;
-# the amalgamation, tests, benchmarks, fuzzers and docs.
-# Not reproduced: position-independent code (src/CMakeLists.txt:25-28),
-# GCC's x86 tuning flags -mno-avx256-split-unaligned-load and -store
-# (:49-52), GCC's PowerPC flags (:54-56), and the warning flags and MSVC's
-# /sdl checks (:29-41).
+# The static library upstream's CMake builds by default: src/simdutf.cpp, a
+# single translation unit that compiles every kernel and the C API.  Each
+# kernel enables its instruction set in the source and the best one the CPU
+# supports is chosen at run time, so no source needs its own flags.  Not
+# ported: the shared library, the command-line tools and their libraries,
+# and simdutf-nostdlibcxx.  Not reproduced: position-independent code
+# (Cabin drops a dependency's raw compiler flags), so the archive is not
+# built for linking into a shared object.
 [target.simdutf]
 type = "library"
 sources = ["src/simdutf.cpp"]
 include-dirs = ["include"]
-# C++17 without extensions, upstream's default SIMDUTF_CXX_STANDARD
-# (cmake/simdutf-flags.cmake:21-29); simdutf.h requires it
-# (include/simdutf/compiler_check.h:46-48).
-# Built so, as upstream's default build is, the library lacks
-# atomic_binary_to_base64 and atomic_base64_to_binary_safe, which
-# simdutf.h declares to C++20 consumers with std::atomic_ref
-# (include/simdutf/portability.h:23-30; src/implementation.cpp:1807-1894,
-# 2666-2688): a consumer calling them fails to link.
+# C++17, upstream's default SIMDUTF_CXX_STANDARD, which simdutf.h requires.
+# Built so, the library lacks atomic_binary_to_base64 and
+# atomic_base64_to_binary_safe, which simdutf.h declares to C++20
+# consumers: a consumer calling them fails to link.
 cxx-standard = "c++17"
 interface-cxx-standard = "c++17"
 # include/simdutf_c.h, the C API, is plain C99.
