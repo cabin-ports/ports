@@ -1,0 +1,46 @@
+[package.upstream]
+url = "https://github.com/nonstd-lite/variant-lite/archive/refs/tags/v3.0.0.tar.gz"
+checksum = "sha256:bd596550369f33ef9455566822f5a4d52852a63a33d3d70ac1fbb529b78abc7b"
+format = "tar.gz"
+strip-prefix = "variant-lite-3.0.0"
+# Where nonstd::variant is variant lite's own, the header calls
+# std::terminate (variant.hpp:2147, 2335) without including <exception>
+# and, at C++98, std::swap (:1910) without <algorithm>, where C++98
+# declares it.  Other headers declare them only by accident: with LLVM
+# 23's libc++ the header compiles at no standard, and with exceptions off
+# (-fno-exceptions, or variant_CONFIG_NO_EXCEPTIONS, which skips
+# <stdexcept> at :268) it fails with libstdc++ at every standard and with
+# Apple's libc++ at C++98.  The patch includes both, as optional-lite's
+# port does; upstream's master still lacks them.
+patches = ["patches/0001-include-exception-and-algorithm.patch"]
+
+[package]
+name = "cabin-ports/variant-lite"
+version = "3.0.0"
+include = ["LICENSE.txt", "include", "patches"]
+
+# Header-only, as upstream's CMake interface target nonstd::variant-lite
+# (CMakeLists.txt:67-77): include/ is the include root, so consumers write
+# `#include <nonstd/variant.hpp>`.  The header supports C++98 and later
+# and takes the standard from _MSVC_LANG on cl.exe (variant.hpp:75-76).
+# Where C++17's <variant> exists, nonstd::variant is std::variant unless a
+# consumer defines variant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD
+# (:102-106); every variant_CONFIG_* option keeps upstream's default.
+#
+# Known upstream defect, not patched: where nonstd::variant is variant
+# lite's own and the standard is C++11 or later (C++11 and C++14, or C++17
+# and later without <variant> or with
+# variant_CONFIG_SELECT_VARIANT=variant_VARIANT_NONSTD), assigning a value
+# (`v = x`) never runs the destructor of the value it replaces, whichever
+# alternative that held.  The converting operator= (variant.hpp:1594-1600,
+# added by upstream commit ba2cb984fc for 3.0.0) marks the variant
+# valueless before move_assign (:1848), which then destroys nothing and
+# constructs the new value afresh: it never calls the held alternative's
+# operator=, and if the new value's construction throws, the variant stays
+# valueless.  Upstream's master still does this.  Assigning a variant,
+# emplace and swap destroy correctly, as does assigning a value at C++98 or
+# with std::variant.
+[target.variant-lite]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++98"
