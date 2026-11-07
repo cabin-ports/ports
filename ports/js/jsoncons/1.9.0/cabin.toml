@@ -1,0 +1,54 @@
+[package.upstream]
+# The v1.9.0 tag archive, the bytes vcpkg's port pins (SHA-512); the
+# release has no assets.
+url = "https://github.com/danielaparker/jsoncons/archive/refs/tags/v1.9.0.tar.gz"
+checksum = "sha256:f1017b36e4e034acd5c0f5f616bacf5d7a161d6d3a43ff9ddb73fd8dca4d3cd9"
+format = "tar.gz"
+strip-prefix = "jsoncons-1.9.0"
+# include/jsoncons_ext/bson/bson_oid.hpp and bson_decimal128.hpp are based
+# on mongo-c-driver's bson-oid and bson-decimal128 (:7-10 of each) and keep
+# MongoDB's copyright and Apache-2.0 notice (:14-28), but the release ships
+# no copy of that license, which Apache-2.0 section 4(a) requires
+# redistributors to give; mongo-c-driver has no NOTICE file for section
+# 4(d).  The patch adds the license text, verbatim from
+# https://www.apache.org/licenses/LICENSE-2.0.txt, as LICENSE.Apache-2.0.
+patches = ["patches/0001-add-apache-2.0-license-for-mongodb-bson-code.patch"]
+
+[package]
+name = "cabin-ports/jsoncons"
+version = "1.9.0"
+# include/ holds the jsoncons and jsoncons_ext directories upstream installs
+# (CMakeLists.txt:51-53).  LICENSE carries the Boost terms, and
+# LICENSE.Apache-2.0 comes from the patch above; jsoncons/detail/grisu3.hpp
+# and a5hash.hpp carry their MIT notices inline.  Code credited to other
+# sources without their terms, shipped as upstream ships it:
+# - jsoncons/config/compiler_support.hpp (:448-557): tinycbor's byte-swap
+#   macros, add_check_overflow and encode_half (MIT, Intel), and decode_half
+#   from RFC 7049 Appendix D, a code component under the Simplified BSD
+#   License.
+# - jsoncons/utility/read_number.hpp (:27-129): yyjson's digit-type table
+#   and predicates (MIT).
+# - jsoncons/utility/unicode_traits.hpp: Unicode, Inc.'s ConvertUTF tables
+#   and conversions, with only the first clause of its grant (:7-14), whose
+#   terms require the whole notice to remain attached.
+# The JSON Schema meta-schemas embedded in
+# jsoncons_ext/jsonschema/draft*/schema_draft*.hpp (json-schema.org) carry
+# no notice of their own.
+include = ["LICENSE", "LICENSE.Apache-2.0", "include", "patches"]
+
+# Header-only: the core is included as <jsoncons/json.hpp> and each extension
+# (bson, cbor, csv, jmespath, jsonpatch, jsonpath, jsonpointer, jsonschema,
+# mergepatch, msgpack, toon, ubjson) as <jsoncons_ext/<name>/<name>.hpp>.  This
+# target is upstream's jsoncons target, include directories only
+# (CMakeLists.txt:25-27).  Not ported: Jsoncons.natvis, the Visual Studio
+# debugger visualizer, which upstream does not install.
+[target.jsoncons]
+type = "header-only"
+include-dirs = ["include"]
+# Upstream claims C++11 (README.md:104) and its target sets no standard, but
+# the constexpr compound assignments in jsoncons/staj_event.hpp:79-89,
+# typed_array.hpp:64-74 and jsonschema/common/eval_context.hpp:47-57 need
+# C++14: GCC 12 and older reject them below C++14 (gcc/cp/constexpr.cc,
+# potential_constant_expression_1's MODIFY_EXPR case), and GCC 13 and later
+# warn (-Winvalid-constexpr).
+interface-cxx-standard = "c++14"
