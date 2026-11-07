@@ -43,8 +43,8 @@ publish-holds.txt                 port versions held back from automatic publish
 
 ## Contributing
 
-Contributions of new ports and of fixes to existing ports and the tooling are welcome through pull
-requests.  The catalog is curated rather than open to every library: each port is reviewed for
+Contributions of new ports and of fixes to existing ports and the tooling are currently limited only
+to maintainers.  The catalog is curated rather than open to every library: each port is reviewed for
 whether it fits Cabin's build model and follows the principles below.  Start with
 [CONTRIBUTING.md](CONTRIBUTING.md).
 
