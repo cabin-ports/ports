@@ -7,16 +7,89 @@ strip-prefix = "xsimd-14.3.0"
 # License, Version 1.0" (for example
 # include/xsimd/arch/common/xsimd_common_details.hpp:323-328), and the
 # archive ships no copy of that license, which it requires source
-# copies to include.  The patch adds the license text, verbatim from
-# https://www.boost.org/LICENSE_1_0.txt, as LICENSE_1_0.txt.
-patches = ["patches/0001-add-boost-software-license-for-numscale-code.patch"]
+# copies to include.  Patch 0001 adds the license text, verbatim from
+# https://www.boost.org/LICENSE_1_0.txt, as LICENSE_1_0.txt.  The headers
+# also ship code taken from Stack Overflow answers, sse2neon and
+# fast-bitset-from-bool-array without those licenses; patches 0002-0005
+# add them, verbatim, as new files:
+# - 0002, LICENSE.CC-BY-SA-3.0:
+#   https://creativecommons.org/licenses/by-sa/3.0/legalcode.txt
+# - 0003, LICENSE.CC-BY-SA-4.0:
+#   https://creativecommons.org/licenses/by-sa/4.0/legalcode.txt
+# - 0004, LICENSE.sse2neon: DLTcollab/sse2neon's LICENSE at ade5552a.
+# - 0005, LICENSE.fast-bitset-from-bool-array:
+#   serge-sans-paille/fast-bitset-from-bool-array's LICENSE at 0e5058b5.
+patches = [
+  "patches/0001-add-boost-software-license-for-numscale-code.patch",
+  "patches/0002-add-cc-by-sa-3.0-license-for-stack-overflow-code.patch",
+  "patches/0003-add-cc-by-sa-4.0-license-for-stack-overflow-code.patch",
+  "patches/0004-add-mit-license-for-sse2neon-code.patch",
+  "patches/0005-add-bsd-license-for-fast-bitset-code.patch",
+]
 
 [package]
 name = "cabin-ports/xsimd"
 version = "14.3.0"
 # include/xsimd is what upstream's CMake installs; LICENSE is xsimd's
-# BSD-3-Clause license, and LICENSE_1_0.txt comes from the patch above.
-include = ["LICENSE", "LICENSE_1_0.txt", "include", "patches"]
+# BSD-3-Clause license, and the other license files come from the patches
+# above.  Code in include/xsimd from other sources, the rest being xsimd's
+# under BSD-3-Clause:
+# - Boost Software License 1.0 (LICENSE_1_0.txt): the NumScale code of
+#   arch/common/xsimd_common_details.hpp, xsimd_common_math.hpp and
+#   xsimd_common_trigo.hpp, and math/xsimd_rem_pio2.hpp.
+# - Distributed under CC BY-SA 4.0 (LICENSE.CC-BY-SA-4.0), modified: the
+#   int64 and uint64 to double fast_cast of arch/xsimd_sse4_1.hpp:57-67
+#   and :70-79, arch/xsimd_sse2.hpp:710-721 and :724-736,
+#   arch/xsimd_avx2.hpp:513-525 and :528-541 and arch/xsimd_wasm.hpp:499-509
+#   and :512-523, from https://stackoverflow.com/a/41148578 (revision 8) by
+#   Mysticial (https://stackoverflow.com/users/922184/mysticial).
+# - Distributed under CC BY-SA 3.0 (LICENSE.CC-BY-SA-3.0), each modified:
+#   the 8x8 float transpose of arch/xsimd_avx.hpp:1975-2013, from
+#   https://stackoverflow.com/a/25627536 (revision 5) by Z boson
+#   (https://stackoverflow.com/users/2542702/z-boson); the uint32 to float
+#   conversion of arch/common/xsimd_common_details.hpp:256-269, from
+#   https://stackoverflow.com/a/40766669 by wim
+#   (https://stackoverflow.com/users/2439725/wim); and the float division of
+#   arch/xsimd_neon.hpp:1163-1178, from https://stackoverflow.com/a/6822407
+#   by Stephen Canon (https://stackoverflow.com/users/142434/stephen-canon).
+# - MIT, Copyright (c) 2015-2025 SSE2NEON Contributors (LICENSE.sse2neon):
+#   the movemask kernels of arch/xsimd_neon.hpp:3503-3561 and
+#   arch/xsimd_neon64.hpp:716-754, from DLTcollab/sse2neon; the
+#   nearbyint_as_int of arch/xsimd_neon.hpp:1955-2017 carries sse2neon's
+#   notice inline.
+# - BSD-3-Clause, Copyright (c) 2025, Serge Guelton
+#   (LICENSE.fast-bitset-from-bool-array): the tobitset helpers of
+#   arch/xsimd_avx512f.hpp:1538-1576, from
+#   serge-sans-paille/fast-bitset-from-bool-array.
+# - Credited, with no license to ship: arch/xsimd_sse2.hpp:447-455 is
+#   samyvilar/vect's _mm_srai_epi64 (vect_128.h:789-797 at d0cbf333, a
+#   repository with no license), a five-intrinsic arithmetic-shift
+#   emulation that leaves no real expressive choice; the division at
+#   arch/xsimd_neon.hpp:1166 shares with Ne10's NE10_divc.neon.c only the
+#   reciprocal-refinement steps NEON dictates; the averages of
+#   arch/xsimd_scalar.hpp:166-173 and
+#   arch/common/xsimd_common_math.hpp:57-66 are Hacker's Delight's formula
+#   (section 2-5), by way of https://stackoverflow.com/a/36046765; the
+#   popcount and countr_zero of arch/common/xsimd_common_bit.hpp, the mask
+#   count of arch/xsimd_emulated.hpp:244-248, the morton of
+#   arch/xsimd_avx512f.hpp:111-151 and the interleave of
+#   arch/xsimd_sse4_1.hpp:422-426 follow Bit Twiddling Hacks, which is
+#   public domain; math/xsimd_rem_pio2.hpp and the log2 and log10 of
+#   arch/common/xsimd_common_math.hpp derive from Sun's fdlibm by way of
+#   FreeBSD's msun, and both files keep Sun's notice inline; and
+#   config/xsimd_cpu_features_x86.hpp quotes three short
+#   passages of Wikipedia's "CPUID" and "X86 Bit manipulation instruction
+#   set" articles (CC BY-SA 4.0), each marked with its URL.
+include = [
+  "LICENSE",
+  "LICENSE.CC-BY-SA-3.0",
+  "LICENSE.CC-BY-SA-4.0",
+  "LICENSE.fast-bitset-from-bool-array",
+  "LICENSE.sse2neon",
+  "LICENSE_1_0.txt",
+  "include",
+  "patches",
+]
 
 # Upstream's header-only xsimd::xsimd target.  The instruction sets come
 # from the consumer's compiler target and flags: xsimd::default_arch is
