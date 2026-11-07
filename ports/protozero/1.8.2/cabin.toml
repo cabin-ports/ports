@@ -1,0 +1,32 @@
+[package.upstream]
+# vcpkg's port pins the same archive's SHA-512; Conan Center has no 1.8.2.
+url = "https://github.com/mapbox/protozero/archive/refs/tags/v1.8.2.tar.gz"
+checksum = "sha256:68d1df951b4d8397355c8fc9ffed40d9c06282a877fe847403feac6edcee3ef1"
+format = "tar.gz"
+strip-prefix = "protozero-1.8.2"
+
+[package]
+name = "cabin-ports/protozero"
+version = "1.8.2"
+# The headers CMake installs (CMakeLists.txt:159), the BSD-2-Clause
+# license, and the Apache-2.0 license of the folly varint decoder
+# include/protozero/varint.hpp:33 adapts.
+include = ["LICENSE.from_folly", "LICENSE.md", "include/protozero"]
+
+# protozero is header-only: include/ is the include root, so consumers
+# write `#include <protozero/pbf_reader.hpp>`, and it needs C++14
+# (README.md:19, CMakeLists.txt:19-20).  Upstream's build passes no
+# define a consumer needs: config.hpp:24-36 takes the byte order from
+# glibc's __BYTE_ORDER when an earlier include has defined it and
+# otherwise assumes little-endian, which is right on little-endian
+# targets; on a big-endian glibc target the result depends on include
+# order, an upstream limitation (README.md:62-67) this port keeps.
+# config.hpp:38-41 picks the bswap builtins on GCC and Clang, and
+# PROTOZERO_USE_VIEW (CMakeLists.txt:44-47), PROTOZERO_STRICT_API and
+# protozero_assert are opt-ins left to consumers; the MSVC defines at
+# CMakeLists.txt:33 only silence warnings in upstream's own targets.
+# Not ported: the tests, tools, benchmarks and documentation.
+[target.protozero]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
