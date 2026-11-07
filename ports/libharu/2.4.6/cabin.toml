@@ -1,0 +1,120 @@
+[package.upstream]
+# Conan Center's conandata pins this sha256 and vcpkg's port the same
+# archive's SHA-512.
+url = "https://github.com/libharu/libharu/archive/refs/tags/v2.4.6.tar.gz"
+checksum = "sha256:ec8f327520d1d354ce58b5d2af75b64f380cddc522437c169463b39760921348"
+format = "tar.gz"
+strip-prefix = "libharu-2.4.6"
+# CMake generates include/hpdf_config.h from include/hpdf_config.h.cmake
+# (CMakeLists.txt:72-82) and installs it with the other headers (:134);
+# hpdf.h includes it.  The patch adds it as configure_file writes it when
+# CMake finds libpng and zlib, which this port always depends on, with
+# the LIBHPDF_DEBUG and LIBHPDF_DEBUG_TRACE options off, their default
+# (:27-28).  The win32/include/hpdf_config.h upstream ships is an older
+# autoheader output that CMake does not use; it also defines M_PI for
+# every consumer.
+patches = ["patches/0001-add-the-generated-hpdf-config-h.patch"]
+
+[package]
+name = "cabin-ports/libharu"
+version = "2.4.6"
+include = ["LICENSE", "include", "patches", "src"]
+# Upstream sets no C standard; C11 is the oldest Cabin can lower for
+# MSVC.  The public headers use long long (hpdf_types.h:50-51) and //
+# comments (e.g. hpdf_consts.h:112), so C99 and C++11 are their floor.
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# PNG images and Flate compression, the features hpdf_config.h turns on.
+# No header in include/ includes png.h or zlib.h, so both stay private.
+[dependencies]
+"cabin-ports/libpng" = "^1.6"
+"cabin-ports/zlib" = "^1.3"
+
+# The static form of the hpdf library upstream's CMake build compiles
+# from LIBHPDF_SRCS (src/CMakeLists.txt:9-80, which lists
+# hpdf_encoder_utf.c twice).  Not ported: the shared library CMake
+# builds by default (CMakeLists.txt:25), with its exported symbols
+# (:70) and the HPDF_DLL import macros of hpdf.h, which a static
+# library needs none of; the -fexceptions option (:35-40, off by
+# default); the demos; and the bindings for other languages.
+[target.hpdf]
+type = "library"
+sources = [
+  "src/hpdf_annotation.c",
+  "src/hpdf_array.c",
+  "src/hpdf_binary.c",
+  "src/hpdf_boolean.c",
+  "src/hpdf_catalog.c",
+  "src/hpdf_destination.c",
+  "src/hpdf_dict.c",
+  "src/hpdf_direct.c",
+  "src/hpdf_doc_png.c",
+  "src/hpdf_doc.c",
+  "src/hpdf_encoder_cns.c",
+  "src/hpdf_encoder_cnt.c",
+  "src/hpdf_encoder_jp.c",
+  "src/hpdf_encoder_kr.c",
+  "src/hpdf_encoder_utf.c",
+  "src/hpdf_encoder.c",
+  "src/hpdf_encrypt.c",
+  "src/hpdf_encryptdict.c",
+  "src/hpdf_error.c",
+  "src/hpdf_ext_gstate.c",
+  "src/hpdf_font_cid.c",
+  "src/hpdf_font_tt.c",
+  "src/hpdf_font_type1.c",
+  "src/hpdf_font.c",
+  "src/hpdf_fontdef_base14.c",
+  "src/hpdf_fontdef_cid.c",
+  "src/hpdf_fontdef_cns.c",
+  "src/hpdf_fontdef_cnt.c",
+  "src/hpdf_fontdef_jp.c",
+  "src/hpdf_fontdef_kr.c",
+  "src/hpdf_fontdef_tt.c",
+  "src/hpdf_fontdef_type1.c",
+  "src/hpdf_fontdef.c",
+  "src/hpdf_gstate.c",
+  "src/hpdf_image_ccitt.c",
+  "src/hpdf_image_png.c",
+  "src/hpdf_image.c",
+  "src/hpdf_info.c",
+  "src/hpdf_list.c",
+  "src/hpdf_mmgr.c",
+  "src/hpdf_name.c",
+  "src/hpdf_namedict.c",
+  "src/hpdf_null.c",
+  "src/hpdf_number.c",
+  "src/hpdf_objects.c",
+  "src/hpdf_outline.c",
+  "src/hpdf_page_label.c",
+  "src/hpdf_page_operator.c",
+  "src/hpdf_pages.c",
+  "src/hpdf_real.c",
+  "src/hpdf_shading.c",
+  "src/hpdf_streams.c",
+  "src/hpdf_string.c",
+  "src/hpdf_u3d.c",
+  "src/hpdf_utils.c",
+  "src/hpdf_xref.c",
+  "src/hpdf_pdfa.c",
+  "src/hpdf_3dmeasure.c",
+  "src/hpdf_exdata.c",
+]
+include-dirs = ["include"]
+links = "hpdf"
+deps = ["cabin-ports/libpng", "cabin-ports/zlib"]
+
+# CMakeLists.txt:65-67 defines these, which only silence the CRT's
+# deprecation warnings, for compilers that set MSVC_VERSION.
+[target.'cfg(any(cc = "msvc", cc = "clang-cl"))'.profile]
+defines = ["_CRT_SECURE_NO_WARNINGS", "_CRT_SECURE_NO_DEPRECATE"]
+
+# The math functions hpdf_utils.c (log10 and modff, which format every
+# real number), hpdf_u3d.c and hpdf_page_operator.c call come from libm,
+# which upstream links on Unix other than Apple and Emscripten
+# (src/CMakeLists.txt:94-97); on Apple it is part of libSystem, so
+# linking it there is a no-op.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
