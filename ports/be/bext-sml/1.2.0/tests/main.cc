@@ -65,8 +65,9 @@ struct door {
              state<opened> + event<close_door> / [](journal &j) { j.trail += 'c'; } = state<closed>,
              state<closed> + event<lock_door> / store_code = state<locked>,
              state<locked> + event<unlock_door>[code_matches] / [](journal &j) { j.trail += 'U'; } = state<closed>,
-             state<locked> + on_entry<_> / [](journal &j) { j.trail += '+'; },
-             state<locked> + on_exit<_> / [](journal &j) { j.trail += '-'; });
+             // Qualified: glibc's <stdlib.h> declares a global on_exit.
+             state<locked> + sml::on_entry<_> / [](journal &j) { j.trail += '+'; },
+             state<locked> + sml::on_exit<_> / [](journal &j) { j.trail += '-'; });
         // clang-format on
     }
 };

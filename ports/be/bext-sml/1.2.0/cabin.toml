@@ -42,8 +42,11 @@ include = ["LICENSE.md", "include"]
 # at sml.hpp:2019 for each state machine class without data members: a
 # const member function that reads no member is called during construction.
 # The "name"_s and "name"_e literals are not declared on MSVC before C++20
-# (sml.hpp:3559-3581); state<T> and event<T> work on every compiler.  The
-# dispatch table does not range-check the id it is given
+# (sml.hpp:3559-3581); state<T> and event<T> work on every compiler.
+# glibc's <stdlib.h> declares a global on_exit, so with glibc an
+# unqualified on_exit<_> under `using namespace boost::sml` is ambiguous;
+# write sml::on_exit<_>, as upstream's examples do (example/states.cpp:27).
+# The dispatch table does not range-check the id it is given
 # (dispatch_table.hpp:108), so an id outside the inclusive range passed to
 # make_dispatch_table is undefined behaviour.  A dependency taken by value
 # or by pointer that the constructor does not receive is value-initialized,
