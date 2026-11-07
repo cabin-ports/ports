@@ -1,0 +1,42 @@
+[package.upstream]
+# The v0.2.2 tag archive, the bytes vcpkg's ltla-sanisizer port pins
+# (SHA-512, REF v${VERSION}); the release has no assets.
+url = "https://github.com/LTLA/sanisizer/archive/refs/tags/v0.2.2.tar.gz"
+checksum = "sha256:8599a301172a39af96348d5e26e8a0d078be1f711a0ecd941d4fab9df159e712"
+format = "tar.gz"
+strip-prefix = "sanisizer-0.2.2"
+
+# Named after vcpkg's port and upstream's CMake package, ltla_sanisizer
+# (CMakeLists.txt:39-60).
+[package]
+name = "cabin-ports/ltla-sanisizer"
+version = "0.2.2"
+include = ["LICENSE", "include"]
+
+# Header-only, as upstream's CMake interface target ltla::sanisizer
+# (CMakeLists.txt:10-20): include/ is the include root in the build tree
+# (:18) and the installed headers keep their sanisizer/ directory (:19,
+# :39-40), so consumers write `#include <sanisizer/sanisizer.hpp>`, as
+# upstream's tests do (tests/src/class.cpp:3).  C++17 is upstream's
+# standard (CMAKE_CXX_STANDARD 17, :8; tests/CMakeLists.txt:15): the
+# headers use `if constexpr` throughout, and the documented `f(Cast(y))`
+# and `f(Exact(y))` calls (include/sanisizer/class.hpp:23, :53) need C++17
+# class template argument deduction.  sanisizer has no C API.
+#
+# As shipped, cast() rejects a negative input only when the destination
+# cannot hold the source type's maximum
+# (include/sanisizer/attest.hpp:177-188), so cast<std::size_t>(-1)
+# yields SIZE_MAX: README.md:16 says it throws, but the API documents
+# non-negative input as a precondition (include/sanisizer/cast.hpp:21,
+# :40).
+#
+# Not ported: the tests, including the second float test build with the
+# SANISIZER_FLOAT_FORCE_FREXP and SANISIZER_FLOAT_FORCE_MANUAL switches
+# that force the non-radix-2 fallbacks (tests/CMakeLists.txt:32-37), the
+# docs, and the CMake package files.  The shipped float.hpp still honours
+# both switches; a consumer that defines them gets the fallback paths,
+# which the consumer test does not exercise.
+[target.ltla-sanisizer]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
