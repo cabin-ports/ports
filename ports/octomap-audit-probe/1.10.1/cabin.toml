@@ -1,0 +1,82 @@
+[package.upstream]
+url = "https://github.com/OctoMap/octomap/archive/refs/tags/v1.10.1.tar.gz"
+checksum = "sha256:b6b6c10c99ab15701dd105840e7d4cf18e226eb68714dd4bdfe049dede5cd489"
+format = "tar.gz"
+strip-prefix = "octomap-1.10.1"
+# The patch makes MapCollection.hxx's path separator choice (:286, :304)
+# test _WIN32, which every Windows compiler predefines, instead of WIN32,
+# which CMake passes to MSVC builds and MinGW GCC predefines only in its
+# GNU modes.  The header is compiled in the consumer, and Cabin passes
+# neither, so Windows consumers would otherwise split and join map
+# paths on '/'.
+
+# The tag archive holds three projects; this port is the octomap one in
+# octomap/.  octovis (a Qt viewer) and dynamicEDT3D (a distance-map library
+# on top of octomap) are separate libraries upstream builds alongside it
+# and are not ported here.
+[package]
+name = "cabin-ports/octomap-audit-probe"
+version = "1.10.1"
+include = [
+  "octomap/LICENSE.txt",
+  "octomap/include",
+  "octomap/src/AbstractOcTree.cpp",
+  "octomap/src/AbstractOccupancyOcTree.cpp",
+  "octomap/src/ColorOcTree.cpp",
+  "octomap/src/CountingOcTree.cpp",
+  "octomap/src/OcTree.cpp",
+  "octomap/src/OcTreeNode.cpp",
+  "octomap/src/OcTreeStamped.cpp",
+  "octomap/src/Pointcloud.cpp",
+  "octomap/src/ScanGraph.cpp",
+  "octomap/src/math",
+]
+
+# The two libraries octomap/CMakeLists.txt builds, octomath
+# (src/math/CMakeLists.txt) and octomap, which links it
+# (src/CMakeLists.txt); upstream builds each shared and static, and Cabin
+# builds them static.  Not ported: the command-line tools and examples
+# in src/, the tests in src/testing, and the experimental OpenMP
+# parallelization (OCTOMAP_OMP, off by default).  Not reproduced: the
+# warning flags and -O3 -funroll-loops CompilerSettings.cmake sets for
+# GCC.  octomap_timing.h, a public header only upstream's tools and
+# tests include, defines a non-inline gettimeofday() under MSVC, so at
+# most one translation unit of a program built with cl may include it.
+# Under GCC, and under Clang with libstdc++, OcTreeKey.h takes
+# unordered_set and unordered_map from <tr1/...> (OcTreeKey.h:42-53).
+[target.octomath]
+type = "library"
+sources = [
+  "octomap/src/math/Pose6D.cpp",
+  "octomap/src/math/Quaternion.cpp",
+  "octomap/src/math/Vector3.cpp",
+]
+include-dirs = ["octomap/include"]
+# The distribution's CMakeLists.txt sets CMAKE_CXX_STANDARD 11; C++14 is
+# the oldest standard Cabin can request from MSVC.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "octomath"
+
+[target.octomap]
+type = "library"
+sources = [
+  "octomap/src/AbstractOcTree.cpp",
+  "octomap/src/AbstractOccupancyOcTree.cpp",
+  "octomap/src/ColorOcTree.cpp",
+  "octomap/src/CountingOcTree.cpp",
+  "octomap/src/OcTree.cpp",
+  "octomap/src/OcTreeNode.cpp",
+  "octomap/src/OcTreeStamped.cpp",
+  "octomap/src/Pointcloud.cpp",
+  "octomap/src/ScanGraph.cpp",
+]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "octomap"
+deps = [{ name = "octomath", public = true }]
+
+# audit probe (never merged): variant C, a Windows-only define.  Profile
+# defines reach only this package's own compiles, not its consumers.
+[target.'cfg(family = "windows")'.profile]
+defines = ["WIN32"]
