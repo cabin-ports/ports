@@ -9,38 +9,68 @@ strip-prefix = "simdjson-5.1.1"
 # terms must accompany every source copy, for the code the files state
 # is under it: string-view-lite
 # (include/simdjson/nonstd/string_view.hpp:1-7) and the Dragonbox port
-# in src/to_chars.cpp (:22-26).  Other third-party notices are shipped
-# as upstream ships them.  Known upstream attribution issues, left to
-# upstream:
-# - src/to_chars.cpp's append_exponent and format_buffer (:1047-1147)
-#   match nlohmann/json's (MIT) number formatter, and the file cites
-#   that project's issues #362 and #378 (:1098, :1171), but it names
-#   neither the project nor its license.
-# - include/simdjson/internal/jeaiii.h:11 credits "James Edward Anhalt
-#   III's algorithm" without the MIT notice of jeaiii/itoa's
-#   include/itoa/jeaiii_to_text.h it adapts.
-# - src/fallback.cpp's UTF-8 validator (:450-511) is credited as
-#   Apache-licensed Google Fuchsia code, while Fuchsia's
-#   validate_string.cc it resembles is BSD-3-Clause.
-# - tools/vendor_fast_float.sh:45 renames the holder in the vendored
-#   include/simdjson/internal/fast_float.h notices (:46, :74) to "The
-#   simdjson_fast_float authors".
+# in src/to_chars.cpp (:22-26).  0002 adds the notices of code that the
+# release adapts from other projects without carrying their terms:
+# - LICENSE-MIT.nlohmann-json, for src/to_chars.cpp's append_exponent,
+#   format_buffer and to_chars (:1047-1189).  They are the number
+#   formatter and entry point of the Grisu2 code that simdjson adapted
+#   from JSON for Modern C++
+#   (nlohmann/json, MIT, Copyright (c) 2013-2020 Niels Lohmann) in
+#   simdjson #1168 (2020); the file still cites that project's issues
+#   #362 and #378 (:1098, :1171).  The notice file holds the notice that
+#   src/to_chars.cpp carried through simdjson v4.6.11 (:14-27, naming
+#   the MIT license and Copyright (c) 2009 Florian Loitsch), which
+#   simdjson #2777 dropped with the Grisu2 core, then nlohmann/json
+#   v3.9.1's LICENSE.MIT, the release current at that adoption.
+# - LICENSE-MIT.jeaiii-itoa, for include/simdjson/internal/jeaiii.h,
+#   which credits "James Edward Anhalt III's algorithm" (:11) and follows
+#   jeaiii/itoa's include/itoa/jeaiii_to_text.h: that file's notice (MIT,
+#   Copyright (c) 2022 James Edward Anhalt III), as of jeaiii/itoa
+#   69308f65e8.
+# - LICENSE-BSD-3-Clause.fuchsia, for src/fallback.cpp's UTF-8 validator
+#   (:450-511), credited as Apache-licensed Google Fuchsia code (:450),
+#   and its uncredited copy in include/simdjson/compile_time_json-inl.h
+#   (:417-507).  Both follow Fuchsia's
+#   zircon/system/ulib/fidl/validate_string.cc (Copyright 2020 The
+#   Fuchsia Authors), which simdjson took in 2020 and which is under
+#   Fuchsia's BSD-3-Clause LICENSE: that LICENSE, as of Fuchsia
+#   11537de04854 (2020).
+# tools/vendor_fast_float.sh:45 renames the holder in the vendored
+# include/simdjson/internal/fast_float.h's notices (:46, :74); fast_float
+# v8.2.10's own fast_float.h reads "Copyright (c) 2021 The fast_float
+# authors" (MIT, :26) and "Copyright 2021 The fast_float authors"
+# (Apache-2.0, :54).  Those notices also cover the routines that
+# include/simdjson/generic/numberparsing.h adapts from fast_float
+# (:319-320, :581).  Credited without terms, and shipped as is:
+# parse_eight_digits_unrolled's three-line SWAR digit sum, credited to
+# johnnylee-sde.github.io in the arm64, fallback, ppc64, rvv-vls, lsx and
+# lasx numberparsing_defs.h, a common idiom too slight to carry
+# copyright; and the bit-count table of
+# src/internal/simdprune_tables.cpp:10-11, from Sean Eron Anderson's Bit
+# Twiddling Hacks, whose snippets that page places in the public domain.
+# include/simdjson/dom/fractured_json.h implements the layout of
+# j-brooke/FracturedJson (MIT) on simdjson's DOM without porting its
+# code, sharing short option descriptions (:9, :19, :62, :132).
 patches = [
   "patches/0001-add-boost-software-license-for-string-view-and-dragonbox-code.patch",
+  "patches/0002-add-licenses-for-nlohmann-json-jeaiii-itoa-and-fuchsia-code.patch",
 ]
 
 [package]
 name = "cabin-ports/simdjson"
 version = "5.1.1"
 # simdjson is Apache-2.0 or MIT, at the user's option;
-# LICENSE_1_0.txt comes from the patch above.  fast_float
-# (include/simdjson/internal/fast_float.h) and the PyTorch-derived CPU
-# detection (src/internal/isadetection.h,
+# LICENSE_1_0.txt and the LICENSE-*.* notices come from the patches
+# above.  fast_float (include/simdjson/internal/fast_float.h) and the
+# PyTorch-derived CPU detection (src/internal/isadetection.h,
 # include/simdjson/internal/instruction_set.h) carry their license
 # texts inline.
 include = [
   "LICENSE",
+  "LICENSE-BSD-3-Clause.fuchsia",
   "LICENSE-MIT",
+  "LICENSE-MIT.jeaiii-itoa",
+  "LICENSE-MIT.nlohmann-json",
   "LICENSE_1_0.txt",
   "include",
   "patches",
