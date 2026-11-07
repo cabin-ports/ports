@@ -47,9 +47,13 @@ does not yet serve cannot publish.
 `ci.yml` runs on pull requests and in the merge queue.  Its `pin` job checks the Cabin pin; its
 `check` job installs the pinned `cabin` and runs the publisher's tests and the dry-run (the
 [checks](../CONTRIBUTING.md#checks)) on Linux, macOS, and Windows; and its `lint` job runs
-`cargo fmt --check`, `cargo clippy --locked --all-targets -- -D warnings`, and
+`cargo fmt --check`, `cargo clippy --locked --all-targets -- -D warnings`, `shellcheck` and
+`shfmt -d -i 2` over `scripts/actions/`, `actionlint` over the workflows, and
 `gh actions-lock --verify`.  Its `required` job is the only required check and fails unless every
 job it gates succeeded.  CI's dry-run is selective (below).
+
+Each `lint` step runs locally, from the repository root, exactly as `ci.yml` writes it, given
+`shellcheck` and Go: `go run` fetches the `shfmt` and `actionlint` versions the job pins.
 
 ### Selective dry-runs
 

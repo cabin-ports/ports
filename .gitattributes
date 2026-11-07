@@ -1,2 +1,4 @@
 # Patches publish verbatim and apply byte-exactly: never convert their line endings.
 ports/**/*.patch -text
+# Git Bash runs these on Windows too, and fails on CRLF line endings.
+scripts/actions/*.sh text eol=lf
