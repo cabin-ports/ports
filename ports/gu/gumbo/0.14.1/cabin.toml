@@ -1,0 +1,80 @@
+[package.upstream]
+# vcpkg pins this archive's SHA-512 (ports/gumbo/portfile.cmake); Conan
+# Center packages only releases up to 0.13.2.
+url = "https://codeberg.org/gumbo-parser/gumbo-parser/archive/0.14.1.tar.gz"
+checksum = "sha256:ba5d13b9b508ec693613b3b61518163aced38f8e885f7e28dc047348a4e61365"
+format = "tar.gz"
+strip-prefix = "gumbo-parser"
+
+# The two headers upstream installs, gumbo.h and the tag_enum.h it includes
+# (meson.build:66, Makefile.am:68).  src/ also holds the private headers,
+# among them an error.h that would shadow the C library's <error.h>, so it
+# stays off the consumer include path.
+[[package.upstream.copy]]
+from = "src/gumbo.h"
+to = "include/gumbo.h"
+
+[[package.upstream.copy]]
+from = "src/tag_enum.h"
+to = "include/tag_enum.h"
+
+[package]
+name = "cabin-ports/gumbo"
+version = "0.14.1"
+include = ["doc/COPYING", "include", "src", "visualc"]
+# Upstream builds C99 (meson.build:5); C11 is the oldest standard Cabin can
+# request from MSVC.  gumbo.h needs <stdbool.h>, so C99 is its floor; from
+# C++ its declarations are extern "C" and <stdbool.h> is C++11's.
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# gumbo, the HTML5 parsing library that Google released and that continues
+# on Codeberg (README.md:7-9), as upstream's Meson and Autotools builds
+# compile libgumbo: the twelve sources of meson.build:14-27 (Makefile.am:
+# 38-67), with no definitions that the sources read.  Consumers write
+# `#include <gumbo.h>`.
+#
+# MSVC's C library has no <strings.h>.  On MSVC the library's compiles find
+# the replacement upstream ships for that case (CHANGES.md:100),
+# visualc/include/strings.h, which maps strcasecmp and strncasecmp to
+# _stricmp and _strnicmp; consumers do not see it.  Upstream's own builds
+# leave that include path to the MSVC builder, as vcpkg's port adds it
+# (ports/gumbo/CMakeLists.txt).  As upstream ships it, gumbo.h defines
+# _CRT_SECURE_NO_WARNINGS and maps fileno to _fileno in every MSVC consumer
+# (src/gumbo.h:45-48).
+#
+# Upstream generates and commits the tag tables, which gentags.sh writes
+# from src/tag.in (src/tag_enum.h, tag_sizes.h, and tag_strings.h, and the
+# gperf hash tag_gperf.h), and the named character reference table, which
+# genentities.sh has gperf build from WHATWG's entities.json
+# (src/char_ref_gperf.c); this port builds them as shipped.
+#
+# Not ported: the shared library, the Python bindings, the examples, the
+# googletest suite, and the fuzzer.
+#
+# Licence: Apache-2.0, doc/COPYING (Google Inc.).  src/utf8.c also embeds
+# Bjoern Hoehrmann's MIT-licensed UTF-8 decoder, whose notice it carries
+# (src/utf8.c:38-58), and src/parser.c:1488-1491 credits html5lib-python's
+# structuring of the spec's "reconstruct the active formatting elements".
+[target.gumbo]
+type = "library"
+sources = [
+  "src/attribute.c",
+  "src/char_ref.c",
+  "src/char_ref_gperf.c",
+  "src/error.c",
+  "src/parser.c",
+  "src/string_buffer.c",
+  "src/string_piece.c",
+  "src/tag.c",
+  "src/tokenizer.c",
+  "src/utf8.c",
+  "src/util.c",
+  "src/vector.c",
+]
+include-dirs = ["include"]
+links = "gumbo"
+
+[target.'cfg(env = "msvc")'.profile]
+include-dirs = ["visualc/include"]
