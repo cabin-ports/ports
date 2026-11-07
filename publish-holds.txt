@@ -24,3 +24,4 @@ json-schema-validator 2.4.1 upstream attribution questions (embedded JSON Patch 
 ccd 2.1.0 two-component upstream version mapping not yet confirmed
 mimalloc 3.5.3 non-upstream weak get_new_handler visibility patch; option A vs B awaiting a publication decision
 parallel-hashmap 2.0.0 licence text added by a patch; awaiting a publication decision
+mapbox-geometry 2.0.3 non-upstream patch (unmerged upstream PR mapbox/geometry.hpp#75, clang ambiguity in geometry_io.hpp) awaiting a publication decision
