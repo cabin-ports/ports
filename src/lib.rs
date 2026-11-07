@@ -3,9 +3,10 @@
 //! the `cabin-ports` scope.  Every committed port is a package
 //! directory, published verbatim apart from its consumer `tests/`.
 //!
-//! Every mode runs the local preflight (materialize ports and publish
-//! them into a temporary file registry in publication order, building
-//! every port against the generated packages as soon as it is staged):
+//! Every mode but `--list-new` runs the local preflight (materialize
+//! ports and publish them into a temporary file registry in publication
+//! order, building every port against the generated packages as soon as
+//! it is staged):
 //!
 //! - `--dry-run` stops after the preflight, which a [`select::Selection`]
 //!   may narrow to the ports a change needs;
@@ -15,10 +16,12 @@
 //!   byte-identical idempotency instead of skipping versions (the
 //!   public index hides pending versions, so it cannot be used to
 //!   decide what is already published), and respinning changed bytes
-//!   as packaging revisions;
+//!   as packaging revisions, but, given `main`'s commit, preflights
+//!   and uploads nothing unless it is the checked-out one;
 //! - `--publish-new` uploads only the versions a receipts log records
-//!   no upload of, never as a packaging revision, and `--plan-new`
-//!   previews it ([`batch`]).
+//!   no upload of, never as a packaging revision, `--plan-new`
+//!   previews it, and `--list-new` lists its candidates without the
+//!   preflight ([`batch`]).
 //!
 //! The committed tree is an input only: every port materializes into
 //! a scratch directory, never in place.
@@ -44,6 +47,9 @@ pub enum Mode {
         /// Registry index URL (the publish API origin comes from its
         /// `config.json`).
         index_url: String,
+        /// `main`'s current commit: unless it is the checked-out one,
+        /// upload nothing.
+        main: Option<String>,
     },
     /// Plan, or upload, the first publication of new versions only.
     New(batch::New),
@@ -106,7 +112,19 @@ pub fn run(options: &Options) -> Result<()> {
     let total = conversions.len();
     let conversions = match &options.mode {
         Mode::DryRun(selection) => select::select(conversions, selection, &options.ports_dir)?,
-        Mode::Publish { .. } => conversions,
+        Mode::Publish { main, .. } => {
+            if let Some(main) = main {
+                let (head, main) = batch::head_and_main(&options.ports_dir, main)?;
+                if head != main {
+                    println!(
+                        "::warning::superseded by main's {main}: published nothing; dispatch \
+                         again on main"
+                    );
+                    return Ok(());
+                }
+            }
+            conversions
+        }
         Mode::New(new) => return batch::run(new, &conversions, &holds, options),
     };
 
@@ -128,7 +146,7 @@ pub fn run(options: &Options) -> Result<()> {
                 report.registry_dir.display()
             );
         }
-        Mode::Publish { index_url } => {
+        Mode::Publish { index_url, .. } => {
             let uploads: Vec<remote::Upload<'_>> = conversions
                 .iter()
                 .zip(report.package_dirs.iter().zip(&report.checksums))

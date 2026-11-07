@@ -329,6 +329,7 @@ fn scrubbed(mut command: Command) -> Command {
         "CLICOLOR",
         "CLICOLOR_FORCE",
         "PORT_PUBLISH_CHANGED_SINCE",
+        "PORT_PUBLISH_RETRY_FAILED",
     ] {
         command.env_remove(key);
     }
@@ -653,8 +654,8 @@ fn publish_refuses_a_selection() {
 }
 
 /// Each new mode demands its whole contract: a missing receipts log,
-/// output log, or `main` is a usage error, and only `--publish-new`
-/// takes `--main` (the preview never uploads).
+/// output log, or `main` is a usage error, and the previews, which
+/// never upload, take neither `--main` nor an output log.
 #[test]
 fn the_new_modes_require_their_state() {
     let base = ["--index-url", "http://127.0.0.1:9/", "--cabin", "cabin"];
@@ -665,6 +666,10 @@ fn the_new_modes_require_their_state() {
         &["--plan-new"],
         &["--plan-new", "--receipts", "r", "--main", "HEAD"],
         &["--plan-new", "--receipts", "r", "--receipts-out", "o"],
+        &["--list-new", "l"],
+        &["--list-new", "l", "--receipts", "r", "--main", "HEAD"],
+        &["--list-new", "l", "--receipts", "r", "--receipts-out", "o"],
+        &["--list-new", "l", "--receipts", "r", "--port", "zlib"],
         &["--publish", "--receipts", "r"],
         &["--dry-run", "--retry-failed"],
     ] {
@@ -1250,13 +1255,17 @@ fn committed_fake_ports(dir: &TempDir) -> (PathBuf, PathBuf, String) {
     git(dir.path(), &["init", "-q"]);
     git(dir.path(), &["add", "ports"]);
     git(dir.path(), &["commit", "-q", "-m", "ports"]);
-    let head = Command::new("git")
-        .current_dir(dir.path())
+    (ports, cache, head(dir.path()))
+}
+
+/// The commit `HEAD` names in `repo`.
+fn head(repo: &Path) -> String {
+    let output = Command::new("git")
+        .current_dir(repo)
         .args(["rev-parse", "HEAD"])
         .output()
         .unwrap();
-    let head = String::from_utf8(head.stdout).unwrap().trim().to_owned();
-    (ports, cache, head)
+    String::from_utf8(output.stdout).unwrap().trim().to_owned()
 }
 
 /// One `--plan-new` or `--publish-new` run over `ports` against
@@ -1353,6 +1362,20 @@ fn publish_new_uploads_each_version_once_and_resumes_from_its_receipts() {
     assert!(!stdout.contains("staged cabin-ports/fastlz"), "{stdout}");
     assert!(registry.requests().is_empty(), "{:?}", registry.requests());
     assert_eq!(receipt_lines(log.path()), Vec::<String>::new());
+
+    // --list-new lists the preview's upload order without staging.
+    let order = stdout
+        .lines()
+        .find_map(|line| line.strip_prefix("new: upload, in order: "))
+        .unwrap()
+        .to_owned();
+    let list = dir.child("pending.txt");
+    let list_new = format!("--list-new={}", list.path().display());
+    let (ok, stdout, stderr) = new_run(&list_new, &dir, snapshot, &registry, log.path(), &[]);
+    assert!(ok, "stdout:\n{stdout}\nstderr:\n{stderr}");
+    assert!(!stdout.contains("preflight:"), "{stdout}");
+    let listed = fs::read_to_string(list.path()).unwrap();
+    assert_eq!(listed.lines().collect::<Vec<_>>().join(", "), order);
 
     let (ok, stdout, stderr) = new_run("--publish-new", &dir, snapshot, &registry, log.path(), &[]);
     assert!(!ok, "a failed upload fails the run: {stdout}");
@@ -1502,6 +1525,172 @@ fn publish_new_resubmits_identical_bytes_and_never_respins() {
         ["cabin-ports/zlib 1.3.1 failed"]
     );
     assert_eq!(puts(&other), ["/api/v1/packages/cabin-ports/zlib/1.3.1"]);
+}
+
+const LIST_REGISTRY: &str = "https://registry.invalid";
+
+/// One `--list-new` run over `fake_ports`' `ports` and `cache` with the
+/// receipts log `log`, `PORT_PUBLISH_RETRY_FAILED` set to
+/// `retry_failed`, and the tool itself standing in for the `cabin` this
+/// mode never runs: its output and the list it wrote, if any.
+fn list_new(
+    dir: &TempDir,
+    (ports, cache): (&Path, &Path),
+    log: &str,
+    retry_failed: Option<&str>,
+) -> (std::process::Output, Option<String>) {
+    let (receipts, list) = (dir.child("receipts.jsonl"), dir.child("pending.txt"));
+    receipts.write_str(log).unwrap();
+    let _ = fs::remove_file(list.path());
+    let mut command = scrubbed(tool());
+    command
+        .arg("--list-new")
+        .arg(list.path())
+        .args(["--index-url", LIST_REGISTRY, "--receipts"])
+        .arg(receipts.path())
+        .arg("--ports-dir")
+        .arg(ports)
+        .arg("--cache-dir")
+        .arg(cache)
+        .arg("--work-dir")
+        .arg(dir.child("work").path())
+        .arg("--cabin")
+        .arg(env!("CARGO_BIN_EXE_port-publish"));
+    if let Some(value) = retry_failed {
+        command.env("PORT_PUBLISH_RETRY_FAILED", value);
+    }
+    let output = command.output().unwrap();
+    (output, fs::read_to_string(list.path()).ok())
+}
+
+/// `--list-new` writes what `--publish-new` would upload, one version
+/// per line in upload order and without what requires a held version,
+/// staging nothing, and only once the hold list is valid.
+#[test]
+fn list_new_lists_the_candidates_without_staging() {
+    let dir = TempDir::new().unwrap();
+    let (ports, cache) = fake_ports(&dir);
+    let holds = dir.child("publish-holds.txt");
+    holds.write_str("zlib 1.3.1 awaiting a decision\n").unwrap();
+    let (output, list) = list_new(&dir, (&ports, &cache), "", None);
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        output.status.success(),
+        "stdout:\n{stdout}\nstderr:\n{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(!stdout.contains("preflight:"), "{stdout}");
+    assert!(!stdout.contains("upload, in order"), "{stdout}");
+    assert_eq!(list.as_deref(), Some("cabin-ports/fastlz 0.5.0\n"));
+
+    holds.write_str("zlib 9.9.9 awaiting a decision\n").unwrap();
+    let (output, list) = list_new(&dir, (&ports, &cache), "", None);
+    let stderr = String::from_utf8_lossy(&output.stderr);
+    assert!(!output.status.success(), "{stderr}");
+    assert!(stderr.contains("not a committed port version"), "{stderr}");
+    assert_eq!(list, None);
+}
+
+/// `PORT_PUBLISH_RETRY_FAILED` carries a workflow input that is empty
+/// on a scheduled run: an empty or `false` value leaves a failed upload
+/// waiting, `true` retries it, and anything else is a usage error, never
+/// a retry.
+#[test]
+fn retry_failed_reads_its_variable() {
+    let dir = TempDir::new().unwrap();
+    let (ports, cache) = fake_ports(&dir);
+    let log = format!(
+        "{{\"registry\":\"{LIST_REGISTRY}\",\"name\":\"cabin-ports/libpng\",\"version\":\
+         \"1.6.50\",\"outcome\":\"failed\",\"checksum\":\"sha256:{}\"}}\n",
+        "0".repeat(64)
+    );
+    let waiting = "cabin-ports/fastlz 0.5.0\ncabin-ports/zlib 1.3.1\n";
+    for (value, expected) in [
+        (None, waiting),
+        (Some(""), waiting),
+        (Some("false"), waiting),
+        (
+            Some("true"),
+            &format!("{waiting}cabin-ports/libpng 1.6.50\n"),
+        ),
+    ] {
+        let (output, list) = list_new(&dir, (&ports, &cache), &log, value);
+        assert!(
+            output.status.success(),
+            "{value:?}: {}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert_eq!(list.as_deref(), Some(expected), "{value:?}");
+    }
+    for typo in ["flase", "TRUE"] {
+        let (output, list) = list_new(&dir, (&ports, &cache), &log, Some(typo));
+        assert_eq!(output.status.code(), Some(2), "{typo:?}");
+        assert_eq!(list, None, "{typo:?}");
+    }
+}
+
+/// `--publish --main` uploads nothing, before any preflight, once main
+/// has moved past the checked-out commit, and fails when main does not
+/// resolve.
+#[test]
+fn publish_skips_a_superseded_commit() {
+    let dir = TempDir::new().unwrap();
+    let (ports, cache) = zlib_only(&dir);
+    git(dir.path(), &["init", "-q"]);
+    git(dir.path(), &["add", "ports"]);
+    git(dir.path(), &["commit", "-q", "-m", "ports"]);
+    let snapshot = head(dir.path());
+    git(
+        dir.path(),
+        &["commit", "-q", "--allow-empty", "-m", "main moves"],
+    );
+    let main = head(dir.path());
+    git(dir.path(), &["checkout", "-q", &snapshot]);
+    let publish = |main: &str| {
+        let output = scrubbed(tool())
+            .args([
+                "--publish",
+                "--index-url",
+                "http://127.0.0.1:9/",
+                "--main",
+                main,
+            ])
+            .arg("--ports-dir")
+            .arg(&ports)
+            .arg("--cache-dir")
+            .arg(&cache)
+            .arg("--work-dir")
+            .arg(dir.child("work").path())
+            // A stub: the preflight fails as soon as it runs `cabin`.
+            .arg("--cabin")
+            .arg(env!("CARGO_BIN_EXE_port-publish"))
+            .output()
+            .unwrap();
+        (
+            output.status.success(),
+            String::from_utf8_lossy(&output.stdout).into_owned(),
+            String::from_utf8_lossy(&output.stderr).into_owned(),
+        )
+    };
+
+    let (ok, stdout, stderr) = publish(&main);
+    assert!(ok, "stdout:\n{stdout}\nstderr:\n{stderr}");
+    assert!(
+        stdout.contains(&format!(
+            "::warning::superseded by main's {main}: published nothing; dispatch again on main"
+        )),
+        "{stdout}"
+    );
+    assert!(!stdout.contains("preflight:"), "{stdout}");
+
+    let (ok, stdout, stderr) = publish("no-such-rev");
+    assert!(!ok, "{stdout}");
+    assert!(stderr.contains("resolving main"), "{stderr}");
+    assert!(!stdout.contains("preflight:"), "{stdout}");
+
+    let (_, stdout, _) = publish(&snapshot);
+    assert!(stdout.contains("preflight:"), "{stdout}");
+    assert!(!stdout.contains("superseded"), "{stdout}");
 }
 
 /// The clap wiring is the mode contract, so its two fail-opens are

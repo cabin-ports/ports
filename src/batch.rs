@@ -1,6 +1,6 @@
-//! First publication of new package versions: `--plan-new` previews
-//! and `--publish-new` uploads, never as a packaging revision
-//! (docs/publishing.md, "Automatic publishing").
+//! First publication of new package versions: `--list-new` lists,
+//! `--plan-new` previews, and `--publish-new` uploads, never as a
+//! packaging revision (docs/publishing.md, "Automatic publishing").
 //!
 //! Which versions the registry already has is the receipts log's
 //! answer, not the registry's: the read routes serve verified
@@ -45,11 +45,11 @@ use crate::{preflight, remote, select};
 /// not upload, `#` starting a comment line.
 pub const HOLDS_FILE: &str = "publish-holds.txt";
 
-/// `--plan-new` and `--publish-new`.
+/// `--list-new`, `--plan-new`, and `--publish-new`.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct New {
     /// The registry, by the index URL its receipts log records.
-    /// `--plan-new` contacts nothing.
+    /// `--list-new` and `--plan-new` contact nothing.
     pub index_url: String,
     /// That registry's receipts log.
     pub receipts: PathBuf,
@@ -57,8 +57,11 @@ pub struct New {
     pub retry_failed: bool,
     /// `--publish-new`: `main`'s current commit, against which the
     /// checked-out snapshot is checked before anything uploads.
-    /// `None` previews.
+    /// `None` previews or lists.
     pub main: Option<String>,
+    /// `--list-new`: write the candidates here, one label per line in
+    /// upload order, and stop before staging.
+    pub list: Option<PathBuf>,
 }
 
 /// One line of the receipts log.
@@ -330,19 +333,7 @@ pub fn defer_stale(
 ) -> Result<()> {
     let (top, prefix) = select::locate(ports_dir)?;
     let top = top.as_path();
-    let rev = |rev: &str| {
-        select::git(
-            top,
-            &[
-                "rev-parse",
-                "--verify",
-                "--end-of-options",
-                &format!("{rev}^{{commit}}"),
-            ],
-        )
-        .map(|out| out.trim().to_owned())
-    };
-    let (head, main) = (rev("HEAD")?, rev(main).context("resolving main")?);
+    let (head, main) = head_and_main(top, main)?;
     if head == main {
         println!("new: main is still {main}, this snapshot");
         return Ok(());
@@ -412,10 +403,34 @@ pub fn defer_stale(
     Ok(())
 }
 
-/// Run `--plan-new` or `--publish-new` over the loaded catalog.
+/// The checked-out commit and `main`'s, resolved in the repository
+/// holding `dir`.
 ///
 /// # Errors
-/// Unreadable state, a failed preflight, or a failed upload.
+/// When Git cannot resolve either: an unresolvable main never reads as
+/// unchanged.
+pub fn head_and_main(dir: &Path, main: &str) -> Result<(String, String)> {
+    let rev = |rev: &str| {
+        select::git(
+            dir,
+            &[
+                "rev-parse",
+                "--verify",
+                "--end-of-options",
+                &format!("{rev}^{{commit}}"),
+            ],
+        )
+        .map(|out| out.trim().to_owned())
+    };
+    Ok((rev("HEAD")?, rev(main).context("resolving main")?))
+}
+
+/// Run `--list-new`, `--plan-new`, or `--publish-new` over the loaded
+/// catalog.
+///
+/// # Errors
+/// Unreadable state, an unwritable list, a failed preflight, or a
+/// failed upload.
 pub fn run(
     new: &New,
     conversions: &[PortConversion],
@@ -434,6 +449,13 @@ pub fn run(
         defer_stale(conversions, &mut status, &options.ports_dir, main)?;
     }
     propagate(conversions, &mut status);
+    if let Some(list) = &new.list {
+        let labels: String = upload_order(&status)
+            .into_iter()
+            .map(|index| label(&conversions[index]) + "\n")
+            .collect();
+        return fs::write(list, labels).with_context(|| format!("writing {}", list.display()));
+    }
     print_plan(conversions, &status, &receipts);
 
     let staged: Vec<usize> = select::closure_of(conversions, upload_order(&status))

@@ -13,12 +13,14 @@ use clap::{ArgGroup, Parser};
 
 /// Publishes the committed foundation ports as `cabin-ports/<name>`
 /// registry packages, each from the `cabin.toml` committed in it,
-/// verbatim.  Every mode runs the local preflight - of every port,
-/// unless a dry-run selects fewer; --publish then uploads every package
-/// through the registry API, changed bytes as packaging revisions.
+/// verbatim.  Every mode but --list-new runs the local preflight - of
+/// every port, unless a dry-run selects fewer; --publish then uploads
+/// every package through the registry API, changed bytes as packaging
+/// revisions, and with --main does neither once main has moved on.
 /// --publish-new uploads only the versions the registry's receipts log
 /// records no upload of, never as a packaging revision, staging only
-/// those and what they require; --plan-new previews it.
+/// those and what they require; --plan-new previews it, and --list-new
+/// lists what it would upload.
 #[derive(Parser)]
 #[command(group(ArgGroup::new("mode").required(true)))]
 #[allow(clippy::struct_excessive_bools)] // the mode flags form one required group
@@ -41,8 +43,18 @@ struct Cli {
         requires_all = ["index_url", "receipts", "receipts_out", "main"]
     )]
     publish_new: bool,
-    /// Registry index URL (required with --publish, --plan-new, and
-    /// --publish-new; --plan-new uses it only to name the registry the
+    /// Write the versions --publish-new would upload before staging,
+    /// one `cabin-ports/<name> <version>` per line in upload order, to
+    /// FILE; stage nothing and contact no registry.
+    #[arg(
+        long,
+        value_name = "FILE",
+        group = "mode",
+        requires_all = ["index_url", "receipts"]
+    )]
+    list_new: Option<PathBuf>,
+    /// Registry index URL (required with --publish and the new modes;
+    /// --list-new and --plan-new use it only to name the registry the
     /// receipts log belongs to).
     // `conflicts_with`, not `requires = "publish"`: clap excuses a
     // missing required argument that conflicts with a present one, and
@@ -52,24 +64,37 @@ struct Cli {
     // --publish, and --publish requires the URL back.
     #[arg(long, conflicts_with = "dry_run")]
     index_url: Option<String>,
-    /// The registry's receipts log (--plan-new, --publish-new): one JSON
-    /// receipt per line, for that registry only.
+    /// The registry's receipts log (--list-new, --plan-new,
+    /// --publish-new): one JSON receipt per line, for that registry only.
     // `conflicts_with`, not `requires`, for the reason above.
     #[arg(long, value_name = "FILE", conflicts_with_all = ["dry_run", "publish"])]
     receipts: Option<PathBuf>,
     /// Append each upload's receipt to this file (--publish,
     /// --publish-new).
-    #[arg(long, value_name = "FILE", conflicts_with_all = ["dry_run", "plan_new"])]
+    #[arg(long, value_name = "FILE", conflicts_with_all = ["dry_run", "plan_new", "list_new"])]
     receipts_out: Option<PathBuf>,
-    /// main's current commit (--publish-new): candidates whose ports,
-    /// requirements, or hold main changed since the checked-out commit
-    /// wait for a later run, and all do when main changed anything
-    /// outside the ports directory.
-    #[arg(long, value_name = "REV", conflicts_with_all = ["dry_run", "publish", "plan_new"])]
+    /// main's current commit (--publish, --publish-new): --publish
+    /// uploads nothing unless the checked-out commit is main's;
+    /// --publish-new defers the candidates whose ports, requirements,
+    /// or hold main changed since the checked-out commit, and all of
+    /// them when main changed anything outside the ports directory.
+    #[arg(long, value_name = "REV", conflicts_with_all = ["dry_run", "plan_new", "list_new"])]
     main: Option<String>,
     /// Also retry versions whose upload failed, which may have landed:
-    /// check the registry first (--plan-new, --publish-new).
-    #[arg(long, conflicts_with_all = ["dry_run", "publish"])]
+    /// check the registry first (--list-new, --plan-new, --publish-new).
+    /// The variable is `true`, or `false` or empty for false; --dry-run
+    /// and --publish refuse it whatever its value.
+    // Only an exact `true` retries, like the workflow's `== true`
+    // tests: a typo must not resubmit an upload that may have landed.
+    #[arg(
+        long,
+        env = "PORT_PUBLISH_RETRY_FAILED",
+        value_parser = clap::builder::TypedValueParser::map(
+            clap::builder::PossibleValuesParser::new(["", "true", "false"]),
+            |value| value == "true",
+        ),
+        conflicts_with_all = ["dry_run", "publish"]
+    )]
     retry_failed: bool,
     /// Dry-run only what the change since this Git revision needs:
     /// when it only adds files under `<prefix>/<name>/<version>/` for new
@@ -83,7 +108,7 @@ struct Cli {
         long,
         value_name = "REV",
         env = "PORT_PUBLISH_CHANGED_SINCE",
-        conflicts_with_all = ["publish", "plan_new", "publish_new"]
+        conflicts_with_all = ["publish", "plan_new", "publish_new", "list_new"]
     )]
     changed_since: Option<String>,
     /// Dry-run only this port (every committed version) and its
@@ -92,7 +117,7 @@ struct Cli {
     #[arg(
         long = "port",
         value_name = "NAME",
-        conflicts_with_all = ["publish", "plan_new", "publish_new", "changed_since"]
+        conflicts_with_all = ["publish", "plan_new", "publish_new", "list_new", "changed_since"]
     )]
     ports: Vec<String>,
     /// Ports directory (default: the repository's ports).
@@ -146,16 +171,20 @@ fn run_with_workdir_notice(options: &Options, scratch: Option<tempfile::TempDir>
 
 fn options(cli: Cli) -> Result<(Options, Option<tempfile::TempDir>)> {
     // Clap enforces the pairings: `--index-url` is present exactly when
-    // an uploading or planning mode is, `--receipts` with the planning
-    // ones, and `--main` exactly with `--publish-new`.
+    // an uploading or planning mode is, `--receipts` with the new ones,
+    // and `--main` only with an uploading one.
     let mode = match (cli.index_url, cli.receipts) {
         (Some(index_url), Some(receipts)) => Mode::New(cabin_ports::batch::New {
             index_url,
             receipts,
             retry_failed: cli.retry_failed,
             main: cli.main,
+            list: cli.list_new,
         }),
-        (Some(index_url), None) => Mode::Publish { index_url },
+        (Some(index_url), None) => Mode::Publish {
+            index_url,
+            main: cli.main,
+        },
         (None, _) => Mode::DryRun(match cli.changed_since {
             Some(base) => Selection::ChangedSince(base),
             None if cli.ports.is_empty() => Selection::All,
