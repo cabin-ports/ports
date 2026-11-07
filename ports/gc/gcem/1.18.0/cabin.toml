@@ -12,6 +12,9 @@ name = "cabin-ports/gcem"
 version = "1.18.0"
 include = ["LICENSE", "NOTICE.txt", "contributors.txt", "include"]
 
+# On MSVC, signbit() tests the sign of a zero with the non-constexpr
+# _fpclass, so signbit(+-0), copysign with a zero argument, and atan2 at
+# the origin are not constant expressions there.
 [target.gcem]
 type = "header-only"
 include-dirs = ["include"]
