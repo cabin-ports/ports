@@ -6,24 +6,78 @@ url = "https://github.com/Dobiasd/FunctionalPlus/archive/refs/tags/v0.2.28.tar.g
 checksum = "sha256:8864a3e9bebde6ebed71b49ac2a036cedf9ae0f02ce758bc28c21e6a2ae15803"
 format = "tar.gz"
 strip-prefix = "FunctionalPlus-0.2.28"
+# include/fplus carries code from Stack Exchange answers and cppreference
+# pages, listed under [package], that upstream credits only by a URL or, for
+# is_function, by name; the
+# release ships no copy of their licence, CC BY-SA 3.0, whose sections 4(a)
+# and 4(b) require a copy or its URI with every copy.  The patch adds the
+# licence text, verbatim from
+# https://creativecommons.org/licenses/by-sa/3.0/legalcode.txt, as
+# LICENSE.CC-BY-SA-3.0.
+patches = ["patches/0001-add-cc-by-sa-3.0-license-for-credited-code.patch"]
 
 [package]
 name = "cabin-ports/functionalplus"
 version = "0.2.28"
 # LICENSE is the Boost Software License 1.0.  include/fplus/function_traits.hpp
 # is kennytm's utils/traits.hpp, under the same licence with its own notice
-# kept in the file (:1-8, :32).  Held in publish-holds.txt: include/fplus also
-# ships code it credits only by URL, without the CC BY-SA 3.0 terms of its
-# sources.  Copied near-verbatim: shared_ref.hpp:22-53 from Stack Overflow
-# answer 41976419 (shared_reference), variant.hpp:137-160 from answer 42493805
-# (type_set_eq), and container_traits.hpp:161-200 from answer 44549820
-# (can_self_assign).  Adapted, with the sources' names and
-# structure: internal/composition.hpp:16-53 from Code Review answer 63893
-# (compose_impl), show.hpp:268-312 from cppreference's std::tuple_cat example
-# (TuplePrinter), and variant.hpp:19-52, :96-113 and :162-175 from Stack
-# Overflow answers 18987405 (is_one_of, is_unique), 27588263 (get_index) and
-# 42581257 (ContainsTypes).
-include = ["LICENSE", "include"]
+# kept in the file (:1-8, :32).  The include/fplus blocks below are copied,
+# modified, from works under the Creative Commons Attribution-ShareAlike 3.0
+# Unported licence, and are distributed under CC BY-SA 3.0
+# (LICENSE.CC-BY-SA-3.0, from the patch above); the rest of the package stays
+# under the Boost Software License 1.0.
+# - shared_ref.hpp:21-53 (shared_ref, make_shared_ref), modified from
+#   shared_reference in the answer to "shared_ptr that cannot be null?",
+#   https://stackoverflow.com/a/41976419, by Simon Kraemer
+#   (https://stackoverflow.com/users/4181011), CC BY-SA 3.0.
+# - variant.hpp:19-52 (is_one_of, is_unique), modified (std::tuple
+#   specializations added) from the answer to "check variadic templates
+#   parameters for uniqueness", https://stackoverflow.com/a/18987405, by
+#   Dietmar Kühl (https://stackoverflow.com/users/1120273), CC BY-SA 3.0.
+# - variant.hpp:96-113 (get_index), modified from the answer to "Variadic
+#   template class, getting index of a specific type from its argument list",
+#   https://stackoverflow.com/a/27588263, by Jarod42
+#   (https://stackoverflow.com/users/2684539), CC BY-SA 3.0.
+# - variant.hpp:137-160 (type_set_eq), modified from the answer to "Compare
+#   two sets of types for equality", https://stackoverflow.com/a/42493805, by
+#   W.F. (https://stackoverflow.com/users/4324224), CC BY-SA 3.0.
+# - variant.hpp:162-175 (is_superset_of), modified from ContainsTypes in the
+#   answer to "Check if one set of types is a subset of the other",
+#   https://stackoverflow.com/a/42581257, by Maarten Bamelis
+#   (https://stackoverflow.com/users/4841248), CC BY-SA 3.0.
+# - container_traits.hpp:161-200 (can_self_assign, can_reuse), modified from
+#   the answer to "Dispatching r-values and l-values differently and using
+#   sfinae to disable one option", https://stackoverflow.com/a/44549820, by
+#   Yakk - Adam Nevraumont (https://stackoverflow.com/users/1774667),
+#   CC BY-SA 3.0.
+# - container_common.hpp:2070-2084 (mean_stddev), modified from the answer to
+#   "Calculate mean and standard deviation from a vector of samples in C++
+#   using Boost", https://stackoverflow.com/a/7616783, by musiphil
+#   (https://stackoverflow.com/users/424632), CC BY-SA 3.0.
+# - internal/composition.hpp:16-53 (compose_impl), modified from the answer
+#   to "C++ function composition", https://codereview.stackexchange.com/a/63893,
+#   by davidhigh (https://codereview.stackexchange.com/users/53753),
+#   CC BY-SA 3.0.
+# - internal/invoke.hpp:24-212 (invoke_impl, invoke), modified from the
+#   possible implementation on "std::invoke",
+#   https://en.cppreference.com/mwiki/index.php?title=cpp/utility/functional/invoke&oldid=82514,
+#   by cppreference.com contributors, CC BY-SA 3.0 (and the GNU FDL).
+# - internal/meta.hpp:69-164 (is_function), modified from the possible
+#   implementation on "std::is_function",
+#   https://en.cppreference.com/w/cpp/types/is_function, by cppreference.com
+#   contributors, CC BY-SA 3.0 (and the GNU FDL).
+# - show.hpp:268-312 (TupleStreamer, stream), modified from TuplePrinter in
+#   the example on "std::tuple_cat",
+#   https://en.cppreference.com/mwiki/index.php?title=cpp/utility/tuple/tuple_cat&oldid=122791,
+#   by cppreference.com contributors, CC BY-SA 3.0 (and the GNU FDL).
+# Credited code too slight to carry copyright, so not listed: the one-line or
+# few-line idioms at variant.hpp:83 (https://stackoverflow.com/a/3273571) and
+# :177 (https://stackoverflow.com/a/36934374), internal/meta.hpp:13
+# (cppreference's void_t) and :60 (https://stackoverflow.com/a/27221517), and
+# internal/invoke.hpp:15 (libc++'s invoke return macro) and :214 (libstdc++
+# 7.1.0's is_invocable traits); internal/apply.hpp:17 is std::apply as C++17
+# [tuple.apply] specifies it.
+include = ["LICENSE", "LICENSE.CC-BY-SA-3.0", "include", "patches"]
 
 # Header-only, as upstream's INTERFACE target fplus (FunctionalPlus::fplus,
 # CMakeLists.txt:15-16): include/ is the include root (:17-22), installed as
