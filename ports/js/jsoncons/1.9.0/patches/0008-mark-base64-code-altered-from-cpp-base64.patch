@@ -1,0 +1,14 @@
+--- a/include/jsoncons/utility/byte_string.hpp
++++ b/include/jsoncons/utility/byte_string.hpp
+@@ -2,7 +2,11 @@
+ // Distributed under the Boost license, Version 1.0.
+ // (See accompanying file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ 
+ // See https://github.com/danielaparker/jsoncons for latest version
++
++// bytes_to_base64_generic, base64_to_bytes_generic and is_base64 below are
++// altered from base64.cpp of https://github.com/ReneNyffenegger/cpp-base64
++// (commit 26a73f38); its notice is in LICENSE.base64.
+ 
+ #ifndef JSONCONS_BYTE_STRING_HPP
+ #define JSONCONS_BYTE_STRING_HPP

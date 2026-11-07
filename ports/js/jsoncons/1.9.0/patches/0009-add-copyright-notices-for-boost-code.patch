@@ -1,0 +1,77 @@
+--- /dev/null
++++ b/NOTICE.Boost
+@@ -0,0 +1,74 @@
++Code in include/ that follows files of the Boost C++ Libraries, which
++are under the Boost Software License, Version 1.0 (LICENSE), and the
++copyright notices of those files as of Boost 1.71.0, verbatim:
++
++jsoncons/config/jsoncons_config.hpp:240-251 (launder_cast)
++follows boost/beast/core/detail/type_traits.hpp:
++
++//
++// Copyright (c) 2016-2019 Vinnie Falco (vinnie dot falco at gmail dot com)
++//
++// Distributed under the Boost Software License, Version 1.0. (See accompanying
++// file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
++//
++// Official repository: https://github.com/boostorg/beast
++//
++
++jsoncons/config/compiler_support.hpp:109-122 (JSONCONS_DEPRECATED_MSG)
++follows boost/atomic/detail/config.hpp:
++
++/*
++ * Distributed under the Boost Software License, Version 1.0.
++ * (See accompanying file LICENSE_1_0.txt or copy at
++ * http://www.boost.org/LICENSE_1_0.txt)
++ *
++ * Copyright (c) 2012 Hartmut Kaiser
++ * Copyright (c) 2014 Andrey Semashev
++ */
++
++jsoncons/config/compiler_support.hpp:308-347 (int128 and float128 detection)
++follows boost/config/compiler/gcc.hpp:
++
++//  (C) Copyright John Maddock 2001 - 2003.
++//  (C) Copyright Darin Adler 2001 - 2002.
++//  (C) Copyright Jens Maurer 2001 - 2002.
++//  (C) Copyright Beman Dawes 2001 - 2003.
++//  (C) Copyright Douglas Gregor 2002.
++//  (C) Copyright David Abrahams 2002 - 2003.
++//  (C) Copyright Synge Todo 2003.
++//  Use, modification and distribution are subject to the
++//  Boost Software License, Version 1.0. (See accompanying file
++//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
++
++jsoncons/config/compiler_support.hpp:308-347 (int128 and float128 detection)
++follows boost/config/compiler/clang.hpp:
++
++// (C) Copyright Douglas Gregor 2010
++//
++//  Use, modification and distribution are subject to the
++//  Boost Software License, Version 1.0. (See accompanying file
++//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
++
++jsoncons/config/compiler_support.hpp:396-416 (int128 and float128 typedefs)
++follows boost/config/detail/suffix.hpp:
++
++//  Copyright (c) 2001-2003 John Maddock
++//  Copyright (c) 2001 Darin Adler
++//  Copyright (c) 2001 Peter Dimov
++//  Copyright (c) 2002 Bill Kempf
++//  Copyright (c) 2002 Jens Maurer
++//  Copyright (c) 2002-2003 David Abrahams
++//  Copyright (c) 2003 Gennaro Prota
++//  Copyright (c) 2003 Eric Friedman
++//  Copyright (c) 2010 Eric Jourdanneau, Joel Falcou
++// Distributed under the Boost Software License, Version 1.0. (See
++// accompanying file LICENSE_1_0.txt or copy at
++// http://www.boost.org/LICENSE_1_0.txt)
++
++jsoncons/utility/more_type_traits.hpp:302-328 (is_cstring)
++follows boost/test/utils/is_cstring.hpp:
++
++//  (C) Copyright Gennadiy Rozental 2001.
++//  Distributed under the Boost Software License, Version 1.0.
++//  (See accompanying file LICENSE_1_0.txt or copy at
++//  http://www.boost.org/LICENSE_1_0.txt)

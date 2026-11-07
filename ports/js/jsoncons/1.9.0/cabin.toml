@@ -12,29 +12,106 @@ strip-prefix = "jsoncons-1.9.0"
 # redistributors to give; mongo-c-driver has no NOTICE file for section
 # 4(d).  The patch adds the license text, verbatim from
 # https://www.apache.org/licenses/LICENSE-2.0.txt, as LICENSE.Apache-2.0.
-patches = ["patches/0001-add-apache-2.0-license-for-mongodb-bson-code.patch"]
+# The release also ships code copied from other sources without their
+# terms; patches 0002-0005, 0007 and 0009 add those terms as new files, and
+# 0006 and 0008 add comment lines only:
+# - 0002, LICENSE.ConvertUTF: the complete notice of Unicode, Inc.'s
+#   ConvertUTF.c, 2004 revision (unicode.org/Public/PROGRAMS/CVTUTF, as
+#   archived on 2008-12-30), without its comment markers.  Its grant
+#   allows copies only while the notice remains attached, so 0006 also
+#   puts that notice, verbatim with its comment markers, into
+#   jsoncons/utility/unicode_traits.hpp after the header's partial quote
+#   of it (:7-14); no code changes.
+# - 0003, LICENSE.tinycbor: tinycbor v0.5.4's LICENSE.
+# - 0004, LICENSE.RFC7049: the Simplified BSD License of the IETF Trust
+#   Legal Provisions 4.0, section 4.c, with RFC 7049's year; the RFC
+#   requires its code components to include it (section 4.e).
+# - 0005, LICENSE.yyjson: yyjson 0.10.0's LICENSE.
+# - 0007, LICENSE.base64: the comment block of René Nyffenegger's
+#   base64.cpp at github.com/ReneNyffenegger/cpp-base64 26a73f38, without
+#   its comment markers and indentation.  Its terms keep the notice in
+#   source distributions and require altered versions to be marked as
+#   such, so 0008 marks the altered code in
+#   jsoncons/utility/byte_string.hpp, pointing to LICENSE.base64 in ASCII
+#   (byte_string.hpp is ASCII); no code changes.
+# - 0009, NOTICE.Boost: the copyright notices, verbatim as of Boost
+#   1.71.0, of the Boost files that jsoncons code follows; the Boost
+#   Software License itself is jsoncons' LICENSE.
+patches = [
+  "patches/0001-add-apache-2.0-license-for-mongodb-bson-code.patch",
+  "patches/0002-add-unicode-notice-for-convertutf-code.patch",
+  "patches/0003-add-mit-license-for-tinycbor-code.patch",
+  "patches/0004-add-bsd-license-for-rfc-7049-code.patch",
+  "patches/0005-add-mit-license-for-yyjson-code.patch",
+  "patches/0006-attach-unicode-notice-to-convertutf-code.patch",
+  "patches/0007-add-zlib-style-notice-for-base64-code.patch",
+  "patches/0008-mark-base64-code-altered-from-cpp-base64.patch",
+  "patches/0009-add-copyright-notices-for-boost-code.patch",
+]
 
 [package]
 name = "cabin-ports/jsoncons"
 version = "1.9.0"
 # include/ holds the jsoncons and jsoncons_ext directories upstream installs
-# (CMakeLists.txt:51-53).  LICENSE carries the Boost terms, and
-# LICENSE.Apache-2.0 comes from the patch above; jsoncons/detail/grisu3.hpp
-# and a5hash.hpp carry their MIT notices inline.  Code credited to other
-# sources without their terms, shipped as upstream ships it:
-# - jsoncons/config/compiler_support.hpp (:448-557): tinycbor's byte-swap
-#   macros, add_check_overflow and encode_half (MIT, Intel), and decode_half
-#   from RFC 7049 Appendix D, a code component under the Simplified BSD
-#   License.
-# - jsoncons/utility/read_number.hpp (:27-129): yyjson's digit-type table
-#   and predicates (MIT).
-# - jsoncons/utility/unicode_traits.hpp: Unicode, Inc.'s ConvertUTF tables
-#   and conversions, with only the first clause of its grant (:7-14), whose
-#   terms require the whole notice to remain attached.
+# (CMakeLists.txt:51-53).  LICENSE carries the Boost terms, and the other
+# LICENSE.* files come from the patches above; jsoncons/detail/grisu3.hpp
+# and a5hash.hpp carry their MIT notices inline.  Code copied from other
+# sources, at upstream's line numbers:
+# - jsoncons/config/compiler_support.hpp: JSONCONS_GCC_AVAILABLE (:46-58)
+#   and the JSONCONS_HAS_BUILTIN, _ATTRIBUTE, _FEATURE and _INCLUDE checks
+#   (:360-394) derive from yyjson's yyjson.h, Copyright (c) 2020 YaoYuan,
+#   MIT (LICENSE.yyjson); the branch-prediction macros (:71-88, credited
+#   there) and the byte-swap macros, add_check_overflow and encode_half
+#   (:448-557), and the __sun include and MSVC comment of
+#   jsoncons/detail/endian.hpp (:10-12, :20), derive from tinycbor,
+#   Copyright (c) 2017 Intel Corporation, MIT (LICENSE.tinycbor);
+#   decode_half derives, through tinycbor, from IETF RFC 7049 Appendix D
+#   (Figure 3), Copyright (c) 2013 IETF Trust and the persons identified
+#   as authors of the code, Simplified BSD License (LICENSE.RFC7049); and
+#   the compiler checks of :575-602 derive from a5hash 5.25's a5hash.h,
+#   Copyright (c) 2025 Aleksey Vaneev, MIT (notice in detail/a5hash.hpp).
+# - jsoncons/utility/read_number.hpp (:27-129): the digit-type table and
+#   predicates derive from yyjson, Copyright (c) 2020 YaoYuan, MIT
+#   (LICENSE.yyjson).
+# - jsoncons/utility/write_number.hpp (:133-239): fill_exponent and
+#   prettify_string derive from the fast_exponent.h and prettify.h of
+#   Florian Loitsch's Grisu benchmark code, Copyright (c) 2009 Florian
+#   Loitsch, MIT (notice in detail/grisu3.hpp).
+# - jsoncons/utility/unicode_traits.hpp (:148-1246): the UTF tables,
+#   conversions and validation derive from Unicode, Inc.'s ConvertUTF.c
+#   and ConvertUTF.h, Copyright 2001-2004 Unicode, Inc.
+#   (LICENSE.ConvertUTF, and the full notice in the header itself from
+#   patch 0006).
+# - jsoncons/utility/byte_string.hpp (:41-155, :196-200): the base64
+#   encoder and decoder and is_base64 are altered from René Nyffenegger's
+#   base64.cpp, Copyright (C) 2004-2017 René Nyffenegger, zlib-style terms
+#   (LICENSE.base64, and the mark from patch 0008).
+# - Code following the Boost C++ Libraries, Boost Software License 1.0
+#   (LICENSE; the Boost authors' copyright notices are in NOTICE.Boost):
+#   launder_cast in jsoncons/config/jsoncons_config.hpp (:240-251) from
+#   Boost.Beast's detail/type_traits.hpp; in
+#   jsoncons/config/compiler_support.hpp, the JSONCONS_DEPRECATED_MSG
+#   fallbacks (:109-122) from Boost.Atomic's detail/config.hpp, the int128
+#   and float128 detection (:308-347) from Boost.Config's compiler/gcc.hpp
+#   and compiler/clang.hpp, and their typedefs (:396-416) from Boost.Config's
+#   detail/suffix.hpp; and is_cstring in
+#   jsoncons/utility/more_type_traits.hpp (:302-328) from Boost.Test's
+#   utils/is_cstring.hpp.
 # The JSON Schema meta-schemas embedded in
 # jsoncons_ext/jsonschema/draft*/schema_draft*.hpp (json-schema.org) carry
 # no notice of their own.
-include = ["LICENSE", "LICENSE.Apache-2.0", "include", "patches"]
+include = [
+  "LICENSE",
+  "LICENSE.Apache-2.0",
+  "LICENSE.ConvertUTF",
+  "LICENSE.RFC7049",
+  "LICENSE.base64",
+  "LICENSE.tinycbor",
+  "LICENSE.yyjson",
+  "NOTICE.Boost",
+  "include",
+  "patches",
+]
 
 # Header-only: the core is included as <jsoncons/json.hpp> and each extension
 # (bson, cbor, csv, jmespath, jsonpatch, jsonpath, jsonpointer, jsonschema,
