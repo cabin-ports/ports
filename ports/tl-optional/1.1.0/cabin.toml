@@ -1,0 +1,33 @@
+[package.upstream]
+url = "https://github.com/TartanLlama/optional/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:88ece79f3de5ccaec4191951a222f95cc80c4381dafd3163bdb1ff87cedf3118"
+format = "tar.gz"
+strip-prefix = "optional-1.1.0"
+
+[package]
+name = "cabin-ports/tl-optional"
+version = "1.1.0"
+include = ["COPYING", "include"]
+
+# TartanLlama's std::optional for C++11 and later, with functional-style
+# extensions and optional references, header-only, as upstream's CMake
+# interface target tl::optional: include/ is the include root, so consumers
+# write `#include <tl/optional.hpp>`.  The header supports C++11:
+# CMakeLists.txt describes it as "C++11/14/17" and sets C++14 only as the
+# default for its own tests.  The v1.1.0 tag's CMakeLists.txt still says
+# 1.0.0; the header's TL_OPTIONAL_VERSION_* macros say 1.1.0
+# (optional.hpp:20-22).  tl::monostate, tl::in_place and the shared trait
+# helpers sit behind include guards shared with cabin-ports/tl-expected, so
+# both headers can be included together (optional.hpp:107-118, 123-280);
+# only on GCC 5 to 7 does a third shared guard differ, so that the header
+# included first decides a std::vector trait (optional.hpp:66-79).
+# TL_OPTIONAL_CXX14 and the C++17 deduction guide key on __cplusplus
+# (optional.hpp:94-96, 1501-1503), so without /Zc:__cplusplus MSVC uses the
+# pre-C++14 overloads and has no class template argument deduction.  Constant
+# expressions need C++14: at C++11 tl::optional<int> is not a literal type,
+# and upstream's tests/constexpr.cpp:5 checks them only from C++14.
+# Not ported: upstream's tests and its CMake packaging files.
+[target.tl-optional]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
