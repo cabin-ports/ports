@@ -1,0 +1,28 @@
+--- /dev/null
++++ b/NOTICE.double-conversion
+@@ -0,0 +1,25 @@
++Code in include/ that follows files of google/double-conversion v1.1.5,
++which are under the terms in LICENSE.double-conversion, and the
++copyright notices those files open with, verbatim:
++
++rapidjson/internal/biginteger.h:40-53, :162-182, :224-232 and :239-246
++(the decimal-string constructor, MultiplyPow5, AppendDecimal64 and
++ParseUint64) follow src/bignum.cc:
++
++// Copyright 2010 the V8 project authors. All rights reserved.
++
++rapidjson/internal/diyfp.h:164-244 (the cached powers of ten and their
++lookup) follows src/cached-powers.cc:
++
++// Copyright 2006-2008 the V8 project authors. All rights reserved.
++
++rapidjson/internal/strtod.h:129-264 (StrtodDiyFp, StrtodBigInteger and
++StrtodFullPrecision) follows src/strtod.cc:
++
++// Copyright 2010 the V8 project authors. All rights reserved.
++
++rapidjson/internal/diyfp.h:139-148 and :155 (DiyFp::ToDouble and
++kDpDenormalExponent) and rapidjson/internal/ieee754.h:51-58
++(EffectiveSignificandSize) follow src/ieee.h:
++
++// Copyright 2012 the V8 project authors. All rights reserved.
