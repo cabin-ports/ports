@@ -1,0 +1,54 @@
+[package.upstream]
+url = "https://github.com/dlbeer/quirc/archive/refs/tags/v1.2.tar.gz"
+checksum = "sha256:73c12ea33d337ec38fb81218c7674f57dba7ec0570bddd5c7f7a977c0deb64c5"
+format = "tar.gz"
+strip-prefix = "quirc-1.2"
+
+# lib/quirc.h is the one header upstream installs (Makefile:89).  The
+# library's private quirc_internal.h sits beside it, so lib/ stays off the
+# consumer include path.
+[[package.upstream.copy]]
+from = "lib/quirc.h"
+to = "include/quirc.h"
+
+[package]
+name = "cabin-ports/quirc"
+version = "1.2.0"
+include = ["LICENSE", "include", "lib"]
+# The sources use C99 for-loop declarations and designated initializers
+# (lib/decode.c:939, lib/quirc.c:148-157); C11 is the oldest standard Cabin
+# can request from MSVC.
+c-standard = "c11"
+
+# Upstream tags this release v1.2 and has no 1.2.x tag; it is 1.2.0 here.
+#
+# quirc, the QR-code recognition library, as upstream's Makefile builds
+# libquirc: lib/decode.c, identify.c, quirc.c, and version_db.c
+# (Makefile:25-29), with no definitions of its own (:23-24 add only -Ilib
+# and the demos' SDL flags).  Consumers write `#include <quirc.h>`.
+#
+# The compile-time options QUIRC_MAX_REGIONS, QUIRC_FLOAT_TYPE, and
+# QUIRC_USE_TGMATH (README.md:239-265) act only on the library's own
+# compiles (lib/quirc_internal.h:31-61, lib/identify.c:21-25): a workspace
+# root's `[profile.<name>] defines` reach them, a consumer target's `defines`
+# do not.  This port sets none and tests only the defaults: at most 252
+# regions per image, with 8-bit pixel labels, and double-precision geometry.
+#
+# As upstream ships it, quirc_version() returns "1.0" (lib/quirc.c:21-24).
+#
+# Not ported: the demos and test programs, which need libjpeg, libpng, SDL,
+# V4L2, or OpenCV, and the shared library.
+#
+# Licence: ISC, LICENSE (Daniel Beer 2010-2012); README.md calls it
+# BSD-licensed (:27).
+[target.quirc]
+type = "library"
+sources = ["lib/decode.c", "lib/identify.c", "lib/quirc.c", "lib/version_db.c"]
+include-dirs = ["include"]
+# quirc.h needs only <stdint.h>.
+interface-c-standard = "c99"
+links = "quirc"
+
+# identify.c calls rint, sqrt, and fabs; upstream links libm (Makefile:79).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
