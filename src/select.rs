@@ -29,10 +29,18 @@ use anyhow::{Context, Result, bail};
 
 use crate::plan::PortConversion;
 
-/// Repository-root files that reach no build and no published archive.
-/// Anything else outside the ports directory is a shared input.  The
-/// hold list only gates `--publish-new`, and every mode validates it.
-pub(crate) const NOT_BUILD_INPUTS: &[&str] = &["README.md", "AGENTS.md", crate::batch::HOLDS_FILE];
+/// Root-relative paths of files that reach no build and no published
+/// archive.  Anything else outside the ports directory is a shared
+/// input.  The hold list only gates `--publish-new`, and every mode
+/// validates it.
+pub(crate) const NOT_BUILD_INPUTS: &[&str] = &[
+    "README.md",
+    "AGENTS.md",
+    "CONTRIBUTING.md",
+    "docs/maintaining.md",
+    "docs/publishing.md",
+    crate::batch::HOLDS_FILE,
+];
 
 /// Which ports a dry-run preflights.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -368,7 +376,12 @@ mod tests {
                 new_packages(&["z"]),
             ),
             (
-                vec![("M", "README.md"), ("D", "AGENTS.md")],
+                vec![
+                    ("M", "README.md"),
+                    ("D", "AGENTS.md"),
+                    ("M", "CONTRIBUTING.md"),
+                    ("M", "docs/publishing.md"),
+                ],
                 new_packages(&[]),
             ),
             // The hold list reaches no build; every mode validates it.

@@ -77,7 +77,8 @@ struct Cli {
     /// uploads nothing unless the checked-out commit is main's;
     /// --publish-new defers the candidates whose ports, requirements,
     /// or hold main changed since the checked-out commit, and all of
-    /// them when main changed anything outside the ports directory.
+    /// them when main changed anything else outside the ports
+    /// directory but the files --changed-since names.
     #[arg(long, value_name = "REV", conflicts_with_all = ["dry_run", "plan_new", "list_new"])]
     main: Option<String>,
     /// Also retry versions whose upload failed, which may have landed:
@@ -98,11 +99,12 @@ struct Cli {
     retry_failed: bool,
     /// Dry-run only what the change since this Git revision needs:
     /// when it only adds files under `<prefix>/<name>/<version>/` for new
-    /// names (and edits README.md, AGENTS.md, or publish-holds.txt),
+    /// names (and edits README.md, AGENTS.md, CONTRIBUTING.md,
+    /// docs/maintaining.md, docs/publishing.md, or publish-holds.txt),
     /// every version of those names plus their dependencies; when it
-    /// edits nothing but those three files, nothing.  Any other change dry-runs every
-    /// port.  Uncommitted and untracked files count as changes, as do
-    /// ignored files in the ports directory.
+    /// edits nothing but those files, nothing.  Any other change dry-runs
+    /// every port.  Uncommitted and untracked files count as changes, as
+    /// do ignored files in the ports directory.
     // `conflicts_with`, not `requires`, for the reason above.
     #[arg(
         long,

@@ -317,8 +317,9 @@ fn check_staged_bytes(
 }
 
 /// Defer every candidate that `main` no longer agrees with: when main
-/// changed a path outside the ports directory (the publisher, the
-/// Cabin pin, the workflow), all of them; otherwise each one whose
+/// changed a path outside the ports directory (the publisher, the Cabin
+/// pin, the workflow) other than the hold list and the files
+/// `select::NOT_BUILD_INPUTS` lists, all of them; otherwise each one whose
 /// staging closure touches a name main changed or a version main holds.
 /// A later run uploads them from main.  This is a last check before
 /// uploading, not a transaction with later merges.
