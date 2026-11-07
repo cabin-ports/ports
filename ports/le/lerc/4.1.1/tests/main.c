@@ -1,8 +1,3 @@
-/* The C consumer: a masked float raster encoded with a 0.01 error bound
- * and decoded within it, the blob's header and info, a too-small output
- * buffer, a truncated and a corrupted blob rejected, a blob in the older
- * codec version 2, two bands with masks of their own, and a lossless
- * multi-band RGB round trip. */
 #include <math.h>
 #include <stdio.h>
 #include <string.h>
@@ -47,8 +42,7 @@ static int make_raster(float *zmin, float *zmax) {
     return valid;
 }
 
-/* Every mask byte kept and every valid value within the bound (a NaN is
- * not). */
+/* Written so that a NaN is out of bounds. */
 static int within(const float *out, const unsigned char *out_mask, double bound) {
     int i;
     for (i = 0; i < pixels; ++i) {
@@ -60,8 +54,7 @@ static int within(const float *out, const unsigned char *out_mask, double bound)
 
 static void float_raster(void) {
     const double max_error = 0.01;
-    /* A decoded float is rounded once more, by at most half an ulp near
-     * 100. */
+    /* Decoding rounds to float once more, by at most half an ulp near 100. */
     const double bound = max_error + 1e-5;
     float zmin = 0, zmax = 0, out[pixels];
     double out_double[pixels], range[range_size], lo, hi;
@@ -92,8 +85,7 @@ static void float_raster(void) {
               info[9] == 1 && info[10] == 0,
           "codec version 6, float, depth 1, 13 x 11, 1 band, the valid pixels, the size, 1 mask, no noData");
     check(range[0] == zmin && range[1] == zmax, "the blob carries the valid range");
-    /* Lerc raises the bound only for values on a coarser grid
-     * (TryRaiseMaxZError), which these are not. */
+    /* Lerc raises the bound only for values on a coarser grid. */
     check(range[2] == max_error, "the blob records the error bound asked for");
     check(lerc_getDataRanges(blob, size, 1, 1, &lo, &hi) == err_ok && lo == zmin && hi == zmax,
           "the data ranges agree");
@@ -124,7 +116,7 @@ static void float_raster(void) {
     check(lerc_decode(corrupted, size, 1, out_mask, 1, cols, rows, 1, dt_float, out) != err_ok,
           "a corrupted blob fails its checksum");
 
-    /* Codec version 2, from Lerc 2.2, has no checksum. */
+    /* Codec version 2 has no checksum. */
     if (!check(lerc_encodeForVersion(raster, 2, dt_float, 1, cols, rows, 1, 1, mask, max_error, blob, sizeof blob,
                                      &size) == err_ok &&
                    lerc_getBlobInfo(blob, size, info, range, info_size, range_size) == err_ok && info[0] == 2,
@@ -136,7 +128,6 @@ static void float_raster(void) {
           "the version 2 blob decodes within the error bound");
 }
 
-/* The raster and its negation as two bands, each with its own mask. */
 static void band_masks(void) {
     static float bands[2 * pixels], out[2 * pixels];
     static unsigned char masks[2 * pixels], out_masks[2 * pixels];
@@ -168,7 +159,6 @@ static void band_masks(void) {
     check(same, "each band keeps its own mask and its values within the error bound");
 }
 
-/* Two bands of 16 x 9 RGB pixels, lossless. */
 static void rgb(void) {
     enum { w = 16, h = 9, depth = 3, bands = 2, values = w * h * depth * bands };
     static unsigned char image[values], out[values];

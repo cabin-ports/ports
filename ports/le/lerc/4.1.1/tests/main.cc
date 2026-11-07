@@ -1,8 +1,3 @@
-// The C++ consumer, through Lerc_types.h's enumerations: doubles encoded
-// losslessly and restored bit for bit, integers beyond 32 bits passed as
-// doubles, a pixel of NaNs moved to the mask, a NaN beside valid values
-// refused without a noData value, and a noData value at some depths of
-// valid pixels, which only the 4D functions handle.
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -40,7 +35,6 @@ struct Blob {
   std::vector<double> range;
 };
 
-// Encodes with the 4D encoder and reads the blob's info back.
 template <typename T>
 Blob encode(const std::vector<T> &data, DataType t, int depth, int cols, int rows, int masks,
             const unsigned char *valid, double max_error, const unsigned char *uses_no_data = nullptr,
@@ -89,8 +83,7 @@ void large_integers() {
   const int cols = 9, rows = 8;
   std::vector<double> data(cols * rows);
   for (int i = 0; i < cols * rows; ++i) data[i] = 1099511627776.0 + 1000.0 * (i % 5) + 3.0 * i;  // 2^40 + ...
-  // Lerc finds the doubles all integer and floors the error bound, as for
-  // integer types, so 0.9 is lossless as 0.5 is.
+  // Lerc floors the bound for all-integer doubles, so 0.9 is lossless.
   Blob blob = encode(data, DataType::dt_double, 1, cols, rows, 0, nullptr, 0.9);
   check(!blob.bytes.empty(), "integers beyond 32 bits encode as doubles");
   if (blob.bytes.empty()) return;
@@ -127,8 +120,7 @@ void nan_pixels() {
   }
   check(same, "the NaN pixels are invalid and the others exact");
 
-  // A NaN at one depth of a pixel whose other depth is valid has no place
-  // in the mask, and Lerc invents no noData value for it.
+  // A NaN beside a valid value of the same pixel cannot go into the mask.
   std::vector<float> mixed(cols * rows * 2, 1.0f);
   mixed[7] = nan;
   unsigned int size = 0;
