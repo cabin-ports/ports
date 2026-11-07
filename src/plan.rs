@@ -785,7 +785,7 @@ pub(crate) mod tests {
             ("zz/zlib/1.3.1", "belongs in the `zl/` prefix directory"),
             ("z/zlib/1.3.1", "belongs in the `zl/` prefix directory"),
             ("zl/1.3.1", "belongs in the `1./` prefix directory"),
-            ("ne/newname", "newname/cabin.toml is not a directory"),
+            ("ne/newname", "cabin.toml is not a directory"),
             ("zl", "cabin.toml is not a directory"),
             ("", "ports/ holds only"),
         ] {
