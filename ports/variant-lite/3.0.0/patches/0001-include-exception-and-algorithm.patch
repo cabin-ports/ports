@@ -1,0 +1,16 @@
+--- a/include/nonstd/variant.hpp
++++ b/include/nonstd/variant.hpp
+@@ -258,9 +258,13 @@
+ #else // variant_USES_STD_VARIANT
+ 
+ #include <cstddef>
++#include <exception>
+ #include <limits>
+ #include <new>
+ #include <utility>
++#if ! variant_CPP11_OR_GREATER
++# include <algorithm> // std::swap before C++11
++#endif
+ 
+ #if variant_CONFIG_NO_EXCEPTIONS
+ # include <cassert>
