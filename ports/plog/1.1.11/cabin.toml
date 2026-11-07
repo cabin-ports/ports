@@ -1,0 +1,50 @@
+[package.upstream]
+url = "https://github.com/SergiusTheBest/plog/archive/refs/tags/1.1.11.tar.gz"
+checksum = "sha256:d60b8b35f56c7c852b7f00f58cbe9c1c2e9e59566c5b200512d0cdbb6309a7c2"
+format = "tar.gz"
+strip-prefix = "plog-1.1.11"
+
+[package]
+name = "cabin-ports/plog"
+version = "1.1.11"
+include = ["LICENSE", "include"]
+
+# plog, a header-only C++ logging library, as upstream's CMake interface
+# target plog::plog: include/ is the include root, so consumers write
+# `#include <plog/Log.h>`.  README.md:128 says plog does not require C++11,
+# but its fallback vasprintf calls va_copy (include/plog/Util.h:200-207),
+# which strict C++98 does not declare.  That fallback is compiled only
+# without _GNU_SOURCE, which GCC and Clang predefine for C++ on Linux, and
+# -std=gnu++98 declares va_copy, so C++98 builds only there; C++11 is the
+# lowest standard that builds everywhere.  plog's compile-time configuration
+# macros (PLOG_DEFAULT_INSTANCE_ID, PLOG_DISABLE_LOGGING, PLOG_CAPTURE_FILE,
+# PLOG_MESSAGE_PREFIX, PLOG_ENABLE_GET_THIS, PLOG_OMIT_LOG_DEFINES, the
+# PLOG_GLOBAL, PLOG_LOCAL, PLOG_EXPORT and PLOG_IMPORT sharing modes,
+# PLOG_CHAR_IS_UTF8 and PLOG_ENABLE_WCHAR_INPUT) are the consumer's to
+# define.  Cabin compiles with /utf-8 under MSVC, which upstream documents as
+# selecting UTF-8 `char` strings on Windows instead of its default wide ones
+# (README.md:1024-1035; detected through _UTF8 at Util.h:25-31).
+# PLOG_ENABLE_WCHAR_INPUT is on by default only on Windows; a consumer that
+# turns it on elsewhere needs iconv, which glibc provides and macOS ships as
+# libiconv, linked by that consumer as upstream's
+# samples/Demo/CMakeLists.txt:19-20 does.
+# Not ported: upstream's samples, tests, documentation, and its NuGet and
+# PlatformIO files.
+[target.plog]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+
+# Upstream's CMake links liblog on Android (CMakeLists.txt:33-35), for
+# AndroidAppender's __android_log_print.  POSIX builds need nothing more:
+# plog's pthread calls are the mutex ones (Util.h:507-578), which libc
+# provides (glibc forwards them before 2.34), and macOS's
+# pthread_threadid_np (Util.h:193), which is libSystem's.
+[target.'cfg(os = "android")'.profile]
+link-libs = ["log"]
+
+# The event-log and registry calls behind EventLogAppender
+# (include/plog/WinApi.h:131-139); upstream's own builds get advapi32 from
+# CMake's default MSVC libraries.  The other Win32 calls are kernel32's.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["advapi32"]
