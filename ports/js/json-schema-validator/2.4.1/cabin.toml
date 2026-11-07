@@ -11,9 +11,22 @@ strip-prefix = "json-schema-validator-2.4.1"
 # as of SchemaStore commit f7a0789 (2020), Mads Kristensen's Apache-2.0
 # schema with upstream's author's fixes, and the archive ships no copy
 # of that license, which Apache-2.0 section 4(a) requires redistributors
-# to give.  The patch adds the license text, verbatim from
+# to give.  Patch 0001 adds the license text, verbatim from
 # https://www.apache.org/licenses/LICENSE-2.0.txt, beside LICENSE.
-patches = ["patches/0001-add-apache-2.0-license-for-json-patch-schema.patch"]
+#
+# src/string-format-check.cpp quotes RFC 3339's ABNF and a note
+# (:120-140) and RFC 3986's ABNF (:209-288), copyright The Internet
+# Society.  RFC 3339 permits derivative works that assist in its
+# implementation if its notice and permission paragraph go with them.
+# RFC 3986 falls under BCP 78, which grants rights only to the ISOC and
+# the IETF, and predates the IETF Trust Legal Provisions, so no grant to
+# redistribute that quotation has been found.  Patch 0002 adds both
+# RFCs' Full Copyright Statements, verbatim from rfc-editor.org, as
+# NOTICE.RFC.
+patches = [
+  "patches/0001-add-apache-2.0-license-for-json-patch-schema.patch",
+  "patches/0002-add-rfc-copyright-statements-for-abnf-comments.patch",
+]
 
 # The one header upstream's CMake installs, to <prefix>/include/nlohmann
 # (src/CMakeLists.txt:14-15, 65), so that src/, with the private
@@ -30,10 +43,39 @@ version = "2.4.1"
 # LICENSE carries the MIT terms; src/smtp-address-validator.cpp carries
 # its own MIT notice (Gene Hightower) and ships with the sources.  The
 # JSON Patch schema in src/json-patch.cpp is Apache-2.0
-# (LICENSE.Apache-2.0, added by the patch above).  The draft-07
+# (LICENSE.Apache-2.0, added by patch 0001), and NOTICE.RFC (patch 0002)
+# carries the copyright statements of the RFCs that
+# src/string-format-check.cpp quotes.  The draft-07
 # meta-schema in src/json-schema-draft7.json.cpp (json-schema.org) is
 # embedded without a notice of its own.
-include = ["LICENSE", "LICENSE.Apache-2.0", "include", "patches", "src"]
+#
+# src/string-format-check.cpp:193 (hostname) is copied from
+# https://stackoverflow.com/a/3824105 by Sakari A. Maaranen
+# (https://stackoverflow.com/users/462036), modified from revisions 1-3 of
+# https://stackoverflow.com/a/106223 by Jorge Ferreira
+# (https://stackoverflow.com/users/6508, then "smink"), both answering
+# "Regular expression to match DNS hostname or IP Address?" under CC BY-SA
+# 2.5 (https://creativecommons.org/licenses/by-sa/2.5/legalcode).  That
+# line is distributed under CC BY-SA 2.5; the rest of the package stays
+# under the licenses above.
+#
+# src/string-format-check.cpp credits "many of" its regular expressions to
+# Jeff Roberson's article
+# http://jmrware.com/articles/2009/uri_regexp/URI_regex.html (:25) and the
+# URI check to jhermsmeier/uri.regex (:291); neither grants a license.
+# What comes from them, the host rules (:156-188) and the URI check
+# (:296-330), transcribes RFC 3986's ABNF rule by rule, with the article's
+# ls32 factoring and, in the URI check, Jeffrey Friedl's dec-octet and
+# capture groups: too slight to carry copyright, so no terms attach and
+# none ship.
+include = [
+  "LICENSE",
+  "LICENSE.Apache-2.0",
+  "NOTICE.RFC",
+  "include",
+  "patches",
+  "src",
+]
 
 [dependencies]
 "cabin-ports/nlohmann_json" = "^3.12"
