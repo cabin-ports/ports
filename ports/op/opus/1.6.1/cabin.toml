@@ -4,12 +4,9 @@ checksum = "sha256:6ffcb593207be92584df15b32466ed64bbec99109f007c82205f019457241
 format = "tar.gz"
 strip-prefix = "opus-1.6.1"
 
-# The public headers upstream's CMake build installs (Opus_PUBLIC_HEADER,
-# CMakeLists.txt:271-276) in their installed layout: include/opus, which
-# its package config and opus.pc both put on the include path, under the
-# installed include directory, so consumers can write <opus.h> or
-# <opus/opus.h>.  Upstream's include/ is not exported: it also holds
-# opus_custom.h, whose API this build does not compile (CUSTOM_MODES).
+# The public headers in their installed layout, so consumers can write
+# <opus.h> or <opus/opus.h>.  Upstream's include/ is not exported: it also
+# holds opus_custom.h, whose API this build does not compile (CUSTOM_MODES).
 [[package.upstream.copy]]
 from = "include/opus.h"
 to = "public/opus/opus.h"
@@ -36,12 +33,9 @@ version = "1.6.1"
 # BSD-3-Clause (COPYING).
 include = ["COPYING", "celt", "include", "public", "silk", "src"]
 
-# libopus as upstream's CMake build compiles it by default
-# (CMakeLists.txt:290, 391-400; the lists in opus_sources.mk,
-# celt_sources.mk and silk_sources.mk): the floating-point codec with
-# the float API, and without custom modes or the optional DNN features
-# (deep PLC, DRED, OSCE), so dnn/ is not packaged.  Not ported: the
-# opus_demo, opus_compare and test programs.
+# libopus as upstream's CMake build compiles it by default: the
+# floating-point codec with the float API, without custom modes or the
+# optional DNN features (deep PLC, DRED, OSCE), so dnn/ is not packaged.
 [target.opus]
 type = "library"
 sources = [
@@ -184,10 +178,8 @@ sources = [
   "silk/float/sort_FLP.c",
 ]
 include-dirs = ["public", "public/opus"]
-# config.h only defines PACKAGE_VERSION (cmake/config.h.cmake.in), which
-# opus_get_version_string() reports, so it is defined directly and
-# HAVE_CONFIG_H is not.  The others are CMake's for its default options
-# (CMakeLists.txt:316-349, 599-603; cmake/OpusConfig.cmake:49-50).
+# config.h only defines PACKAGE_VERSION, so it is defined directly and
+# HAVE_CONFIG_H is not.  The others are CMake's for its default options.
 defines = [
   "OPUS_BUILD",
   "ENABLE_HARDENING",
@@ -196,8 +188,8 @@ defines = [
   "HAVE_LRINTF",
   'PACKAGE_VERSION="1.6.1"',
 ]
-# Upstream asks for C99 (C11 under MSVC, cmake/OpusConfig.cmake:13-20);
-# C11 is the oldest standard Cabin can request from MSVC.
+# Upstream asks for C99; C11 is the oldest standard Cabin can request from
+# MSVC.
 c-standard = "c11"
 # The public headers are C89: opus_types.h takes <stdint.h> only from C99
 # on, and the API uses no 64-bit type.
@@ -205,48 +197,37 @@ interface-c-standard = "c89"
 interface-cxx-standard = "c++98"
 links = "opus"
 
-# Sources include their siblings and "celt/x86/x86cpu.h"-style paths
-# from the package root (CMakeLists.txt:304-314, 400).
+# Sources include their siblings and "celt/x86/x86cpu.h"-style paths from
+# the package root.
 [profile]
 include-dirs = ["include", ".", "celt", "silk", "silk/float"]
 
-# Upstream's CMake build also hardens by default: -fstack-protector-strong
-# (/GS under MSVC, which cl enables anyway) and, outside Debug,
-# _FORTIFY_SOURCE=2 (CMakeLists.txt:154-169, 322-325, 373-378).  Both are
-# left to the toolchain's defaults.  Cabin drops a registry package's raw
-# compiler flags, so the stack protector cannot carry over, and a port
-# does not impose a fortify level of its own over the toolchain's.
+# Upstream's hardening flags (-fstack-protector-strong, _FORTIFY_SOURCE=2)
+# are left to the toolchain's defaults: Cabin drops a registry package's raw
+# compiler flags, so the stack protector cannot carry over, and a port does
+# not impose a fortify level of its own over the toolchain's.
 
-# Stack arrays: C99 variable-length arrays, or alloca() where the
-# compiler has none (CMakeLists.txt:351-358).
+# Stack arrays: C99 variable-length arrays, or alloca() where the compiler
+# has none.
 [target.'cfg(not(env = "msvc"))'.profile]
 defines = ["VAR_ARRAYS"]
 
 [target.'cfg(env = "msvc")'.profile]
 defines = ["USE_ALLOCA", "_CRT_SECURE_NO_WARNINGS"]
 
-# Where <alloca.h> exists, and libm, which the codec's math calls
-# (cmake/OpusConfig.cmake:30-47; opus.pc.in's Libs.private).
+# Where <alloca.h> exists, and libm, which the codec's math calls.
 [target.'cfg(family = "unix")'.profile]
 defines = ["HAVE_ALLOCA_H"]
 link-libs = ["m"]
 
 # x86-64, as upstream's CMake build configures it: SSE and SSE2 are
 # presumed, and the SSE4.1 kernels are chosen at run time by CPUID
-# (CMakeLists.txt:429-557).  In this floating-point build those are
-# SILK's quantizers, voice activity detector and LTP codebook search;
-# celt's SSE4.1 files and pitch_sse2.c hold fixed-point code only.  CMake
-# detects CPUID through inline assembly (CPU_INFO_BY_ASM) and MSVC
-# through __cpuid, which celt/x86/x86cpu.c takes whenever _MSC_VER is
-# defined.  The AVX2 kernels are not ported: upstream compiles them with
-# -mavx2 -mfma -mavx, and pitch_avx.c and inner_product_FLP_avx2.c call
-# FMA intrinsics, which Cabin cannot enable (vcpkg's default build leaves
-# them out too: its avx2 feature is opt-in).  On AVX2 machines the
-# run-time tables in silk/x86/x86_silk_map.c then pick the SSE4.1
-# kernels, except silk_NSQ_del_dec's, whose AVX2 entry is the C one.
-# CELT's presumed SSE and SSE2 kernels are called directly.  32-bit x86
-# builds the portable C code, since Cabin cannot enable plain SSE for
-# pitch_sse.c there.
+# (CPU_INFO_BY_ASM; under MSVC, x86cpu.c uses __cpuid instead).  The AVX2
+# kernels are not ported: they call FMA intrinsics, which Cabin cannot
+# enable (vcpkg's default build leaves them out too), so AVX2 machines run
+# the SSE4.1 kernels, except silk_NSQ_del_dec's, whose AVX2 entry is the C
+# one.  32-bit x86 builds the portable C code, since Cabin cannot enable
+# plain SSE for pitch_sse.c there.
 [target.'cfg(arch = "x86_64")'.sources]
 opus = [
   "celt/x86/x86cpu.c",
@@ -285,17 +266,12 @@ defines = [
 ]
 
 # AArch64, where NEON is architectural: the NEON intrinsics kernels,
-# presumed rather than detected, with the defines upstream's CMake build
-# sets for "aarch64" processors and iOS (cmake/OpusConfig.cmake:76-80,
-# CMakeLists.txt:559-597) and ConanCenter's recipe for every armv8
-# target.  On macOS arm64 CMake presumes nothing and calls the C kernels;
-# autotools and Meson presume only the intrinsics there
-# (configure.ac:527-561, meson.build:213-220, 391-421), which leaves
-# silk_NSQ_del_dec in C.
-# With NEON presumed, the kernels are called directly, so this port
-# leaves out the run-time detection CMake also compiles on Linux and
-# Windows, and silk/fixed, which CMake adds for that detection's
-# silk/arm/arm_silk_map.c.  32-bit ARM builds the portable C code.
+# presumed rather than detected, as upstream's CMake build does for aarch64
+# and iOS and ConanCenter's recipe does for every armv8 target (on macOS
+# arm64, upstream's CMake build presumes nothing and calls the C kernels).
+# The kernels are called directly, so the run-time detection and the
+# silk/fixed sources it needs are left out.  32-bit ARM builds the portable
+# C code.
 [target.'cfg(arch = "aarch64")'.sources]
 opus = [
   "celt/arm/celt_neon_intr.c",
