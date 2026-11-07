@@ -1,0 +1,48 @@
+[package.upstream]
+url = "https://github.com/kainjow/Mustache/archive/refs/tags/v4.1.tar.gz"
+checksum = "sha256:acd66359feb4318b421f9574cfc5a511133a77d916d0b13c7caa3783c0bfe167"
+format = "tar.gz"
+strip-prefix = "Mustache-4.1"
+
+[package]
+name = "cabin-ports/kainjow-mustache"
+# Upstream tags this release v4.1 (mustache.hpp:4); Cabin versions have
+# three components.
+version = "4.1.0"
+include = ["LICENSE", "mustache.hpp"]
+
+# kainjow/Mustache, a header-only Mustache template renderer (namespace
+# kainjow::mustache).  Version 4.1 has no library target or install rule:
+# its CMakeLists.txt and Makefile build only the Catch-based tests.cpp, as
+# C++11 (README.md:3 "requires C++11"), and tests.cpp:29 includes the
+# header from the root, so consumers write `#include <mustache.hpp>`.  It
+# has no dependencies, definitions or link libraries.  Against the Mustache
+# spec: only the standalone tag lines of a section that renders are removed
+# (mustache.hpp:970-984, 1128-1161), so a skipped section leaves a line
+# holding only its indentation, standalone comment, partial and
+# set-delimiter lines stay, and partials are not indented; a dotted name
+# whose later part is missing falls back to outer contexts
+# (mustache.hpp:469-483); and data holds strings, booleans, lists, objects,
+# partials and lambdas, but no numbers.  An unclosed or unopened section,
+# an unclosed tag, an invalid set-delimiter tag or a lambda2 used as a
+# variable sets error_message() and makes is_valid() false.  render() with
+# data renders nothing for a template that failed to parse, but render()
+# with a basic_context does not check (mustache.hpp:915-927) and renders
+# whatever was parsed, so its callers check is_valid() first.  An error
+# during rendering stops the rest of the template, except that inside a
+# section it stops only that section or list item and rendering resumes
+# after it; a partial or section lambda that hits one stops its caller; and
+# error_message() holds the last error.  Templates are not hardened against
+# untrusted input: section nesting and partials recurse without a depth
+# limit.  Tag names and delimiters go through std::isspace on the raw
+# character (mustache.hpp:46-56, 800-807), which is undefined for a
+# character outside unsigned char (a negative char, or a wchar_t above 0xFF
+# in mustachew), so the first and last characters of every tag, comments
+# included, and every character of a custom delimiter should be ASCII.
+# Licence: BSL-1.0 (LICENSE, mustache.hpp:1-28).  Not ported: tests.cpp,
+# the bundled catch.hpp, the CMake, Makefile, build.bat and CI files, and
+# README.md.
+[target.kainjow-mustache]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
