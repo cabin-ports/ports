@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/foonathan/debug_assert/archive/refs/tags/v1.3.4.tar.gz"
+checksum = "sha256:6d8749eaa6b571b6b53e2355ed0e916a83842cd623ce7e5f65b521ec71b70454"
+format = "tar.gz"
+strip-prefix = "debug_assert-1.3.4"
+
+[package]
+name = "cabin-ports/debug-assert"
+version = "1.3.4"
+include = ["LICENSE", "debug_assert.hpp"]
+
+# Upstream's debug_assert INTERFACE target (CMakeLists.txt:44-53): the
+# single header debug_assert.hpp, which consumers include as
+# <debug_assert.hpp>, as from upstream's install tree (:86).  README.md:6
+# states C++11; the target sets no compile features.  Its options
+# (:16-39) default to off or empty, so the target adds no definitions; a
+# consumer can define DEBUG_ASSERT_NO_STDIO, DEBUG_ASSERT_DISABLE,
+# DEBUG_ASSERT_MARK_UNREACHABLE or DEBUG_ASSERT_FORCE_INLINE itself
+# before including the header (the header does not read the
+# DEBUG_ASSERT_ASSUME define that :31-34 can set).  Not ported:
+# example.cpp, test_package/, the docs and the CMake package files.
+[target.debug-assert]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
