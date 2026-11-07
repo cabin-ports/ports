@@ -1,0 +1,49 @@
+[package.upstream]
+url = "https://github.com/jlblancoc/nanoflann/archive/refs/tags/2.0.1.tar.gz"
+checksum = "sha256:bb3991ad924248d3f20953a951c34878196c11ca112d800acc341c3808443896"
+format = "tar.gz"
+strip-prefix = "nanoflann-2.0.1"
+
+[package]
+name = "cabin-ports/nanoflann"
+version = "2.0.1"
+include = ["COPYING", "include"]
+
+# nanoflann, header-only, as upstream's CMake interface target
+# nanoflann::nanoflann: include/ is the include root, so consumers write
+# `#include <nanoflann.hpp>` (CMakeLists.txt:88-100).  C++11 is the floor
+# of the Euclidean core (README.md:23), and the target asks only for C++11
+# features (CMakeLists.txt:91-95).  The compile-time product-manifold
+# metrics (Manifold_Adaptor, Product<>, SO2, SO3, SE2, SE3, Sn, Torus)
+# need C++17: they are enabled when the compiler defines
+# __cpp_if_constexpr, that is from C++17, unless NANOFLANN_NO_MANIFOLDS is
+# defined (README.md:256, nanoflann.hpp:158-166).  The consumer test builds
+# at this target's C++11 floor, so it covers the Euclidean core, not the
+# manifolds.
+#
+# The other configuration macros are the consumer's, defined before the
+# include and identically in every translation unit: NANOFLANN_FIRST_MATCH,
+# NANOFLANN_NO_THREADS, NANOFLANN_NODE_ALIGNMENT,
+# NANOFLANN_INCREMENTAL_NO_COORD_CACHE, NANOFLANN_INCREMENTAL_INNODE_DISTANCE,
+# and NANOFLANN_INCREMENTAL_NO_FREELIST, which is meant only for ablation
+# measurements: the incremental index's memory then grows with every insert
+# (nanoflann.hpp:40-62, README.md:251-258).  On Windows, unless NOMINMAX is
+# already defined, the header defines it and, if a max macro exists,
+# undefines min and max; everywhere it undefines X11's None
+# (nanoflann.hpp:113-124).
+#
+# Not ported: upstream's examples, tests, documentation, and its CMake and
+# ROS packaging files.
+[target.nanoflann]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+
+# Upstream links Threads::Threads (CMakeLists.txt:105-108): the parallel
+# index build runs on std::async whenever n_thread_build is not 1 (0 means
+# one thread per core), and KDTreeSingleIndexIncrementalAdaptorMT rebuilds
+# on a std::thread (nanoflann.hpp:2277, 2868-2875, 5210).  Under
+# NANOFLANN_NO_THREADS a parallel build throws instead, and the MT index is
+# not declared (nanoflann.hpp:2176-2181, 4949).
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["pthread"]
