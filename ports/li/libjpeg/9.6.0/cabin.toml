@@ -1,0 +1,180 @@
+[package.upstream]
+# The Independent JPEG Group's release 9f ("9f  14-Jan-2024", jversion.h),
+# which configure.ac:8 and jpeglib.h:41-42 number 9.6.0.
+# conan-center-index pins the same checksum for 9f.
+url = "https://www.ijg.org/files/jpegsrc.v9f.tar.gz"
+checksum = "sha256:04705c110cb2469caa79fb71fba3d7bf834914706e9641a4589485c1f832565b"
+format = "tar.gz"
+strip-prefix = "jpeg-9f"
+
+# jpeglib.h includes jconfig.h, which configure generates from jconfig.cfg
+# (configure.ac:14) and the canned builds copy from a file per system, such
+# as jconfig.vc (Windows) or jconfig.xc (Xcode) (install.txt:142-164).  One
+# file serves every platform here, so this places upstream's generic
+# jconfig.txt, as install.txt:174-176 describes for builds without
+# configure.  Against configure's output on Linux and macOS it lacks
+# HAVE_LOCALE_H, which only the programs read, and INLINE, which jmorecfg.h
+# then defines as configure does under GCC and Clang, as __inline__
+# (configure.ac:187-198, jmorecfg.h:421-428); CHAR_IS_UNSIGNED, which
+# configure sets where char is unsigned, is read only without
+# HAVE_UNSIGNED_CHAR (jmorecfg.h:67-81, 160-174, 186-194).  Where configure
+# defines HAVE_PROTOTYPES, HAVE_UNSIGNED_CHAR, HAVE_UNSIGNED_SHORT,
+# HAVE_STDDEF_H and HAVE_STDLIB_H as 1, jconfig.txt defines them empty, as
+# jconfig.vc does, so a consumer that also defines one of them as 1 gets a
+# macro-redefinition warning.  Compared with jconfig.vc, jconfig.txt lacks
+# only #undef lines and options of the programs, and both make boolean an
+# unsigned char on Windows (jconfig.txt:95-108); jmorecfg.h makes it an
+# enum elsewhere.
+[[package.upstream.copy]]
+from = "jconfig.txt"
+to = "jconfig.h"
+
+[package]
+name = "cabin-ports/libjpeg"
+version = "9.6.0"
+include = [
+  "README",
+  "jconfig.h",
+  "jdct.h",
+  "jerror.h",
+  "jinclude.h",
+  "jmemsys.h",
+  "jmorecfg.h",
+  "jpegint.h",
+  "jpeglib.h",
+  "jversion.h",
+  "jaricom.c",
+  "jcapimin.c",
+  "jcapistd.c",
+  "jcarith.c",
+  "jccoefct.c",
+  "jccolor.c",
+  "jcdctmgr.c",
+  "jchuff.c",
+  "jcinit.c",
+  "jcmainct.c",
+  "jcmarker.c",
+  "jcmaster.c",
+  "jcomapi.c",
+  "jcparam.c",
+  "jcprepct.c",
+  "jcsample.c",
+  "jctrans.c",
+  "jdapimin.c",
+  "jdapistd.c",
+  "jdarith.c",
+  "jdatadst.c",
+  "jdatasrc.c",
+  "jdcoefct.c",
+  "jdcolor.c",
+  "jddctmgr.c",
+  "jdhuff.c",
+  "jdinput.c",
+  "jdmainct.c",
+  "jdmarker.c",
+  "jdmaster.c",
+  "jdmerge.c",
+  "jdpostct.c",
+  "jdsample.c",
+  "jdtrans.c",
+  "jerror.c",
+  "jfdctflt.c",
+  "jfdctfst.c",
+  "jfdctint.c",
+  "jidctflt.c",
+  "jidctfst.c",
+  "jidctint.c",
+  "jmemmgr.c",
+  "jmemnobs.c",
+  "jquant1.c",
+  "jquant2.c",
+  "jutils.c",
+]
+c-standard = "c11"
+# jpeglib.h, jmorecfg.h, jerror.h and jconfig.h are C89, and jpeglib.h
+# declares the API extern "C" for C++.
+interface-c-standard = "c89"
+
+# README's terms (LEGAL ISSUES, conditions (1)-(3), README:125-138) require
+# that README accompany any part of the source and that additions,
+# deletions and changes be indicated: this package adds jconfig.h, a copy
+# of jconfig.txt, and keeps only README and the files listed in `include`,
+# unmodified; the rest of the jpegsrc.v9f distribution is omitted.  A
+# program distributed only as executable code must state in its
+# documentation that "this software is based in part on the work of the
+# Independent JPEG Group".
+#
+# jcarith.c:213-215, jdarith.c:100-102 and jaricom.c:25-26 credit Markus
+# Kuhn's JBIG implementation, JBIG-KIT (GPL-2.0-or-later), for how the
+# probability estimation table is packed and accessed.  Compared with
+# JBIG-KIT 0.9 to 2.1 (libjbig/jbig.c, jbig.h, jbig_ar.c, jbig_ar.h and
+# jbig_tab.c), the shared material is that scheme, the encoder's procedures
+# of ITU-T T.81 Annex D (encoding, renormalization, byte output and
+# flushing) written with the standard's names, the values of its Table D.3,
+# and short comment phrases: the coder registers' descriptions at
+# jcarith.c:26-28 and 31-32 and jdarith.c:26-28, and jcarith.c:140-141,
+# 146, 149, 179, 237, 239-242, 248, 250, 252-254, 266, 269, 283, 286, 288
+# and 306; jdarith.c's decoding procedure is of a different design.  That
+# is too slight to carry copyright, so the package carries IJG's terms
+# only.
+#
+# The static library configure builds: Makefile.am's LIBSOURCES with
+# configure's default memory manager, jmemnobs.c (configure.ac:315-317),
+# which keeps every image in memory and never uses temporary files.  Not
+# ported: the shared library and its libjpeg.map version script, the cjpeg,
+# djpeg, jpegtran, rdjpgcom and wrjpgcom programs with their own sources,
+# the other memory managers (jmemansi.c and jmemname.c, which configure
+# --enable-maxmem selects, and jmemdos.c and jmemmac.c), and the canned
+# makefiles and project files.
+[target.jpeg]
+type = "library"
+sources = [
+  "jaricom.c",
+  "jcapimin.c",
+  "jcapistd.c",
+  "jcarith.c",
+  "jccoefct.c",
+  "jccolor.c",
+  "jcdctmgr.c",
+  "jchuff.c",
+  "jcinit.c",
+  "jcmainct.c",
+  "jcmarker.c",
+  "jcmaster.c",
+  "jcomapi.c",
+  "jcparam.c",
+  "jcprepct.c",
+  "jcsample.c",
+  "jctrans.c",
+  "jdapimin.c",
+  "jdapistd.c",
+  "jdarith.c",
+  "jdatadst.c",
+  "jdatasrc.c",
+  "jdcoefct.c",
+  "jdcolor.c",
+  "jddctmgr.c",
+  "jdhuff.c",
+  "jdinput.c",
+  "jdmainct.c",
+  "jdmarker.c",
+  "jdmaster.c",
+  "jdmerge.c",
+  "jdpostct.c",
+  "jdsample.c",
+  "jdtrans.c",
+  "jerror.c",
+  "jfdctflt.c",
+  "jfdctfst.c",
+  "jfdctint.c",
+  "jidctflt.c",
+  "jidctfst.c",
+  "jidctint.c",
+  "jmemmgr.c",
+  "jmemnobs.c",
+  "jquant1.c",
+  "jquant2.c",
+  "jutils.c",
+]
+include-dirs = ["."]
+links = "jpeg"
