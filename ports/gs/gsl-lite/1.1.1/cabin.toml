@@ -1,0 +1,28 @@
+[package.upstream]
+# The v1.1.1 tag archive, the bytes vcpkg's port pins (SHA-512); the
+# release has no assets.
+url = "https://github.com/gsl-lite/gsl-lite/archive/refs/tags/v1.1.1.tar.gz"
+checksum = "sha256:6746753379b00a8148c3b0714a3a9c2bc84735f0cfa82077f2f3b36f8d330a24"
+format = "tar.gz"
+strip-prefix = "gsl-lite-1.1.1"
+
+[package]
+name = "cabin-ports/gsl-lite"
+version = "1.1.1"
+# include/ is what upstream installs (src/CMakeLists.txt:58-62).
+include = ["LICENSE", "include"]
+
+# Header-only: include/gsl-lite/gsl-lite.hpp is the library, included as
+# <gsl-lite/gsl-lite.hpp>.  include/gsl/gsl-lite.hpp is the legacy header,
+# which turns on the GSL compatibility mode; upstream still installs it but
+# advises against it (README.md:302).  This target is upstream's gsl-lite
+# target and the identical gsl-lite-v1, include directories only
+# (src/CMakeLists.txt:12-37).  Not ported: the gsl-lite-v0 target, which
+# only adds gsl_CONFIG_DEFAULTS_VERSION=0 (:40-55) and which a consumer gets
+# by defining that macro itself, and gsl-lite.natvis, the Visual Studio
+# debugger visualizer, which upstream adds only to its build-tree targets.
+[target.gsl-lite]
+type = "header-only"
+include-dirs = ["include"]
+# C++98 and later (README.md:83); upstream's targets set no standard.
+interface-cxx-standard = "c++98"
