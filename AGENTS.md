@@ -36,6 +36,24 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   "Pull requests") gives the rules and the grounds for a
   `publish-holds.txt` line.
 
+## Comments
+
+- Prefer self-explanatory code and concise comments. Explain non-obvious
+  intent, constraints, invariants, and trade-offs; do not restate what
+  the code, configuration, or tests already make clear.
+- In `cabin.toml`, document non-obvious packaging decisions, patches,
+  compatibility limitations, platform workarounds, and required license
+  or attribution information. Avoid upstream API documentation,
+  exhaustive bug or feature inventories, and lengthy source citations.
+- Apply the same principles to Rust, tests, scripts, and workflows.
+  Preserve public API contracts and reasoning essential to correctness,
+  security, or publication safety. Avoid duplicating existing documentation.
+- Do not impose comment-count limits or remove useful context merely
+  to reduce line counts. Preserve legally required notices.
+- A comment-only change to a published port changes its package bytes.
+  Treat such cleanup as a packaging change requiring appropriate review
+  and revision handling.
+
 ## Cabin revision
 
 - Every `cabinpkg-*` dependency names the same full commit of `cabinpkg/cabin`'s `main`, and the
