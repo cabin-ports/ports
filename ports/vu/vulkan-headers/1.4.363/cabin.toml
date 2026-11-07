@@ -1,0 +1,45 @@
+[package.upstream]
+url = "https://github.com/KhronosGroup/Vulkan-Headers/archive/refs/tags/vulkan-sdk-1.4.363.0.tar.gz"
+checksum = "sha256:4a078be12bef21cfebc09d878b77a63cff9d68f899254a0b00d0e37ef73e7f7e"
+format = "tar.gz"
+strip-prefix = "Vulkan-Headers-vulkan-sdk-1.4.363.0"
+
+# The Vulkan SDK 1.4.363.0 tag, the commit tag v1.4.363 also names.  The
+# version is the headers' own: VK_API_VERSION 1.4 (VK_HEADER_VERSION_COMPLETE,
+# include/vulkan/vulkan_core.h:72) plus VK_HEADER_VERSION 363 (:69), which
+# upstream's CMake reads as its project version (CMakeLists.txt:17-42).
+[package]
+name = "cabin-ports/vulkan-headers"
+version = "1.4.363"
+# Every file is Apache-2.0, or Apache-2.0 OR MIT (LICENSE.md, LICENSES/).
+include = ["LICENSE.md", "LICENSES", "include/vk_video", "include/vulkan"]
+
+# The INTERFACE target Vulkan::Headers (CMakeLists.txt:52-54) and the two
+# directories upstream installs as headers (:96-97): the Vulkan C API
+# (vulkan/vulkan.h, with the window-system headers it adds for each
+# VK_USE_PLATFORM_* the consumer defines, vk_icd.h and vk_layer.h), the
+# video codec headers (vk_video/), and the Vulkan-Hpp C++ bindings
+# (vulkan/vulkan.hpp, vulkan_raii.hpp and the rest).  Upstream limitations,
+# as released: vulkan.h does not include vulkan_ubm.h for
+# VK_USE_PLATFORM_UBM_SEC, so a consumer that defines it includes
+# vulkan/vulkan_ubm.h after vulkan.h and before vulkan.hpp; and
+# VK_USE_PLATFORM_SCI includes vulkan_sci.h and NVIDIA's nvsci headers
+# (vulkan.h:87-90), which Vulkan-Headers does not ship.  Headers only, as
+# upstream's target: a consumer that calls Vulkan links the loader (libvulkan
+# or vulkan-1), which this package does not provide, or loads it at run time,
+# as Vulkan-Hpp's DynamicLoader does by default (dlopen, in libdl before
+# glibc 2.34, or LoadLibraryA).  Not ported: the C++ named modules
+# (Vulkan::HppModule from vulkan.cppm and vulkan_video.cppm, built only when
+# the compiler supports C++23 `import std`, :47; the .cppm files ship, as
+# upstream installs them otherwise) and the API registry (registry/, which
+# upstream installs as data under share/vulkan, :99).
+[target.vulkan-headers]
+type = "header-only"
+include-dirs = ["include"]
+# vk_platform.h includes <stdint.h> (:75), and upstream tests the C headers
+# as strict C99 (tests/integration/CMakeLists.txt:46-48).  vulkan.hpp errors
+# below C++11 (vulkan_hpp_macros.hpp:27) and keeps C++11 fallbacks
+# (vulkan.hpp:8354-8364); upstream's test of it requires at least C++11
+# (:81).
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
