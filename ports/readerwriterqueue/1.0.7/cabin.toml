@@ -1,0 +1,59 @@
+[package.upstream]
+# The v1.0.7 tag archive, the bytes Conan Center's conandata pins
+# (SHA-256) and vcpkg's port pins (SHA-512); the release has no assets.
+url = "https://github.com/cameron314/readerwriterqueue/archive/refs/tags/v1.0.7.tar.gz"
+checksum = "sha256:532224ed052bcd5f4c6be0ed9bb2b8c88dfe7e26e3eb4dd9335303b059df6691"
+format = "tar.gz"
+strip-prefix = "readerwriterqueue-1.0.7"
+
+# The three headers upstream's CMake build installs, in the
+# readerwriterqueue/ directory it installs them in (CMakeLists.txt:14-15).
+# Upstream documents both spellings: <readerwriterqueue.h> through its
+# CMake target, whose include directory is the headers' own directory,
+# the source root in the build tree and that subdirectory once installed
+# (:9-12; README.md:121-146), and <readerwriterqueue/readerwriterqueue.h>
+# from the system include directory (README.md:149-163).  Both queue
+# headers include "atomicops.h" from their own directory, so either root
+# works.
+[[package.upstream.copy]]
+from = "atomicops.h"
+to = "include/readerwriterqueue/atomicops.h"
+
+[[package.upstream.copy]]
+from = "readerwriterqueue.h"
+to = "include/readerwriterqueue/readerwriterqueue.h"
+
+[[package.upstream.copy]]
+from = "readerwritercircularbuffer.h"
+to = "include/readerwriterqueue/readerwritercircularbuffer.h"
+
+[package]
+name = "cabin-ports/readerwriterqueue"
+version = "1.0.7"
+# LICENSE.md is the Simplified BSD licence; atomicops.h carries the zlib
+# notice of Jeff Preshing's semaphore itself (LICENSE.md:1-4).
+include = ["LICENSE.md", "include"]
+
+# Header-only, as upstream's CMake target is (CMakeLists.txt:7).  Not
+# ported: the tests, the benchmarks (benchmarks/ext has its own licences),
+# and the CMake package files.  readerwriterqueue has no C API.
+[target.readerwriterqueue]
+type = "header-only"
+include-dirs = ["include", "include/readerwriterqueue"]
+# C++11 (readerwritercircularbuffer.h:5, :17; upstream's makefiles use
+# -std=c++11).
+interface-cxx-standard = "c++11"
+
+# On non-Apple Unix the blocking queues' semaphore is POSIX sem_t
+# (atomicops.h:375-376, 513-594): pthreads, which upstream's test and
+# benchmark builds compile with (-pthread: tests/unittests/makefile:24)
+# and ConanCenter's recipe links.  Folded into libc since glibc 2.34,
+# where the extra -lpthread is a harmless no-op.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# The timed waits call clock_gettime (atomicops.h:565), in librt before
+# glibc 2.17; upstream's builds link -lrt off Darwin and Windows
+# (tests/unittests/makefile:3-16).
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["rt"]
