@@ -3,13 +3,56 @@ url = "https://github.com/doctest/doctest/archive/refs/tags/v2.5.3.tar.gz"
 checksum = "sha256:174ebc4e769928959614789c5b4e9c3d0a0f81a62bb608756b127bfebfb21331"
 format = "tar.gz"
 strip-prefix = "doctest-2.5.3"
-# doctest.h takes code from Catch2 (its XmlWriter verbatim) and lest,
-# both under the Boost Software License 1.0 (doctest/doctest.h:20-36),
-# whose terms must accompany every source copy; the release ships only
-# doctest's MIT LICENSE.txt.  The patch adds the license text, verbatim
-# from https://www.boost.org/LICENSE_1_0.txt (byte-identical to the
-# Catch2 LICENSE.txt that doctest.h cites).
-patches = ["patches/0001-add-bsl-1.0-license-for-catch2-and-lest-code.patch"]
+# doctest.h takes code from Catch (among it the XmlWriter class) and
+# lest, both under the Boost Software License 1.0 (doctest/doctest.h:
+# 20-36), whose terms must accompany every source copy; the release
+# ships only doctest's MIT LICENSE.txt.  0001 adds the license text,
+# verbatim from https://www.boost.org/LICENSE_1_0.txt (byte-identical
+# to the Catch2 LICENSE.txt that doctest.h cites).  The copyright
+# notices of those sources: "Copyright 2010 Two Blue Cubes Ltd. All
+# rights reserved." (Catch's files, for example Catch2 v2.4.0's
+# include/internal/catch_xmlwriter.h) and "Copyright 2013-2018 by
+# Martin Moene" (lest's include/lest/lest.hpp).  0002 adds the licenses
+# of three more sources doctest.h takes code from:
+# - LICENSE.Apache-2.0, verbatim from
+#   https://www.apache.org/licenses/LICENSE-2.0.txt, for
+#   has_uncaught_exceptions (:6433-6443), "Derived from" oneTBB
+#   v2023.0.0's include/oneapi/tbb/detail/_config.h (:6434; Apache-2.0,
+#   Copyright (c) 2005-2025 Intel Corporation, Copyright (c) 2025 UXL
+#   Foundation Contributors).  oneTBB has no NOTICE file.
+# - LICENSE-BSD-3-Clause.googletest, googletest's LICENSE (Copyright 2008,
+#   Google Inc.) as of googletest 6450691fd7d0, for the Windows crash
+#   reporting settings (:7958-7975) "taken from google test", the calls
+#   and comments of UnitTest::Run() in googletest/src/gtest.cc (Copyright
+#   2005, Google Inc.).
+# - LICENSE-ISC.cocoawithlove, the ISC-style license that Cocoa with
+#   Love's about page grants for its code samples (Copyright © 2008-2026
+#   Matt Gallagher), for the PowerPC DOCTEST_BREAK_INTO_DEBUGGER
+#   sequence (:597-599) from its 2008 article "Break into Debugger".
+# doctest/extensions/mpi_reporter.h:19-24's NullBuffer is john's
+# Stack Overflow answer https://stackoverflow.com/a/11826666 (2012,
+# CC BY-SA 3.0, https://creativecommons.org/licenses/by-sa/3.0/), a
+# one-method streambuf.  The compiler version checks credit cxx_detect
+# for ideas (:79), which is under the Unlicense or zlib terms.
+# wildcmp (:5047-5048, :6470-6502) is "taken from" Jack Handy's
+# CodeProject article "Wildcard string compare (globbing)" (posted 1 May
+# 2001, Article Copyright 2001 by Jack Handy).  The article names no
+# license, but CodeProject's submission terms (codeproject.com/info/
+# submit.asp, archived 3 Aug 2001) have authors keep copyright and
+# "permit all developers to freely use the code in their own
+# applications".  doctest.h cites the article's URL in place of the
+# function's credit line, "Written by Jack Handy".
+# isDebuggerActive on macOS (:6312-6337) comes through Catch (Catch2's
+# catch_debugger.cpp), "taken directly from" Apple's Technical Q&A
+# QA1361 (Copyright 2004 Apple Computer, Inc.), whose site Terms of Use
+# reserve all rights.  It ships as is, as the NullBuffer above does,
+# because it is too slight or functional to carry copyright: its code is
+# the sysctl(KERN_PROC_PID) query and P_TRACED test that the API
+# dictates, and its comments are the note's five short sentences.
+patches = [
+  "patches/0001-add-bsl-1.0-license-for-catch2-and-lest-code.patch",
+  "patches/0002-add-licenses-for-onetbb-googletest-and-cocoa-with-love-code.patch",
+]
 
 [package]
 name = "cabin-ports/doctest"
@@ -18,6 +61,9 @@ version = "2.5.3"
 # doctest/extensions/*.h.  The rest of doctest/ is the split source the
 # single header is generated from, plus doctest.cpp.
 include = [
+  "LICENSE-BSD-3-Clause.googletest",
+  "LICENSE-ISC.cocoawithlove",
+  "LICENSE.Apache-2.0",
   "LICENSE.txt",
   "LICENSE_1_0.txt",
   "doctest/doctest.h",
