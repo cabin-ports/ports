@@ -45,10 +45,10 @@ env:
   RECEIPTS_BRANCH: publish-receipts
 
 jobs:
-  # Decides what the run does before anything is built, and takes the
-  # receipts log's lock for a run that may upload. A scheduled run
-  # starts no job at all unless the variable is `true`; expressions
-  # compare case-insensitively, so the step insists on the exact bytes.
+  # Resolves the mode, requires CI for `new`, and finds the receipts log
+  # before anything is built. A scheduled run starts no job at all
+  # unless the variable is `true`; expressions compare
+  # case-insensitively, so the step insists on the exact bytes.
   gate:
     if: >-
       github.repository == 'cabin-ports/ports' && github.ref == 'refs/heads/main' &&
@@ -60,7 +60,6 @@ jobs:
       checks: read
     outputs:
       mode: ${{ steps.mode.outputs.mode }}
-      work: ${{ steps.gate.outputs.work }}
       receipts: ${{ steps.probe.outputs.receipts }}
     steps:
       - uses: actions/checkout@v7.0.1
@@ -89,84 +88,17 @@ jobs:
           MODE: ${{ steps.mode.outputs.mode }}
         run: scripts/actions/receipts.sh probe
 
-      - name: Read the receipts log
-        if: steps.mode.outputs.mode == 'new' || steps.mode.outputs.mode == 'plan'
-        run: scripts/actions/receipts.sh read "$RUNNER_TEMP/receipts.jsonl"
-
-      # Spares a `new` or `plan` run with nothing to upload from building
-      # the tools: every version has an upload receipt, a failed one
-      # (unless retrying), or a hold. port-publish alone decides what
-      # uploads.
-      - id: gate
-        name: Look for versions without an upload receipt
-        if: steps.mode.outputs.mode != 'off'
-        env:
-          MODE: ${{ steps.mode.outputs.mode }}
-          RETRY_FAILED: ${{ inputs.retry-failed }}
-          LC_ALL: C
-        run: |
-          if [[ "$MODE" != all ]]; then
-            accounted="$RUNNER_TEMP/accounted"
-            jq -r --arg r "$REGISTRY" --arg retry "$RETRY_FAILED" \
-              'select(.registry == $r and (.outcome == "uploaded" or $retry != "true")) | "\(.name) \(.version)"' \
-              "$RUNNER_TEMP/receipts.jsonl" > "$accounted"
-            if [[ -f publish-holds.txt ]]; then
-              awk '!/^[[:space:]]*(#|$)/ { print "cabin-ports/" $1 " " $2 }' publish-holds.txt >> "$accounted"
-            fi
-            sort -u -o "$accounted" "$accounted"
-            find ports -mindepth 4 -maxdepth 4 -name cabin.toml |
-              awk -F/ '{ print "cabin-ports/" $3 " " $4 }' | sort -u > "$RUNNER_TEMP/catalog"
-            pending="$(comm -23 "$RUNNER_TEMP/catalog" "$accounted")"
-            if [[ -z "$pending" ]]; then
-              echo "every version is uploaded, failed, or held; nothing to do"
-              exit 0
-            fi
-            printf 'without an upload receipt:\n%s\n' "$pending"
-          fi
-          echo "work=true" >> "$GITHUB_OUTPUT"
-
-  # Every run that may upload, with a receipts log to add to, holds its
-  # lock: a `lock` file naming the run and attempt, committed on the
-  # receipts branch on top of the tip this job read, so of two runs
-  # racing for it one push fails. A rerun attempt never inherits it. Only `record` releases it, once the run's receipts are
-  # in the log, so no run reads the log while another may still add to
-  # it; a run that cannot account for its uploads keeps it, which stops
-  # both modes until an operator reconciles the log (docs/publishing.md,
-  # "Automatic publishing"). It runs only scripts/actions/ from its own
-  # commit (git and gh), so it may push that branch.
-  lock:
-    needs: gate
-    if: needs.gate.outputs.work == 'true'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      actions: read
-    outputs:
-      go: ${{ steps.lock.outputs.go }}
-      locked: ${{ steps.lock.outputs.locked }}
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ github.workflow_sha }}
-          persist-credentials: false
-          sparse-checkout: scripts/actions/
-          sparse-checkout-cone-mode: false
-      - id: lock
-        name: Take the receipts log's lock
-        env:
-          GH_TOKEN: ${{ github.token }}
-          MODE: ${{ needs.gate.outputs.mode }}
-          RECEIPTS: ${{ needs.gate.outputs.receipts }}
-        run: scripts/actions/receipts.sh acquire
-
   # Builds both binaries in a job without the OIDC permission, so no
-  # Rust build script runs beside the publish job's token.
+  # Rust build script runs beside the publish job's token. A `new` or
+  # `plan` run then asks port-publish what `new` would upload, and with
+  # nothing to upload stops here, before taking the lock.
   build:
-    needs: lock
-    if: needs.lock.outputs.go == 'true'
+    needs: gate
+    if: needs.gate.outputs.mode != 'off'
     runs-on: ubuntu-latest
     outputs:
       cabin-rev: ${{ steps.rev.outputs.cabin-rev }}
+      work: ${{ steps.pending.outputs.work }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -187,18 +119,62 @@ jobs:
         run: |
           cargo build --locked --bin port-publish
           cp target/debug/port-publish "$RUNNER_TEMP/tools/bin/"
+      - name: Read the receipts log
+        if: needs.gate.outputs.mode == 'new' || needs.gate.outputs.mode == 'plan'
+        run: scripts/actions/receipts.sh read "$RUNNER_TEMP/receipts.jsonl"
+      - id: pending
+        name: List the versions to upload
+        if: needs.gate.outputs.mode == 'new' || needs.gate.outputs.mode == 'plan'
+        env:
+          PORT_PUBLISH_RETRY_FAILED: ${{ inputs.retry-failed }}
+        run: scripts/actions/pending-new.sh "$RUNNER_TEMP/tools/bin" "$RUNNER_TEMP/receipts.jsonl"
       - uses: actions/upload-artifact@v7.0.2
         with:
           name: publish-tools
           path: ${{ runner.temp }}/tools/bin/
           retention-days: 1
 
+  # Every run that may upload, with a receipts log to add to, holds its
+  # lock: a `lock` file naming the run and attempt, committed on the
+  # receipts branch on top of the tip this job read, so of two runs
+  # racing for it one push fails. A rerun attempt never inherits it. Only `record` releases it, once the run's receipts are
+  # in the log, so no run reads the log while another may still add to
+  # it; a run that cannot account for its uploads keeps it, which stops
+  # both modes until an operator reconciles the log (docs/publishing.md,
+  # "Automatic publishing"). It runs only scripts/actions/ from its own
+  # commit (git and gh), so it may push that branch.
+  lock:
+    needs: [gate, build]
+    if: >-
+      needs.gate.outputs.mode == 'all' ||
+      (needs.gate.outputs.mode == 'new' && needs.build.outputs.work == 'true')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: read
+    outputs:
+      go: ${{ steps.lock.outputs.go }}
+      locked: ${{ steps.lock.outputs.locked }}
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ github.workflow_sha }}
+          persist-credentials: false
+          sparse-checkout: scripts/actions/
+          sparse-checkout-cone-mode: false
+      - id: lock
+        name: Take the receipts log's lock
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RECEIPTS: ${{ needs.gate.outputs.receipts }}
+        run: scripts/actions/receipts.sh acquire
+
   # The `plan` preview: stages and builds what `new` would upload,
   # without any credential. Like every job of this workflow, it runs no
   # port code: the merge queue ran the consumer tests.
   preview:
     needs: [gate, build]
-    if: needs.gate.outputs.mode == 'plan'
+    if: needs.gate.outputs.mode == 'plan' && needs.build.outputs.work == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -227,8 +203,8 @@ jobs:
   # registry independently: wait for such a deploy with Cabin's own
   # guard, from the pinned commit.
   await-deploy:
-    needs: [gate, build]
-    if: needs.gate.outputs.mode == 'all' || needs.gate.outputs.mode == 'new'
+    needs: [build, lock]
+    if: needs.lock.outputs.go == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1

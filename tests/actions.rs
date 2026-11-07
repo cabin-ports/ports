@@ -571,7 +571,6 @@ mod receipts {
                 ("GITHUB_RUN_ATTEMPT", "1"),
                 ("GITHUB_SHA", REV),
                 ("GH_TOKEN", "token"),
-                ("MODE", "new"),
                 ("RECEIPTS", "true"),
                 ("GIT_CONFIG_GLOBAL", gitconfig.to_str().unwrap()),
                 ("GIT_CONFIG_NOSYSTEM", "1"),
@@ -685,20 +684,15 @@ mod receipts {
         );
     }
 
-    /// A `plan` run, or a run that found no log, takes no lock.
+    /// An `all` run that found no log takes no lock.
     #[test]
-    fn acquire_without_an_upload_to_record_takes_no_lock() {
+    fn acquire_without_a_log_takes_no_lock() {
         let repo = Repo::new(&[("receipts.jsonl", LOG)]);
         let before = repo.tip();
-        for env in [
-            [("MODE", "plan"), ("RECEIPTS", "true")],
-            [("MODE", "all"), ("RECEIPTS", "")],
-        ] {
-            let (output, written) = repo.run(&["acquire"], &env);
-            assert!(output.status.success(), "{env:?}: {}", stderr(&output));
-            assert_eq!(written, "go=true\n", "{env:?}");
-            assert_eq!(repo.tip(), before, "{env:?}");
-        }
+        let (output, written) = repo.run(&["acquire"], &[("RECEIPTS", "")]);
+        assert!(output.status.success(), "{}", stderr(&output));
+        assert_eq!(written, "go=true\n");
+        assert_eq!(repo.tip(), before);
     }
 
     /// A running run's lock skips a scheduled run and fails a dispatch;
@@ -1054,5 +1048,89 @@ mod receipts {
         let (output, _) = repo.run(&["record", dir.to_str().unwrap()], &env);
         assert!(output.status.success(), "{}", stderr(&output));
         assert_eq!(repo.show("lock"), None);
+    }
+}
+
+/// `pending-new.sh` with a fake `port-publish`.  The publish workflow
+/// runs it on Linux only.
+#[cfg(unix)]
+mod pending_new {
+    use std::os::unix::fs::PermissionsExt as _;
+
+    use super::*;
+
+    const REGISTRY: &str = "https://registry.invalid";
+
+    /// Runs `pending-new.sh` with a `port-publish` that, called with
+    /// exactly the build job's arguments, writes `list` as the versions
+    /// to upload and exits with `status`, returning the run and its
+    /// `$GITHUB_OUTPUT`.
+    fn pending_new(list: &str, status: u8) -> (Output, String) {
+        let dir = TempDir::new().unwrap();
+        let (tools, log, listed) = (
+            dir.child("tools"),
+            dir.child("receipts.jsonl"),
+            dir.child("listed"),
+        );
+        listed.write_str(list).unwrap();
+        let call = format!(
+            "--index-url {REGISTRY} --receipts {} --ports-dir ports --cabin {}/cabin",
+            log.display(),
+            tools.display()
+        );
+        let tool = tools.child("port-publish");
+        tool.write_str(&format!(
+            "#!/bin/sh\n\
+             [ \"$1\" = --list-new ] || exit 64\n\
+             out=\"$2\"\n\
+             shift 2\n\
+             [ \"$*\" = '{call}' ] || {{ echo \"unexpected: port-publish $*\" >&2; exit 64; }}\n\
+             cat '{}' > \"$out\"\n\
+             exit {status}\n",
+            listed.display()
+        ))
+        .unwrap();
+        std::fs::set_permissions(tool.path(), std::fs::Permissions::from_mode(0o755)).unwrap();
+        let output_file = command_file(&dir, "output");
+        let output = run(
+            "pending-new.sh",
+            &[tools.to_str().unwrap(), log.to_str().unwrap()],
+            dir.path(),
+            &dir,
+            &[
+                ("GITHUB_OUTPUT", output_file.to_str().unwrap()),
+                ("REGISTRY", REGISTRY),
+                ("RUNNER_TEMP", dir.to_str().unwrap()),
+            ],
+        );
+        (output, read(&output_file))
+    }
+
+    /// A version to upload is work, and the step prints the list.
+    #[test]
+    fn pending_new_lists_the_versions_to_upload() {
+        let list = "cabin-ports/zlib 1.3.1\ncabin-ports/libpng 1.6.50\n";
+        let (output, written) = pending_new(list, 0);
+        assert!(output.status.success(), "{}", stderr(&output));
+        assert_eq!(written, "work=true\n");
+        let printed = format!("to upload, in order:\n{list}");
+        assert!(stdout(&output).contains(&printed), "{}", stdout(&output));
+    }
+
+    /// An empty list is no work, and no failure.
+    #[test]
+    fn pending_new_without_a_version_to_upload_is_no_work() {
+        let (output, written) = pending_new("", 0);
+        assert!(output.status.success(), "{}", stderr(&output));
+        assert_eq!(written, "work=false\n");
+    }
+
+    /// A failed `port-publish` fails the step, whatever list it left,
+    /// and outputs nothing.
+    #[test]
+    fn pending_new_fails_with_port_publish() {
+        let (output, written) = pending_new("cabin-ports/zlib 1.3.1\n", 1);
+        assert_eq!(output.status.code(), Some(1), "{}", stderr(&output));
+        assert_eq!(written, "");
     }
 }

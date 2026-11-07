@@ -82,8 +82,9 @@ bind `new` only.
 Only the candidates and the versions their requirements match stage, and build without running a
 probe.  An uploaded requirement must stage exactly the bytes of its last receipt; otherwise the
 candidates that need it wait for its packaging revision.  A run in which every version has an
-upload receipt, a `failed` line, or a hold stops in the `gate` job, before any tool is built; one
-whose candidates all wait on a blocked requirement still builds the tools to find that out.
+upload receipt, a `failed` line, or a hold, or requires a version with a `failed` line or a hold,
+stops after the `build` job, before taking the lock; a `new` run whose candidates all wait on a
+requirement's packaging revision still takes the lock and stages them to find that out.
 
 ### Failures
 
@@ -100,7 +101,9 @@ Every run that may upload, in either mode, holds the log's lock: a `lock` file n
 attempt, which the `lock` job commits on top of the branch tip it read, so of two runs racing for it
 one push fails and that run uploads nothing.  A push refused while the tip did not move fails the
 run, whatever started it.  A run that finds the lock held by a running run
-uploads nothing: a scheduled one leaves it to a later run, a dispatch fails.  The `publish` job
+uploads nothing: a scheduled one leaves it to a later run, a dispatch fails.  Dispatch again
+rather than rerun a run whose `lock` job failed: the rerun reuses that run's tools, which are kept
+one day, and once they are gone its `publish` job fails holding the lock.  The `publish` job
 uploads only if the lock names its own attempt, so rerunning a run's jobs never uploads under an
 earlier attempt's lock.  The `record` job appends the receipts of the lock's attempt only while the
 run holds the lock, so an old run's jobs cannot replay them, and releases it only when that
