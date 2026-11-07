@@ -1,0 +1,70 @@
+[package.upstream]
+url = "https://github.com/KDAB/KDBindings/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:0ee07cb3e2ec4f5688b4b2971c42e5a4f4a41c7bf4aa130e6b118bea4b6340ab"
+format = "tar.gz"
+strip-prefix = "KDBindings-1.1.0"
+
+[package]
+name = "cabin-ports/kdbindings"
+version = "1.1.0"
+include = ["LICENSES/MIT.txt", "src/kdbindings"]
+
+# KDBindings, header-only, as upstream's CMake interface target KDBindings:
+# src/ is the include root, so consumers write `#include
+# <kdbindings/signal.h>` (src/kdbindings/CMakeLists.txt:43-45), and C++17 is
+# its interface standard (:34, README.md:17).  The target defines
+# KDBINDINGS_ENABLE_WARN_UNUSED=1 for its consumers by default
+# (CMakeLists.txt:44, src/kdbindings/CMakeLists.txt:36-38), which marks the
+# Signal connect functions [[nodiscard]] (KDBindingsConfig.h:13-17,
+# signal.h:337-435); this port keeps it.  The headers test it with #ifdef,
+# so a consumer's own `defines` entry changes only its value, never removes
+# it; ConnectionHandle::release() discards a handle explicitly
+# (connection_handle.h:183-198).
+#
+# Version: the v1.1.0 tag and release still carry CMake's project version
+# 1.0.95 and a ChangeLog that calls 1.1.0 unreleased (CMakeLists.txt:31-37,
+# ChangeLog:1).  CMake writes that version into the generated
+# kdbindings_version.h and KDBindingsConfigVersion.cmake
+# (src/kdbindings/CMakeLists.txt:56-67); no header includes the former,
+# and this port provides neither.
+#
+# Not ported: the off-by-default option KDBindings_ERROR_ON_WARNING
+# (CMakeLists.txt:45), which would add /W3 /WX or -Wall -Wextra -Wpedantic
+# -Werror to consumers' compiles (src/kdbindings/CMakeLists.txt:46-52); the
+# tests, examples, and API documentation; and the CMake package files
+# (src/kdbindings/CMakeLists.txt ships beside the headers, unused).
+#
+# As upstream ships it:
+# - Qt defines `emit` as a macro, which signal.h rejects with a
+#   static_assert (signal.h:21-29); Qt consumers define QT_NO_EMIT or
+#   QT_NO_KEYWORDS themselves (README.md:26-30), as the off-by-default
+#   CMake option KDBindings_QT_NO_EMIT would for QT_NO_EMIT
+#   (CMakeLists.txt:46, src/kdbindings/CMakeLists.txt:39-41).
+# - The Signal::connect overload that binds leading arguments to a slot
+#   converts their count to bool in its enable_if (signal.h:434), a
+#   narrowing that a template argument may not perform once the count
+#   reaches 2, so binding more than one argument does not compile (Clang
+#   rejects it); upstream's tests and examples bind exactly one
+#   (tests/signal/tst_signal.cpp:147-151,
+#   examples/07-advanced-connections/main.cpp:50).
+# - A Property constructed from a binding (makeBoundProperty, or the
+#   constructor taking an updater) compares its still-uninitialized value
+#   with the binding's first result (property.h:237-241, :265, :362-372),
+#   which is undefined behavior for scalar T; constructing the property
+#   with a value and then assigning makeBinding(...) avoids it.
+# - Deferred connections (Signal::connectDeferred, ConnectionEvaluator) are
+#   documented as experimental (connection_evaluator.h:24, signal.h:368).
+# - Signal is not thread-safe (signal.h:380-381); a slot that throws, a
+#   connection made during an emission, and a signal emitted from one of
+#   its own slots are undefined behavior (signal.h:333, :541-546).
+#
+# Licence: the headers are MIT, KDAB's per SPDX header and
+# genindex_array.h's Jeremy Burns notice in full (:1-19);
+# LICENSES/MIT.txt is the licence text.  The BSD-3-Clause licence covers
+# only CMake modules and configuration files (.reuse/dep5,
+# cmake/InstallLocation.cmake:4), which this port does not ship.
+[target.kdbindings]
+type = "header-only"
+include-dirs = ["src"]
+interface-cxx-standard = "c++17"
+interface-defines = ["KDBINDINGS_ENABLE_WARN_UNUSED=1"]
