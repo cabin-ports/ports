@@ -155,8 +155,8 @@ downloads each pinned upstream archive once into Cabin's cache (`<cache>/ports/a
 `--help`).
 
 A change to `scripts/actions/` or `.github/workflows/` must also pass the `lint` job's
-`shellcheck`, `shfmt`, and `actionlint` steps; [CI](docs/maintaining.md#ci) shows how to run them
-locally.
+`shellcheck`, `shfmt`, `actionlint`, and `check-inline-runs.sh` steps;
+[CI](docs/maintaining.md#ci) shows how to run them locally.
 
 On a branch, a selective dry-run preflights only what the branch changes; compare with where it
 starts:
