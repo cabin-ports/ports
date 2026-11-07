@@ -1,0 +1,75 @@
+[package.upstream]
+url = "https://downloads.sourceforge.net/tclap/tclap-1.2.5.tar.gz"
+checksum = "sha256:bb649f76dae35e8d0dcba4b52acfd4e062d787e6a81b43f7a4b01275153165a6"
+format = "tar.gz"
+strip-prefix = "tclap-1.2.5"
+
+[package]
+name = "cabin-ports/tclap"
+version = "1.2.5"
+# The headers upstream installs (include/tclap/Makefile.am).
+include = [
+  "COPYING",
+  "include/tclap/Arg.h",
+  "include/tclap/ArgException.h",
+  "include/tclap/ArgTraits.h",
+  "include/tclap/CmdLine.h",
+  "include/tclap/CmdLineInterface.h",
+  "include/tclap/CmdLineOutput.h",
+  "include/tclap/Constraint.h",
+  "include/tclap/DocBookOutput.h",
+  "include/tclap/HelpVisitor.h",
+  "include/tclap/IgnoreRestVisitor.h",
+  "include/tclap/MultiArg.h",
+  "include/tclap/MultiSwitchArg.h",
+  "include/tclap/OptionalUnlabeledTracker.h",
+  "include/tclap/StandardTraits.h",
+  "include/tclap/StdOutput.h",
+  "include/tclap/SwitchArg.h",
+  "include/tclap/UnlabeledMultiArg.h",
+  "include/tclap/UnlabeledValueArg.h",
+  "include/tclap/ValueArg.h",
+  "include/tclap/ValuesConstraint.h",
+  "include/tclap/VersionVisitor.h",
+  "include/tclap/Visitor.h",
+  "include/tclap/XorHandler.h",
+  "include/tclap/ZshCompletionOutput.h",
+  "include/tclap/sstream.h",
+]
+
+# TCLAP, the Templatized C++ Command Line Parser, header-only, from the
+# official release on SourceForge (github.com/mirror/tclap is a third-party
+# mirror).  Upstream installs include/tclap/*.h under $(includedir)/tclap
+# (include/tclap/Makefile.am) and its tclap.pc adds only -I${includedir}, so
+# include/ is the include root and consumers write
+# `#include <tclap/CmdLine.h>`.  The headers build as C++98.  The
+# configure-generated config.h is read only when the consumer defines
+# HAVE_CONFIG_H (Arg.h:29-31, StandardTraits.h:30-32, ValuesConstraint.h:29-31,
+# ZshCompletionOutput.h:27-29); without it, values are parsed through
+# <sstream> (sstream.h:28-38).  TCLAP_FLAGSTARTCHAR, TCLAP_FLAGSTARTSTRING and
+# TCLAP_NAMESTARTSTRING (Arg.h:212-236) and TCLAP_SETBASE_ZERO (Arg.h:414)
+# are the consumer's to define.  The flag delimiter and the `--` ignore-rest
+# state are process-wide statics (Arg.h:71-77): every CmdLine sets the
+# delimiter when it is constructed, and once any parse has seen `--`,
+# later parses in the process skip the ignorable labeled arguments and
+# accept unmatched ones (Arg.h:191-196, ValueArg.h:337, CmdLine.h:492).
+# A third, never-cleared static records an optional UnlabeledValueArg
+# (OptionalUnlabeledTracker.h:40-58): once one has been constructed,
+# constructing any later UnlabeledValueArg or UnlabeledMultiArg, in any
+# CmdLine, throws a SpecificationException.  StdOutput, DocBookOutput and
+# ZshCompletionOutput write to std::cout (StdOutput's parse errors to
+# std::cerr).  With exception handling on (the default), --help and
+# --version end the process with exit(0), and a parse failure goes to the
+# output's failure() (CmdLine.h:503-527): StdOutput's and DocBookOutput's
+# end the process with exit(1) (StdOutput.h:154, DocBookOutput.h:181),
+# while ZshCompletionOutput's prints the error and lets parse() return
+# (ZshCompletionOutput.h:135-140).  ZshCompletionOutput.h defines its
+# constructor without `inline` (ZshCompletionOutput.h:92), so a program
+# that includes it in more than one translation unit fails to link with a
+# duplicate symbol; include it in one.  Not ported: upstream's examples,
+# tests, documentation, MSVC project files and its autotools and pkg-config
+# files.
+[target.tclap]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++98"
