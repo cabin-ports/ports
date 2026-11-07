@@ -30,6 +30,11 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   platform assumptions, upstream checksums, and license obligations.
   Do not assume that a successful default-feature probe validates
   non-default features or unsupported configurations.
+- Publish by default.  Resolve license, notice, and attribution gaps
+  through packaging, and never hold a version for an ordinary upstream
+  bug or an open question; CONTRIBUTING.md ("Upstream fidelity" and
+  "Pull requests") gives the rules and the grounds for a
+  `publish-holds.txt` line.
 
 ## Cabin revision
 
@@ -51,9 +56,8 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   it, initializing or editing the receipts log, and dispatching an upload are operator decisions,
   never part of routine work, and so are deleting the receipts log's lock and retrying a failed
   upload.  `--publish-new` never passes `--new-revision`: a correction to an uploaded version
-  ships only through an `all` dispatch.  While the variable is `true`, a port
-  merges only with its publication decision settled or its `publish-holds.txt` line added in the
-  same pull request.
+  ships only through an `all` dispatch.  While the variable is `true`, a merged port publishes
+  on the next run, so a hold lands in its pull request.
 - `ci.yml` runs on `pull_request` and `merge_group`.  Its `required` job is the only required
   check and must fail unless every job it gates succeeded; its `pin` job keeps the Cabin pin a
   single commit on `cabinpkg/cabin`'s `main`.  Its dry-run narrows only through `--changed-since`
