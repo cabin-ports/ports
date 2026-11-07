@@ -1,0 +1,853 @@
+diff --git a/capi/geos_c.h b/capi/geos_c.h
+index 8121146..94bfd6f 100644
+--- a/capi/geos_c.h
++++ b/capi/geos_c.h
+@@ -1,3 +1,4 @@
++/* Changed for cabin-ports on 2026-11-08: generated from geos_c.h.in as CMake's configure_file would. */
+ /************************************************************************
+  *
+  * C-Wrapper for GEOS library
+@@ -58,25 +59,25 @@ extern "C" {
+ /** \cond */
+ 
+ #ifndef GEOS_VERSION_MAJOR
+-#define GEOS_VERSION_MAJOR @VERSION_MAJOR@
++#define GEOS_VERSION_MAJOR 3
+ #endif
+ #ifndef GEOS_VERSION_MINOR
+-#define GEOS_VERSION_MINOR @VERSION_MINOR@
++#define GEOS_VERSION_MINOR 15
+ #endif
+ #ifndef GEOS_VERSION_PATCH
+-#define GEOS_VERSION_PATCH @VERSION_PATCH@
++#define GEOS_VERSION_PATCH 0
+ #endif
+ #ifndef GEOS_VERSION
+-#define GEOS_VERSION "@VERSION@"
++#define GEOS_VERSION "3.15.0"
+ #endif
+ #ifndef GEOS_JTS_PORT
+-#define GEOS_JTS_PORT "@JTS_PORT@"
++#define GEOS_JTS_PORT "1.20.0"
+ #endif
+ 
+-#define GEOS_CAPI_VERSION_MAJOR @CAPI_VERSION_MAJOR@
+-#define GEOS_CAPI_VERSION_MINOR @CAPI_VERSION_MINOR@
+-#define GEOS_CAPI_VERSION_PATCH @CAPI_VERSION_PATCH@
+-#define GEOS_CAPI_VERSION "@VERSION@-CAPI-@CAPI_VERSION@"
++#define GEOS_CAPI_VERSION_MAJOR 1
++#define GEOS_CAPI_VERSION_MINOR 21
++#define GEOS_CAPI_VERSION_PATCH 0
++#define GEOS_CAPI_VERSION "3.15.0-CAPI-1.21.0"
+ 
+ #define GEOS_CAPI_FIRST_INTERFACE GEOS_CAPI_VERSION_MAJOR
+ #define GEOS_CAPI_LAST_INTERFACE (GEOS_CAPI_VERSION_MAJOR+GEOS_CAPI_VERSION_MINOR)
+@@ -3639,7 +3640,10 @@ and geometric quality.
+ * linestrings. A "simple" linestring has no self-intersections.
+ * Z and M values are not considered.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The geometry to test
+ * \return 1 on true, 0 on false, 2 on exception
+@@ -3654,7 +3658,10 @@ extern char GEOS_DLL GEOSisSimple(const GEOSGeometry* g);
+ * Caller has the responsibility to destroy 'location' with
+ * GEOSGeom_destroy()
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The geometry to test
+ * \param findAllLocations Whether to return all self-intersection locations, or just one
+@@ -3678,7 +3685,10 @@ extern char GEOS_DLL GEOSisSimpleDetail(
+ *
+ * Z and M values are not considered.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The geometry to test
+ * \return 1 on true, 0 on false, 2 on exception
+@@ -3691,7 +3701,10 @@ extern char GEOS_DLL GEOSisValid(const GEOSGeometry* g);
+ * Return the human readable reason a geometry is invalid,
+ * "Valid Geometry" string otherwise, or NULL on exception.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The geometry to test
+ * \return A string with the reason, NULL on exception.
+@@ -3708,7 +3721,10 @@ extern char GEOS_DLL *GEOSisValidReason(const GEOSGeometry *g);
+ * Caller has the responsibility to destroy 'reason' with GEOSFree()
+ * and 'location' with GEOSGeom_destroy()
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The geometry to test
+ * \param flags A value from the \ref GEOSValidFlags enum
+@@ -3727,8 +3743,14 @@ extern char GEOS_DLL GEOSisValidDetail(
+ /**
+ * Repair an invalid geometry, returning a valid output.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param g The geometry to repair
+ * \return The repaired geometry. Caller must free with GEOSGeom_destroy().
+@@ -3742,8 +3764,14 @@ extern GEOSGeometry GEOS_DLL *GEOSMakeValid(
+ * Repair an invalid geometry, returning a valid output, using the
+ * indicated GEOSMakeValidMethods algorithm and options.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param g is the geometry to test.
+ * \param makeValidParams is a GEOSMakeValidParams with the desired parameters set on it.
+@@ -3815,7 +3843,10 @@ extern int GEOS_DLL GEOSMakeValidParams_setKeepCollapsed(
+ * If the minimum clearance cannot be defined for a geometry (such as with a single point, or a multipoint
+ * whose points are identical, a value of Infinity will be calculated.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g the input geometry
+ * \param d a double to which the result can be stored
+@@ -3831,7 +3862,10 @@ extern int GEOS_DLL GEOSMinimumClearance(const GEOSGeometry* g, double* d);
+ * Returns a 2D LineString whose endpoints define the minimum clearance of a geometry.
+ * If the geometry has no minimum clearance, an empty LineString will be returned.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g the input geometry
+ * \return a linestring geometry, or NULL if an exception occurred.
+@@ -3936,7 +3970,10 @@ extern int GEOS_DLL GEOSGeomGetLength(
+ * Calculate the distance between two geometries.
+ * Distance is calculated in the XY plane; Z and M values are ignored.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param[in] g1 Input geometry
+ * \param[in] g2 Input geometry
+@@ -3955,7 +3992,10 @@ extern int GEOS_DLL GEOSDistance(
+ * within the given dist.
+ * Distance is calculated in the XY plane; Z and M values are ignored.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g1 Input geometry
+ * \param g2 Input geometry
+@@ -3975,7 +4015,10 @@ extern char GEOS_DLL GEOSDistanceWithin(
+ * internally, then calculates the distance. Useful when one
+ * or both geometries is very large.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param[in] g1 Input geometry
+ * \param[in] g2 Input geometry
+@@ -3995,7 +4038,10 @@ extern int GEOS_DLL GEOSDistanceIndexed(
+ * The first point comes from g1 geometry and the second point comes from g2.
+ * Returned points will not have Z or M values.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param[in] g1 Input geometry
+ * \param[in] g2 Input geometry
+@@ -4013,7 +4059,10 @@ extern GEOSCoordSequence GEOS_DLL *GEOSNearestPoints(
+ * [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance)
+ * is the largest distance between two geometries.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param[in] g1 Input geometry
+ * \param[in] g2 Input geometry
+@@ -4032,7 +4081,10 @@ extern int GEOS_DLL GEOSHausdorffDistance(
+ * Calculate the Hausdorff distance between two geometries and return
+ * the coordinates of the points that determine the distance.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param[in] g1 Input geometry
+ * \param[in] g2 Input geometry
+@@ -4060,7 +4112,10 @@ extern int GEOS_DLL GEOSHausdorffDistanceWithPoints(
+ * [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance)
+ * is the largest distance between two geometries.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param[in] g1 Input geometry
+ * \param[in] g2 Input geometry
+@@ -4084,7 +4139,10 @@ extern int GEOS_DLL GEOSHausdorffDistanceDensify(
+ * [Hausdorff distance](https://en.wikipedia.org/wiki/Hausdorff_distance)
+ * is the largest distance between two geometries.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param[in] g1 Input geometry
+ * \param[in] g2 Input geometry
+@@ -4113,7 +4171,10 @@ extern int GEOS_DLL GEOSHausdorffDistanceDensifyWithPoints(
+ * between two geometries,
+ * a similarity measure for linear features.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param[in] g1 Input geometry
+ * \param[in] g2 Input geometry
+@@ -4135,7 +4196,10 @@ extern int GEOS_DLL GEOSFrechetDistance(
+ * a similarity measure for linear features.
+ * The inputs can be densified to provide a more accurate result.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param[in] g1 Input geometry
+ * \param[in] g2 Input geometry
+@@ -4165,7 +4229,10 @@ extern int GEOS_DLL GEOSFrechetDistanceDensify(
+ /**
+ * Distance of point projected onto line from the start of the line.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param line linear target of projection
+ * \param point point to be projected onto 'g'
+@@ -4183,7 +4250,10 @@ extern double GEOS_DLL GEOSProject(const GEOSGeometry* line,
+ * If applicable, the Z value of the returned point will be interpolated from the input line.
+ * Since GEOS 3.15, the M value will also be interpolated.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * If the (converted) input is not a LineString, NULL will be returned.
+ *
+@@ -4201,7 +4271,10 @@ extern GEOSGeometry GEOS_DLL *GEOSInterpolate(const GEOSGeometry* line,
+ * the line the point is from the start. For example, a point that
+ * projects to the middle of a line would be return 0.5.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param line linear target of projection
+ * \param point the point to project
+@@ -4219,7 +4292,10 @@ extern double GEOS_DLL GEOSProjectNormalized(const GEOSGeometry* line,
+ * If applicable, the Z value of the returned point will be interpolated from the input line.
+ * Since GEOS 3.15, the M value will also be interpolated.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * If the (converted) input is not a LineString, NULL will be returned.
+ *
+@@ -4246,8 +4322,14 @@ extern GEOSGeometry GEOS_DLL *GEOSInterpolateNormalized(
+ * Returns the intersection of two geometries: the set of points
+ * that fall within **both** geometries.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param g1 one of the geometries
+ * \param g2 the other geometry
+@@ -4278,8 +4360,14 @@ extern GEOSGeometry GEOS_DLL *GEOSIntersectionPrec(const GEOSGeometry* g1, const
+ * Returns the difference of two geometries A and B: the set of points
+ * that fall within A but **not** within B.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param ga the base geometry
+ * \param gb the geometry to subtract from it
+@@ -4317,8 +4405,14 @@ extern GEOSGeometry GEOS_DLL *GEOSDifferencePrec(
+ * that fall in A but **not** within B and the set of points that fall in B but
+ * **not** in A.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param ga geometry A
+ * \param gb geometry B
+@@ -4356,8 +4450,14 @@ extern GEOSGeometry GEOS_DLL *GEOSSymDifferencePrec(
+ * Returns the union of two geometries A and B: the set of points
+ * that fall in A **or** within B.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param ga geometry A
+ * \param gb geometry B
+@@ -4395,8 +4495,14 @@ extern GEOSGeometry GEOS_DLL *GEOSUnionPrec(
+ * used to convert a collection into the smallest set of polygons
+ * that cover the same area.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param g The input geometry
+ * \return A newly allocated geometry of the union. NULL on exception.
+@@ -4431,8 +4537,14 @@ extern GEOSGeometry GEOS_DLL *GEOSUnaryUnionPrec(
+ * that do not intersect. If there is only one such subset, performance
+ * can be expected to be worse than GEOSUnionaryUnion.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param g The input geometry
+ * \return A newly allocated geometry of the union, or NULL on exception.
+@@ -4447,8 +4559,14 @@ extern GEOSGeometry GEOS_DLL *GEOSDisjointSubsetUnion(const GEOSGeometry *g);
+ * Supposed to be faster than using GEOSIntersection(). Not
+ * guaranteed to return valid results.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param g The input geometry to be clipped
+ * \param xmin Left bound of clipping rectangle
+@@ -4470,8 +4588,14 @@ extern GEOSGeometry GEOS_DLL *GEOSClipByRect(
+ * Compute the intersection of a geometry with each polygon in
+ * a rectangular grid.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param g The input geometry to be clipped
+ * \param xmin Left bound of grd
+@@ -4504,7 +4628,10 @@ extern GEOSGeometry GEOS_DLL *GEOSSubdivideByGrid(
+ * Determine the fraction of each cell in a rectangular grid
+ * that is covered by a polygon.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The input geometry
+ * \param xmin Left bound of grd
+@@ -4536,7 +4663,10 @@ extern int GEOS_DLL GEOSGridIntersectionFractions(
+ * - second element is a MultiLineString containing shared paths
+ *   having the _opposite_ direction on the two inputs
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g1 An input geometry
+ * \param g2 An input geometry
+@@ -4566,7 +4696,10 @@ static const size_t GEOS_CLUSTER_NONE = (size_t) -1;
+ *
+ * Cluster geometries using the DBSCAN algorithm
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * @param g a collection of geometries to be clustered
+ * @param eps distance parameter for clustering
+@@ -4580,7 +4713,10 @@ extern GEOSClusterInfo GEOS_DLL* GEOSClusterDBSCAN(const GEOSGeometry* g, double
+ *
+ * Cluster geometries according to a distance threshold
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * @param g a collection of geometries to be clustered
+ * @param d minimum distance between geometries in the same cluster
+@@ -4593,7 +4729,10 @@ extern GEOSClusterInfo GEOS_DLL* GEOSClusterGeometryDistance(const GEOSGeometry*
+ *
+ * Cluster geometries that intersect
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * @param g a collection of geometries to be clustered
+ * @return cluster information object
+@@ -4688,7 +4827,10 @@ extern void GEOS_DLL GEOSClusterInfo_destroy(GEOSClusterInfo* clusters);
+ * Buffer a geometry.
+ * The coordinates of the constructed geometry will not have Z or M values.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The input geometry to be buffered.
+ * \param width The distance by which to expand the geometry (or contract)
+@@ -4788,7 +4930,10 @@ extern int GEOS_DLL GEOSBufferParams_setSingleSided(
+ /**
+ * Generates a buffer using the special parameters in the GEOSBufferParams
+ * 
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The geometry to buffer
+ * \param p The parameters to apply to the buffer process
+@@ -4807,7 +4952,10 @@ extern GEOSGeometry GEOS_DLL *GEOSBufferWithParams(
+ * Generate a buffer using the provided style parameters.
+ * The coordinates of the constructed geometry will not have Z or M values.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The geometry to buffer
+ * \param width Width of the buffer
+@@ -4833,7 +4981,10 @@ extern GEOSGeometry GEOS_DLL *GEOSBufferWithStyle(
+ * Handles all non-curved geometry types as input.
+ * The coordinates of the constructed geometry will not have Z or M values.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * - For a LineString the result is a LineString.
+ * - For a Point the result is an empty LineString.
+@@ -4872,8 +5023,14 @@ extern GEOSGeometry GEOS_DLL *GEOSOffsetCurve(const GEOSGeometry* g,
+ * for inputs that do not satisfy this constraint, however this is not
+ * guaranteed.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param g The input geometry
+ * \return A geometry that covers all the points of the input geometry.
+@@ -4889,7 +5046,10 @@ extern GEOSGeometry GEOS_DLL *GEOSCoverageUnion(const GEOSGeometry *g);
+ * with exactly matching edge geometry) to find places where the
+ * assumption of exactly matching edges is not met.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param input The polygonal coverage to access,
+ *        stored in a geometry collection. All members must be POLYGON
+@@ -4927,8 +5087,14 @@ extern int GEOS_DLL GEOSCoverageIsValid(
+ * it will still be simplified, but invalid topology such as crossing
+ * edges will still be invalid.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param input The polygonal coverage to access,
+ *        stored in a geometry collection. All members must be POLYGON
+@@ -5073,8 +5239,14 @@ GEOSCoverageCleanParams_setOverlapMergeStrategy(
+ * the input. Polygons that have collapsed during cleaning will be returned
+ * as empties.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param input The dirty polygonal coverage,
+ *        stored in a geometry collection. All members must be POLYGON
+@@ -5151,7 +5323,10 @@ extern GEOSGeometry GEOS_DLL *GEOSBoundary(const GEOSGeometry* g);
+ * Z values in the input coordinates will be preserved.
+ * M values in the input coordinates will not be preserved.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The input geometry
+ * \return A newly allocated geometry of the convex hull. NULL on exception.
+@@ -5180,7 +5355,10 @@ extern GEOSGeometry GEOS_DLL *GEOSConvexHull(const GEOSGeometry* g);
+ * This can be expressed as a ratio between the lengths of the longest and shortest edges.
+ * 1 produces the convex hull; 0 produces a hull with maximum concaveness
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The input geometry
+ * \param ratio The edge length ratio value, between 0 and 1.
+@@ -5219,7 +5397,10 @@ extern GEOSGeometry GEOS_DLL *GEOSConcaveHull(
+ * until the specified maximum edge length is reached.
+ * A large value produces the convex hull, 0 produces the hull of maximum concaveness.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The input geometry
+ * \param length The maximum edge length (0 or greater)
+@@ -5259,7 +5440,10 @@ extern GEOSGeometry GEOS_DLL *GEOSConcaveHullByLength(
+ * The input polygons *must* be a *valid* MultiPolygon
+ * (i.e. they must be non-overlapping).
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g the valid MultiPolygon geometry to process
+ * \param lengthRatio specifies the Maximum Edge Length as a
+@@ -5295,8 +5479,14 @@ extern GEOSGeometry GEOS_DLL *GEOSConcaveHullOfPolygons(
+ * An outer hull is computed if the parameter is positive,
+ * an inner hull is computed if it is negative.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param g the polygonal geometry to process
+ * \param isOuter indicates whether to compute an outer or inner hull (1 for outer hull, 0 for inner)
+@@ -5322,8 +5512,14 @@ extern GEOSGeometry GEOS_DLL *GEOSPolygonHullSimplify(
+ * produces the original geometry.
+ * Either outer or inner hulls can be computed.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
+-* @OUTPUT_LINES_CONVERTED_TO_CURVES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
++* This function outputs linear geometry types only. If line-to-curve
++* conversion parameters are registered with the context, and a 
++* curved input was provided, outputs will be automatically 
++* converted to curved types.
+ *
+ * \param g the polygonal geometry to process
+ * \param isOuter indicates whether to compute an outer or inner hull (1 for outer hull, 0 for inner)
+@@ -5352,7 +5548,10 @@ extern GEOSGeometry GEOS_DLL *GEOSPolygonHullSimplifyMode(
+ * is returned. The minimum rotated rectangle can be used as an
+ * extremely generalized representation for the given geometry.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The input geometry
+ * \return A newly allocated geometry of the rotated envelope. NULL on exception.
+@@ -5379,7 +5578,10 @@ extern GEOSGeometry GEOS_DLL *GEOSMinimumRotatedRectangle(const GEOSGeometry* g)
+ * Returns a two-point linestring, with one point at the center of the inscribed circle and the other
+ * on the boundary of the inscribed circle.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g Input geometry
+ * \param tolerance Stop the algorithm when the search area is smaller than this tolerance
+@@ -5417,7 +5619,10 @@ extern GEOSGeometry GEOS_DLL *GEOSMaximumInscribedCircle(
+ * Returns the LEC radius as a two-point linestring, with the start point at the center of the inscribed circle and the end
+ * on the boundary of the circle.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param obstacles The geometries that the LEC must not cross
+ * \param boundary The area to contain the LEC center (may be null or empty)
+@@ -5440,7 +5645,10 @@ extern GEOSGeometry GEOS_DLL *GEOSLargestEmptyCircle(
+ * by two parallel lines. This can be thought of as the smallest hole that the geometry
+ * can be moved through, with a single rotation.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The input geometry
+ * \return A newly allocated geometry of the LEC. NULL on exception.
+@@ -5455,7 +5663,10 @@ extern GEOSGeometry GEOS_DLL *GEOSMinimumWidth(const GEOSGeometry* g);
+ /**
+ * Returns a 2D point that is inside the boundary of a polygonal geometry.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The input geometry
+ * \return A point that is inside the input
+@@ -5469,7 +5680,10 @@ extern GEOSGeometry GEOS_DLL *GEOSPointOnSurface(const GEOSGeometry* g);
+ /**
+ * Returns a 2D point at the center of mass of the input.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g The input geometry
+ * \return A point at the center of mass of the input
+@@ -5484,7 +5698,10 @@ extern GEOSGeometry GEOS_DLL *GEOSGetCentroid(const GEOSGeometry* g);
+ * Returns a 2D geometry which represents the "minimum bounding circle",
+ * the smallest circle that contains the input.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param[in] g The input geometry
+ * \param[out] radius Pointer will be filled with output radius.
+@@ -5532,7 +5749,10 @@ extern GEOSGeometry GEOS_DLL * GEOSDelaunayTriangulation(
+ * Z values from the input points will be propagated to the generated polygons.
+ * M values from the input points will be ignored.
+ *
+-* @INPUT_CURVES_CONVERTED_TO_LINES@
++* This function does not support curved types directly. If curve-to-line
++* conversion parameters are registered with the context, curved
++* inputs will be automatically converted to lines. Otherwise, the
++* operation will fail.
+ *
+ * \param g the input geometry whose rings will be used as input
+ * \return A newly allocated geometry. NULL on exception.
+diff --git a/include/geos/version.h b/include/geos/version.h
+index 104f017..63f1978 100644
+--- a/include/geos/version.h
++++ b/include/geos/version.h
+@@ -1,3 +1,4 @@
++/* Changed for cabin-ports on 2026-11-08: generated from version.h.in as CMake's configure_file would. */
+ /**********************************************************************
+  *
+  * GEOS - Geometry Engine Open Source
+@@ -15,23 +16,23 @@
+ #define GEOS_VERSION_H_INCLUDED
+ 
+ #ifndef GEOS_VERSION_MAJOR
+-#define GEOS_VERSION_MAJOR @VERSION_MAJOR@
++#define GEOS_VERSION_MAJOR 3
+ #endif
+ 
+ #ifndef GEOS_VERSION_MINOR
+-#define GEOS_VERSION_MINOR @VERSION_MINOR@
++#define GEOS_VERSION_MINOR 15
+ #endif
+ 
+ #ifndef GEOS_VERSION_PATCH
+-#define GEOS_VERSION_PATCH @VERSION_PATCH@
++#define GEOS_VERSION_PATCH 0
+ #endif
+ 
+ #ifndef GEOS_VERSION
+-#define GEOS_VERSION "@VERSION@"
++#define GEOS_VERSION "3.15.0"
+ #endif
+ 
+ #ifndef GEOS_JTS_PORT
+-#define GEOS_JTS_PORT "@JTS_PORT@"
++#define GEOS_JTS_PORT "1.20.0"
+ #endif
+ 
+ #endif // GEOS_VERSION_H_INCLUDED
