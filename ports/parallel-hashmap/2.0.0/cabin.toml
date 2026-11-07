@@ -1,0 +1,38 @@
+[package.upstream]
+# The GitHub tag archive; the release publishes no other artifact.
+url = "https://github.com/greg7mdp/parallel-hashmap/archive/refs/tags/v2.0.0.tar.gz"
+checksum = "sha256:4f462f51a3468166ea4cf87c80e001dc1999093264cf55cbda3492ca39a7730b"
+format = "tar.gz"
+strip-prefix = "parallel-hashmap-2.0.0"
+# phmap_utils.h's hash combiners are Daniel James's code under the Boost
+# Software License 1.0 (phmap_utils.h:294-296, 317-319), whose terms must
+# accompany every source copy; the release ships only the Apache-2.0
+# LICENSE.  The patch adds the license text, verbatim from
+# https://www.boost.org/LICENSE_1_0.txt.
+patches = ["patches/0001-add-bsl-1.0-license-for-hash-combiners.patch"]
+
+[package]
+name = "cabin-ports/parallel-hashmap"
+version = "2.0.0"
+# parallel_hashmap/ is what upstream's CMake installs, whole (CMakeLists.txt:
+# 73-75), with the licenses above; upstream ships no NOTICE file.
+include = ["LICENSE", "LICENSE_1_0.txt", "parallel_hashmap", "patches"]
+
+# Upstream's header-only phmap target (CMakeLists.txt:41, 60), whose include
+# directory is the source root (:64-67): consumers include
+# <parallel_hashmap/phmap.h>, as from upstream's install tree.  CMake sets
+# C++11 (:27), and phmap_config.h rejects anything older (:85-89).  The Boost,
+# Abseil and cereal integrations switch on only at the consumer's request:
+# the Boost.Thread and Abseil mutexes when their headers come first
+# (phmap_base.h:4587, 5004, 5068 test their include guards), Abseil's hash
+# when the consumer defines PHMAP_USE_ABSL_HASH (phmap_fwd_decl.h:24-32), and
+# cereal's archives when its CEREAL_SIZE_TYPE is defined (phmap_dump.h:257),
+# so this package depends on none of them.  meminfo.h, a memory-statistics
+# helper for upstream's benchmarks, is installed with the rest; it defines
+# non-inline functions, so at most one translation unit of a program may
+# include it.  Not ported: the tests, examples, benchmarks, documentation and
+# debugger visualizers.
+[target.phmap]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
