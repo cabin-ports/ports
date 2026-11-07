@@ -1,0 +1,48 @@
+[package.upstream]
+url = "https://github.com/Naios/function2/archive/refs/tags/4.2.5.tar.gz"
+checksum = "sha256:a1f15327c542fb0d3e5affed352784d1126dc0b109e611fca93df804b8f19241"
+format = "tar.gz"
+strip-prefix = "function2-4.2.5"
+
+[package]
+name = "cabin-ports/function2"
+version = "4.2.5"
+include = ["LICENSE.txt", "include"]
+
+# Naios' function2, header-only, as upstream's CMake interface target
+# function2::function2: include/ is the include root, so consumers write
+# `#include <function2/function2.hpp>` (CMakeLists.txt:17-20).  The 4.2.5
+# tag's CMakeLists.txt:2 still says 4.2.0.  C++14 is upstream's floor:
+# Readme.md:240 asks for "modern C++14 support", and the target requires
+# C++14 language features such as generic lambdas and return type
+# deduction (CMakeLists.txt:22-37).
+#
+# Configuration is the consumer's, through macros defined before the
+# include, and identically in every translation unit, since they change
+# inline definitions (function2.hpp:18-69).  Exception support follows the
+# compiler: __EXCEPTIONS on GCC and Clang, but _HAS_EXCEPTIONS on MSVC,
+# which upstream's own no-exception build defines to 0 (function2.hpp:18-37,
+# cmake/compiler/msvc.cmake:20).  FU2_WITH_DISABLED_EXCEPTIONS (or
+# FU2_MACRO_DISABLE_EXCEPTIONS) turns it off.  Without exception support,
+# fu2::bad_function_call is not declared, an empty call aborts instead of
+# throwing it, and <functional> is left out unless
+# FU2_WITH_LIMITED_EMPTY_PROPAGATION is defined (function2.hpp:42-49,
+# 505-519, 577-584, 1799-1813).  An empty call through a noexcept
+# signature always aborts (Readme.md:87-88).
+# FU2_WITH_NO_FUNCTIONAL_HEADER (or FU2_NO_FUNCTIONAL_HEADER) always leaves
+# <functional> out, and with exceptions on, function2 then declares its own
+# bad_function_call in place of std's.  By default a callable whose bool
+# conversion is false, such as an empty std::function, gives an empty
+# wrapper.  FU2_WITH_LIMITED_EMPTY_PROPAGATION narrows that, as
+# std::function does, to pointers, function2's own wrappers, and
+# std::function unless <functional> is left out.
+# FU2_WITH_NO_EMPTY_PROPAGATION turns it off (function2.hpp:1413-1470).
+# From C++17, noexcept signatures are detected automatically, and
+# FU2_WITH_CXX17_NOEXCEPT_FUNCTION_TYPE forces them on (function2.hpp:51-64).
+# The header uses no RTTI.
+#
+# Not ported: upstream's tests and its CMake and Conan packaging files.
+[target.function2]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
