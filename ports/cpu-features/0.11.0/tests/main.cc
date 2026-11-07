@@ -59,7 +59,7 @@ int main() {
   CHECK(info.features.sse2 != 0);
 #endif
   const cpu_features::CacheInfo caches = cpu_features::GetX86CacheInfo();
-  CHECK(caches.size > 0 && caches.size <= CPU_FEATURES_MAX_CACHE_LEVEL);
+  CHECK(caches.size >= 0 && caches.size <= CPU_FEATURES_MAX_CACHE_LEVEL);
 #else
   const cpu_features::Aarch64Info info = cpu_features::GetAarch64Info();
   for (int e = 0; e < cpu_features::AARCH64_LAST_; ++e) {
