@@ -348,7 +348,10 @@ const DOWNLOAD_RETRY_PAUSE: Duration = Duration::from_secs(5);
 /// Call `fetch` up to [`DOWNLOAD_ATTEMPTS`] times, retrying only a
 /// failed download: upstream hosts such as downloads.xiph.org
 /// intermittently drop connections, while a checksum mismatch or a
-/// cache I/O error would fail the same way again.
+/// cache I/O error would fail the same way again.  The retry is publish
+/// orchestration, so it wraps Cabin's resolver here: one host's dropped
+/// connection should not fail a run over every port, while an
+/// interactive `cabin` command leaves retrying to its user.
 fn retry_download<T>(
     pause: Duration,
     mut fetch: impl FnMut() -> Result<T, upstream::UpstreamStageError>,
