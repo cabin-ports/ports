@@ -133,7 +133,7 @@ Install the pinned `cabin`, then run the publisher's tests and the complete dry-
 stages every port, builds it against the staged package, and runs its consumer test:
 
 ```console
-$ rev="$(sed -n 's|^source = "git+https://github.com/cabinpkg/cabin?rev=\([0-9a-f]\{40\}\)#.*|\1|p' Cargo.lock | sort -u)"
+$ rev="$(scripts/actions/cabin-rev.sh)"
 $ cargo install --locked --debug --git https://github.com/cabinpkg/cabin --rev "$rev" cabinpkg --root target/pinned-cabin
 $ PORT_PUBLISH_CABIN="$PWD/target/pinned-cabin/bin/cabin" cargo test --locked
 $ cargo run --locked -- --dry-run --cabin target/pinned-cabin/bin/cabin
@@ -142,6 +142,10 @@ $ cargo run --locked -- --dry-run --cabin target/pinned-cabin/bin/cabin
 The tests that drive `cabin` read it from `PORT_PUBLISH_CABIN` and fail without it.  The dry-run
 downloads each pinned upstream archive once into Cabin's cache (`<cache>/ports/archives/`; see
 `--help`).
+
+A change to `scripts/actions/` or `.github/workflows/` must also pass the `lint` job's
+`shellcheck`, `shfmt`, and `actionlint` steps; [CI](docs/maintaining.md#ci) shows how to run them
+locally.
 
 On a branch, a selective dry-run preflights only what the branch changes; compare with where it
 starts:
