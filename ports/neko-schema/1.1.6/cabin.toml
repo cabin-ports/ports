@@ -1,0 +1,33 @@
+[package.upstream]
+# NekoSchema publishes no release assets; this is the v1.1.6 tag archive
+# from the canonical hoshimoe/NekoSchema (moehoshio/NekoSchema redirects
+# there), the bytes vcpkg pins.  Tag v1.0.6, released as "Neko Schema
+# v1.1.6", names the same commit, 6096fb8.
+url = "https://github.com/hoshimoe/NekoSchema/archive/refs/tags/v1.1.6.tar.gz"
+checksum = "sha256:996fb1a0f835ea69ab79b7282936d3f35870c57b067a01f3cdc484d6e15a9933"
+format = "tar.gz"
+strip-prefix = "NekoSchema-1.1.6"
+
+[package]
+name = "cabin-ports/neko-schema"
+version = "1.1.6"
+# LICENSE carries both texts of the MIT OR Apache-2.0 choice.
+include = [
+  "LICENSE",
+  "include/neko/schema/exception.hpp",
+  "include/neko/schema/srcLoc.hpp",
+  "include/neko/schema/types.hpp",
+]
+
+# Upstream's NekoSchema INTERFACE target: the three headers under
+# include/neko/schema, at C++20 (CMakeLists.txt:61's cxx_std_20;
+# srcLoc.hpp needs <source_location>).  Not ported: neko.schema.cppm, the
+# C++20 module unit that only the NEKO_SCHEMA_ENABLE_MODULE option
+# builds, off by default (CMakeLists.txt:11) and in vcpkg, though the
+# install rule copies the file regardless (:153-157); a Cabin target
+# cannot build a module unit.  Also not ported: the tests and the vcpkg
+# and Conan recipes.
+[target.neko-schema]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
