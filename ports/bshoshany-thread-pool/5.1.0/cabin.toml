@@ -1,0 +1,41 @@
+[package.upstream]
+# The v5.1.0 tag archive, the bytes vcpkg's port pins (SHA-512); the
+# release has no assets.
+url = "https://github.com/bshoshany/thread-pool/archive/refs/tags/v5.1.0.tar.gz"
+checksum = "sha256:54378fb9cbeaee72996d3f8761469c43bb7dd2d4b07faec6d29a68277bd91a51"
+format = "tar.gz"
+strip-prefix = "thread-pool-5.1.0"
+
+[package]
+name = "cabin-ports/bshoshany-thread-pool"
+version = "5.1.0"
+# LICENSE.txt is the plain MIT licence.  The header's and README's request
+# for a repository link and a citation (BS_thread_pool.hpp:12;
+# README.md:3451-3455) is a request, not a licence term, and the header
+# ships with it.
+include = ["LICENSE.txt", "include"]
+
+# Header-only: include/BS_thread_pool.hpp is the whole library
+# (BS_thread_pool.hpp:14), included as <BS_thread_pool.hpp> with include/
+# on the include path (README.md:238-246).  Upstream has no build system;
+# scripts/compile_cpp.py builds only its own tests.  Not ported: the C++20
+# module modules/BS.thread_pool.cppm (`import BS.thread_pool`), as Cabin
+# targets have no module-interface sources, and the tests.  Upstream's
+# opt-in macros keep their defaults: BS_THREAD_POOL_NATIVE_EXTENSIONS
+# (:42-62), BS_THREAD_POOL_IMPORT_STD (module-only, :66-75) and
+# BS_THREAD_POOL_DISABLE_WORKAROUNDS stay undefined unless a consumer
+# defines them.  README.md:231 recommends /permissive- on MSVC, which a
+# port cannot pass to its consumers; the consumer test builds without it.
+[target.bshoshany-thread-pool]
+type = "header-only"
+include-dirs = ["include"]
+# C++17 (README.md:228-231); later standards switch on std::jthread,
+# std::move_only_function and concepts through feature-test macros.
+interface-cxx-standard = "c++17"
+
+# The workers are std::thread or std::jthread (:371, 381): pthreads on
+# Unix, which ConanCenter's recipe links on Linux and FreeBSD.  Folded
+# into libc since glibc 2.34, where the extra -lpthread is a harmless
+# no-op.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
