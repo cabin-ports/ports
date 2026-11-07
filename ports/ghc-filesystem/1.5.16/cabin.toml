@@ -1,0 +1,65 @@
+[package.upstream]
+url = "https://github.com/gulrak/filesystem/archive/refs/tags/v1.5.16.tar.gz"
+checksum = "sha256:f4a098ed48e3b25b87b2be84cde58c884177af6b4ce27666ed2dbfe907b24418"
+format = "tar.gz"
+strip-prefix = "filesystem-1.5.16"
+
+[package]
+name = "cabin-ports/ghc-filesystem"
+version = "1.5.16"
+include = ["LICENSE", "include"]
+
+# ghc::filesystem, header-only, as upstream's CMake interface target
+# ghc_filesystem: include/ is the include root, so consumers write
+# `#include <ghc/filesystem.hpp>` (CMakeLists.txt:41-45, README.md:174-178).
+# C++11 is upstream's floor (CMakeLists.txt:25-34).  The target's one
+# interface option, /utf-8 for MSVC (CMakeLists.txt:46-47), is a flag Cabin
+# already passes to every cl compile.
+#
+# As upstream ships it:
+# - include/ghc also holds the forwarding/implementation split: fs_fwd.hpp
+#   wherever the API is used and fs_impl.hpp in exactly one source file,
+#   included there before anything that includes fs_fwd.hpp
+#   (README.md:283-296, fs_impl.hpp:30-32).  That implementation cannot be
+#   exported from a Windows DLL (README.md:292-295).  fs_std.hpp,
+#   fs_std_fwd.hpp and fs_std_impl.hpp select std::filesystem instead when
+#   compiled as C++17 or later with <filesystem> available, except for Apple
+#   targets older than macOS 10.15 or iOS 13 (fs_std.hpp:35-56); toolchains
+#   that keep std::filesystem in a separate library (stdc++fs, c++fs;
+#   cmake/GhcHelper.cmake:11-35) then need it linked, which this port does
+#   not do.
+# - Used header-only, filesystem.hpp includes <windows.h>, <shellapi.h> and
+#   <winioctl.h> in every translation unit that includes it, without
+#   WIN32_LEAN_AND_MEAN or NOMINMAX (filesystem.hpp:131-140,
+#   README.md:268-275).
+# - Every std::string is UTF-8, and std::wstring is UTF-16 on Windows
+#   (README.md:551-559).  On Windows path stores std::wstring
+#   (README.md:562-566).  Under C++20, u8string() returns std::u8string and
+#   u8path is deprecated unless GHC_FILESYSTEM_ENFORCE_CPP17_API is defined
+#   (README.md:428-436, :583-589; filesystem.hpp:628-638).
+# - A consumer may define GHC_FILESYSTEM_ENFORCE_CPP17_API,
+#   LWG_2935_BEHAVIOUR, GHC_WIN_DISABLE_WSTRING_STORAGE_TYPE,
+#   GHC_RAISE_UNICODE_ERRORS or GHC_WIN_DISABLE_AUTO_PREFIXES before the
+#   include (filesystem.hpp:250-291), identically in every translation unit.
+# - On Windows, status() synthesizes permissions: read for everyone, and
+#   write unless the file is read-only (filesystem.hpp:2318-2321).  It means
+#   to add execute for .exe, .cmd, .bat and .com files (:2322-2324), but
+#   has_executable_extension() wants the dot three characters from the end
+#   and so rejects all four (:3199-3213); no file reports execute.  Setting
+#   permissions changes only the read-only attribute, from owner_write
+#   (:4771-4793, README.md:643-653).  Symbolic links need Developer Mode or
+#   the matching privilege (README.md:636-641).
+#
+# Not ported: upstream's tests, examples and CMake package files, none of
+# which consumers build against.
+[target.ghc_filesystem]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+
+# u8arguments' Windows constructor calls CommandLineToArgvW
+# (filesystem.hpp:2471-2490), which shell32 exports; everything else the
+# header calls is in kernel32.  Upstream's CMake builds get shell32 from
+# CMake's default MSVC link libraries, and MinGW links it by default.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["shell32"]
