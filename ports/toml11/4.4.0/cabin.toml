@@ -1,0 +1,47 @@
+[package.upstream]
+# The v4.4.0 tag archive, the bytes Conan Center's conandata pins
+# (SHA-256) and vcpkg's port pins (SHA-512); the release has no assets.
+url = "https://github.com/ToruNiina/toml11/archive/refs/tags/v4.4.0.tar.gz"
+checksum = "sha256:815bfe6792aa11a13a133b86e7f0f45edc5d71eb78f5fb6686c49c7f792b9049"
+format = "tar.gz"
+strip-prefix = "toml11-4.4.0"
+
+[package]
+name = "cabin-ports/toml11"
+version = "4.4.0"
+include = ["LICENSE", "include"]
+
+# toml11 in its default header-only mode, as upstream's CMake interface
+# target toml11::toml11 (TOML11_PRECOMPILE is off, CMakeLists.txt:19;
+# src/CMakeLists.txt:131-139): include/ is the include root, so consumers
+# write `#include <toml.hpp>`.  CMake installs toml.hpp and include/toml11
+# with fwd/ and impl/ (:174-186) but not include/toml_fwd.hpp, which
+# upstream documents as a public header
+# (docs/content.en/docs/reference/_index.md:14, :96-98); include/ ships
+# as upstream lays it out.  C++11 is upstream's floor: earlier standards
+# stop at an #error (include/toml11/version.hpp:24-32).  toml11 has no C
+# API.
+#
+# For MSVC consumers upstream also adds /utf-8 (src/CMakeLists.txt:143),
+# which Cabin passes to cl itself, and /Zc:preprocessor (MSVC 2017's
+# /experimental:preprocessor, :147-150), which a manifest cannot pass to
+# consumers.  The library does not need it: only the optional
+# TOML11_DEFINE_CONVERSION_NON_INTRUSIVE macro
+# (include/toml11/conversion.hpp:113-201) does, and upstream drops that
+# macro where the preprocessor cannot expand it (MSVC before 2017,
+# :144-146).  Under cl's traditional preprocessor a use of the macro
+# fails to compile; hand-written toml::from<> and toml::into<>
+# specializations work with every compiler.  TOML11_ENABLE_ACCESS_CHECK,
+# an off-by-default beta option (CMakeLists.txt:20;
+# src/CMakeLists.txt:133-135), is a define for the consumer to set.  It
+# adds a member to toml::basic_value (include/toml11/value.hpp:2154), so
+# every package that shares toml values must set it alike.
+#
+# Not ported: the precompiled library (TOML11_PRECOMPILE: src/*.cpp with
+# TOML11_COMPILE_SOURCES), single_include/toml.hpp, a generated copy of
+# the same headers, the tests, examples, tools and docs, and the CMake
+# package files.
+[target.toml11]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
