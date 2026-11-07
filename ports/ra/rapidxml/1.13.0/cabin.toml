@@ -1,0 +1,52 @@
+[package.upstream]
+# The release zip ConanCenter pins (SHA-256) and vcpkg pins (SHA-512),
+# through SourceForge's download redirector.
+url = "https://downloads.sourceforge.net/project/rapidxml/rapidxml/rapidxml%201.13/rapidxml-1.13.zip"
+checksum = "sha256:c3f0b886374981bb20fabcf323d755db4be6dba42064599481da64a85f5b3571"
+format = "zip"
+strip-prefix = "rapidxml-1.13"
+# rapidxml_print.hpp's print_node calls print_children and the
+# print_*_node functions, defined after it, unqualified, with arguments
+# from namespace rapidxml rather than rapidxml::internal, so GCC and Clang
+# find no declaration once rapidxml::print is instantiated (upstream bug
+# 16, https://sourceforge.net/p/rapidxml/bugs/16/).  The patch declares
+# them ahead of print_node, as vcpkg's and ConanCenter's patches do, and
+# changes nothing else.
+patches = ["patches/0001-declare-print-functions-before-print-node.patch"]
+
+# Upstream calls this release 1.13.
+[package]
+name = "cabin-ports/rapidxml"
+version = "1.13.0"
+# license.txt grants the Boost Software License 1.0 or the MIT license, at
+# the user's choice.  Left out: manual.html, the documentation.
+include = [
+  "license.txt",
+  "patches",
+  "rapidxml.hpp",
+  "rapidxml_iterators.hpp",
+  "rapidxml_print.hpp",
+  "rapidxml_utils.hpp",
+]
+
+# RapidXml, header-only, with no build system: the manual (manual.html,
+# section 1) says to copy rapidxml.hpp where it is needed and include it,
+# and rapidxml_print.hpp, rapidxml_utils.hpp and rapidxml_iterators.hpp,
+# which include "rapidxml.hpp", add printing, loading and counting, and
+# iterators.  Consumers write #include <rapidxml.hpp>; vcpkg installs the
+# headers under include/rapidxml/ instead.  The configuration macros
+# (RAPIDXML_NO_STDLIB, RAPIDXML_NO_EXCEPTIONS, RAPIDXML_NO_STREAMS,
+# RAPIDXML_STATIC_POOL_SIZE, RAPIDXML_DYNAMIC_POOL_SIZE, RAPIDXML_ALIGNMENT)
+# keep their defaults; a consumer defines them before the include.  The code
+# is C++98.  Upstream limitations, not patched: rapidxml_iterators.hpp does
+# not compile with GCC or Clang, which reject `typename` before its
+# unqualified typedef names (:21-23, :100-102); it also names
+# std::bidirectional_iterator_tag without including <iterator>, and its
+# postfix ++ and -- apply ++ to `this` (:59, :73, :138, :152).  MSVC rejects
+# the memory pool's function typedefs (rapidxml.hpp:385-386) when a global
+# type named alloc_func, such as zlib.h's, is declared before them (upstream
+# bug 13, https://sourceforge.net/p/rapidxml/bugs/13/).
+[target.rapidxml]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++98"
