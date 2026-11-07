@@ -1,0 +1,76 @@
+[package.upstream]
+url = "https://github.com/AngusJohnson/Clipper2/archive/refs/tags/Clipper2_2.0.1.tar.gz"
+checksum = "sha256:2a3693aceab4aed3e39b743e038d87701acc53cf05ed7b2013aab3e0aec5287e"
+format = "tar.gz"
+strip-prefix = "Clipper2-Clipper2_2.0.1"
+
+[package]
+name = "cabin-ports/clipper2"
+version = "2.0.1"
+# LICENSE carries the library's BSL-1.0 terms.  Two pieces are by GitHub
+# user alexisnaveros, who posted them in the upstream repository for
+# inclusion: the MSVC x64 fmin, fmax and nearbyint macros
+# (CPP/Clipper2Lib/src/clipper.engine.cpp:14-22), copied from
+# https://github.com/AngusJohnson/Clipper2/discussions/334#discussioncomment-4248602,
+# which says "you might want to add that to Clipper2"; and the
+# GetLineIntersectPt that only CLIPPER2_HI_PRECISION compiles
+# (CPP/Clipper2Lib/include/clipper2/clipper.core.h:891-948), adapted from
+# https://github.com/AngusJohnson/Clipper2/issues/317#issuecomment-1314023253.
+# Contributed to a repository that carries BSL-1.0, both come under its
+# terms (GitHub Terms of Service D.6), so the BSL-1.0 above covers them;
+# the macros are also too slight to carry copyright.  GetAngle
+# (CPP/Clipper2Lib/src/clipper.triangulation.cpp:163-173) credits Stack
+# Overflow answer https://stackoverflow.com/a/3487062 by valdo, whose
+# revision 4 (2012-11-12, CC BY-SA 3.0) added the method it follows; no
+# CC BY-SA terms ship, because the code is the standard angle formula,
+# atan2 of the cross and dot products of two vector differences, which
+# the function dictates and which is too slight to carry copyright.  The
+# other Stack Overflow links name a standard idiom (clipper.core.h:664),
+# an explanation without code (clipper.offset.cpp:66) and Angus Johnson's
+# own merge sort, which he placed in the public domain
+# (clipper.engine.cpp:2400); the Wikipedia and MathWorld links name
+# formulas.
+include = ["CPP/Clipper2Lib", "LICENSE"]
+
+# Upstream's Clipper2 library (CPP/CMakeLists.txt:42-86): the four
+# sources, with Clipper2Lib/include public, so consumers include
+# <clipper2/clipper.h>.  clipper.version.h, which CMake configures from
+# clipper.version.in (:39-40), ships generated in the archive with the
+# same content.  Not ported: Clipper2Z (:88-111), which upstream also
+# builds by default (CLIPPER2_USINGZ, :23): it compiles the same sources
+# with USINGZ, which adds a z member to Point64 and PointD under the same
+# symbol names, so one program cannot link both builds; the utilities
+# (:119-174), which upstream builds but does not install;
+# CLIPPER2_HI_PRECISION, off by default (:16); the shared library
+# (BUILD_SHARED_LIBS, :22) and upstream's DLL, which compiles the C
+# interface clipper.export.h defines (DLL/); the examples, tests and
+# benchmarks; the CMake package and pkg-config files.  Not reproduced:
+# position-independent code (:4) and the warning flags (:80-83).
+[target.clipper2]
+type = "library"
+sources = [
+  "CPP/Clipper2Lib/src/clipper.engine.cpp",
+  "CPP/Clipper2Lib/src/clipper.offset.cpp",
+  "CPP/Clipper2Lib/src/clipper.rectclip.cpp",
+  "CPP/Clipper2Lib/src/clipper.triangulation.cpp",
+]
+include-dirs = ["CPP/Clipper2Lib/include"]
+# C++17 without extensions, upstream's minimum (:5-9); the public
+# headers need it (if constexpr and std::is_integral_v in clipper.core.h,
+# std::optional in clipper.offset.h).
+cxx-standard = "c++17"
+interface-cxx-standard = "c++17"
+# Upstream defines the maximum decimal precision publicly (:68-72), with
+# the CLIPPER2_MAX_DECIMAL_PRECISION cache default 8 (:27): the
+# library and its consumers must agree on it, because clipper.core.h's
+# inline functions read it (:59-63).
+defines = ["CLIPPER2_MAX_DECIMAL_PRECISION=8"]
+interface-defines = ["CLIPPER2_MAX_DECIMAL_PRECISION=8"]
+# Upstream's case-sensitive library name (:66, Clipper2.pc.cmakein:11);
+# a USINGZ build defines the same symbols.
+links = "Clipper2"
+
+# Upstream links libm publicly for every compiler but MSVC (:84); the
+# Windows toolchains need none.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
