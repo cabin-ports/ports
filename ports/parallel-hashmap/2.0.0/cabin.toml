@@ -27,11 +27,14 @@ include = ["LICENSE", "LICENSE_1_0.txt", "parallel_hashmap", "patches"]
 # (phmap_base.h:4587, 5004, 5068 test their include guards), Abseil's hash
 # when the consumer defines PHMAP_USE_ABSL_HASH (phmap_fwd_decl.h:24-32), and
 # cereal's archives when its CEREAL_SIZE_TYPE is defined (phmap_dump.h:257),
-# so this package depends on none of them.  meminfo.h, a memory-statistics
-# helper for upstream's benchmarks, is installed with the rest; it defines
-# non-inline functions, so at most one translation unit of a program may
-# include it.  Not ported: the tests, examples, benchmarks, documentation and
-# debugger visualizers.
+# so this package depends on none of them.  Like upstream's target, it links
+# no thread library: the headers start no threads, and only upstream's
+# threaded examples link Threads::Threads (CMakeLists.txt:178, 232-236); a
+# consumer that starts threads links its platform's thread library itself.
+# meminfo.h, a memory-statistics helper for upstream's benchmarks, is
+# installed with the rest; it defines non-inline functions, so at most one
+# translation unit of a program may include it.  Not ported: the tests,
+# examples, benchmarks, documentation and debugger visualizers.
 [target.phmap]
 type = "header-only"
 include-dirs = ["."]
