@@ -1,0 +1,86 @@
+[package.upstream]
+# The v4.1.1 tag (8b32de31d3b0), upstream's C++ release 4.1.1
+# (CMakeLists.txt:6, src/LercLib/include/Lerc_c_api.h:39-41).  vcpkg's lerc
+# 4.1.1 builds the js_v4.1.1 tag instead (1281ceac3cf3), the JavaScript
+# release, whose C++ library still reads 4.1.0 and lacks the 4.1.1 changes
+# to nine src/LercLib files.
+url = "https://github.com/Esri/lerc/archive/refs/tags/v4.1.1.tar.gz"
+checksum = "sha256:fe2860e10635166cd9f2144e429ec6b870d471e9957f5812ba2da0973770b022"
+format = "tar.gz"
+strip-prefix = "lerc-4.1.1"
+# src/LercLib/Lerc2.cpp carries code from Wikipedia, listed under
+# [package]; the release ships no copy of its licence, CC BY-SA 3.0, whose
+# sections 4(a) and 4(b) require a copy or its URI with every copy.  The
+# patch adds the licence text, verbatim from
+# https://creativecommons.org/licenses/by-sa/3.0/legalcode.txt, as
+# LICENSE.CC-BY-SA-3.0.
+patches = ["patches/0001-add-cc-by-sa-3.0-license-for-credited-code.patch"]
+
+[package]
+name = "cabin-ports/lerc"
+version = "4.1.1"
+include = [
+  "LICENSE",
+  "LICENSE.CC-BY-SA-3.0",
+  "NOTICE",
+  "patches",
+  "src/LercLib",
+]
+# Upstream builds C++17 (CMakeLists.txt:10).  The public headers are
+# src/LercLib/include/Lerc_c_api.h, C with // comments, and Lerc_types.h,
+# C++ with scoped enumerations (CMakeLists.txt:24-26).
+cxx-standard = "c++17"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# LICENSE is Apache-2.0; NOTICE, which ships with it, records Esri's patent
+# and its grant under the licence.  ComputeChecksumFletcher32
+# (src/LercLib/Lerc2.cpp:1000-1030) is modified, from 16-bit words to
+# bytes, from the optimized C implementation in the Wikipedia article
+# "Fletcher's checksum", https://en.wikipedia.org/wiki/Fletcher's_checksum,
+# by Wikipedia contributors, in the form the article showed from revision
+# 688804218 (2015-11-03) on, under CC BY-SA 3.0; Lerc has carried it since
+# Lerc2 v3 (410d600f30ee, 2016-02-25).  That function is distributed under
+# CC BY-SA 3.0 (LICENSE.CC-BY-SA-3.0, from the patch above); the rest of
+# the package stays under Apache-2.0.
+#
+# 4.2.0 adds size checks on the data to encode and the blob, Coverity fixes
+# and overflow checks, and 4.3.0 more security fixes, among them byte
+# counting in the decoder against a possible buffer overrun (CHANGELOG.md
+# of v4.3.0); this version has neither.
+#
+# Upstream's static library (CMakeLists.txt:12-36): every source under
+# src/LercLib and src/LercLib/Lerc1Decode, compiled with LERC_STATIC.
+# Consumers of the static library define LERC_STATIC too (Lerc.pc.in:11),
+# so that src/LercLib/include/Lerc_c_api.h:54-56 declares the functions
+# without __declspec(dllimport) on Windows.  Lerc supports only
+# little-endian systems with a 32-bit int: elsewhere it builds, but every
+# Lerc2 encode and decode fails (src/LercLib/Lerc2.h:163), and Lerc1 blobs
+# are read without byte swapping (src/LercLib/Defines.h:54-64).  Not
+# ported: the shared library and its LERC_EXPORTS (CMakeLists.txt:28-32),
+# the Emscripten decoder that USE_EMSCRIPTEN selects
+# (src/LercLib/include/Lerc_c_api.h:27-31), src/LercTest, the IDE projects
+# and the conda recipe under build/, and the C#, JavaScript and Python
+# bindings under OtherLanguages/.
+[target.Lerc]
+type = "library"
+sources = [
+  "src/LercLib/BitMask.cpp",
+  "src/LercLib/BitStuffer2.cpp",
+  "src/LercLib/Huffman.cpp",
+  "src/LercLib/Lerc.cpp",
+  "src/LercLib/Lerc2.cpp",
+  "src/LercLib/Lerc_c_api_impl.cpp",
+  "src/LercLib/RLE.cpp",
+  "src/LercLib/fpl_Compression.cpp",
+  "src/LercLib/fpl_EsriHuffman.cpp",
+  "src/LercLib/fpl_Lerc2Ext.cpp",
+  "src/LercLib/fpl_Predictor.cpp",
+  "src/LercLib/fpl_UnitTypes.cpp",
+  "src/LercLib/Lerc1Decode/BitStuffer.cpp",
+  "src/LercLib/Lerc1Decode/CntZImage.cpp",
+]
+include-dirs = ["src/LercLib/include"]
+defines = ["LERC_STATIC"]
+interface-defines = ["LERC_STATIC"]
+links = "Lerc"
