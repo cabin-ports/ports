@@ -1,0 +1,37 @@
+[package.upstream]
+# The v1.1.0 tag archive, the bytes vcpkg's ltla-aarand port pins
+# (SHA-512, REF v${VERSION}); the release has no assets.
+url = "https://github.com/LTLA/aarand/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:af0bc29e38a02a23a95e0ab988f42510c73fbeb89c6f22162fa6a98f1b863dbe"
+format = "tar.gz"
+strip-prefix = "aarand-1.1.0"
+
+# Named after vcpkg's port and upstream's CMake package, ltla_aarand
+# (CMakeLists.txt:33-55).  include/aarand/aarand.hpp:42 credits
+# standard_uniform's scaling to Boost's uniform_01.hpp; the archive, like
+# vcpkg's port, carries only aarand's MIT LICENSE.
+[package]
+name = "cabin-ports/ltla-aarand"
+version = "1.1.0"
+include = ["LICENSE", "include"]
+
+# Header-only, as upstream's CMake interface target ltla::aarand
+# (CMakeLists.txt:9-15): include/ is the include root in the build tree
+# (:14) and the installed header keeps its aarand/ directory (:15,
+# :33-34), so consumers write `#include <aarand/aarand.hpp>`, as
+# upstream's README and tests do (README.md:21,
+# tests/src/uniform.cpp:3).  C++17 is upstream's interface requirement
+# (target_compile_features cxx_std_17, :17): the header uses
+# static_assert without a message (include/aarand/aarand.hpp:127,
+# :133-134).  aarand has no C API.
+#
+# As shipped, sample(bound, s, output, eng) fills its tail with
+# std::iota(output, output + denom, i) (include/aarand/aarand.hpp:267),
+# so output must be random-access although the documentation says a
+# forward iterator (:242).
+#
+# Not ported: the tests, the docs, and the CMake package files.
+[target.ltla-aarand]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
