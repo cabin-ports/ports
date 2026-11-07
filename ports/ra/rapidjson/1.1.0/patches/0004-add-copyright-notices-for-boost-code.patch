@@ -1,0 +1,68 @@
+--- /dev/null
++++ b/NOTICE.Boost
+@@ -0,0 +1,65 @@
++Code in include/ that follows files of the Boost C++ Libraries, which
++are under the Boost Software License, Version 1.0 (LICENSE.Boost), and
++the copyright notices of those files as of Boost 1.42.0, verbatim:
++
++rapidjson/rapidjson.h:219-238 (RAPIDJSON_ENDIAN detection)
++follows boost/detail/endian.hpp:
++
++// Copyright 2005 Caleb Epstein
++// Copyright 2006 John Maddock
++// Distributed under the Boost Software License, Version 1.0. (See accompany-
++// ing file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
++
++/*
++ * Copyright (c) 1997
++ * Silicon Graphics Computer Systems, Inc.
++ *
++ * Permission to use, copy, modify, distribute and sell this software
++ * and its documentation for any purpose is hereby granted without fee,
++ * provided that the above copyright notice appear in all copies and
++ * that both that copyright notice and this permission notice appear
++ * in supporting documentation.  Silicon Graphics makes no
++ * representations about the suitability of this software for any
++ * purpose.  It is provided "as is" without express or implied warranty.
++ */
++
++/*
++ * Copyright notice reproduced from <boost/detail/limits.hpp>, from
++ * which this code was originally taken.
++ *
++ * Modified by Caleb Epstein to use <endian.h> with GNU libc and to
++ * defined the BOOST_ENDIAN macro.
++ */
++
++rapidjson/rapidjson.h:414-416 and :437-440 (STATIC_ASSERTION_FAILURE,
++StaticAssertTest and RAPIDJSON_STATIC_ASSERT) follow
++boost/static_assert.hpp:
++
++//  (C) Copyright John Maddock 2000.
++//  Use, modification and distribution are subject to the 
++//  Boost Software License, Version 1.0. (See accompanying file 
++//  LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
++
++rapidjson/rapidjson.h:419-421 (RAPIDJSON_JOIN, RAPIDJSON_DO_JOIN and
++RAPIDJSON_DO_JOIN2) follow boost/config/suffix.hpp:
++
++//  Copyright (c) 2001-2003 John Maddock
++//  Copyright (c) 2001 Darin Adler
++//  Copyright (c) 2001 Peter Dimov
++//  Copyright (c) 2002 Bill Kempf 
++//  Copyright (c) 2002 Jens Maurer
++//  Copyright (c) 2002-2003 David Abrahams
++//  Copyright (c) 2003 Gennaro Prota
++//  Copyright (c) 2003 Eric Friedman
++//
++// Distributed under the Boost Software License, Version 1.0. (See
++// accompanying file LICENSE_1_0.txt or copy at
++// http://www.boost.org/LICENSE_1_0.txt)
++
++rapidjson/internal/meta.h:104-126 (IsBaseOfImpl and the pre-C++11
++IsBaseOf) follow boost/type_traits/is_base_and_derived.hpp:
++
++//  (C) Copyright Rani Sharoni 2003.
++//  Use, modification and distribution are subject to the Boost Software License,
++//  Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
++//  http://www.boost.org/LICENSE_1_0.txt).
