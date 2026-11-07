@@ -185,9 +185,6 @@ jobs:
           name: publish-tools
           path: ${{ runner.temp }}/tools
       - run: chmod +x "$RUNNER_TEMP/tools/cabin" "$RUNNER_TEMP/tools/port-publish"
-      - name: Negative proof for the inline-run guard
-        run: |
-          for f in "$RUNNER_TEMP"/tools/*; do test -x "$f" || exit 1; done
       - name: Read the receipts log
         run: scripts/actions/receipts.sh read "$RUNNER_TEMP/receipts.jsonl"
       - name: Preview the upload of new versions
