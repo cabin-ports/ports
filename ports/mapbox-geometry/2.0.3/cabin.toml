@@ -1,0 +1,46 @@
+[package.upstream]
+# geometry.hpp publishes no release assets; this is the v2.0.3 tag
+# archive, the bytes ConanCenter and vcpkg pin.
+url = "https://github.com/mapbox/geometry.hpp/archive/refs/tags/v2.0.3.tar.gz"
+checksum = "sha256:9d750d34576069bcc4f39677af08cde2862fbe4b8c0d9af504877c2fae2ae273"
+format = "tar.gz"
+strip-prefix = "geometry.hpp-2.0.3"
+# Patch 0001 is the unmerged upstream fix for streaming a point on clang,
+# applied unchanged: the diff of commit
+# c94c2734ae8afc7cbf489dc04a11b65805648b51, the head of Justin B's
+# "Apple Clang 21 compatibility"
+# (https://github.com/mapbox/geometry.hpp/pull/75, open as of 2026-11-07).
+# As shipped, geometry_io.hpp's point operator<< (:19) and its container
+# operator<< (:24-25, C = point, Args = <>) are ambiguous on clang
+# (Apple clang 21 and LLVM clang 23, as C++14, C++17 and C++20); the patch
+# keeps point<T> out of the container overload, so clang, like GCC, takes
+# the point overload.
+patches = ["patches/0001-resolve-the-ambiguous-point-operator-on-clang.patch"]
+
+[package]
+name = "cabin-ports/mapbox-geometry"
+version = "2.0.3"
+include = ["LICENSE", "include", "patches"]
+
+[dependencies]
+# ConanCenter's recipe requires mapbox-variant 1.2.0; upstream's own
+# mason test build pins variant 1.1.5 (CMakeLists.txt:41).
+"cabin-ports/mapbox-variant" = "^1.2"
+
+# The headers under include/mapbox: geometry.hpp (the geometry types,
+# envelope, for_each_point and point arithmetic), feature.hpp (features
+# and their property values) and geometry_io.hpp (stream output).  The
+# geometry variant and the feature values are mapbox::util::variant, so
+# geometry/geometry.hpp:11 and feature.hpp:5 include <mapbox/variant.hpp>.
+# C++14, upstream's CMakeLists.txt:3: for_each_point.hpp:27 and
+# feature.hpp:57 take generic lambdas and feature.hpp:87 uses
+# std::enable_if_t; README.md:27's C++11 goal is stale.  Upstream defects,
+# as shipped: geometry_io.hpp's container operator<< dereferences the
+# first element of an empty container, and two to_stream overloads it
+# declares are defined nowhere.  Not ported: the tests, benchmarks and the
+# mason build scripts.
+[target.mapbox-geometry]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+deps = [{ name = "cabin-ports/mapbox-variant", public = true }]
