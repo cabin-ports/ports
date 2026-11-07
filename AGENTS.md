@@ -100,7 +100,11 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   `&&`/`||`, pipelines, command substitution, or heredocs.  An inline script is allowed only where
   extracting it would weaken a credential boundary, obscure what a privileged job executes, or
   add disproportionate machinery, and it starts with `# inline: <reason>`.  There is no line-count
-  limit; do not compress logic to pass a check.
+  limit; do not compress logic to pass a check.  The `lint` job's
+  `scripts/actions/check-inline-runs.sh` flags these constructs; it is a tripwire for review, and
+  this rule, not the check, is the policy.  Its validation is documented, not tested: a change to
+  it shows a deliberately flagged step failing the `lint` job in its pull request, since a test
+  would make the suite fetch `yq` through Go and the network.
 - Scripts use `set -euo pipefail`, take explicit arguments or named variables, quote expansions,
   pass `shellcheck` and `shfmt -i 2`, and never turn a failure into success (no `|| true`, no
   `$(...)` whose exit status is lost).  Each nontrivial one has tests in this crate's test suite

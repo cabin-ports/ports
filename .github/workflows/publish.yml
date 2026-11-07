@@ -399,6 +399,7 @@ jobs:
         # the same reason. The DELETE must answer the revocation's 204.
         shell: bash
         run: |
+          # inline: this id-token job has no checkout, so a script would add one
           jwt="$(curl -sSf -H "Authorization: Bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=cabinpkg.com" | jq -er .value)"
           echo "::add-mask::$jwt"
           token="$(curl -sSf -X PUT https://cabinpkg.com/api/v1/trusted_publishing/tokens -H "Content-Type: application/json" -d "{\"jwt\":\"$jwt\"}" | jq -er .token)"

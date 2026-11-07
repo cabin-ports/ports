@@ -62,6 +62,7 @@ jobs:
       - run: go run mvdan.cc/sh/v3/cmd/shfmt@v3.14.1 -d -i 2 scripts/actions
       # actionlint does not know publish.yml's `concurrency.queue`.
       - run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -ignore 'unexpected key "queue" for "concurrency" section'
+      - run: scripts/actions/check-inline-runs.sh
       # .github/workflows/actions.lock is generated; see AGENTS.md.
       - name: Verify the actions lockfile
         env:
