@@ -1,38 +1,27 @@
 [package.upstream]
-# The 2.4.1 tag archive, the bytes ConanCenter pins; the release has no
-# assets.
+# The tag archive ConanCenter pins; the release has no assets.
 url = "https://github.com/pboettch/json-schema-validator/archive/refs/tags/2.4.1.tar.gz"
 checksum = "sha256:0c8bf7ba59bd50e312d82da4bab1d49cf3e2211cfbd659472f9c90505d2a4e4c"
 format = "tar.gz"
 strip-prefix = "json-schema-validator-2.4.1"
-# src/json-patch.cpp embeds a JSON Patch schema "originally from
-# http://jsonpatch.com/, http://json.schemastore.org/json-patch with
-# fixes" (:8-9).  It is SchemaStore's src/schemas/json/json-patch.json
-# as of SchemaStore commit f7a0789 (2020), Mads Kristensen's Apache-2.0
-# schema with upstream's author's fixes, and the archive ships no copy
-# of that license, which Apache-2.0 section 4(a) requires redistributors
-# to give.  Patch 0001 adds the license text, verbatim from
-# https://www.apache.org/licenses/LICENSE-2.0.txt, beside LICENSE.
-#
-# src/string-format-check.cpp quotes RFC 3339's ABNF and a note
-# (:120-140) and RFC 3986's ABNF (:209-288), copyright The Internet
-# Society.  RFC 3339 permits derivative works that assist in its
-# implementation if its notice and permission paragraph go with them.
-# RFC 3986 falls under BCP 78, which grants rights only to the ISOC and
-# the IETF, and predates the IETF Trust Legal Provisions, so no grant to
-# redistribute that quotation has been found.  Patch 0002 adds both
-# RFCs' Full Copyright Statements, verbatim from rfc-editor.org, as
-# NOTICE.RFC.
+# src/json-patch.cpp:10-68 embeds Mads Kristensen's Apache-2.0 JSON Patch
+# schema as of SchemaStore commit f7a0789 (2020), with upstream's author's
+# fixes; 0001 adds the license text the archive lacks.
+# src/string-format-check.cpp:120-140 and :209-288 quote ABNF (and a note)
+# from RFC 3339 and RFC 3986, copyright The Internet Society; 0002 adds
+# both RFCs' copyright statements as NOTICE.RFC.  RFC 3339 permits such use
+# with its notice and permission paragraph, but RFC 3986's BCP 78 grants
+# rights only to the ISOC and the IETF, and it predates the IETF Trust
+# Legal Provisions, so no grant to redistribute that quotation has been
+# found.
 patches = [
   "patches/0001-add-apache-2.0-license-for-json-patch-schema.patch",
   "patches/0002-add-rfc-copyright-statements-for-abnf-comments.patch",
 ]
 
-# The one header upstream's CMake installs, to <prefix>/include/nlohmann
-# (src/CMakeLists.txt:14-15, 65), so that src/, with the private
-# json-patch.hpp and smtp-address-validator.hpp, stays off consumers'
-# include path.  The sources include it as <nlohmann/json-schema.hpp>
-# and reach this copy.
+# The one public header, where the sources include it as
+# <nlohmann/json-schema.hpp>; src/ and its private headers stay off
+# consumers' include path.
 [[package.upstream.copy]]
 from = "src/nlohmann/json-schema.hpp"
 to = "include/nlohmann/json-schema.hpp"
@@ -40,14 +29,9 @@ to = "include/nlohmann/json-schema.hpp"
 [package]
 name = "cabin-ports/json-schema-validator"
 version = "2.4.1"
-# LICENSE carries the MIT terms; src/smtp-address-validator.cpp carries
-# its own MIT notice (Gene Hightower) and ships with the sources.  The
-# JSON Patch schema in src/json-patch.cpp is Apache-2.0
-# (LICENSE.Apache-2.0, added by patch 0001), and NOTICE.RFC (patch 0002)
-# carries the copyright statements of the RFCs that
-# src/string-format-check.cpp quotes.  The draft-07
-# meta-schema in src/json-schema-draft7.json.cpp (json-schema.org) is
-# embedded without a notice of its own.
+# LICENSE is MIT, and src/smtp-address-validator.cpp carries its own MIT
+# notice; the draft-07 meta-schema in src/json-schema-draft7.json.cpp has
+# no notice of its own.
 #
 # src/string-format-check.cpp:193 (hostname) is copied from
 # https://stackoverflow.com/a/3824105 by Sakari A. Maaranen
@@ -56,18 +40,17 @@ version = "2.4.1"
 # (https://stackoverflow.com/users/6508, then "smink"), both answering
 # "Regular expression to match DNS hostname or IP Address?" under CC BY-SA
 # 2.5 (https://creativecommons.org/licenses/by-sa/2.5/legalcode).  That
-# line is distributed under CC BY-SA 2.5; the rest of the package stays
-# under the licenses above.
+# line is distributed under CC BY-SA 2.5, the rest under the licenses
+# above.
 #
-# src/string-format-check.cpp credits "many of" its regular expressions to
-# Jeff Roberson's article
-# http://jmrware.com/articles/2009/uri_regexp/URI_regex.html (:25) and the
-# URI check to jhermsmeier/uri.regex (:291); neither grants a license.
-# What comes from them, the host rules (:156-188) and the URI check
-# (:296-330), transcribes RFC 3986's ABNF rule by rule, with the article's
-# ls32 factoring and, in the URI check, Jeffrey Friedl's dec-octet and
-# capture groups: too slight to carry copyright, so no terms attach and
-# none ship.
+# The regular expressions src/string-format-check.cpp credits to Jeff
+# Roberson's article
+# http://jmrware.com/articles/2009/uri_regexp/URI_regex.html and to
+# jhermsmeier/uri.regex (:25, :291), the host rules (:156-188) and the URI
+# check (:296-330), transcribe RFC 3986's ABNF rule by rule, with the
+# article's ls32 factoring and, in the URI check, Jeffrey Friedl's
+# dec-octet and capture groups.  Neither source grants a license, but
+# these are too slight to carry copyright, so no terms apply.
 include = [
   "LICENSE",
   "LICENSE.Apache-2.0",
@@ -80,25 +63,16 @@ include = [
 [dependencies]
 "cabin-ports/nlohmann_json" = "^3.12"
 
-# The static library CMake builds by default (JSON_VALIDATOR_SHARED_LIBS
-# follows BUILD_SHARED_LIBS, CMakeLists.txt:38, 151-154), keyed by its
-# name, from the six sources in src/CMakeLists.txt:1-8.  The DLL export
-# and import defines are set only for the shared library (:17-22), so
-# json-schema.hpp leaves its API macro empty here.  nlohmann_json is a
-# public dependency (:55-56): the header includes <nlohmann/json.hpp>.
-# Upstream requires only cxx_range_for (:24-26), that is C++11, which the
-# header needs too; C++14 is the oldest standard Cabin can request from
-# MSVC.  nlohmann_json orders object keys with std::less<> from C++14 on
-# and std::less<std::string> before (its json.hpp:326-332), so the
-# library and a C++11 consumer differ in that comparator, which is empty
-# and orders alike either way; upstream's build, at the compiler's default
-# standard, mixes standards the same way.  Upstream's Boost.Regex
-# fallback applies to GCC before 4.9 only (:38-53); std::regex is used
-# here, as with every supported compiler.
+# The static library upstream builds by default, so json-schema.hpp's
+# export macro stays empty.  Upstream needs only C++11; C++14 is the oldest
+# standard Cabin can request from MSVC.  A C++11 consumer then sees
+# nlohmann_json's key comparator as std::less<std::string> rather than
+# std::less<>, which is empty and orders alike; upstream's own build mixes
+# standards the same way.  std::regex is used, as upstream does with every
+# compiler but GCC before 4.9.
 #
-# Not ported: the shared library, the examples and tests, and the CMake
-# package files.  Not reproduced: the warning flags (-Wall -Wextra
-# -Wshadow, :28-36).
+# Not ported: the shared library, examples, tests, CMake package files,
+# and warning flags.
 [target.nlohmann_json_schema_validator]
 type = "library"
 sources = [
