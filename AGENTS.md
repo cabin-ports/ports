@@ -8,6 +8,10 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
 
 ## Ports
 
+- A port lives at `ports/<prefix>/<name>/<version>/`.  `<prefix>` is the first two characters of
+  the unscoped package name, or the whole name when it has one character (`ports/zl/zlib/`,
+  `ports/z/z/`).  Only `<name>` and `<version>` form the identity.  Discovery refuses anything
+  else under `ports/` above a version directory, so CI fails a misplaced port.
 - A port directory, except its unpublished `tests/`, is published verbatim, so every edit,
   including a comment, changes archive bytes.  Do not fold a port correction into unrelated work;
   a correction to a published version ships as a packaging revision of the same upstream version.

@@ -14,6 +14,7 @@ use std::sync::{Arc, Mutex};
 
 use assert_fs::TempDir;
 use assert_fs::prelude::*;
+use cabin_ports::plan::port_prefix;
 use sha2::{Digest, Sha256};
 
 const SCOPE_ZLIB_INDEX: &str = "packages/cabin-ports/zlib.json";
@@ -163,7 +164,7 @@ fn fake_ports(dir: &TempDir) -> (PathBuf, PathBuf) {
          [\"fastlz.c\"]\ninclude-dirs = [\".\"]\nc-standard = \"c11\"\n",
     );
     ports
-        .child("fastlz/0.5.0/patches/0001-define-answer.patch")
+        .child("fa/fastlz/0.5.0/patches/0001-define-answer.patch")
         .write_str(
             "--- a/fastlz.c\n\
              +++ b/fastlz.c\n\
@@ -258,8 +259,8 @@ fn assert_patched_package_round_trip(registry: &std::path::Path, work: &std::pat
     );
 }
 
-/// Write a committed port: one `cabin.toml`
-/// carrying the canonical scoped identity and complete
+/// Write a committed port at `<prefix>/<name>/<version>/`: one
+/// `cabin.toml` carrying the canonical scoped identity and complete
 /// `[package.upstream]` provenance, published verbatim.
 fn write_port_package(
     ports: &assert_fs::fixture::ChildPath,
@@ -275,7 +276,7 @@ fn write_port_package(
         let quoted: Vec<String> = patches.iter().map(|p| format!("\"{p}\"")).collect();
         format!("patches = [{}]\n", quoted.join(", "))
     };
-    let dir = ports.child(format!("{name}/{version}"));
+    let dir = ports.child(format!("{}/{name}/{version}", port_prefix(name)));
     dir.child("cabin.toml")
         .write_str(&format!(
             "[package]\nname = \"cabin-ports/{name}\"\nversion = \"{version}\"\n\n\
@@ -403,7 +404,7 @@ fn consumer_tests_run_in_the_dry_run_and_never_in_the_publish_run() {
     // Relative to the probe's inherited working directory, so no host
     // path has to survive a C string literal and the ANSI code page.
     let marker = dir.child("ran");
-    dir.child("ports/zlib/1.3.1/tests/main.cc")
+    dir.child("ports/zl/zlib/1.3.1/tests/main.cc")
         .write_str(
             "#include <cstdio>\nint main() {\n    std::FILE* f = std::fopen(\"ran\", \"w\");\n    \
              if (f) std::fclose(f);\n    return 3;\n}\n",
@@ -565,7 +566,7 @@ fn a_selected_dry_run_preflights_only_the_selection() {
     assert!(stderr.contains("unfetched"), "{stderr}");
 
     ports
-        .child("libpng/1.6.50/tests/main.cc")
+        .child("li/libpng/1.6.50/tests/main.cc")
         .write_str("int main() { return 3; }\n")
         .unwrap();
     let (ok, _, stderr) = dry_run(&["--port", "libpng"], None);
@@ -593,7 +594,7 @@ fn a_selected_dry_run_still_checks_every_consumer_test_name() {
         "[target.o]\ntype = \"library\"\nsources = [\"o.c\"]\nc-standard = \"c11\"\n",
     );
     ports_child
-        .child("other/1.0.0/tests/main.cpp")
+        .child("ot/other/1.0.0/tests/main.cpp")
         .write_str("int main() { return 0; }\n")
         .unwrap();
     let output = scrubbed(tool())
@@ -700,7 +701,7 @@ fn the_earliest_failing_port_is_reported_when_a_later_one_fails_first() {
     );
     let sentinel = dir.child("zmini-failed");
     let sentinel = sentinel.path().display();
-    dir.child("ports/zlib/1.3.1/tests/main.cc")
+    dir.child("ports/zl/zlib/1.3.1/tests/main.cc")
         .write_str(&format!(
             "#include <chrono>\n#include <filesystem>\n#include <thread>\nint main() {{\n    \
              for (int i = 0; i < 300 && !std::filesystem::exists(R\"({sentinel})\"); ++i) {{\n        \
@@ -708,7 +709,7 @@ fn the_earliest_failing_port_is_reported_when_a_later_one_fails_first() {
              std::this_thread::sleep_for(std::chrono::seconds(1));\n    return 3;\n}}\n"
         ))
         .unwrap();
-    dir.child("ports/zmini/1.0.0/tests/main.cc")
+    dir.child("ports/zm/zmini/1.0.0/tests/main.cc")
         .write_str(&format!(
             "#include <fstream>\nint main() {{\n    std::ofstream(R\"({sentinel})\");\n    return 4;\n}}\n"
         ))

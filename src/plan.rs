@@ -1,7 +1,8 @@
 //! Port discovery and publication planning.
 //!
-//! Scans the committed `ports/` directory and orders the results so
-//! every port is published after the ports it depends on.  Every
+//! Scans the committed `ports/<prefix>/<name>/<version>/` directories
+//! ([`port_prefix`]) and orders the results so every port is published
+//! after the ports it depends on.  Every
 //! committed port is a provenance-bearing package manifest, published
 //! verbatim.
 
@@ -19,7 +20,7 @@ const REGISTRY_SCOPE: &str = "cabin-ports";
 /// One committed port, ready to materialize and publish.
 #[derive(Debug, Clone)]
 pub struct PortConversion {
-    /// `ports/<name>/<version>/` source directory.
+    /// `ports/<prefix>/<name>/<version>/` source directory.
     pub committed_dir: PathBuf,
     /// The declared provenance the shared materializer runs.
     pub upstream: Box<UpstreamProvenance>,
@@ -116,6 +117,16 @@ pub struct DeclaredRequirement {
 /// name (`[a-z0-9][a-z0-9_-]*`).
 pub(crate) fn scoped_package_name(port_name: &str) -> Result<PackageName> {
     Ok(PackageName::new(format!("{REGISTRY_SCOPE}/{port_name}"))?)
+}
+
+/// The directory a port named `name` lives under in `ports/`: the
+/// name's first two characters, or the whole name when it has one.
+/// Only the `<name>` directory beneath it is the port's identity.
+#[must_use]
+pub fn port_prefix(name: &str) -> &str {
+    name.char_indices()
+        .nth(2)
+        .map_or(name, |(end, _)| &name[..end])
 }
 
 /// Scan `ports_dir` and return every committed port in publication
@@ -569,14 +580,36 @@ fn ensure_requirements_satisfiable(conversions: &[PortConversion]) -> Result<()>
     Ok(())
 }
 
-/// Every `ports/<name>/<version>/` directory holding a committed
-/// `cabin.toml` - the one shape a port is committed in.
+/// Every `ports/<prefix>/<name>/<version>/` directory, `<prefix>`
+/// being [`port_prefix`] of `<name>` - the one shape a port is
+/// committed in.  Anything else at those depths fails, a file included,
+/// so a port left in another place can never silently drop out of
+/// publication.
 fn discover_ports(ports_dir: &Path) -> Result<Vec<PathBuf>> {
     let mut packages = Vec::new();
-    let names = read_sorted_dirs(ports_dir)?;
-    for name_dir in names {
-        for version_dir in read_sorted_dirs(&name_dir)? {
-            if version_dir.join("cabin.toml").is_file() {
+    for prefix_dir in read_sorted_dirs(ports_dir)? {
+        let prefix = dir_name(&prefix_dir)?;
+        if port_prefix(&prefix) != prefix {
+            bail!(
+                "{} is not a prefix directory: a port lives in \
+                 ports/<prefix>/<name>/<version>/, <prefix> being the first two characters of \
+                 <name>",
+                prefix_dir.display()
+            );
+        }
+        for name_dir in read_sorted_dirs(&prefix_dir)? {
+            let name = dir_name(&name_dir)?;
+            if port_prefix(&name) != prefix {
+                bail!(
+                    "{} is misplaced: the port `{name}` belongs in the `{}/` prefix directory",
+                    name_dir.display(),
+                    port_prefix(&name)
+                );
+            }
+            for version_dir in read_sorted_dirs(&name_dir)? {
+                if !version_dir.join("cabin.toml").is_file() {
+                    bail!("{} has no cabin.toml", version_dir.display());
+                }
                 packages.push(version_dir);
             }
         }
@@ -590,24 +623,24 @@ fn read_sorted_dirs(dir: &Path) -> Result<Vec<PathBuf>> {
         let path = entry
             .with_context(|| format!("reading {}", dir.display()))?
             .path();
-        // Committed regular directories only: a symlinked name or
-        // version directory would source manifests and patch bytes
+        // Committed regular directories only: a symlinked prefix, name,
+        // or version directory would source manifests and patch bytes
         // from outside the committed tree.
         let metadata = fs::symlink_metadata(&path)
             .with_context(|| format!("inspecting {}", path.display()))?;
-        if metadata.file_type().is_symlink() {
-            if fs::metadata(&path).is_ok_and(|m| m.is_dir()) {
-                bail!(
-                    "{} is a symlinked directory; ports must be committed as regular \
-                     directories",
-                    path.display()
-                );
-            }
-            continue;
+        if metadata.file_type().is_symlink() && fs::metadata(&path).is_ok_and(|m| m.is_dir()) {
+            bail!(
+                "{} is a symlinked directory; ports must be committed as regular directories",
+                path.display()
+            );
         }
-        if metadata.is_dir() {
-            dirs.push(path);
+        if !metadata.is_dir() {
+            bail!(
+                "{} is not a directory; ports/ holds only <prefix>/<name>/<version>/ directories",
+                path.display()
+            );
         }
+        dirs.push(path);
     }
     dirs.sort();
     Ok(dirs)
@@ -676,27 +709,11 @@ pub(crate) mod tests {
         assert!(scoped_package_name("foo.bar").is_err());
     }
 
-    /// Discovery intentionally skips incomplete version directories;
-    /// committed ones must not disappear silently from publication.
-    #[test]
-    fn every_committed_version_directory_has_a_manifest() {
-        let ports_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("ports");
-        for name_dir in read_sorted_dirs(&ports_dir).unwrap() {
-            for version_dir in read_sorted_dirs(&name_dir).unwrap() {
-                assert!(
-                    version_dir.join("cabin.toml").is_file(),
-                    "{} has no cabin.toml and would be skipped",
-                    version_dir.display()
-                );
-            }
-        }
-    }
-
     /// Scaffolding for the package-shape validation tests: one
     /// committed package directory under a temp ports tree, loaded
     /// through the real `load_conversions` entry.
     pub(crate) fn write_package(dir: &std::path::Path, name: &str, version: &str, manifest: &str) {
-        let package_dir = dir.join(name).join(version);
+        let package_dir = dir.join(port_prefix(name)).join(name).join(version);
         std::fs::create_dir_all(&package_dir).unwrap();
         std::fs::write(package_dir.join("cabin.toml"), manifest).unwrap();
     }
@@ -710,6 +727,84 @@ pub(crate) mod tests {
              c-standard = \"c11\"\n",
             "a".repeat(64)
         )
+    }
+
+    #[test]
+    fn prefixes_are_the_first_two_characters() {
+        assert_eq!(port_prefix("zlib"), "zl");
+        assert_eq!(port_prefix("xz"), "xz");
+        assert_eq!(port_prefix("z"), "z");
+        assert_eq!(port_prefix("c-ares"), "c-");
+        assert_eq!(port_prefix("7zip"), "7z");
+    }
+
+    /// Every name loads from its prefix directory, one-character names
+    /// included, with every version, in name and version order.
+    #[test]
+    fn ports_load_from_prefix_name_version_directories() {
+        let dir = assert_fs::TempDir::new().unwrap();
+        for (name, version) in [
+            ("zlib", "1.3.1"),
+            ("zlib", "1.3.2"),
+            ("zlib-ng", "2.2.4"),
+            ("z", "1.0.0"),
+            ("xz", "5.8.1"),
+        ] {
+            let manifest = package_manifest(&format!("cabin-ports/{name}"), version, "");
+            write_package(dir.path(), name, version, &manifest);
+        }
+        assert!(dir.path().join("zl/zlib/1.3.1/cabin.toml").is_file());
+        assert!(dir.path().join("z/z/1.0.0/cabin.toml").is_file());
+        let loaded: Vec<String> = load_conversions(dir.path())
+            .unwrap()
+            .iter()
+            .map(|c| format!("{} {}", c.scoped_name.as_str(), c.published_version))
+            .collect();
+        assert_eq!(
+            loaded,
+            [
+                "cabin-ports/xz 5.8.1",
+                "cabin-ports/z 1.0.0",
+                "cabin-ports/zlib 1.3.1",
+                "cabin-ports/zlib 1.3.2",
+                "cabin-ports/zlib-ng 2.2.4"
+            ]
+        );
+    }
+
+    /// A port anywhere but `<prefix>/<name>/<version>/` fails discovery
+    /// instead of dropping out of publication: the flat layout, a
+    /// wrong prefix (which could otherwise hold a second copy of a
+    /// name), a manifest above its version directory, and a version
+    /// directory without a manifest.
+    #[test]
+    fn a_port_outside_its_prefix_directory_is_refused() {
+        let manifest = package_manifest("cabin-ports/zlib", "1.3.1", "");
+        for (place, error) in [
+            ("zlib/1.3.1", "zlib is not a prefix directory"),
+            ("zz/zlib/1.3.1", "belongs in the `zl/` prefix directory"),
+            ("z/zlib/1.3.1", "belongs in the `zl/` prefix directory"),
+            ("zl/1.3.1", "belongs in the `1./` prefix directory"),
+            ("ne/newname", "cabin.toml is not a directory"),
+            ("zl", "cabin.toml is not a directory"),
+            ("", "ports/ holds only"),
+        ] {
+            let dir = assert_fs::TempDir::new().unwrap();
+            write_package(dir.path(), "zlib", "1.3.1", &manifest);
+            let package_dir = dir.path().join(place);
+            std::fs::create_dir_all(&package_dir).unwrap();
+            std::fs::write(package_dir.join("cabin.toml"), &manifest).unwrap();
+            let err = format!("{:#}", load_conversions(dir.path()).unwrap_err());
+            assert!(err.contains(error), "{place}: {err}");
+        }
+
+        let dir = assert_fs::TempDir::new().unwrap();
+        write_package(dir.path(), "zlib", "1.3.1", &manifest);
+        let patches = dir.path().join("zl/zlib/1.3.2/patches");
+        std::fs::create_dir_all(&patches).unwrap();
+        std::fs::write(patches.join("0001-a.patch"), "").unwrap();
+        let err = format!("{:#}", load_conversions(dir.path()).unwrap_err());
+        assert!(err.contains("1.3.2 has no cabin.toml"), "{err}");
     }
 
     #[test]
@@ -1342,7 +1437,7 @@ pub(crate) mod tests {
             package_manifest("cabin-ports/fmt", "12.2.0", ""),
         )
         .unwrap();
-        let package_dir = dir.path().join("ports/fmt/12.2.0");
+        let package_dir = dir.path().join("ports/fm/fmt/12.2.0");
         std::fs::create_dir_all(&package_dir).unwrap();
         std::os::unix::fs::symlink(
             dir.path().join("outside.toml"),
@@ -1365,8 +1460,19 @@ pub(crate) mod tests {
         )
         .unwrap();
         let ports = dir.path().join("ports");
-        std::fs::create_dir_all(&ports).unwrap();
-        std::os::unix::fs::symlink(&outside, ports.join("fmt")).unwrap();
+        std::fs::create_dir_all(ports.join("fm")).unwrap();
+        std::os::unix::fs::symlink(&outside, ports.join("fm/fmt")).unwrap();
+        let err = load_conversions(&ports).unwrap_err();
+        assert!(
+            format!("{err:#}").contains("symlinked directory"),
+            "{err:#}"
+        );
+
+        // A symlinked prefix directory too.
+        std::fs::remove_dir_all(ports.join("fm")).unwrap();
+        std::fs::create_dir_all(dir.path().join("prefix")).unwrap();
+        std::fs::rename(&outside, dir.path().join("prefix/fmt")).unwrap();
+        std::os::unix::fs::symlink(dir.path().join("prefix"), ports.join("fm")).unwrap();
         let err = load_conversions(&ports).unwrap_err();
         assert!(
             format!("{err:#}").contains("symlinked directory"),

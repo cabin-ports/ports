@@ -629,7 +629,7 @@ mod tests {
     fn conversion(target_keys: &[&str]) -> PortConversion {
         PortConversion {
             probe_standards: crate::plan::ProbeStandards::default(),
-            committed_dir: PathBuf::from("ports/zlib/1.3.1"),
+            committed_dir: PathBuf::from("ports/zl/zlib/1.3.1"),
             upstream: Box::new(
                 cabin_core::UpstreamProvenance::new(
                     "https://ports.invalid/zlib-1.3.1.tar.gz",
@@ -664,7 +664,7 @@ mod tests {
     fn a_committed_consumer_test_replaces_the_empty_main() {
         let dir = assert_fs::TempDir::new().unwrap();
         let mut conversion = conversion(&["z"]);
-        conversion.committed_dir = dir.path().join("ports/zlib/1.3.1");
+        conversion.committed_dir = dir.path().join("ports/zl/zlib/1.3.1");
         fs::create_dir_all(conversion.committed_dir.join("tests")).unwrap();
         fs::write(
             conversion.committed_dir.join("tests/main.cc"),
@@ -688,7 +688,7 @@ mod tests {
     fn an_unused_consumer_test_is_refused() {
         let dir = assert_fs::TempDir::new().unwrap();
         let mut conversion = conversion(&["z"]);
-        conversion.committed_dir = dir.path().join("ports/zlib/1.3.1");
+        conversion.committed_dir = dir.path().join("ports/zl/zlib/1.3.1");
         let tests = conversion.committed_dir.join("tests");
         fs::create_dir_all(&tests).unwrap();
         fs::write(tests.join("main.cc"), "").unwrap();
@@ -809,7 +809,7 @@ mod tests {
             );
         }
 
-        conversion.committed_dir = dir.path().join("ports/zlib/1.3.1");
+        conversion.committed_dir = dir.path().join("ports/zl/zlib/1.3.1");
         let tests = conversion.committed_dir.join("tests");
         fs::create_dir_all(&tests).unwrap();
         fs::write(tests.join("main.cc"), "").unwrap();

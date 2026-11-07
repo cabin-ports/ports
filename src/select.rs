@@ -116,10 +116,13 @@ fn changed_since(ports_dir: &Path, base: &str) -> Result<Change> {
         format!("{base} is not an ancestor of HEAD; pass the commit the change starts from")
     })?;
 
-    let base_names = git(top, &["ls-tree", "-z", "--name-only", base, "--", prefix])?;
-    let base_names: BTreeSet<&str> = base_names
+    let base_files = git(
+        top,
+        &["ls-tree", "-r", "-z", "--name-only", base, "--", prefix],
+    )?;
+    let base_names: BTreeSet<&str> = base_files
         .split('\0')
-        .filter_map(|path| path.strip_prefix(prefix))
+        .filter_map(|path| path.strip_prefix(prefix)?.split('/').nth(1))
         .collect();
     let diff = git(
         top,
@@ -174,8 +177,9 @@ pub(crate) fn locate(ports_dir: &Path) -> Result<(PathBuf, String)> {
 
 /// Classify changed `(status, root-relative path)` pairs; `prefix` is
 /// the ports directory's root-relative path with its trailing `/`, and
-/// `base_names` the entries the base has directly under it.  One path
-/// outside the narrow shape makes the whole change [`Change::Other`].
+/// `base_names` the package names the base has (the directories one
+/// level below its prefix directories).  One path outside the narrow
+/// shape makes the whole change [`Change::Other`].
 fn classify(prefix: &str, base_names: &BTreeSet<&str>, changes: &[(&str, &str)]) -> Change {
     let mut names = BTreeSet::new();
     for &(status, path) in changes {
@@ -185,11 +189,17 @@ fn classify(prefix: &str, base_names: &BTreeSet<&str>, changes: &[(&str, &str)])
             }
             return Change::Other(format!("{path} is a shared input"));
         };
-        // `<name>/<version>/<file>`: anything shallower is not part of
-        // a package the publisher loads.
-        let mut parts = port_path.splitn(3, '/');
-        let (Some(name), Some(_), Some(_)) = (parts.next(), parts.next(), parts.next()) else {
-            return Change::Other(format!("{path} is outside any {prefix}<name>/<version>/"));
+        // `<prefix>/<name>/<version>/<file>`: anything shallower is not
+        // part of a package the publisher loads.  The package is the
+        // `<name>` directory, never its prefix directory, which other
+        // names share; discovery has already refused a misplaced name.
+        let mut parts = port_path.splitn(4, '/');
+        let (Some(_), Some(name), Some(_), Some(_)) =
+            (parts.next(), parts.next(), parts.next(), parts.next())
+        else {
+            return Change::Other(format!(
+                "{path} is outside any {prefix}<prefix>/<name>/<version>/"
+            ));
         };
         if base_names.contains(name) {
             return Change::Other(format!(
@@ -328,19 +338,34 @@ mod tests {
     #[test]
     fn only_additions_under_new_package_names_narrow_a_change() {
         let base = BTreeSet::from(["zlib", "libpng"]);
-        let fmt = ("A", "ports/fmt/12.2.0/cabin.toml");
+        let fmt = ("A", "ports/fm/fmt/12.2.0/cabin.toml");
         for (changes, expected) in [
             (
-                vec![fmt, ("A", "ports/fmt/12.2.0/tests/main.cc")],
+                vec![fmt, ("A", "ports/fm/fmt/12.2.0/tests/main.cc")],
                 new_packages(&["fmt"]),
             ),
             (
                 vec![
                     fmt,
-                    ("A", "ports/xxhash/0.8.3/cabin.toml"),
+                    ("A", "ports/xx/xxhash/0.8.3/cabin.toml"),
                     ("M", "README.md"),
                 ],
                 new_packages(&["fmt", "xxhash"]),
+            ),
+            // A new name is new though the base has its prefix: the
+            // package is the name directory, not the prefix.
+            (
+                vec![
+                    ("A", "ports/zl/zlib-ng/2.2.4/cabin.toml"),
+                    ("A", "ports/zl/zlib-ng/2.2.4/patches/0001-a.patch"),
+                    ("A", "ports/li/libpng-apng/1.0.0/cabin.toml"),
+                ],
+                new_packages(&["libpng-apng", "zlib-ng"]),
+            ),
+            // A one-character name is its own prefix.
+            (
+                vec![("A", "ports/z/z/1.0.0/cabin.toml")],
+                new_packages(&["z"]),
             ),
             (
                 vec![("M", "README.md"), ("D", "AGENTS.md")],
@@ -365,17 +390,21 @@ mod tests {
         for other in [
             // A new version of an existing name can satisfy existing
             // requirements.
-            ("A", "ports/zlib/1.4.0/cabin.toml"),
-            ("M", "ports/zlib/1.3.1/cabin.toml"),
-            ("A", "ports/zlib/1.3.1/tests/main.cc"),
-            ("A", "ports/zlib/1.3.1/README.md"),
-            ("D", "ports/libpng/1.6.50/cabin.toml"),
-            ("T", "ports/zlib/1.3.1/patches/0001-fix.patch"),
+            ("A", "ports/zl/zlib/1.4.0/cabin.toml"),
+            ("M", "ports/zl/zlib/1.3.1/cabin.toml"),
+            ("A", "ports/zl/zlib/1.3.1/tests/main.cc"),
+            ("A", "ports/zl/zlib/1.3.1/README.md"),
+            ("D", "ports/li/libpng/1.6.50/cabin.toml"),
+            ("T", "ports/zl/zlib/1.3.1/patches/0001-fix.patch"),
             // Not inside a version directory.
-            ("A", "ports/fmt/README.md"),
-            ("A", "ports/fmt"),
+            ("A", "ports/fm/fmt/README.md"),
+            ("A", "ports/fm/fmt"),
+            ("A", "ports/fm/README.md"),
+            ("A", "ports/fm"),
+            // The flat layout's depth.
+            ("A", "ports/fmt/12.2.0/cabin.toml"),
             // Not an addition, under a name the base lacks.
-            ("M", "ports/fmt/12.2.0/cabin.toml"),
+            ("M", "ports/fm/fmt/12.2.0/cabin.toml"),
             ("M", "src/plan.rs"),
             ("M", "Cargo.lock"),
             ("M", "rust-toolchain.toml"),
@@ -384,7 +413,7 @@ mod tests {
             ("A", "docs/README.md"),
         ] {
             let changes = [
-                ("A", "ports/fmt/12.2.0/cabin.toml"),
+                ("A", "ports/fm/fmt/12.2.0/cabin.toml"),
                 ("M", "README.md"),
                 other,
             ];
@@ -522,7 +551,7 @@ mod tests {
         let repo = dir.path().join("repo");
         fs::create_dir_all(&repo).unwrap();
         fixture_git(&repo, &["init", "-q"]);
-        write(&repo, "ports/zlib/1.3.1/cabin.toml", "zlib\n");
+        write(&repo, "ports/zl/zlib/1.3.1/cabin.toml", "zlib\n");
         write(&repo, "README.md", "ports\n");
         let base = commit(&repo, "base");
         (repo, base)
@@ -535,11 +564,11 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         let (repo, base) = base_repo(&dir);
         let ports = repo.join("ports");
-        write(&repo, "ports/fmt/12.2.0/cabin.toml", "fmt\n");
+        write(&repo, "ports/fm/fmt/12.2.0/cabin.toml", "fmt\n");
         commit(&repo, "add fmt");
         write(&repo, "README.md", "ports, edited\n");
         commit(&repo, "edit the README");
-        write(&repo, "ports/xxhash/0.8.3/cabin.toml", "untracked\n");
+        write(&repo, "ports/xx/xxhash/0.8.3/cabin.toml", "untracked\n");
         assert_eq!(
             changed_since(&ports, &base).unwrap(),
             new_packages(&["fmt", "xxhash"])
@@ -549,12 +578,16 @@ mod tests {
             new_packages(&["xxhash"])
         );
 
-        write(&repo, "ports/zlib/1.3.1/cabin.toml", "zlib, uncommitted\n");
+        write(
+            &repo,
+            "ports/zl/zlib/1.3.1/cabin.toml",
+            "zlib, uncommitted\n",
+        );
         assert!(matches!(
             changed_since(&ports, &base).unwrap(),
-            Change::Other(reason) if reason.contains("ports/zlib/1.3.1/cabin.toml")
+            Change::Other(reason) if reason.contains("ports/zl/zlib/1.3.1/cabin.toml")
         ));
-        write(&repo, "ports/zlib/1.3.1/cabin.toml", "zlib\n");
+        write(&repo, "ports/zl/zlib/1.3.1/cabin.toml", "zlib\n");
 
         write(&repo, "notes.txt", "untracked\n");
         assert!(matches!(
@@ -564,23 +597,54 @@ mod tests {
         fs::remove_file(repo.join("notes.txt")).unwrap();
         // Ignored or not, an untracked file in an existing port widens it.
         write(&repo, ".git/info/exclude", "1.4.0/\n");
-        write(&repo, "ports/zlib/1.4.0/cabin.toml", "ignored\n");
+        write(&repo, "ports/zl/zlib/1.4.0/cabin.toml", "ignored\n");
         assert!(matches!(
             changed_since(&ports, &base).unwrap(),
-            Change::Other(reason) if reason.contains("ports/zlib/1.4.0/cabin.toml")
+            Change::Other(reason) if reason.contains("ports/zl/zlib/1.4.0/cabin.toml")
         ));
 
         // An earlier commit's change to an existing port widens a
         // change whose last commit only adds a port.
         let dir = assert_fs::TempDir::new().unwrap();
         let (repo, base) = base_repo(&dir);
-        write(&repo, "ports/zlib/1.3.1/cabin.toml", "zlib, edited\n");
+        write(&repo, "ports/zl/zlib/1.3.1/cabin.toml", "zlib, edited\n");
         commit(&repo, "edit zlib");
-        write(&repo, "ports/fmt/12.2.0/cabin.toml", "fmt\n");
+        write(&repo, "ports/fm/fmt/12.2.0/cabin.toml", "fmt\n");
         commit(&repo, "add fmt");
         assert!(matches!(
             changed_since(&repo.join("ports"), &base).unwrap(),
             Change::Other(_)
+        ));
+    }
+
+    /// The base's names are the directories below its prefix
+    /// directories: a new name under a prefix the base has is new, a
+    /// new version of a name the base has is not, and a move between
+    /// two places (deleting one path, adding another) is no addition.
+    #[test]
+    fn a_new_name_under_an_existing_prefix_is_new() {
+        let dir = assert_fs::TempDir::new().unwrap();
+        let (repo, base) = base_repo(&dir);
+        let ports = repo.join("ports");
+        write(&repo, "ports/zl/zlib-ng/2.2.4/cabin.toml", "zlib-ng\n");
+        commit(&repo, "add zlib-ng");
+        assert_eq!(
+            changed_since(&ports, &base).unwrap(),
+            new_packages(&["zlib-ng"])
+        );
+
+        write(&repo, "ports/zl/zlib/1.4.0/cabin.toml", "zlib\n");
+        assert!(matches!(
+            changed_since(&ports, &base).unwrap(),
+            Change::Other(reason) if reason.contains("ports/zl/zlib/1.4.0/cabin.toml")
+        ));
+        fs::remove_dir_all(repo.join("ports/zl/zlib/1.4.0")).unwrap();
+
+        fixture_git(&repo, &["mv", "ports/zl/zlib-ng", "ports/zl/zlibng"]);
+        commit(&repo, "rename zlib-ng");
+        assert!(matches!(
+            changed_since(&ports, "HEAD~1").unwrap(),
+            Change::Other(reason) if reason.contains("ports/zl/zlib-ng/2.2.4/cabin.toml")
         ));
     }
 
@@ -591,10 +655,10 @@ mod tests {
         let dir = assert_fs::TempDir::new().unwrap();
         let (repo, base) = base_repo(&dir);
         fixture_git(&repo, &["switch", "-q", "-c", "pr"]);
-        write(&repo, "ports/fmt/12.2.0/cabin.toml", "fmt\n");
+        write(&repo, "ports/fm/fmt/12.2.0/cabin.toml", "fmt\n");
         commit(&repo, "add fmt");
         fixture_git(&repo, &["switch", "-q", "main"]);
-        write(&repo, "ports/zlib/1.3.1/cabin.toml", "zlib, edited\n");
+        write(&repo, "ports/zl/zlib/1.3.1/cabin.toml", "zlib, edited\n");
         commit(&repo, "edit zlib");
         fixture_git(&repo, &["merge", "-q", "--no-ff", "-m", "test merge", "pr"]);
 
@@ -619,7 +683,7 @@ mod tests {
         write(&repo, "README.md", "side\n");
         let side = commit(&repo, "side");
         fixture_git(&repo, &["switch", "-q", "main"]);
-        write(&repo, "ports/fmt/12.2.0/cabin.toml", "fmt\n");
+        write(&repo, "ports/fm/fmt/12.2.0/cabin.toml", "fmt\n");
         commit(&repo, "add fmt");
 
         let err = changed_since(&ports, &side).unwrap_err();

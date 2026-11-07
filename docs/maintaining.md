@@ -57,10 +57,11 @@ job it gates succeeded.  CI's dry-run is selective (below).
 `<rev>`, which must be an ancestor of `HEAD`, with the working tree, uncommitted and untracked files
 included, and ignored files under `ports/` too:
 
-- A change that only adds files under `ports/<name>/<version>/` for names `<rev>` lacks, besides
-  editing the root `README.md`, `AGENTS.md`, or `publish-holds.txt`, preflights every version of
-  those names plus every committed version any of their requirements (optional and dev ones
-  included) matches, transitively.  An added name with no `cabin.toml` under it is an error.
+- A change that only adds files under `ports/<prefix>/<name>/<version>/` for names `<rev>` lacks,
+  besides editing the root `README.md`, `AGENTS.md`, or `publish-holds.txt`, preflights every
+  version of those names plus every committed version any of their requirements (optional and dev
+  ones included) matches, transitively.  A name is new even when `<rev>` has its prefix directory.
+  An added name with no `cabin.toml` under it is an error.
 - A change that edits nothing but those three root files preflights nothing.
 - Anything else preflights every port: a new version of an existing name (existing requirements
   may resolve to it), any other change under an existing name, and every other file.  That
