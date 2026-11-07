@@ -41,12 +41,9 @@ fn cabin_binary() -> PathBuf {
     std::path::absolute(cabin).expect("PORT_PUBLISH_CABIN resolves to an absolute path")
 }
 
-/// Preflight builds compile real C/C++ sources through `cabin`,
-/// which needs Ninja plus C and C++ toolchains.  Fail (not skip)
-/// when the host lacks them, mirroring Cabin's `crates/cabin` require
-/// helpers.  On Windows, MSVC is discovered by cabin's own
-/// toolchain logic (`cl` is normally not on PATH), so only Ninja is
-/// checked there.
+/// Preflight builds need Ninja plus C and C++ toolchains: fail, not
+/// skip, when the host lacks them.  On Windows `cabin` discovers MSVC
+/// itself (`cl` is normally not on PATH), so only Ninja is checked.
 fn require_build_tools() {
     assert!(which("ninja"), "preflight tests need `ninja` on PATH");
     if cfg!(windows) {
@@ -234,11 +231,9 @@ fn assert_publication_order(stdout: &str) {
     let _ = position("cabin-ports/fastlz 0.5.0");
 }
 
-/// `fastlz` was staged from its committed manifest, published
-/// verbatim (identity, provenance, and target key all straight from
-/// the file), and probe-built from the registry.  Its upstream source
-/// does not compile unpatched, so the probe artifact existing is proof
-/// the declared patch ran through the shared materializer.
+/// `fastlz` was published verbatim from its committed manifest and
+/// probe-built from the registry.  Its upstream source does not compile
+/// unpatched, so the probe artifact proves the declared patch ran.
 fn assert_patched_package_round_trip(registry: &std::path::Path, work: &std::path::Path) {
     let fastlz_index: serde_json::Value = serde_json::from_str(
         &fs::read_to_string(registry.join("packages/cabin-ports/fastlz.json")).unwrap(),
@@ -832,11 +827,9 @@ impl FakeRegistry {
                             ),
                         );
                     } else if method == "GET" && path == "/packages/cabin-ports/zlib.json" {
-                        // The version the tool is about to publish is
-                        // already visible in the public index.  The
-                        // upload must still happen: pending versions
-                        // are invisible here, so the index can never
-                        // justify skipping a PUT.
+                        // Already in the public index, yet the upload
+                        // must still happen: the index hides pending
+                        // versions, so it never justifies skipping a PUT.
                         respond(
                             request,
                             200,
@@ -1016,7 +1009,6 @@ fn publish_uploads_every_package_in_dependency_order() {
 /// The registry and probe trees the preflight leaves under
 /// `work/run/`, shared by both modes and asserted once.
 fn assert_preflight_products(work: &Path) {
-    // The temporary file registry holds every package, scoped.
     let registry_dir = work.join("run").join("registry");
     assert!(registry_dir.join("config.json").is_file());
     let zlib_index: serde_json::Value =

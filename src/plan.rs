@@ -1,10 +1,6 @@
-//! Port discovery and publication planning.
-//!
-//! Scans the committed `ports/<prefix>/<name>/<version>/` directories
-//! ([`port_prefix`]) and orders the results so every port is published
-//! after the ports it depends on.  Every
-//! committed port is a provenance-bearing package manifest, published
-//! verbatim.
+//! Port discovery and publication planning: scans the committed
+//! `ports/<prefix>/<name>/<version>/` directories ([`port_prefix`]) and
+//! orders them so every port publishes after the ports it depends on.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
@@ -26,19 +22,16 @@ pub struct PortConversion {
     pub upstream: Box<UpstreamProvenance>,
     /// Scoped registry name (`cabin-ports/<lowercase>`).
     pub scoped_name: PackageName,
-    /// Version the conversion publishes: the upstream version,
-    /// verbatim.  Packaging corrections republish the same version as
-    /// a new registry revision (derived from the archive bytes), so
-    /// no version-string axis exists here.
+    /// The upstream version, verbatim: a packaging correction
+    /// republishes it as a new registry revision.
     pub published_version: Version,
-    /// The manifest text that publishes: the committed file,
-    /// verbatim.
+    /// The committed manifest text, published verbatim.
     pub manifest: String,
-    /// Inter-port dependencies this package publishes with — the
-    /// publication-order edges, requirement included so ordering can
-    /// wait for a *satisfying* version, not just any version of the
-    /// name.  A subset of [`Self::declared_requirements`]: only an
-    /// edge something actually resolves constrains the order.
+    /// The publication-order edges, with their requirements so ordering
+    /// waits for a *satisfying* version: the normal dependencies a
+    /// default build resolves (non-optional, or optional and activated by
+    /// the default features), a subset of
+    /// [`Self::declared_requirements`].
     pub dependencies: Vec<PortDependencyEdge>,
     /// Every registry requirement the published manifest declares,
     /// ordering edge or not.
@@ -53,19 +46,15 @@ pub struct PortConversion {
     /// shorthand.
     pub library_like_target_keys: Vec<String>,
     /// Whether the published package declares exactly one
-    /// library-like target *in total*.  Only then may the probe use
-    /// the bare-package shorthand: Cabin resolves a bare `deps` entry
-    /// against every library-like target the dependency's manifest
-    /// declares - including one gated behind a non-default feature,
-    /// which the probe leaves unlinked - and refuses the reference as
-    /// ambiguous when there is more than one.
+    /// library-like target *in total*, gated ones included.  Only then
+    /// may the probe use the bare-package shorthand, which Cabin
+    /// refuses as ambiguous against several targets.
     pub sole_library_target: bool,
 }
 
 /// The `c-standard` / `cxx-standard` a generated probe consumer must
 /// declare, and which probed targets each consumer links.  `None`
-/// means "no declared interface requirement to satisfy", and that
-/// probe keeps its default.
+/// keeps that probe's default.
 #[derive(Debug, Clone, Default, PartialEq, Eq)]
 pub struct ProbeStandards {
     /// Lowest C standard satisfying the declared `interface-c-standard`
@@ -74,14 +63,11 @@ pub struct ProbeStandards {
     /// Lowest C++ standard satisfying the remaining probed targets'
     /// declared `interface-cxx-standard`.
     pub cxx: Option<cabin_core::CxxStandard>,
-    /// Probed targets that declare `interface-cxx-standard = "none"`:
-    /// not consumable from C++ at all, so they are linked by a C
-    /// consumer instead.  Every other probed target goes to the C++
-    /// consumer, so a package mixing the two is probed from both.
+    /// Probed targets with `interface-cxx-standard = "none"`, linked by
+    /// the C consumer instead of the C++ one.
     pub c_targets: Vec<String>,
-    /// C++-consumable probed targets that also declare an
-    /// `interface-c-standard` other than `"none"`: linked by the C
-    /// consumer as well as the C++ one.
+    /// C++-consumable probed targets that also declare a C interface:
+    /// linked by both consumers.
     pub dual_targets: Vec<String>,
 }
 
@@ -151,16 +137,12 @@ pub fn load_conversions(ports_dir: &Path) -> Result<Vec<PortConversion>> {
     order_by_dependencies(conversions)
 }
 
-/// Load one committed port directory: the committed manifest is the
-/// published manifest, so nothing is rewritten.  The directory layout
-/// is the identity, and a disagreement fails loudly rather than
+/// Load one committed port directory.  The directory layout is the
+/// identity, and a manifest that disagrees with it fails rather than
 /// publishing under a surprising name.
 fn load_package(package_dir: &Path) -> Result<PortConversion> {
     let manifest_path = package_dir.join("cabin.toml");
-    // The manifest is the package's identity and provenance, so it
-    // must be the committed regular file - the same rule the
-    // directory walk and the patch resolver already apply.  Following
-    // a symlink here would let published metadata depend on
+    // Following a symlink would let published metadata depend on
     // checkout-local state.
     let marker = fs::symlink_metadata(&manifest_path)
         .with_context(|| format!("inspecting {}", manifest_path.display()))?;
@@ -218,14 +200,10 @@ fn load_package(package_dir: &Path) -> Result<PortConversion> {
 
     let (dependencies, declared_requirements) = registry_edges(&package, &manifest_path)?;
 
-    // The preflight probe depends on the staged package the ordinary
-    // way, so the package's default features are on and no others.
-    // A target whose `required-features` that set satisfies is
-    // therefore linkable and must be probed - dropping it would let
-    // a target that does not even compile pass preflight.  One
-    // gated behind a non-default feature is left out of the link
-    // set (it still publishes); linking it would fail the very
-    // build the probe exists to prove.
+    // The probe enables the default features and no others, so it
+    // links every target they satisfy - dropping one would let a target
+    // that does not compile pass preflight - and none gated behind a
+    // non-default feature, which would fail the probe's own build.
     let default_features = package
         .features
         .expand(&package.features.default.iter().cloned().collect());
@@ -274,9 +252,7 @@ fn registry_edges(
     package: &cabin_core::Package,
     manifest_path: &Path,
 ) -> Result<(Vec<PortDependencyEdge>, Vec<DeclaredRequirement>)> {
-    // System dependencies live in their own field, so the loop below
-    // would never see them - and a port package resolving through
-    // host pkg-config would make its published build host-dependent.
+    // Host pkg-config would make the published build host-dependent.
     if let Some(system) = package.system_dependencies.first() {
         bail!(
             "{} declares the system dependency `{}`; port packages carry registry \
@@ -311,29 +287,19 @@ fn registry_edges(
                         REGISTRY_SCOPE
                     );
                 }
-                // Every dependency is validated above, but only one
-                // that is resolved becomes a publication-order edge.
-                // A consumer's resolution of a transitive registry
-                // package drops its dev dependencies
-                // (Cabin's `docs/dependency-kinds.md`) and the optional ones
-                // its default features do not activate, and the
-                // preflight probe depends on the package the ordinary
-                // way, so those edges are inactive in both and two
-                // packages referencing each other only that way do
-                // not form a cycle.  An optional dependency the
-                // default closure activates is resolved and must be
-                // published first.
+                // Only a resolved dependency orders publication: a
+                // consumer's resolution of a registry package drops its
+                // dev dependencies and the optional ones its default
+                // features leave off, and so does the probe, so two
+                // packages referencing each other only that way form no
+                // cycle.
                 //
-                // Limitation: activation is read from this package's
-                // own default closure.  A `features = [..]` request on
-                // an edge can also activate optional dependencies
-                // inside the dependency; ordering does not follow
-                // that, because resolving it means running
-                // `cabin-feature`'s cross-package activation.  No
-                // committed port requests features on a dependency.
-                // If one does, preflight, which stages and builds in
-                // publication order, fails on the missing package
-                // before anything is published.
+                // Limitation: activation is read from this package's own
+                // default closure, not from a `features = [..]` request
+                // on an edge, which needs `cabin-feature`'s cross-package
+                // activation.  No committed port makes one; if one does,
+                // preflight fails on the missing package before anything
+                // publishes.
                 let resolved_by_default =
                     !dep.optional || activated_by_default.contains(dep.name.as_str());
                 if dep.kind == cabin_core::DependencyKind::Normal && resolved_by_default {
@@ -345,9 +311,8 @@ fn registry_edges(
                 declared.push(DeclaredRequirement {
                     scoped: dep.name.clone(),
                     req: req.clone(),
-                    // A dev dependency is optional-free and activated
-                    // by `cabin test`; a normal one counts when the
-                    // default features resolve it.
+                    // `cabin test` activates dev dependencies, which are
+                    // never optional.
                     default_active: resolved_by_default,
                 });
             }
@@ -362,12 +327,10 @@ fn registry_edges(
     Ok((dependencies, declared))
 }
 
-/// Names of the optional dependencies a package's DEFAULT feature
-/// closure activates, as written in the manifest.  Both activation
-/// forms count, matching `cabin-feature`'s resolver: a `dep:<name>`
-/// entry, and a `<dep>/<feature>` entry naming an optional
-/// dependency.  Unparsable entries are ignored here - manifest
-/// validation owns that diagnosis.
+/// Names of the optional dependencies a package's default feature
+/// closure activates, through `dep:<name>` or `<dep>/<feature>` as
+/// `cabin-feature`'s resolver does.  Manifest validation owns the
+/// diagnosis of unparsable entries.
 fn default_activated_optional_deps(package: &cabin_core::Package) -> BTreeSet<String> {
     let roots: BTreeSet<String> = package.features.default.iter().cloned().collect();
     let mut entries: Vec<&String> = package.features.default.iter().collect();
@@ -402,12 +365,9 @@ fn default_activated_optional_deps(package: &cabin_core::Package) -> BTreeSet<St
 
 /// The lowest standard a probe consumer can declare and still
 /// satisfy every target it links, per language.  The requirements
-/// are joined through `cabin_core::Requirement` - the
-/// standard-compatibility engine's own intersection - rather than
-/// compared here, so the publisher cannot drift from the rule the
-/// build enforces.  `None` means nothing was declared and that probe
-/// keeps its default; a requirement no consumer level can satisfy
-/// (`Forbidden`) is refused by the caller.
+/// are joined through `cabin_core::Requirement`, the build's own
+/// intersection, so the publisher cannot drift from the rule the
+/// build enforces.
 fn probe_standards(
     package: &cabin_core::Package,
     probed: &[String],
@@ -435,17 +395,14 @@ fn probe_standards(
         )
     };
 
-    // A target declaring `interface-cxx-standard = "none"` is not
-    // consumable from C++ at all, so it is linked by a C consumer;
-    // every other target is linked by the C++ one.  Splitting them
-    // keeps a package that mixes both shapes probeable - one
-    // consumer of the whole set could satisfy neither side.
+    // Splitting C-only targets from the rest keeps a package that mixes
+    // both shapes probeable: one consumer of the whole set could
+    // satisfy neither side.
     let (c_targets, cxx_targets): (Vec<_>, Vec<_>) = targets
         .into_iter()
         .partition(|t| matches!(declared(t).1, Some(cabin_core::InterfaceRequirement::None)));
-    // A C++-consumable target that declares a C interface is linked
-    // by the C consumer as well, so its C claim is probed, not only
-    // stated.
+    // A C++-consumable target that declares a C interface is linked by
+    // the C consumer too, so its C claim is probed, not only stated.
     let dual_targets: Vec<_> = cxx_targets
         .iter()
         .copied()
@@ -457,17 +414,13 @@ fn probe_standards(
         })
         .collect();
 
-    // Only the language a given probe actually compiles is joined.
-    // Each probe is a single `main.cc` / `main.c` consumer, so Cabin
-    // only ever checks that language's interface - a C++ library
-    // declaring `interface-c-standard = "none"` is valid and must not
-    // be refused because of a C requirement no probe exercises.
+    // Each probe joins only the language it compiles, so a C++ library
+    // declaring `interface-c-standard = "none"` is not refused for a C
+    // requirement no probe exercises.
     //
-    // Limitation: these are the declared interfaces only.  Cabin
-    // also composes requirements across public target edges (and
-    // infers them for header-only targets); this function does not
-    // replicate that, so a composed floor above the probe's surfaces
-    // as Cabin's own compatibility error at preflight.
+    // Limitation: declared interfaces only.  A higher floor Cabin
+    // composes across public target edges fails preflight with Cabin's
+    // own compatibility error.
     Ok(ProbeStandards {
         c: join_interface(c_targets.iter().chain(&dual_targets).map(|t| declared(t).0))?,
         cxx: join_interface(cxx_targets.iter().map(|t| declared(t).1))?,
@@ -509,16 +462,12 @@ fn dir_name(dir: &Path) -> Result<String> {
         .ok_or_else(|| anyhow!("{} has no UTF-8 directory name", dir.display()))
 }
 
-/// Every declared requirement must be satisfiable by a version
-/// published in the same run, or the preflight (and every consumer)
-/// would fail resolution later with a worse error.  An unsatisfiable
-/// edge must fail here with its real diagnosis, not surface as a
-/// phantom "dependency cycle" when ordering never drains the node.
-///
-/// This reads `declared_requirements`, not the ordering edges: a dev
-/// dependency and an optional one the default features leave off
-/// order nothing, but they still publish, so a requirement nothing
-/// satisfies is broken metadata however inert it is at build time.
+/// Every declared requirement must be satisfiable by a committed
+/// version, so an unsatisfiable edge fails with its real diagnosis
+/// rather than as a phantom "dependency cycle".  This reads
+/// `declared_requirements`, not the ordering edges: an inert
+/// requirement still publishes, and an unsatisfiable one is broken
+/// metadata.
 fn ensure_requirements_satisfiable(conversions: &[PortConversion]) -> Result<()> {
     let mut published: BTreeMap<&str, Vec<&Version>> = BTreeMap::new();
     for conversion in conversions {
@@ -528,21 +477,12 @@ fn ensure_requirements_satisfiable(conversions: &[PortConversion]) -> Result<()>
             .push(&conversion.published_version);
     }
     for conversion in conversions {
-        // Grouped by name.  Cabin permits the same name under
-        // `[dependencies]` and `[dev-dependencies]`, and
-        // `cabin-workspace`'s selection joins same-name requirements
-        // into a single `VersionReq` - so requirements a default
-        // invocation resolves TOGETHER must be satisfiable by ONE
-        // version: `^1` normal beside `^2` dev is unsatisfiable under
-        // `cabin test` even though each half matches a different
-        // committed version.
-        //
-        // Only co-activatable requirements are conjoined.  An optional
-        // dependency the default features leave off is never resolved
-        // beside the others - ordinary commands omit it and `cabin
-        // test` still leaves it disabled - so it is checked alone;
-        // conjoining it would reject a port every default invocation
-        // resolves fine.
+        // Cabin joins same-name requirements across `[dependencies]` and
+        // `[dev-dependencies]` into one `VersionReq`, so those a default
+        // invocation resolves together must be satisfiable by one
+        // version: `^1` normal beside `^2` dev fails under `cabin test`.
+        // An optional dependency the default features leave off is never
+        // resolved beside them, so it is checked alone.
         let mut by_name: BTreeMap<&str, Vec<&DeclaredRequirement>> = BTreeMap::new();
         for dep in &conversion.declared_requirements {
             by_name.entry(dep.scoped.as_str()).or_default().push(dep);
@@ -580,11 +520,10 @@ fn ensure_requirements_satisfiable(conversions: &[PortConversion]) -> Result<()>
     Ok(())
 }
 
-/// Every `ports/<prefix>/<name>/<version>/` directory, `<prefix>`
-/// being [`port_prefix`] of `<name>` - the one shape a port is
-/// committed in.  Anything else at those depths fails, a file included,
-/// so a port left in another place can never silently drop out of
-/// publication.
+/// Every `ports/<prefix>/<name>/<version>/` directory, `<prefix>` being
+/// [`port_prefix`] of `<name>`.  Anything else at those depths fails, a
+/// file included, so a misplaced port can never silently drop out of
+/// publication, nor a copy under another prefix silently replace it.
 fn discover_ports(ports_dir: &Path) -> Result<Vec<PathBuf>> {
     let mut packages = Vec::new();
     for prefix_dir in read_sorted_dirs(ports_dir)? {
@@ -623,8 +562,7 @@ fn read_sorted_dirs(dir: &Path) -> Result<Vec<PathBuf>> {
         let path = entry
             .with_context(|| format!("reading {}", dir.display()))?
             .path();
-        // Committed regular directories only: a symlinked prefix, name,
-        // or version directory would source manifests and patch bytes
+        // A symlinked directory would source manifests and patch bytes
         // from outside the committed tree.
         let metadata = fs::symlink_metadata(&path)
             .with_context(|| format!("inspecting {}", path.display()))?;
@@ -665,10 +603,8 @@ fn order_by_dependencies(conversions: Vec<PortConversion>) -> Result<Vec<PortCon
     let mut ordered = Vec::with_capacity(remaining.len());
     let mut published: BTreeMap<String, Vec<Version>> = BTreeMap::new();
     while !remaining.is_empty() {
-        // Readiness is per requirement, not per name: a dependent
-        // waits until a *satisfying* version of each dependency has
-        // published (a name may convert several versions, and a
-        // dependent may require one that publishes in a later rank).
+        // Readiness is per requirement, not per name: a dependent may
+        // require a version that publishes in a later rank.
         let ready: Vec<(String, Version)> = remaining
             .iter()
             .filter(|(_, c)| {
@@ -709,9 +645,8 @@ pub(crate) mod tests {
         assert!(scoped_package_name("foo.bar").is_err());
     }
 
-    /// Scaffolding for the package-shape validation tests: one
-    /// committed package directory under a temp ports tree, loaded
-    /// through the real `load_conversions` entry.
+    /// One committed package directory under a temp ports tree, loaded
+    /// through `load_conversions`.
     pub(crate) fn write_package(dir: &std::path::Path, name: &str, version: &str, manifest: &str) {
         let package_dir = dir.join(port_prefix(name)).join(name).join(version);
         std::fs::create_dir_all(&package_dir).unwrap();
@@ -738,8 +673,8 @@ pub(crate) mod tests {
         assert_eq!(port_prefix("7zip"), "7z");
     }
 
-    /// Every name loads from its prefix directory, one-character names
-    /// included, with every version, in name and version order.
+    /// Every port loads from its prefix directory, one-character names
+    /// included, in name and version order.
     #[test]
     fn ports_load_from_prefix_name_version_directories() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -772,11 +707,9 @@ pub(crate) mod tests {
         );
     }
 
-    /// A port anywhere but `<prefix>/<name>/<version>/` fails discovery
-    /// instead of dropping out of publication: the flat layout, a
-    /// wrong prefix (which could otherwise hold a second copy of a
-    /// name), a manifest above its version directory, and a version
-    /// directory without a manifest.
+    /// Covers the flat layout, a wrong prefix (which could otherwise hold
+    /// a second copy of a name), a manifest above its version directory,
+    /// and a version directory without a manifest.
     #[test]
     fn a_port_outside_its_prefix_directory_is_refused() {
         let manifest = package_manifest("cabin-ports/zlib", "1.3.1", "");
@@ -870,10 +803,7 @@ pub(crate) mod tests {
         );
     }
 
-    /// Two versions of a port may expose different library targets:
-    /// each publishes verbatim and is probed on its own targets, and
-    /// nothing consumes a port through a port-wide summary, so there
-    /// is no port-wide target set to keep consistent.
+    /// Each version publishes verbatim and is probed on its own targets.
     #[test]
     fn migrated_versions_may_expose_different_targets() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -957,9 +887,8 @@ pub(crate) mod tests {
         assert!(format!("{err:#}").contains("cycle"), "{err:#}");
     }
 
-    /// Ordering waits for a version that *satisfies* the requirement,
-    /// not merely for the dependency's name: `apng` needs zlib `^2`,
-    /// so publishing zlib 1.3.1 first does not unblock it.
+    /// `apng` needs zlib `^2`, so publishing zlib 1.3.1 first does not
+    /// unblock it.
     #[test]
     fn dependents_wait_for_a_satisfying_version_not_just_the_name() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1011,10 +940,8 @@ pub(crate) mod tests {
         assert!(position("cabin-ports/zlib 1.3.1") < position("cabin-ports/zlib 2.0.0"));
     }
 
-    /// An unactivated optional dependency is dropped by a consumer's
-    /// resolution and by the preflight probe alike, so it must not
-    /// order publication - two packages optionally depending
-    /// on each other are valid, not a cycle.
+    /// Two packages optionally depending on each other, with neither
+    /// dependency activated by default, are valid, not a cycle.
     #[test]
     fn optional_dependencies_do_not_order_publication() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1048,10 +975,6 @@ pub(crate) mod tests {
         );
     }
 
-    /// An optional dependency the DEFAULT feature closure activates
-    /// is resolved by the preflight probe, so it must publish first.
-    /// Both activation forms count (`dep:<name>` and an optional
-    /// `<dep>/<feature>`), and the closure is transitive.
     #[test]
     fn default_activated_optional_dependencies_order_publication() {
         for extra in [
@@ -1117,10 +1040,6 @@ pub(crate) mod tests {
         );
     }
 
-    /// Publication ordering reads declared edges without evaluating
-    /// cfg conditions, so a conditional dependency is refused rather
-    /// than recorded as an unconditional edge (two packages with
-    /// mutually exclusive platform edges would otherwise false-cycle).
     #[test]
     fn a_package_with_a_conditional_dependency_is_refused() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1142,10 +1061,6 @@ pub(crate) mod tests {
         );
     }
 
-    /// A library target whose `required-features` the package's
-    /// DEFAULT features satisfy is linkable by the probe, so it must
-    /// stay in the link set - otherwise a target that does not
-    /// compile could pass preflight and publish.
     #[test]
     fn default_enabled_feature_gated_targets_stay_in_the_probe_link_set() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1163,9 +1078,6 @@ pub(crate) mod tests {
         assert_eq!(conversions[0].library_like_target_keys, ["t"]);
     }
 
-    /// A library target gated behind a NON-default feature stays out
-    /// of the probe's link set: the probe enables no extra features,
-    /// so linking it would fail the build it exists to prove.
     #[test]
     fn feature_gated_targets_stay_out_of_the_probe_link_set() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1184,10 +1096,6 @@ pub(crate) mod tests {
         );
     }
 
-    /// A gated sibling still publishes, so it still counts against
-    /// the bare-package shorthand: Cabin resolves a bare `deps` entry
-    /// against the whole declared target set, not the probe's link
-    /// set.
     #[test]
     fn a_gated_sibling_target_forbids_the_bare_shorthand() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1202,11 +1110,6 @@ pub(crate) mod tests {
         assert!(!conversions[0].sole_library_target);
     }
 
-    /// The probe consumes every probed target at once, so its
-    /// standards must satisfy their joined declared interface
-    /// requirements - a package whose interface floor is above the
-    /// probe's default must raise it, or preflight would reject the
-    /// probe edge and the package could never publish.
     #[test]
     fn probe_standards_rise_to_the_declared_interface_floor() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1222,10 +1125,6 @@ pub(crate) mod tests {
         );
     }
 
-    /// A package-level interface declaration applies where the
-    /// target is silent, matching Cabin's effective-standard
-    /// precedence - reading only the target would leave the probe on
-    /// its default and reject a valid package.
     #[test]
     fn package_level_interface_standards_reach_the_probe() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1241,9 +1140,6 @@ pub(crate) mod tests {
         );
     }
 
-    /// A target explicitly not consumable from C++ is probed by a C
-    /// consumer rather than refused: the port is valid, it just has
-    /// no C++ interface.
     #[test]
     fn c_only_interfaces_are_probed_from_c() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1262,9 +1158,6 @@ pub(crate) mod tests {
         assert_eq!(conversions[0].probe_standards.cxx, None);
     }
 
-    /// A package mixing a C-only library with a C++-consumable one is
-    /// probed from both languages instead of being refused: no single
-    /// consumer could link the two, but each half has one.
     #[test]
     fn mixed_language_targets_are_split_across_probes() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1291,10 +1184,6 @@ pub(crate) mod tests {
         );
     }
 
-    /// A C++ library may declare `interface-c-standard = "none"`:
-    /// the probe compiles C++, so Cabin never checks its C level and
-    /// the package must not be refused for a C requirement no probe
-    /// exercises.
     #[test]
     fn a_cxx_library_forbidding_c_consumption_is_accepted() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1313,9 +1202,9 @@ pub(crate) mod tests {
         );
     }
 
-    /// A C library consumable from C++ that declares its C interface
-    /// is probed from both languages, at the declared floors, whether
-    /// or not it also declares its C++ interface.
+    /// A C library consumable from C++ that declares its C interface is
+    /// probed from both languages at the declared floors, whether or not
+    /// it also declares its C++ interface.
     #[test]
     fn a_declared_c_interface_is_probed_from_c_as_well() {
         for (cxx_interface, cxx) in [
@@ -1340,7 +1229,6 @@ pub(crate) mod tests {
         }
     }
 
-    /// Nothing declared leaves the probe on its defaults.
     #[test]
     fn probe_standards_default_when_no_interface_is_declared() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1391,9 +1279,9 @@ pub(crate) mod tests {
         );
     }
 
-    /// A mixed-case directory is refused even when its manifest
-    /// declares the lowercase name, so no two directories can differ
-    /// only in case and publish as one package.
+    /// A mixed-case directory is refused even when its manifest declares
+    /// the lowercase name, so no two directories can differ only in case
+    /// and publish as one package.
     #[test]
     fn a_mixed_case_package_directory_is_refused() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1424,10 +1312,6 @@ pub(crate) mod tests {
         );
     }
 
-    /// The manifest carries the package's identity and provenance,
-    /// so it must be the committed regular file - following a
-    /// symlink would let published metadata come from outside the
-    /// version directory.
     #[cfg(unix)]
     #[test]
     fn a_symlinked_migrated_manifest_is_refused() {
@@ -1480,10 +1364,6 @@ pub(crate) mod tests {
         );
     }
 
-    /// A dev dependency orders nothing, but it still publishes: a
-    /// requirement no committed version satisfies is broken metadata
-    /// whether or not anything resolves it, so it must fail the run
-    /// rather than ship.
     #[test]
     fn an_unsatisfiable_dev_dependency_is_diagnosed() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1511,8 +1391,6 @@ pub(crate) mod tests {
         );
     }
 
-    /// Same for an optional dependency the default features leave
-    /// off: inert for ordering, still published metadata.
     #[test]
     fn an_unsatisfiable_optional_dependency_is_diagnosed() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -1606,8 +1484,6 @@ pub(crate) mod tests {
         assert_eq!(conversions.len(), 3);
     }
 
-    /// The same name across kinds is fine when one version satisfies
-    /// both requirements - the check is a conjunction, not a ban.
     #[test]
     fn compatible_requirements_across_kinds_are_accepted() {
         let dir = assert_fs::TempDir::new().unwrap();

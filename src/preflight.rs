@@ -1,25 +1,12 @@
-//! Local preflight: materialize every conversion, publish it into a
-//! temporary file registry in publication order, and build every
-//! port *from that registry*, the probes in parallel.
-//!
-//! The preflight is the gate in front of any remote mutation: a port
-//! that cannot fetch, extract, package, publish, resolve, or compile
-//! locally never reaches the registry API.
-//!
-//! Each port is exercised through a generated probe package that
-//! depends on the just-published version, so the build consumes the
-//! registry artifact - archive bytes, checksum, archived manifest,
-//! source materialization - rather than the scratch source tree it
-//! was packaged from.  The probe references the dependency the way
-//! the published target set allows: the bare-package shorthand when
-//! the package exposes exactly one library-like target, explicit
-//! `package:target` selectors otherwise.  A probe consumer's source
-//! is the port's committed consumer test (`tests/main.cc` or
-//! `tests/main.c` in its version directory) when one exists, so the
-//! build exercises the port's API, and an empty `main` otherwise.  A
-//! dry-run then runs every probe, which must exit successfully;
-//! `--publish` only builds them, keeping upstream code from running
-//! beside the job's OIDC token.
+//! Local preflight, the gate in front of any remote mutation:
+//! materialize every conversion, publish it into a temporary file
+//! registry in publication order, and build every port *from that
+//! registry* through a generated probe package, so the build consumes
+//! the registry artifact rather than the scratch tree it was packaged
+//! from.  A probe's source is the port's committed consumer test, or an
+//! empty `main`.  A dry-run also runs every probe; `--publish` only
+//! builds them, keeping upstream code from running beside the job's
+//! OIDC token.
 
 use std::fmt;
 use std::fs;
@@ -42,12 +29,10 @@ pub struct PreflightRequest<'a> {
     /// Publication-ordered conversions from [`crate::plan`].
     pub conversions: &'a [PortConversion],
     /// Cabin cache root; upstream archives are cached under
-    /// `<cache>/ports`, so an archive fetched by an earlier run is
-    /// reused, not re-downloaded.
+    /// `<cache>/ports`.
     pub cache_dir: &'a Path,
     /// Scratch root.  The preflight owns (and clears) exactly the
-    /// `run/` directory beneath it, so pointing `--work-dir` at a
-    /// directory with unrelated content is safe.
+    /// `run/` directory beneath it.
     pub work_dir: &'a Path,
     /// `cabin` binary used for the preflight builds.
     pub cabin: &'a Path,
@@ -69,27 +54,20 @@ pub struct PreflightReport {
     pub checksums: Vec<String>,
 }
 
-/// Run the full local preflight.  This thread materializes each
-/// conversion and publishes it into the temporary file registry in
-/// publication order, handing every staged port to a pool of one probe
-/// worker per available CPU, which builds (and, with `run_probes`,
-/// runs) its probe against the registry.  Publication order stages a
-/// version satisfying each of a port's dependencies before it, so its
-/// probe can start the moment the port is staged.  A newer version
-/// staged meanwhile may also satisfy one; the probe then resolves it,
-/// as a consumer of the published registry would.
+/// Run the full local preflight.  This thread stages each conversion
+/// in publication order and hands it to a pool of one probe worker per
+/// CPU, which builds (and, with `run_probes`, runs) its probe as soon as
+/// the port is staged: its dependencies are staged before it.  A newer
+/// version staged meanwhile may also satisfy one; the probe then
+/// resolves it, as a consumer of the published registry would.
 ///
 /// # Errors
 /// Returns the failure of the earliest failing port in publication
-/// order: archive fetch or checksum mismatch, preparation, staging or
-/// publish-lint rejection, file-registry write, or a probe build (or,
-/// with `run_probes`, run) exiting non-zero.  Staging and probes past
-/// the earliest failure seen so far are skipped; those before it
-/// always finish.
+/// order, staging or probe.  Work past the earliest failure seen so far
+/// is skipped; work before it always finishes.
 #[allow(clippy::too_many_lines)] // one stager feeding one probe pool through shared failure state
 pub fn preflight(request: &PreflightRequest<'_>) -> Result<PreflightReport> {
-    // The tool owns everything under `run/` and nothing else; a
-    // reused work dir therefore cannot trip the file registry's
+    // A reused work dir must not trip the file registry's
     // duplicate-version guard or leak a previous run's packages.
     let run_dir = request.work_dir.join("run");
     if run_dir.exists() {
@@ -282,12 +260,9 @@ fn report_timings(conversions: &[PortConversion], timings: &[PortTimings], elaps
     }
 }
 
-/// Materialize one conversion through the shared staging step
-/// (`cabin_publish::upstream`) and publish it into the file registry
-/// at `registry_dir`, returning the staged package directory, the
-/// publish report (lint warnings included), and how long each phase
-/// took.  Cabin's own `cabin-ports/*` registry fixtures stage through
-/// the same step, so they are byte-identical to what this stages.
+/// Materialize one conversion through Cabin's shared staging step
+/// (`cabin_publish::upstream`), which Cabin's own `cabin-ports/*`
+/// fixtures also use, and publish it into the file registry.
 fn stage(
     conversion: &PortConversion,
     ports_cache: &Path,
@@ -310,8 +285,6 @@ fn stage(
         )
     })?;
     let fetched = started.elapsed();
-    // The preflight clears `run/`, which holds `sources_dir`, so this
-    // directory is fresh.
     let package_dir = sources_dir
         .join(conversion.scoped_name.base_name())
         .join(conversion.published_version.to_string());
@@ -348,10 +321,10 @@ const DOWNLOAD_RETRY_PAUSE: Duration = Duration::from_secs(5);
 /// Call `fetch` up to [`DOWNLOAD_ATTEMPTS`] times, retrying only a
 /// failed download: upstream hosts such as downloads.xiph.org
 /// intermittently drop connections, while a checksum mismatch or a
-/// cache I/O error would fail the same way again.  The retry is publish
-/// orchestration, so it wraps Cabin's resolver here: one host's dropped
-/// connection should not fail a run over every port, while an
-/// interactive `cabin` command leaves retrying to its user.
+/// cache I/O error would fail the same way again.  Retrying is publish
+/// orchestration, not Cabin's: one host's dropped connection should not
+/// fail a run over every port, while an interactive `cabin` command
+/// leaves retrying to its user.
 fn retry_download<T>(
     pause: Duration,
     mut fetch: impl FnMut() -> Result<T, upstream::UpstreamStageError>,
@@ -372,11 +345,10 @@ fn retry_download<T>(
 }
 
 /// Build the port from the preflight registry through a generated
-/// probe package that depends on the exact published version, and
-/// return how long the build and the probe runs took.  `--offline`
-/// enforces that the file registry and the worker's run-local cache
-/// satisfy the whole build.  Probes build concurrently, so each one's
-/// output prints as a single block once it finishes.
+/// probe package, and return how long the build and the probe runs
+/// took.  `--offline` enforces that the file registry and the
+/// run-local cache satisfy the whole build.  Each probe's output prints
+/// as one block once it finishes.
 fn build_probe_against_registry(
     request: &PreflightRequest<'_>,
     conversion: &PortConversion,
@@ -534,12 +506,10 @@ struct ProbeConsumer<'a> {
     keys: Vec<&'a str>,
 }
 
-/// Split the probed targets across the consumers that can link them.
-/// Targets forbidding C++ consumption go to a C consumer and the rest
-/// to a C++ one, so a package mixing both shapes is still probed
-/// whole; one of the rest declaring a C interface goes to both.  A package
-/// with no library-like targets keeps the C++ consumer, leaving the
-/// dependency resolve-and-fetch-only.
+/// Split the probed targets across the consumers that can link them
+/// ([`crate::plan::ProbeStandards`]).  A package with no library-like
+/// targets keeps the C++ consumer, leaving the dependency
+/// resolve-and-fetch-only.
 fn probe_consumers(conversion: &PortConversion) -> Vec<ProbeConsumer<'_>> {
     let standards = &conversion.probe_standards;
     let listed = |list: &[String], key: &str| list.iter().any(|k| k == key);
@@ -572,19 +542,15 @@ fn probe_consumers(conversion: &PortConversion) -> Vec<ProbeConsumer<'_>> {
     consumers
 }
 
-/// The probe package's manifest.  The exact requirement names the
-/// published version.  A sole library-like target is referenced
-/// through the bare-package shorthand (exercising the spelling
-/// consumers use); several are referenced through explicit
-/// `package:target` selectors, since the shorthand is ambiguous
-/// then; none leaves the dependency resolve-and-fetch-only.
+/// The probe package's manifest, requiring the exact published
+/// version.  A sole library-like target is referenced through the
+/// bare-package shorthand consumers use; several need explicit
+/// `package:target` selectors.
 fn probe_manifest(conversion: &PortConversion) -> String {
     let exact = conversion.published_version.clone();
     let scoped = conversion.scoped_name.as_str();
     let sole_target = conversion.sole_library_target;
-    // Each consumer's standards must satisfy the joined interface
-    // requirements of the targets it links.  It takes the lowest
-    // standard those accept (`plan::probe_standards`), or `c11` /
+    // The lowest standard the linked targets accept, or `c11` /
     // `c++17` when none is declared.  cl.exe has no `/std:` flag below
     // C11 / C++14 and Cabin refuses to stand another standard in, so
     // an MSVC host probes a lower declared floor at C11 / C++14.
@@ -601,9 +567,8 @@ fn probe_manifest(conversion: &PortConversion) -> String {
         })
         .as_str();
     let consumers = probe_consumers(conversion);
-    // A package with no C++-consumable target gets no `cxx-standard`:
-    // declaring one the probe never compiles would be noise, and the
-    // C++ edge is exactly what such a package forbids.
+    // A package with no C++-consumable target forbids the C++ edge, so
+    // it gets no `cxx-standard`.
     let cxx = if consumers
         .iter()
         .any(|consumer| consumer.source == "main.cc")
@@ -713,8 +678,7 @@ mod tests {
         );
     }
 
-    /// A test no probe compiles fails the preflight instead of being
-    /// skipped - here a C test beside a port probed only from C++.
+    /// A C test beside a port probed only from C++ fails the preflight.
     #[test]
     fn an_unused_consumer_test_is_refused() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -764,10 +728,6 @@ mod tests {
         assert!(manifest.contains("deps = []"), "{manifest}");
     }
 
-    /// Cabin resolves a bare `deps` entry against every library-like
-    /// target the dependency declares, so a package that publishes a
-    /// second one behind a non-default feature makes the shorthand
-    /// ambiguous even though the probe links only the enabled target.
     #[test]
     fn probe_qualifies_its_target_when_a_gated_sibling_publishes_too() {
         let mut conversion = conversion(&["z"]);
@@ -779,9 +739,6 @@ mod tests {
         );
     }
 
-    /// Every probed target that forbids C++ consumption is linked by
-    /// the C probe and the rest by the C++ one, so a mixed package
-    /// still compiles both halves.
     #[test]
     fn probe_splits_a_mixed_target_set_across_two_consumers() {
         let mut conversion = conversion(&["z", "zxx"]);
@@ -804,8 +761,6 @@ mod tests {
         assert_eq!(probe_sources(&conversion), ["main.cc", "main.c"]);
     }
 
-    /// A package with no C++-consumable target declares no
-    /// `cxx-standard`: the probe never compiles C++.
     #[test]
     fn probe_for_a_c_only_package_declares_no_cxx_standard() {
         let mut conversion = conversion(&["z"]);
@@ -822,8 +777,8 @@ mod tests {
         assert_eq!(probe_sources(&conversion), ["main.c"]);
     }
 
-    /// A target declaring both interfaces is linked by both consumers,
-    /// so its committed C test is compiled rather than refused.
+    /// A target declaring both interfaces is linked by both consumers, so
+    /// its committed C test is compiled rather than refused.
     #[test]
     fn a_dual_language_target_is_linked_by_both_consumers() {
         let dir = assert_fs::TempDir::new().unwrap();

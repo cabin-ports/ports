@@ -1,38 +1,20 @@
 //! Remote publication through the existing `cabin publish` flow.
 //!
-//! The preflighted packages upload in consecutive batches of
-//! `BATCH_SIZE`, each through ONE `cabin -Z remote-registry publish`
-//! invocation carrying a `--manifest-path` per scratch package, in
-//! publication order (the client publishes a batch in exactly the order
-//! the flags are given, and the batches run in order), so staging,
-//! scoped-name gates, credential lookup, the registry's `config.json`
-//! API discovery, publish lints, and the framed uploads all run exactly
-//! the code path an ordinary publish runs.  This tool adds only the
-//! ordering, the batching, and the receipts log (`crate::batch`): the
-//! client's `--format json` report of each upload, as it arrives.
+//! The preflighted packages upload in publication order, in batches of
+//! `BATCH_SIZE`, each one `cabin -Z remote-registry publish` invocation
+//! with a `--manifest-path` per package, so every upload runs exactly the
+//! code path an ordinary publish runs.  This tool adds only the ordering,
+//! the batching, and the receipts log (`crate::batch`).
 //!
 //! Batching keeps a large set from riding one credential: under GitHub
-//! Actions the client exchanges the run's OIDC token for a
-//! trusted-publishing token that expires 30 minutes later, once per
-//! invocation, and revokes it best-effort when the invocation exits.  A
-//! batch that fails - an upload refused, a token rejected or expired by
-//! an unusually slow batch - stops the run before the next batch, and
-//! the run fails, after logging a `failed` receipt for the package the
-//! invocation stopped at.
+//! Actions each invocation exchanges the run's OIDC token for a
+//! trusted-publishing token that expires 30 minutes later.  A failed
+//! batch stops the run before the next one, after logging a `failed`
+//! receipt for the package it stopped at.
 //!
-//! `--publish` never skips a version based on the public index:
-//! pending (not yet verified) versions are invisible there, so its
-//! dedupe is the registry's own byte-identical idempotency - `cabin
-//! publish` reports a no-op for identical bytes.  That is also how a
-//! failed run resumes: the rerun publishes every batch again from the
-//! first, and what already landed answers as no-ops.  Divergent bytes do
-//! not fail there: every `--publish` upload passes `--new-revision`, so
-//! they land as a new packaging revision of the same immutable version.
-//! `--publish-new` passes no `--new-revision`, so the registry refuses
-//! divergent bytes for a version it already has (`409`).
-//!
-//! Rate-limit pacing lives in the client: `cabin publish` waits out
-//! the registry's `429` answers per upload on the typed error.
+//! `--publish` never skips a version based on the public index, which
+//! hides pending versions: identical bytes answer as a no-op, which is
+//! also how a failed run resumes.  Rate-limit pacing lives in the client.
 
 use std::fs::File;
 use std::io::{BufRead as _, BufReader, Write as _};
@@ -330,8 +312,6 @@ mod tests {
         }
     }
 
-    /// A failed batch (an upload refused, a token rejected or expired)
-    /// ends the run before the next batch and names the batch.
     #[test]
     fn a_failed_batch_stops_the_run() {
         let items: Vec<usize> = (0..=2 * BATCH_SIZE).collect();
@@ -350,8 +330,7 @@ mod tests {
         assert!(message.contains("exit status: 1"), "{message}");
     }
 
-    /// One invocation per batch over exactly its packages; only
-    /// `--publish` opts into packaging revisions.
+    /// Only `--publish` opts into packaging revisions.
     #[test]
     fn a_batch_is_one_publish_invocation_over_exactly_its_packages() {
         let upload = |dir| Upload {

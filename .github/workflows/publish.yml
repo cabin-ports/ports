@@ -134,15 +134,10 @@ jobs:
           path: ${{ runner.temp }}/tools/bin/
           retention-days: 1
 
-  # Every run that may upload, with a receipts log to add to, holds its
-  # lock: a `lock` file naming the run and attempt, committed on the
-  # receipts branch on top of the tip this job read, so of two runs
-  # racing for it one push fails. A rerun attempt never inherits it. Only `record` releases it, once the run's receipts are
-  # in the log, so no run reads the log while another may still add to
-  # it; a run that cannot account for its uploads keeps it, which stops
-  # both modes until an operator reconciles the log (docs/publishing.md,
-  # "Automatic publishing"). It runs only scripts/actions/ from its own
-  # commit (git and gh), so it may push that branch.
+  # Every run that may upload, with a receipts log to add to, holds the
+  # log's lock (docs/publishing.md, "The lock"). It runs only
+  # scripts/actions/ from its own commit (git and gh), so it may push that
+  # branch.
   lock:
     needs: [gate, build]
     if: >-
@@ -342,16 +337,10 @@ jobs:
           retention-days: 30
 
   # Appends the receipts of the attempt holding the lock to the log and
-  # releases the lock. No OIDC and no port code - only scripts/actions/
-  # from its own commit (git and jq) - so it may push the receipts
-  # branch. It records only while this run holds the lock, so rerunning
-  # an old run's job cannot replay its receipts, and releases the lock
-  # only when the publish job of the lock's attempt succeeded and left
-  # its receipts, or when the lock's attempt skipped it. After a failure
-  # or a cancellation an upload may have landed without its receipt, so
-  # the lock stays until an operator reconciles the log
-  # (docs/publishing.md, "Automatic publishing"). After a failed push,
-  # rerun this job alone; the artifacts last 30 days.
+  # releases it under the rules of docs/publishing.md, "The lock". No OIDC
+  # and no port code - only scripts/actions/ from its own commit (git and
+  # jq) - so it may push the receipts branch. After a failed push, rerun
+  # this job alone; the artifacts last 30 days.
   record:
     needs: [lock, build, publish]
     if: always() && needs.lock.outputs.locked == 'true'
