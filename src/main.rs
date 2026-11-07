@@ -72,7 +72,7 @@ struct Cli {
     #[arg(long, conflicts_with_all = ["dry_run", "publish"])]
     retry_failed: bool,
     /// Dry-run only what the change since this Git revision needs:
-    /// when it only adds files under `<name>/<version>/` for new
+    /// when it only adds files under `<prefix>/<name>/<version>/` for new
     /// names (and edits README.md, AGENTS.md, or publish-holds.txt),
     /// every version of those names plus their dependencies; when it
     /// edits nothing but those three files, nothing.  Any other change dry-runs every

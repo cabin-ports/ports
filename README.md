@@ -24,11 +24,13 @@ are consumed and the rules a port meets.
 ## Repository structure
 
 ```
-ports/<name>/<version>/   one port: cabin.toml, optional patches/ and tests/
-Cargo.toml, src/, tests/  port-publish, the tool that checks and publishes the ports
-publish-holds.txt         port versions held back from automatic publishing
-.github/workflows/        CI (ci.yml) and publishing (publish.yml)
+ports/<prefix>/<name>/<version>/  one port: cabin.toml, optional patches/ and tests/
+Cargo.toml, src/, tests/          port-publish, the tool that checks and publishes the ports
+publish-holds.txt                 port versions held back from automatic publishing
+.github/workflows/                CI (ci.yml) and publishing (publish.yml)
 ```
+
+`<prefix>` is the first two characters of the port's name, as in `ports/zl/zlib/1.3.1/`.
 
 - `cabin.toml` is the manifest the port publishes: the package identity, the pinned upstream
   archive in `[package.upstream]`, and the Cabin targets that build the library.

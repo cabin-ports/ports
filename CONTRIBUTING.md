@@ -25,16 +25,21 @@ A foundation port should be **retired** once its upstream project ships and main
 
 ## Port layout
 
-Every `ports/<name>/<version>/` directory holds a single `cabin.toml` carrying the canonical scoped
-identity (`cabin-ports/<name>`) and a complete `[package.upstream]` block, plus its `patches/` when
-it declares any and its `tests/` consumer test (required for new ports):
+Every `ports/<prefix>/<name>/<version>/` directory holds a single `cabin.toml` carrying the
+canonical scoped identity (`cabin-ports/<name>`) and a complete `[package.upstream]` block, plus its
+`patches/` when it declares any and its `tests/` consumer test (required for new ports):
 
 ```
-ports/<name>/<version>/
+ports/<prefix>/<name>/<version>/
   cabin.toml   the published manifest
   patches/     unified diffs declared by [package.upstream].patches, if any
   tests/       the consumer test (main.cc, main.c); never published
 ```
+
+`<prefix>` is the first two characters of the name, or the whole name when it has only one: zlib
+1.3.1 lives in `ports/zl/zlib/1.3.1/`, and a port named `z` in `ports/z/z/`.  The prefix only
+groups directories; it is not part of the package identity.  The publisher refuses any other
+directory or file above a version directory, so CI fails a misplaced port.
 
 The manifest and patches publish verbatim: editing a byte of them - a comment included - changes
 the published archive.  `tests/` is never published.  Cabin's
@@ -175,5 +180,5 @@ upstream version.  Keep such a correction in its own pull request, not folded in
 merging it publishes nothing by itself, since only a full `all` publish uploads packaging revisions
 ([Publishing](docs/publishing.md)).
 
-Retiring a specific *version* of a foundation port removes `ports/<name>/<version>/`; retiring an
-entire port removes the whole `ports/<name>/` directory.
+Retiring a specific *version* of a foundation port removes `ports/<prefix>/<name>/<version>/`;
+retiring an entire port removes the whole `ports/<prefix>/<name>/` directory.

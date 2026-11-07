@@ -365,7 +365,8 @@ pub fn defer_stale(
     let mut changed_names = BTreeSet::new();
     for path in diff.split('\0').filter(|path| !path.is_empty()) {
         if let Some(port_path) = path.strip_prefix(&prefix) {
-            changed_names.insert(port_path.split('/').next().unwrap_or_default());
+            // `<prefix>/<name>/...`: the name, not the prefix it shares.
+            changed_names.insert(port_path.split('/').nth(1).unwrap_or_default());
         } else if path != holds_path && !select::NOT_BUILD_INPUTS.contains(&path) {
             for index in upload_order(status) {
                 defer(status, index, &format!("main changed {path}"));
@@ -394,7 +395,10 @@ pub fn defer_stale(
             .find_map(|(conversion, _)| {
                 let name = conversion.scoped_name.base_name();
                 if changed_names.contains(name) {
-                    Some(format!("main changed {prefix}{name}/"))
+                    Some(format!(
+                        "main changed {prefix}{}/{name}/",
+                        crate::plan::port_prefix(name)
+                    ))
                 } else if held_at_main.contains_key(&key(conversion)) {
                     Some(format!("main holds {}", label(conversion)))
                 } else {
@@ -825,19 +829,22 @@ mod tests {
         ];
 
         assert_eq!(defer(&snapshot), all_candidates);
-        let main = commit("ports/newport/1.0.0/cabin.toml", "unrelated\n");
+        let main = commit("ports/ne/newport/1.0.0/cabin.toml", "unrelated\n");
+        assert_eq!(defer(&main), all_candidates);
+        // A name sharing a candidate's prefix is another package.
+        let main = commit("ports/zl/zlib-ng/1.0.0/cabin.toml", "unrelated\n");
         assert_eq!(defer(&main), all_candidates);
         let main = commit("README.md", "docs\n");
         assert_eq!(defer(&main), all_candidates);
 
         // A new version of a name a candidate requires defers that
         // candidate and what requires it.
-        let main = commit("ports/zlib/1.1.0/cabin.toml", "zlib\n");
+        let main = commit("ports/zl/zlib/1.1.0/cabin.toml", "zlib\n");
         let plan = defer(&main);
         assert_eq!(plan[0], "tool candidate");
         for line in &plan[1..] {
             assert!(
-                line.contains("deferred: main changed ports/zlib/"),
+                line.contains("deferred: main changed ports/zl/zlib/"),
                 "{plan:?}"
             );
         }
