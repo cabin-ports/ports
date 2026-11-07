@@ -117,9 +117,9 @@ of either mode fails until an operator reconciles the log
 A scheduled run uploads its own commit, which must have passed the merge queue's `required` check.
 Under the lock it re-reads the log and compares its commit with `main`: a candidate whose ports,
 requirements, or hold main has since changed waits for a later run, and every candidate does when
-main changed any other file outside `ports/` except the root `README.md` and `AGENTS.md` (an edit
-to `CONTRIBUTING.md` or `docs/` included).  Unrelated port merges never stop it.  This is a last
-check, not a transaction with later merges.
+main changed any other file outside `ports/` except the documentation files `README.md`,
+`AGENTS.md`, `CONTRIBUTING.md`, `docs/maintaining.md`, and `docs/publishing.md`.  Unrelated port
+merges never stop it.  This is a last check, not a transaction with later merges.
 
 ### Dependents and verification
 

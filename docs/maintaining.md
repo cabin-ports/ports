@@ -62,15 +62,15 @@ Each `lint` step runs locally, from the repository root, exactly as `ci.yml` wri
 included, and ignored files under `ports/` too:
 
 - A change that only adds files under `ports/<prefix>/<name>/<version>/` for names `<rev>` lacks,
-  besides editing the root `README.md`, `AGENTS.md`, or `publish-holds.txt`, preflights every
+  besides editing `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `docs/maintaining.md`,
+  `docs/publishing.md`, or `publish-holds.txt` (paths from the repository root), preflights every
   version of those names plus every committed version any of their requirements (optional and dev
   ones included) matches, transitively.  A name is new even when `<rev>` has its prefix directory.
   An added name with no `cabin.toml` under it is an error.
-- A change that edits nothing but those three root files preflights nothing.
+- A change that edits nothing but those files preflights nothing.
 - Anything else preflights every port: a new version of an existing name (existing requirements
-  may resolve to it), any other change under an existing name, and every other file.  That
-  includes the other documentation, `CONTRIBUTING.md` and `docs/`: editing it preflights every
-  port.
+  may resolve to it), any other change under an existing name, and every other file, a new file
+  under `docs/` included.
 
 Whatever it selects, the dry-run first loads and validates the whole catalog (manifests,
 identities, requirement satisfiability, publication order, consumer-test file names) and prints its
