@@ -1,12 +1,7 @@
 [package.upstream]
-# The v3.6.7 tag, Mbed TLS 3.6.7 of the 3.6 long-term-support branch.  Its
-# GitHub archive lacks the framework submodule that the release tarball
-# mbedtls-3.6.7.tar.bz2 carries, which is the only difference between the
-# two trees; Cabin does not take tar.bz2.  The library build uses the
-# framework only to regenerate sources the tag already carries, which the
-# default GEN_FILES=OFF never does (CMakeLists.txt:70-77,
-# library/Makefile:11-22), and for upstream's tests; upstream's CMake build
-# still refuses to configure without it (CMakeLists.txt:318-325).
+# The tag's GitHub archive, since Cabin does not take the release's tar.bz2.
+# It differs only in lacking the framework submodule, which the library
+# build uses only to regenerate sources the tag already carries.
 url = "https://github.com/Mbed-TLS/mbedtls/archive/refs/tags/v3.6.7.tar.gz"
 checksum = "sha256:7312b70b067b6a271961c8d36c3b8f9ba3e86fe6b26f18af13cd70430ee52ed1"
 format = "tar.gz"
@@ -16,10 +11,9 @@ strip-prefix = "mbedtls-3.6.7"
 name = "cabin-ports/mbedtls"
 version = "3.6.7"
 include = ["LICENSE", "include", "library"]
-# Upstream compiles C99 (CMakeLists.txt:201); Cabin has no C99 flag for
-# MSVC, so the sources compile as C11, and the headers stay C99.  C++
-# consumers need C++11, for the variadic macro of
-# include/mbedtls/debug.h:23.
+# Upstream compiles C99; Cabin has no C99 flag for MSVC, so the sources
+# compile as C11, and the headers stay C99.  C++ consumers need C++11 for a
+# variadic macro in debug.h.
 c-standard = "c11"
 interface-c-standard = "c99"
 interface-cxx-standard = "c++11"
@@ -34,20 +28,12 @@ interface-cxx-standard = "c++11"
 # occur with default optimization flags, nor with GCC or Clang on Arm or
 # x86 with MBEDTLS_HAVE_ASM, which the default configuration enables.
 #
-# The three static libraries of library/CMakeLists.txt (src_crypto,
-# src_x509 and src_tls, lines 13-128), built with upstream's default
-# configuration, include/mbedtls/mbedtls_config.h.  zlib support was
-# removed in 3.0 (include/mbedtls/check_config.h:1113-1114), so there is no
-# zlib dependency.  library/ecp_curves_new.c, an empty placeholder kept for
-# custom build systems (its lines 2-3), ships with library/ but is not
-# compiled, as in upstream's CMake and make builds.  Not ported:
-# 3rdparty/everest and 3rdparty/p256-m, which upstream compiles into or
-# links with mbedcrypto (library/CMakeLists.txt:289-295,
-# library/Makefile:191) but whose code is wholly inside
-# MBEDTLS_ECDH_VARIANT_EVEREST_ENABLED and
-# MBEDTLS_PSA_P256M_DRIVER_ENABLED, which the default configuration leaves
-# undefined (mbedtls_config.h:749, 1487); the shared libraries; the
-# programs, tests and documentation.
+# The three static libraries of upstream's CMake build, with its default
+# configuration, include/mbedtls/mbedtls_config.h.  library/ecp_curves_new.c,
+# an empty placeholder, ships but is not compiled, as upstream builds it.
+# Not ported: 3rdparty/everest and 3rdparty/p256-m, whose code is wholly
+# inside options the default configuration leaves off, and the shared
+# libraries.
 #
 # include/mbedtls/constant_time.h and include/mbedtls/psa_util.h declare
 # their functions without extern "C", unlike the other public headers, so a
@@ -184,9 +170,8 @@ include-dirs = ["include"]
 links = "mbedtls"
 deps = [{ name = "mbedx509", public = true }]
 
-# net_sockets.c and x509_crt.c (inet_pton) use Winsock and entropy_poll.c
-# BCryptGenRandom; upstream links ws2_32 and bcrypt on Windows, and the
-# network library on Haiku (library/CMakeLists.txt:225-227, 238-240).
+# Winsock for the sockets and inet_pton, BCryptGenRandom for entropy, as
+# upstream links on Windows, and Haiku's network library.
 [target.'cfg(os = "windows")'.profile]
 link-libs = ["ws2_32", "bcrypt"]
 
