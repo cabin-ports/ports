@@ -92,14 +92,13 @@ fn lockfile(dir: &TempDir, packages: &[(&str, Option<&str>)]) {
     dir.child("Cargo.lock").write_str(&lock).unwrap();
 }
 
-/// A fake `gh` that prints `reply` and exits with `status` when asked
-/// to compare `REV` with Cabin's main, and fails on any other call.
-fn fake_gh(dir: &TempDir, reply: &str, status: u8) {
+/// A fake `gh` that prints `reply` and exits with `status` when called
+/// with exactly the arguments `call`, and fails on any other call.
+fn fake_gh(dir: &TempDir, call: &str, reply: &str, status: u8) {
     let gh = dir.child("bin/gh");
     gh.write_str(&format!(
         "#!/bin/sh\n\
-         [ \"$*\" = 'api repos/cabinpkg/cabin/compare/{REV}...main --jq .status' ] || \
-         {{ echo \"unexpected: gh $*\" >&2; exit 64; }}\n\
+         [ \"$*\" = '{call}' ] || {{ echo \"unexpected: gh $*\" >&2; exit 64; }}\n\
          echo '{reply}'\nexit {status}\n"
     ))
     .unwrap();
@@ -108,6 +107,11 @@ fn fake_gh(dir: &TempDir, reply: &str, status: u8) {
         use std::os::unix::fs::PermissionsExt as _;
         std::fs::set_permissions(gh.path(), std::fs::Permissions::from_mode(0o755)).unwrap();
     }
+}
+
+/// The `gh` call that compares `REV` with Cabin's main.
+fn compare_call() -> String {
+    format!("api repos/cabinpkg/cabin/compare/{REV}...main --jq .status")
 }
 
 /// Runs `cabin-rev.sh args` against a lockfile with `packages` and a
@@ -121,7 +125,7 @@ fn cabin_rev(
 ) -> (Output, String) {
     let dir = TempDir::new().unwrap();
     lockfile(&dir, packages);
-    fake_gh(&dir, reply, status);
+    fake_gh(&dir, &compare_call(), reply, status);
     let output_file = command_file(&dir, "output");
     let output = run(
         "cabin-rev.sh",
@@ -158,7 +162,7 @@ fn cabin_rev_outputs_a_pin_on_cabins_main() {
 fn cabin_rev_without_on_main_reads_only_the_lockfile() {
     let dir = TempDir::new().unwrap();
     lockfile(&dir, PINNED);
-    fake_gh(&dir, "identical", 1);
+    fake_gh(&dir, &compare_call(), "identical", 1);
     let output = run("cabin-rev.sh", &[], dir.path(), &dir, &[]);
     assert!(output.status.success(), "{}", stderr(&output));
     assert_eq!(stdout(&output), format!("{REV}\n"));
@@ -405,4 +409,650 @@ fn dry_run_base_without_verified_metadata_checks_every_port() {
     ];
     full("another event", &repo, "push", &all);
     full("no event", &repo, "", &all);
+}
+
+/// Runs `publish-mode.sh` for `event` with `env`, returning the run and
+/// what it wrote to `$GITHUB_OUTPUT`.
+fn publish_mode(event: &str, env: &[(&str, &str)]) -> (Output, String) {
+    let dir = TempDir::new().unwrap();
+    let output_file = command_file(&dir, "output");
+    let mut vars = vec![
+        ("GITHUB_EVENT_NAME", event),
+        ("GITHUB_OUTPUT", output_file.to_str().unwrap()),
+    ];
+    vars.extend_from_slice(env);
+    let output = run("publish-mode.sh", &[], dir.path(), &dir, &vars);
+    (output, read(&output_file))
+}
+
+/// A scheduled run is `new` only while the variable is exactly `true`
+/// (expressions compare case-insensitively); any other value turns it
+/// off with a notice, which is no failure.
+#[test]
+fn publish_mode_schedules_new_only_while_exactly_enabled() {
+    let (output, written) = publish_mode("schedule", &[("ENABLED", "true"), ("INPUT", "")]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(written, "mode=new\n");
+    for enabled in ["TRUE", " true", "", "false"] {
+        let (output, written) = publish_mode("schedule", &[("ENABLED", enabled), ("INPUT", "all")]);
+        assert!(output.status.success(), "{enabled:?}: {}", stderr(&output));
+        assert_eq!(written, "mode=off\n", "{enabled:?}");
+        assert!(
+            stdout(&output).contains("::notice::PORTS_AUTO_PUBLISH is not exactly 'true'"),
+            "{enabled:?}: {}",
+            stdout(&output)
+        );
+    }
+}
+
+/// A dispatch runs the mode it names, whatever the variable says, and
+/// fails on anything else.
+#[test]
+fn publish_mode_dispatches_the_named_mode() {
+    for mode in ["all", "new", "plan"] {
+        let (output, written) =
+            publish_mode("workflow_dispatch", &[("ENABLED", ""), ("INPUT", mode)]);
+        assert!(output.status.success(), "{mode}: {}", stderr(&output));
+        assert_eq!(written, format!("mode={mode}\n"));
+    }
+    for mode in ["", "New", "off"] {
+        let (output, written) =
+            publish_mode("workflow_dispatch", &[("ENABLED", "true"), ("INPUT", mode)]);
+        assert_eq!(output.status.code(), Some(1), "{mode:?}");
+        assert_eq!(written, "", "{mode:?}");
+        assert!(
+            stdout(&output).contains(&format!("::error::unknown mode '{mode}'")),
+            "{mode:?}: {}",
+            stdout(&output)
+        );
+    }
+}
+
+/// `require-ci.sh` with a `gh` that counts `reply` successful
+/// `required` check runs on `REV` and exits with `status`.
+fn require_ci(reply: &str, status: u8) -> Output {
+    let dir = TempDir::new().unwrap();
+    fake_gh(
+        &dir,
+        &format!(
+            "api repos/o/r/commits/{REV}/check-runs?check_name=required --jq \
+             [.check_runs[] | select(.conclusion == \"success\")] | length"
+        ),
+        reply,
+        status,
+    );
+    run(
+        "require-ci.sh",
+        &[],
+        dir.path(),
+        &dir,
+        &[("GITHUB_REPOSITORY", "o/r"), ("GITHUB_SHA", REV)],
+    )
+}
+
+/// An unattended upload needs at least one successful `required` run on
+/// its commit; none, or a failed `gh` call, fails it.
+#[test]
+fn require_ci_needs_a_successful_required_run() {
+    for reply in ["1", "2"] {
+        let output = require_ci(reply, 0);
+        assert!(output.status.success(), "{reply}: {}", stderr(&output));
+    }
+    let output = require_ci("0", 0);
+    assert_eq!(output.status.code(), Some(1));
+    let error = format!("::error::{REV} has no successful 'required' check run");
+    assert!(stdout(&output).contains(&error), "{}", stdout(&output));
+    for (reply, status) in [("1", 1), ("", 0)] {
+        let output = require_ci(reply, status);
+        assert!(!output.status.success(), "{reply:?} {status}");
+    }
+}
+
+/// `receipts.sh` against a bare `origin.git` reached through a `file://`
+/// URL.  The publish workflow runs it on Linux only.
+#[cfg(unix)]
+mod receipts {
+    use std::os::unix::fs::PermissionsExt as _;
+
+    use super::*;
+
+    const BRANCH: &str = "publish-receipts";
+    const LOG: &str =
+        "{\"name\":\"cabin-ports/zlib\",\"version\":\"1.3.1\",\"outcome\":\"uploaded\"}\n";
+
+    fn executable(file: &ChildPath, text: &str) {
+        file.write_str(text).unwrap();
+        std::fs::set_permissions(file.path(), std::fs::Permissions::from_mode(0o755)).unwrap();
+    }
+
+    /// The runner's view of a repository whose receipts branch, unless
+    /// absent, starts as one commit of `files`.  Its `gh` fails on any
+    /// call until a test fakes one.
+    struct Repo {
+        dir: TempDir,
+    }
+
+    impl Repo {
+        fn new(files: &[(&str, &str)]) -> Self {
+            let dir = TempDir::new().unwrap();
+            git(dir.path(), &["init", "-q", "--bare", "origin.git"]);
+            if !files.is_empty() {
+                let seed = dir.child("seed");
+                seed.create_dir_all().unwrap();
+                git(seed.path(), &["init", "-q"]);
+                for (name, text) in files {
+                    seed.child(name).write_str(text).unwrap();
+                }
+                git(seed.path(), &["add", "."]);
+                git(seed.path(), &["commit", "-q", "-m", "seed"]);
+                let push = format!("HEAD:refs/heads/{BRANCH}");
+                git(seed.path(), &["push", "-q", "../origin.git", &push]);
+            }
+            dir.child("runner").create_dir_all().unwrap();
+            fake_gh(&dir, "nothing", "", 64);
+            Self { dir }
+        }
+
+        /// Runs `receipts.sh args` as attempt 1 of the dispatched run 111,
+        /// with `env` on top, returning the run and its `$GITHUB_OUTPUT`.
+        fn run(&self, args: &[&str], env: &[(&str, &str)]) -> (Output, String) {
+            let output_file = command_file(&self.dir, "output");
+            let server = format!("file://{}", self.dir.path().display());
+            let runner = self.dir.child("runner");
+            let gitconfig = self.dir.child("gitconfig");
+            let mut vars = vec![
+                ("GITHUB_SERVER_URL", server.as_str()),
+                ("GITHUB_REPOSITORY", "origin.git"),
+                ("RECEIPTS_BRANCH", BRANCH),
+                ("RUNNER_TEMP", runner.to_str().unwrap()),
+                ("GITHUB_OUTPUT", output_file.to_str().unwrap()),
+                ("GITHUB_EVENT_NAME", "workflow_dispatch"),
+                ("GITHUB_RUN_ID", "111"),
+                ("GITHUB_RUN_ATTEMPT", "1"),
+                ("GITHUB_SHA", REV),
+                ("GH_TOKEN", "token"),
+                ("MODE", "new"),
+                ("RECEIPTS", "true"),
+                ("GIT_CONFIG_GLOBAL", gitconfig.to_str().unwrap()),
+                ("GIT_CONFIG_NOSYSTEM", "1"),
+            ];
+            vars.extend_from_slice(env);
+            let output = super::run("receipts.sh", args, self.dir.path(), &self.dir, &vars);
+            (output, read(&output_file))
+        }
+
+        /// `git args` in `origin.git`.
+        fn origin(&self, args: &[&str]) -> String {
+            git(self.dir.child("origin.git").path(), args)
+        }
+
+        fn tip(&self) -> String {
+            self.origin(&["rev-parse", &format!("refs/heads/{BRANCH}")])
+        }
+
+        /// The tip's `file`, if it has one.
+        fn show(&self, file: &str) -> Option<String> {
+            let output = Command::new("git")
+                .current_dir(self.dir.child("origin.git").path())
+                .args(["show", &format!("{BRANCH}:{file}")])
+                .output()
+                .unwrap();
+            output
+                .status
+                .success()
+                .then(|| String::from_utf8(output.stdout).unwrap())
+        }
+
+        fn runs(&self) -> String {
+            format!(
+                "file://{}/origin.git/actions/runs",
+                self.dir.path().display()
+            )
+        }
+
+        /// Makes `origin.git` refuse every push.
+        fn refuse_pushes(&self) {
+            executable(
+                &self.dir.child("origin.git/hooks/pre-receive"),
+                "#!/bin/sh\necho refused >&2\nexit 1\n",
+            );
+        }
+    }
+
+    fn lock(run: &str) -> String {
+        format!("{run}\n")
+    }
+
+    #[test]
+    fn probe_and_read_find_the_log() {
+        let repo = Repo::new(&[("receipts.jsonl", LOG)]);
+        for mode in ["all", "new", "plan"] {
+            let (output, written) = repo.run(&["probe"], &[("MODE", mode)]);
+            assert!(output.status.success(), "{mode}: {}", stderr(&output));
+            assert_eq!(written, "receipts=true\n", "{mode}");
+        }
+        let file = repo.dir.child("receipts.jsonl");
+        let (output, _) = repo.run(&["read", file.to_str().unwrap()], &[]);
+        assert!(output.status.success(), "{}", stderr(&output));
+        assert_eq!(read(&file), LOG);
+    }
+
+    /// Only an `all` run may go on without the receipts branch, and only
+    /// when Git can tell that the branch does not exist.
+    #[test]
+    fn probe_without_the_log_passes_only_all() {
+        let repo = Repo::new(&[]);
+        let (output, written) = repo.run(&["probe"], &[("MODE", "all")]);
+        assert!(output.status.success(), "{}", stderr(&output));
+        assert_eq!(written, "");
+        let notice = "::notice::no publish-receipts branch: this run's receipts are not recorded";
+        assert!(stdout(&output).contains(notice), "{}", stdout(&output));
+        let error = "::error::cannot read the publish-receipts branch";
+        for mode in ["new", "plan"] {
+            let (output, written) = repo.run(&["probe"], &[("MODE", mode)]);
+            assert_eq!(output.status.code(), Some(1), "{mode}");
+            assert_eq!(written, "", "{mode}");
+            assert!(
+                stdout(&output).contains(error),
+                "{mode}: {}",
+                stdout(&output)
+            );
+        }
+        let (output, written) = repo.run(
+            &["probe"],
+            &[("MODE", "all"), ("GITHUB_REPOSITORY", "missing.git")],
+        );
+        assert_eq!(output.status.code(), Some(1));
+        assert_eq!(written, "");
+        assert!(stdout(&output).contains(error), "{}", stdout(&output));
+    }
+
+    /// The lock commit goes on top of the tip it read: a fast-forward
+    /// that names this run and attempt and keeps the log.
+    #[test]
+    fn acquire_takes_a_free_lock() {
+        let repo = Repo::new(&[("receipts.jsonl", LOG)]);
+        let before = repo.tip();
+        let (output, written) = repo.run(&["acquire"], &[("GITHUB_RUN_ATTEMPT", "2")]);
+        assert!(output.status.success(), "{}", stderr(&output));
+        assert_eq!(written, "locked=true\ngo=true\n");
+        assert_eq!(repo.show("lock"), Some(lock("111 2")));
+        assert_eq!(repo.show("receipts.jsonl").as_deref(), Some(LOG));
+        assert_eq!(repo.origin(&["rev-parse", &format!("{BRANCH}^")]), before);
+        assert_eq!(
+            repo.origin(&["log", "-1", "--format=%s", BRANCH]),
+            format!("Lock for {}/111", repo.runs())
+        );
+    }
+
+    /// A `plan` run, or a run that found no log, takes no lock.
+    #[test]
+    fn acquire_without_an_upload_to_record_takes_no_lock() {
+        let repo = Repo::new(&[("receipts.jsonl", LOG)]);
+        let before = repo.tip();
+        for env in [
+            [("MODE", "plan"), ("RECEIPTS", "true")],
+            [("MODE", "all"), ("RECEIPTS", "")],
+        ] {
+            let (output, written) = repo.run(&["acquire"], &env);
+            assert!(output.status.success(), "{env:?}: {}", stderr(&output));
+            assert_eq!(written, "go=true\n", "{env:?}");
+            assert_eq!(repo.tip(), before, "{env:?}");
+        }
+    }
+
+    /// A running run's lock skips a scheduled run and fails a dispatch;
+    /// a finished run's lock, or an earlier attempt's of this run (never
+    /// inherited, so `gh` is not asked), fails both until reconciled.
+    #[test]
+    fn acquire_leaves_another_lock_in_place() {
+        let repo = Repo::new(&[("receipts.jsonl", LOG), ("lock", &lock("222 1"))]);
+        let before = repo.tip();
+        let call = "api repos/origin.git/actions/runs/222 --jq .status";
+        fake_gh(&repo.dir, call, "in_progress", 0);
+        let running = format!(
+            "{}/222 is publishing; this run uploads nothing",
+            repo.runs()
+        );
+        let (output, written) = repo.run(&["acquire"], &[("GITHUB_EVENT_NAME", "schedule")]);
+        assert!(output.status.success(), "{}", stderr(&output));
+        assert_eq!(written, "");
+        let notice = format!("::notice::{running} and a later one resumes");
+        assert!(stdout(&output).contains(&notice), "{}", stdout(&output));
+        let (output, written) = repo.run(&["acquire"], &[]);
+        assert_eq!(output.status.code(), Some(1));
+        assert_eq!(written, "");
+        let error = format!("::error::{running}, dispatch again later");
+        assert!(stdout(&output).contains(&error), "{}", stdout(&output));
+
+        fake_gh(&repo.dir, call, "completed", 0);
+        let stale = format!(
+            "::error::{}/222 (attempt 1) ended without recording all its uploads",
+            repo.runs()
+        );
+        for event in ["schedule", "workflow_dispatch"] {
+            let (output, written) = repo.run(&["acquire"], &[("GITHUB_EVENT_NAME", event)]);
+            assert_eq!(output.status.code(), Some(1), "{event}");
+            assert_eq!(written, "", "{event}");
+            assert!(
+                stdout(&output).contains(&stale),
+                "{event}: {}",
+                stdout(&output)
+            );
+        }
+        assert_eq!(repo.tip(), before);
+
+        let repo = Repo::new(&[("receipts.jsonl", LOG), ("lock", &lock("111 1"))]);
+        let (output, written) = repo.run(&["acquire"], &[("GITHUB_RUN_ATTEMPT", "2")]);
+        assert_eq!(output.status.code(), Some(1));
+        assert_eq!(written, "");
+        let earlier = format!("::error::{}/111 (attempt 1) ended without", repo.runs());
+        assert!(stdout(&output).contains(&earlier), "{}", stdout(&output));
+    }
+
+    /// Run 222 takes the lock between this run's fetch and push (a `git`
+    /// shim runs its whole `acquire` first), so this run's push is a real
+    /// non-fast-forward: a scheduled run skips, a dispatch fails, and the
+    /// branch holds only run 222's lock.
+    #[test]
+    fn acquire_loses_a_race_without_taking_the_lock() {
+        let script = Path::new(env!("CARGO_MANIFEST_DIR")).join("scripts/actions/receipts.sh");
+        let path = std::env::var_os("PATH").unwrap();
+        let real_git = std::env::split_paths(&path)
+            .map(|dir| dir.join("git"))
+            .find(|git| git.is_file())
+            .unwrap();
+        for (event, status) in [("schedule", 0), ("workflow_dispatch", 1)] {
+            let repo = Repo::new(&[("receipts.jsonl", LOG)]);
+            let before = repo.tip();
+            let marker = repo.dir.child("marker");
+            marker.write_str("").unwrap();
+            let rival = command_file(&repo.dir, "rival");
+            executable(
+                &repo.dir.child("bin/git"),
+                "#!/bin/sh\n\
+                 if [ -z \"$RIVAL\" ] && [ -e \"$MARKER\" ]; then\n\
+                 case \" $* \" in *\" push \"*)\n\
+                 rm \"$MARKER\"\n\
+                 RIVAL=1 GITHUB_RUN_ID=222 GITHUB_OUTPUT=\"$RIVAL_OUTPUT\" \
+                 bash \"$SCRIPT\" acquire >&2 || exit 99 ;;\n\
+                 esac\n\
+                 fi\n\
+                 exec \"$REAL_GIT\" \"$@\"\n",
+            );
+            let (output, written) = repo.run(
+                &["acquire"],
+                &[
+                    ("GITHUB_EVENT_NAME", event),
+                    ("MARKER", marker.to_str().unwrap()),
+                    ("RIVAL_OUTPUT", rival.to_str().unwrap()),
+                    ("SCRIPT", script.to_str().unwrap()),
+                    ("REAL_GIT", real_git.to_str().unwrap()),
+                ],
+            );
+            assert_eq!(
+                output.status.code(),
+                Some(status),
+                "{event}: {}",
+                stderr(&output)
+            );
+            assert_eq!(written, "", "{event}");
+            assert!(
+                stdout(&output)
+                    .contains("the publish-receipts branch moved; this run uploads nothing"),
+                "{event}: {}",
+                stdout(&output)
+            );
+            assert!(!marker.exists(), "{event}");
+            assert_eq!(read(&rival), "locked=true\ngo=true\n", "{event}");
+            assert_eq!(repo.show("lock"), Some(lock("222 1")), "{event}");
+            assert_eq!(
+                repo.origin(&["rev-parse", &format!("{BRANCH}^")]),
+                before,
+                "{event}"
+            );
+        }
+    }
+
+    /// A push refused while the tip stayed put is no lost race: a
+    /// scheduled run that skipped it would skip every later run too.
+    #[test]
+    fn acquire_fails_a_refused_push_that_moved_nothing() {
+        let repo = Repo::new(&[("receipts.jsonl", LOG)]);
+        repo.refuse_pushes();
+        let before = repo.tip();
+        for event in ["schedule", "workflow_dispatch"] {
+            let (output, written) = repo.run(&["acquire"], &[("GITHUB_EVENT_NAME", event)]);
+            assert_eq!(output.status.code(), Some(1), "{event}");
+            assert_eq!(written, "", "{event}");
+            let error = "::error::the publish-receipts branch refused the lock but did not move";
+            assert!(
+                stdout(&output).contains(error),
+                "{event}: {}",
+                stdout(&output)
+            );
+        }
+        assert_eq!(repo.tip(), before);
+    }
+
+    /// The publish job uploads only under its own attempt's lock, reading
+    /// the log of the tip that holds it; only a run that found no log may
+    /// go on while there still is none.
+    #[test]
+    fn held_requires_this_attempts_lock() {
+        let file = |repo: &Repo| repo.dir.child("log");
+        let repo = Repo::new(&[("receipts.jsonl", LOG), ("lock", &lock("111 1"))]);
+        let (output, _) = repo.run(&["held", file(&repo).to_str().unwrap()], &[]);
+        assert!(output.status.success(), "{}", stderr(&output));
+        assert_eq!(read(&file(&repo)), LOG);
+
+        let not_held = "::error::this attempt does not hold the publish-receipts lock";
+        let refuse = |repo: &Repo, env: &[(&str, &str)], error: &str| {
+            let (output, _) = repo.run(&["held", file(repo).to_str().unwrap()], env);
+            assert_eq!(output.status.code(), Some(1), "{env:?}");
+            assert!(
+                stdout(&output).contains(error),
+                "{env:?}: {}",
+                stdout(&output)
+            );
+            assert!(!file(repo).exists(), "{env:?}");
+        };
+        let repo = Repo::new(&[("receipts.jsonl", LOG), ("lock", &lock("111 1"))]);
+        refuse(&repo, &[("GITHUB_RUN_ATTEMPT", "2")], not_held);
+        refuse(&repo, &[("GITHUB_RUN_ID", "222")], not_held);
+        let repo = Repo::new(&[("receipts.jsonl", LOG)]);
+        refuse(&repo, &[], not_held);
+        refuse(&repo, &[("RECEIPTS", "")], not_held);
+
+        let repo = Repo::new(&[]);
+        let (output, _) = repo.run(
+            &["held", file(&repo).to_str().unwrap()],
+            &[("RECEIPTS", "")],
+        );
+        assert!(output.status.success(), "{}", stderr(&output));
+        assert!(!file(&repo).exists());
+        let unreadable = "::error::cannot read the publish-receipts branch; uploading nothing";
+        refuse(&repo, &[], unreadable);
+        let missing = [("RECEIPTS", ""), ("GITHUB_REPOSITORY", "missing.git")];
+        refuse(&repo, &missing, unreadable);
+
+        // An `all` run reads no log, so the lock alone suffices.
+        let repo = Repo::new(&[("lock", &lock("111 1"))]);
+        let (output, _) = repo.run(&["held", file(&repo).to_str().unwrap()], &[]);
+        assert!(output.status.success(), "{}", stderr(&output));
+        assert!(!file(&repo).exists());
+    }
+
+    /// `read` and `held` take the log from Git's objects: a symlink on
+    /// the branch yields its target's name, never a runner file.
+    #[test]
+    fn read_and_held_never_follow_a_symlink() {
+        let repo = Repo::new(&[("lock", &lock("111 1"))]);
+        let secret = repo.dir.child("secret");
+        secret.write_str("secret\n").unwrap();
+        let seed = repo.dir.child("seed");
+        std::os::unix::fs::symlink(secret.path(), seed.child("receipts.jsonl").path()).unwrap();
+        git(seed.path(), &["add", "receipts.jsonl"]);
+        git(seed.path(), &["commit", "-q", "-m", "link"]);
+        let push = format!("HEAD:refs/heads/{BRANCH}");
+        git(seed.path(), &["push", "-q", "../origin.git", &push]);
+        for command in ["read", "held"] {
+            let file = repo.dir.child(command);
+            let (output, _) = repo.run(&[command, file.to_str().unwrap()], &[]);
+            assert!(output.status.success(), "{command}: {}", stderr(&output));
+            assert_eq!(
+                read(&file),
+                secret.path().display().to_string(),
+                "{command}"
+            );
+        }
+    }
+
+    /// A receipts artifact of attempt 1 with two uploads.
+    fn artifact(repo: &Repo) -> ChildPath {
+        let dir = repo.dir.child("artifacts");
+        dir.child("receipts-1.jsonl")
+            .write_str("{\"name\":\"a\",\"outcome\":\"uploaded\"}\n{\"name\":\"b\",\"outcome\":\"failed\"}\n")
+            .unwrap();
+        dir
+    }
+
+    /// The log after appending `artifact`'s lines, stamped as run 111's.
+    fn stamped(repo: &Repo) -> String {
+        let stamp = format!(
+            "\"source\":\"{REV}\",\"cabin\":\"{OTHER_REV}\",\"run\":\"{}/111\"",
+            repo.runs()
+        );
+        format!(
+            "{LOG}{{\"name\":\"a\",\"outcome\":\"uploaded\",{stamp}}}\n\
+             {{\"name\":\"b\",\"outcome\":\"failed\",{stamp}}}\n"
+        )
+    }
+
+    /// `record`'s inputs: the publish job's result and attempt, the
+    /// artifact download's outcome, then this attempt.
+    fn outcome<'a>(
+        publish: &'a str,
+        published_in: &'a str,
+        download: &'a str,
+        attempt: &'a str,
+    ) -> [(&'a str, &'a str); 5] {
+        [
+            ("PUBLISH", publish),
+            ("PUBLISHED_IN", published_in),
+            ("DOWNLOAD", download),
+            ("GITHUB_RUN_ATTEMPT", attempt),
+            ("CABIN_REV", OTHER_REV),
+        ]
+    }
+
+    /// One commit appends the lock's attempt's receipts and releases the
+    /// lock when that attempt's publish job succeeded and its receipts
+    /// downloaded, or when that attempt skipped the job.
+    #[test]
+    fn record_appends_and_releases() {
+        let repo = Repo::new(&[("receipts.jsonl", LOG), ("lock", &lock("111 1"))]);
+        let before = repo.tip();
+        let dir = artifact(&repo);
+        let (output, _) = repo.run(
+            &["record", dir.to_str().unwrap()],
+            &outcome("success", "1", "success", "2"),
+        );
+        assert!(output.status.success(), "{}", stderr(&output));
+        assert_eq!(repo.show("lock"), None);
+        assert_eq!(repo.show("receipts.jsonl"), Some(stamped(&repo)));
+        assert_eq!(repo.origin(&["rev-parse", &format!("{BRANCH}^")]), before);
+        assert_eq!(
+            repo.origin(&["log", "-1", "--format=%s", BRANCH]),
+            format!("Record the receipts of {}/111 (attempt 1)", repo.runs())
+        );
+
+        let repo = Repo::new(&[("receipts.jsonl", LOG), ("lock", &lock("111 2"))]);
+        let empty = repo.dir.child("empty");
+        let (output, _) = repo.run(
+            &["record", empty.to_str().unwrap()],
+            &outcome("skipped", "", "failure", "2"),
+        );
+        assert!(output.status.success(), "{}", stderr(&output));
+        assert_eq!(repo.show("lock"), None);
+        assert_eq!(repo.show("receipts.jsonl").as_deref(), Some(LOG));
+    }
+
+    /// Unless the lock's attempt ended cleanly, the receipts it left are
+    /// recorded but the lock stays and `record` fails, as it does with
+    /// nothing pushed when this run does not hold the lock.
+    #[test]
+    fn record_keeps_the_lock_unless_the_upload_is_accounted_for() {
+        for (case, env) in [
+            ("failed", outcome("failure", "1", "success", "1")),
+            ("cancelled", outcome("cancelled", "1", "success", "1")),
+            ("download failed", outcome("success", "1", "failure", "1")),
+            (
+                "published in a later attempt",
+                outcome("success", "2", "success", "2"),
+            ),
+            (
+                "skipped in a later attempt",
+                outcome("skipped", "", "success", "2"),
+            ),
+        ] {
+            let repo = Repo::new(&[("receipts.jsonl", LOG), ("lock", &lock("111 1"))]);
+            let dir = artifact(&repo);
+            let (output, _) = repo.run(&["record", dir.to_str().unwrap()], &env);
+            assert_eq!(output.status.code(), Some(1), "{case}");
+            let error = "::error::the publish job under the lock of attempt 1 ended";
+            assert!(
+                stdout(&output).contains(error),
+                "{case}: {}",
+                stdout(&output)
+            );
+            assert_eq!(repo.show("lock"), Some(lock("111 1")), "{case}");
+            assert_eq!(repo.show("receipts.jsonl"), Some(stamped(&repo)), "{case}");
+        }
+
+        let repo = Repo::new(&[("receipts.jsonl", LOG), ("lock", &lock("111 1"))]);
+        let empty = repo.dir.child("empty");
+        let (output, _) = repo.run(
+            &["record", empty.to_str().unwrap()],
+            &outcome("success", "1", "success", "1"),
+        );
+        assert_eq!(output.status.code(), Some(1), "no receipts file");
+        assert_eq!(repo.show("lock"), Some(lock("111 1")));
+        assert_eq!(repo.show("receipts.jsonl").as_deref(), Some(LOG));
+
+        let not_holder = "::error::this run does not hold the publish-receipts lock";
+        for files in [
+            &[("receipts.jsonl", LOG), ("lock", &lock("222 1"))][..],
+            &[("receipts.jsonl", LOG)],
+        ] {
+            let repo = Repo::new(files);
+            let before = repo.tip();
+            let dir = artifact(&repo);
+            let (output, _) = repo.run(
+                &["record", dir.to_str().unwrap()],
+                &outcome("success", "1", "success", "1"),
+            );
+            assert_eq!(output.status.code(), Some(1), "{files:?}");
+            assert!(stdout(&output).contains(not_holder), "{}", stdout(&output));
+            assert_eq!(repo.tip(), before, "{files:?}");
+        }
+    }
+
+    /// A refused push fails `record` and leaves the lock: rerunning it
+    /// alone then records.
+    #[test]
+    fn record_fails_a_refused_push() {
+        let repo = Repo::new(&[("receipts.jsonl", LOG), ("lock", &lock("111 1"))]);
+        let before = repo.tip();
+        let dir = artifact(&repo);
+        repo.refuse_pushes();
+        let env = outcome("success", "1", "success", "1");
+        let (output, _) = repo.run(&["record", dir.to_str().unwrap()], &env);
+        assert!(!output.status.success());
+        assert_eq!(repo.tip(), before);
+        std::fs::remove_file(repo.dir.child("origin.git/hooks/pre-receive")).unwrap();
+        let (output, _) = repo.run(&["record", dir.to_str().unwrap()], &env);
+        assert!(output.status.success(), "{}", stderr(&output));
+        assert_eq!(repo.show("lock"), None);
+    }
 }
