@@ -1,0 +1,178 @@
+[package.upstream]
+url = "https://github.com/google/draco/archive/refs/tags/1.5.9.tar.gz"
+checksum = "sha256:5b84e0e212ccc7b03ace681760a65a66fe2481a5f54df65154cfc8f0cbb87148"
+format = "tar.gz"
+strip-prefix = "draco-1.5.9"
+# The patch adds src/draco/draco_features.h, which CMake generates
+# (cmake/draco_options.cmake:292-357) from the default options: the
+# eight feature macros they enable, and, only when MSVC builds, eight
+# warning-suppression pragmas.  The pragmas sit under #ifdef _MSC_VER so
+# one header serves every platform; that guard is this port's only
+# structural deviation from the generated file.  Like upstream's, the
+# pragmas also reach MSVC consumers that include the header.
+patches = ["patches/0001-add-the-generated-draco-features-h.patch"]
+
+[package]
+name = "cabin-ports/draco"
+version = "1.5.9"
+# The directories holding the default library's sources and headers,
+# with their tests and the transcoder's files, which nothing here
+# compiles, and the four texture/ headers the default build includes
+# (metadata/property_texture.cc, mesh/mesh_are_equivalent.cc); their
+# content is guarded by DRACO_TRANSCODER_SUPPORTED.
+include = [
+  "LICENSE",
+  "patches",
+  "src/draco/animation",
+  "src/draco/attributes",
+  "src/draco/compression",
+  "src/draco/core",
+  "src/draco/draco_features.h",
+  "src/draco/io",
+  "src/draco/mesh",
+  "src/draco/metadata",
+  "src/draco/point_cloud",
+  "src/draco/texture/texture.h",
+  "src/draco/texture/texture_library.h",
+  "src/draco/texture/texture_map.h",
+  "src/draco/texture/texture_utils.h",
+]
+
+# The static draco library CMake builds by default from the object
+# libraries in CMakeLists.txt:721-893 (draco_object_library_deps,
+# :944-973), with the default options (cmake/draco_options.cmake:65-143).
+# Not ported: the draco_encoder and draco_decoder executables
+# (DRACO_BUILD_EXECUTABLES), and everything off by default: the
+# transcoder with its glTF, scene, material and texture support
+# (DRACO_TRANSCODER_SUPPORTED), the PMC codec, the tests, the Unity and
+# Maya plugins, and the JavaScript/WebAssembly builds; with them the
+# vendored third_party/ code they need.  Not reproduced: the warning
+# flags cmake/draco_build_definitions.cmake adds, and the
+# DRACO_CMAKE, DRACO_FLAGS_SRCDIR and DRACO_FLAGS_TMPDIR definitions
+# (:87-89), which no library source reads.  Like upstream, the library
+# leaves out core/status.cc, so Status::code_string() and
+# code_and_error_string() (core/status.h:48-49) stay undefined.
+[target.draco]
+type = "library"
+sources = [
+  "src/draco/animation/keyframe_animation.cc",
+  "src/draco/animation/keyframe_animation_decoder.cc",
+  "src/draco/animation/keyframe_animation_encoder.cc",
+  "src/draco/attributes/attribute_octahedron_transform.cc",
+  "src/draco/attributes/attribute_quantization_transform.cc",
+  "src/draco/attributes/attribute_transform.cc",
+  "src/draco/attributes/geometry_attribute.cc",
+  "src/draco/attributes/point_attribute.cc",
+  "src/draco/compression/attributes/attributes_decoder.cc",
+  "src/draco/compression/attributes/attributes_encoder.cc",
+  "src/draco/compression/attributes/kd_tree_attributes_decoder.cc",
+  "src/draco/compression/attributes/kd_tree_attributes_encoder.cc",
+  "src/draco/compression/attributes/prediction_schemes/prediction_scheme_encoder_factory.cc",
+  "src/draco/compression/attributes/sequential_attribute_decoder.cc",
+  "src/draco/compression/attributes/sequential_attribute_decoders_controller.cc",
+  "src/draco/compression/attributes/sequential_attribute_encoder.cc",
+  "src/draco/compression/attributes/sequential_attribute_encoders_controller.cc",
+  "src/draco/compression/attributes/sequential_integer_attribute_decoder.cc",
+  "src/draco/compression/attributes/sequential_integer_attribute_encoder.cc",
+  "src/draco/compression/attributes/sequential_normal_attribute_decoder.cc",
+  "src/draco/compression/attributes/sequential_normal_attribute_encoder.cc",
+  "src/draco/compression/attributes/sequential_quantization_attribute_decoder.cc",
+  "src/draco/compression/attributes/sequential_quantization_attribute_encoder.cc",
+  "src/draco/compression/bit_coders/adaptive_rans_bit_decoder.cc",
+  "src/draco/compression/bit_coders/adaptive_rans_bit_encoder.cc",
+  "src/draco/compression/bit_coders/direct_bit_decoder.cc",
+  "src/draco/compression/bit_coders/direct_bit_encoder.cc",
+  "src/draco/compression/bit_coders/rans_bit_decoder.cc",
+  "src/draco/compression/bit_coders/rans_bit_encoder.cc",
+  "src/draco/compression/bit_coders/symbol_bit_decoder.cc",
+  "src/draco/compression/bit_coders/symbol_bit_encoder.cc",
+  "src/draco/compression/decode.cc",
+  "src/draco/compression/draco_compression_options.cc",
+  "src/draco/compression/encode.cc",
+  "src/draco/compression/entropy/shannon_entropy.cc",
+  "src/draco/compression/entropy/symbol_decoding.cc",
+  "src/draco/compression/entropy/symbol_encoding.cc",
+  "src/draco/compression/expert_encode.cc",
+  "src/draco/compression/mesh/mesh_decoder.cc",
+  "src/draco/compression/mesh/mesh_edgebreaker_decoder.cc",
+  "src/draco/compression/mesh/mesh_edgebreaker_decoder_impl.cc",
+  "src/draco/compression/mesh/mesh_edgebreaker_encoder.cc",
+  "src/draco/compression/mesh/mesh_edgebreaker_encoder_impl.cc",
+  "src/draco/compression/mesh/mesh_encoder.cc",
+  "src/draco/compression/mesh/mesh_sequential_decoder.cc",
+  "src/draco/compression/mesh/mesh_sequential_encoder.cc",
+  "src/draco/compression/point_cloud/algorithms/dynamic_integer_points_kd_tree_decoder.cc",
+  "src/draco/compression/point_cloud/algorithms/dynamic_integer_points_kd_tree_encoder.cc",
+  "src/draco/compression/point_cloud/algorithms/float_points_tree_decoder.cc",
+  "src/draco/compression/point_cloud/algorithms/float_points_tree_encoder.cc",
+  "src/draco/compression/point_cloud/point_cloud_decoder.cc",
+  "src/draco/compression/point_cloud/point_cloud_encoder.cc",
+  "src/draco/compression/point_cloud/point_cloud_kd_tree_decoder.cc",
+  "src/draco/compression/point_cloud/point_cloud_kd_tree_encoder.cc",
+  "src/draco/compression/point_cloud/point_cloud_sequential_decoder.cc",
+  "src/draco/compression/point_cloud/point_cloud_sequential_encoder.cc",
+  "src/draco/core/bit_utils.cc",
+  "src/draco/core/cycle_timer.cc",
+  "src/draco/core/data_buffer.cc",
+  "src/draco/core/decoder_buffer.cc",
+  "src/draco/core/divide.cc",
+  "src/draco/core/draco_types.cc",
+  "src/draco/core/encoder_buffer.cc",
+  "src/draco/core/hash_utils.cc",
+  "src/draco/core/options.cc",
+  "src/draco/core/quantization_utils.cc",
+  "src/draco/io/file_reader_factory.cc",
+  "src/draco/io/file_utils.cc",
+  "src/draco/io/file_writer_factory.cc",
+  "src/draco/io/file_writer_utils.cc",
+  "src/draco/io/mesh_io.cc",
+  "src/draco/io/obj_decoder.cc",
+  "src/draco/io/obj_encoder.cc",
+  "src/draco/io/parser_utils.cc",
+  "src/draco/io/ply_decoder.cc",
+  "src/draco/io/ply_encoder.cc",
+  "src/draco/io/ply_reader.cc",
+  "src/draco/io/point_cloud_io.cc",
+  "src/draco/io/stdio_file_reader.cc",
+  "src/draco/io/stdio_file_writer.cc",
+  "src/draco/io/stl_decoder.cc",
+  "src/draco/io/stl_encoder.cc",
+  "src/draco/mesh/corner_table.cc",
+  "src/draco/mesh/mesh.cc",
+  "src/draco/mesh/mesh_are_equivalent.cc",
+  "src/draco/mesh/mesh_attribute_corner_table.cc",
+  "src/draco/mesh/mesh_cleanup.cc",
+  "src/draco/mesh/mesh_features.cc",
+  "src/draco/mesh/mesh_misc_functions.cc",
+  "src/draco/mesh/mesh_stripifier.cc",
+  "src/draco/mesh/triangle_soup_mesh_builder.cc",
+  "src/draco/metadata/geometry_metadata.cc",
+  "src/draco/metadata/json_entity.cc",
+  "src/draco/metadata/metadata.cc",
+  "src/draco/metadata/metadata_decoder.cc",
+  "src/draco/metadata/metadata_encoder.cc",
+  "src/draco/metadata/property_attribute.cc",
+  "src/draco/metadata/property_table.cc",
+  "src/draco/metadata/property_texture.cc",
+  "src/draco/metadata/structural_metadata.cc",
+  "src/draco/metadata/structural_metadata_schema.cc",
+  "src/draco/point_cloud/point_cloud.cc",
+  "src/draco/point_cloud/point_cloud_builder.cc",
+]
+include-dirs = ["src"]
+# Upstream requires C++11 (cxx_std_11, cmake/draco_targets.cmake:298-302);
+# C++14 is the oldest standard Cabin can request from MSVC.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "draco"
+
+# cmake/draco_build_definitions.cmake:91-92: the CRT deprecation
+# silencer, and NOMINMAX for core/cycle_timer.h's <windows.h>.
+[target.'cfg(os = "windows")'.profile]
+defines = ["_CRT_SECURE_NO_DEPRECATE=1", "NOMINMAX=1"]
+
+# cmake/draco_build_definitions.cmake:99-104: large-file support on
+# 64-bit targets except under MSVC, which io/stdio_file_reader.cc's file
+# size query reads (ftello under _FILE_OFFSET_BITS == 64).
+[target.'cfg(all(not(any(cxx = "msvc", cxx = "clang-cl")), any(arch = "x86_64", arch = "aarch64", arch = "powerpc64", arch = "riscv64", arch = "s390x", arch = "loongarch64", arch = "mips64", arch = "sparc64")))'.profile]
+defines = ["_LARGEFILE_SOURCE", "_FILE_OFFSET_BITS=64"]
