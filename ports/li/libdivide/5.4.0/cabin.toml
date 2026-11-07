@@ -1,0 +1,38 @@
+[package.upstream]
+url = "https://github.com/ridiculousfish/libdivide/archive/refs/tags/v5.4.0.tar.gz"
+checksum = "sha256:077e8ce6c783d1b4402aa6d77f643f88f37feb80e9896c30e19a62cc0a3f5576"
+format = "tar.gz"
+strip-prefix = "libdivide-5.4.0"
+
+# The one header upstream's CMake installs (CMakeLists.txt:325-327).  The
+# archive root also holds the tests, the benchmarks and the 8-bit
+# constant-division add-on, so it is not put on the include path.
+[[package.upstream.copy]]
+from = "libdivide.h"
+to = "include/libdivide.h"
+
+[package]
+name = "cabin-ports/libdivide"
+version = "5.4.0"
+include = ["LICENSE.txt", "include"]
+
+# The INTERFACE target libdivide::libdivide (CMakeLists.txt:312-323).  It
+# carries no definitions: SIMD division stays opt-in, enabled by the
+# consumer defining LIBDIVIDE_SSE2, LIBDIVIDE_AVX2, LIBDIVIDE_AVX512,
+# LIBDIVIDE_NEON, LIBDIVIDE_SVE or LIBDIVIDE_SVE2 before the include
+# (README.md:106-133); upstream applies LIBDIVIDE_VECTOR_EXT and
+# LIBDIVIDE_ASSERTIONS_ON only to its own tests (:289-308, :384-388).  The
+# C side is C99 (test_c99 builds with C_STANDARD 99, :380); the C++ side
+# requires cxx_alias_templates (:319) for
+# libdivide::branchfree_divider.  Not ported: the constant-divisor add-on
+# README.md:74-75 lists, constant_fast_div.h and constant_fast_div.hpp
+# with their generated s16/u16_ldparams tables, which divide 16-bit values
+# by compile-time constants for 8-bit CPUs
+# (constant_fast_div.hpp:1-9).  Upstream's CMake does not install it, and
+# its C++ tables use designated initializers, a C++20 feature above this
+# target's C++11 floor.
+[target.libdivide]
+type = "header-only"
+include-dirs = ["include"]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
