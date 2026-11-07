@@ -4,5 +4,4 @@
 # dispatch - and versions that require a held version wait with it.
 # Hold only a genuine blocker (CONTRIBUTING.md, "Pull requests"); remove its line
 # through a pull request once the blocker is resolved.
-xtl 0.8.2 include/xtl/xvisitor.hpp:18 and xmultimethods.hpp:25 ship code ported from Loki without Loki's MIT notice (Copyright (c) 2001 Andrei Alexandrescu); patch 0001 already adds the BSL-1.0 text for the tcb/span code; held until the package ships those terms, or its cabin.toml records why none apply (CONTRIBUTING.md, "Upstream fidelity")
 json-schema-validator 2.4.1 src/string-format-check.cpp ships regexes it credits to other sources without stating their licence terms: the hostname regex "from" Stack Overflow question 106179 (:192-193), verbatim from answer 3824105 (CC BY-SA 2.5); "Many of the RegExes" from the jmrware.com URI_regex article (:25); the URI regex "adapted from" jhermsmeier/uri.regex (:291); patch 0001 already adds the Apache-2.0 text for the JSON Patch schema in src/json-patch.cpp; held until the package ships those terms, or its cabin.toml records why none apply (CONTRIBUTING.md, "Upstream fidelity")
