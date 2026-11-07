@@ -1,0 +1,43 @@
+[package.upstream]
+url = "https://github.com/martinus/robin-hood-hashing/archive/refs/tags/3.11.5.tar.gz"
+checksum = "sha256:3693e44dda569e9a8b87ce8263f7477b23af448a3c3600c8ab9004fe79c20ad0"
+format = "tar.gz"
+strip-prefix = "robin-hood-hashing-3.11.5"
+# robin_hood.h uses uint64_t, UINT64_C and SIZE_MAX but gets <cstdint>
+# only transitively, which not every standard library provides; without
+# it the SIZE_MAX == UINT32_MAX bitness test compares 0 with 0 and picks
+# the 32-bit branch, which then fails at uint32_t.  Conan Center patches
+# the same include in for GCC 15 (conan-center-index#27631) and vcpkg for
+# MinGW (vcpkg#48009).  The patch adds just that include.  Upstream has
+# no fix and takes none: the repository is archived.
+patches = ["patches/0001-include-cstdint.patch"]
+
+[package]
+name = "cabin-ports/robin-hood-hashing"
+version = "3.11.5"
+include = ["LICENSE", "patches", "src/include/robin_hood.h"]
+
+# Upstream's robin_hood INTERFACE target, which its CMake defines when
+# the project is not the top-level one (CMakeLists.txt:125-137):
+# src/include is the include root and robin_hood.h the one header it
+# installs (:146-149).  The header supports C++11/14/17/20
+# (robin_hood.h:8); the target sets no compile features or definitions,
+# so ROBIN_HOOD_DISABLE_INTRINSICS and the ROBIN_HOOD_LOG_ENABLED,
+# ROBIN_HOOD_TRACE_ENABLED and ROBIN_HOOD_COUNT_ENABLED debugging
+# switches stay the consumer's to define.  hash_bytes() and hash_int()
+# follow MurmurHash64A and MurmurHash3's finalizer, which their author
+# placed in the public domain.  ROBIN_HOOD_IS_TRIVIALLY_COPYABLE
+# (robin_hood.h:207-212) adapts Stack Overflow answer 31798726 (CC BY-SA),
+# whose terms no shipped file carries.  The header's other credits (:96,
+# :866, :906) name techniques, not copied code.
+#
+# Upstream is archived and unmaintained: its README on master names
+# ankerl::unordered_dense as the successor.  Master's one header change
+# since 3.11.5 (#166, bd632059) keeps Clang off the deprecated
+# __has_trivial_copy builtin; it is unreleased and not taken.  Not
+# ported: the standalone test and benchmark build and the CMake package
+# files.
+[target.robin-hood-hashing]
+type = "header-only"
+include-dirs = ["src/include"]
+interface-cxx-standard = "c++11"
