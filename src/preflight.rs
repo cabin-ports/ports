@@ -302,11 +302,13 @@ fn stage(
         manifest: &conversion.manifest,
     };
     let started = Instant::now();
-    let archive = upstream::resolve_archive(
-        &package,
-        ports_cache,
-        upstream::ArchiveFetch::CacheOrDownload,
-    )?;
+    let archive = retry_download(DOWNLOAD_RETRY_PAUSE, || {
+        upstream::resolve_archive(
+            &package,
+            ports_cache,
+            upstream::ArchiveFetch::CacheOrDownload,
+        )
+    })?;
     let fetched = started.elapsed();
     // The preflight clears `run/`, which holds `sources_dir`, so this
     // directory is fresh.
@@ -338,6 +340,35 @@ fn stage(
         ..PortTimings::default()
     };
     Ok((package_dir, report, timing))
+}
+
+const DOWNLOAD_ATTEMPTS: u32 = 3;
+const DOWNLOAD_RETRY_PAUSE: Duration = Duration::from_secs(5);
+
+/// Call `fetch` up to [`DOWNLOAD_ATTEMPTS`] times, retrying only a
+/// failed download: upstream hosts such as downloads.xiph.org
+/// intermittently drop connections, while a checksum mismatch or a
+/// cache I/O error would fail the same way again.  The retry is publish
+/// orchestration, so it wraps Cabin's resolver here: one host's dropped
+/// connection should not fail a run over every port, while an
+/// interactive `cabin` command leaves retrying to its user.
+fn retry_download<T>(
+    pause: Duration,
+    mut fetch: impl FnMut() -> Result<T, upstream::UpstreamStageError>,
+) -> Result<T, upstream::UpstreamStageError> {
+    let mut attempt = 1;
+    loop {
+        match fetch() {
+            Err(err @ upstream::UpstreamStageError::Download { .. })
+                if attempt < DOWNLOAD_ATTEMPTS =>
+            {
+                attempt += 1;
+                eprintln!("warning: {err}; retrying (attempt {attempt} of {DOWNLOAD_ATTEMPTS})");
+                thread::sleep(pause);
+            }
+            result => return result,
+        }
+    }
 }
 
 /// Build the port from the preflight registry through a generated
@@ -815,5 +846,22 @@ mod tests {
         fs::write(tests.join("main.cc"), "").unwrap();
         fs::write(tests.join("main.c"), "").unwrap();
         ensure_consumer_tests_used(&[conversion]).unwrap();
+    }
+
+    #[test]
+    fn a_failed_download_is_retried_up_to_the_attempt_limit() {
+        let mut calls = 0;
+        let fetched: Result<(), _> = retry_download(Duration::ZERO, || {
+            calls += 1;
+            Err(upstream::UpstreamStageError::Download {
+                url: "https://ports.invalid/zlib-1.3.1.tar.gz".to_owned(),
+                message: "Unexpected EOF".to_owned(),
+            })
+        });
+        assert!(
+            matches!(fetched, Err(upstream::UpstreamStageError::Download { .. })),
+            "{fetched:?}"
+        );
+        assert_eq!(calls, DOWNLOAD_ATTEMPTS);
     }
 }
