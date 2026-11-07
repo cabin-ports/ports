@@ -1,0 +1,45 @@
+[package.upstream]
+url = "https://github.com/KhronosGroup/SPIRV-Headers/archive/refs/tags/vulkan-sdk-1.4.363.0.tar.gz"
+checksum = "sha256:5b3a0d099f5c7649e29c0938476c462e71d66ad89a0bde42fa1ba3eb476956c9"
+format = "tar.gz"
+strip-prefix = "SPIRV-Headers-vulkan-sdk-1.4.363.0"
+
+# Upstream releases with the Vulkan SDK under tags such as
+# vulkan-sdk-1.4.363.0; the version drops the tag's fourth component, which
+# is 0.  The project VERSION 1.5.5 in CMakeLists.txt:10 is not the release.
+# LICENSES/MIT.txt is the MIT text that the SPDX-License-Identifier: MIT
+# tags in include/spirv name: spir-v.xml; GLSL.std.450.h and OpenCL.std.h
+# in 1.0, 1.1, 1.2 and unified1; unified1's AMD_*.h, NonSemantic*.h,
+# TOSA.001000.1.h, ArmExperimentalMLOperations.h and ArmMotionEngine.100.h;
+# and the grammar JSON of the Arm motion engine, Arm ML operations, TOSA and
+# graph debug info instruction sets.  Arm Ltd. holds the copyright of the
+# TOSA, Arm and graph debug info files, and Khronos that of the rest.
+[package]
+name = "cabin-ports/spirv-headers"
+version = "1.4.363"
+include = ["LICENSE", "LICENSES/MIT.txt", "include"]
+
+# The INTERFACE target SPIRV-Headers::SPIRV-Headers and the directory
+# upstream's CMake installs, include/spirv (CMakeLists.txt:17-19, :32), so
+# consumers include <spirv/unified1/spirv.h>; the tree also holds the
+# grammar JSON, the XML registry and the headers generated for other
+# languages, which upstream installs with it.  The C headers need C99,
+# the standard upstream's C test builds with (tests/CMakeLists.txt:23):
+# spirv.h for its trailing enumerator commas and the extended instruction
+# set headers for their // comments; 1.0, 1.1 and 1.2's OpenCL.std.h are
+# C++ only.  The C++ headers need C++11: spirv.hpp ends its enumerator
+# lists with commas too, and spirv.hpp11 uses scoped enums and constexpr
+# operators (tests/CMakeLists.txt:17).  spirv.hpp and spirv.hpp11 share an
+# include guard, so a translation unit gets whichever it includes first.
+# With SPV_ENABLE_UTILITY_CODE defined, spirv.h's helpers (:2713-5714) are
+# C99 inline definitions with no external definition, so C code that calls
+# one links only where the call is inlined or exactly one translation unit
+# of the program includes spirv.h and declares the helper extern (C99
+# 6.7.4p6-7); a second such declaration duplicates the definition.  Not
+# ported: the CMake config and pkg-config files, and the header generator
+# under tools/.
+[target.spirv-headers]
+type = "header-only"
+include-dirs = ["include"]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
