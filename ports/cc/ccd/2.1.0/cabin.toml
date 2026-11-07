@@ -1,22 +1,15 @@
 [package.upstream]
-# Conan Center's conandata pins this sha256 for its "2.1" and vcpkg's
-# port the same archive's SHA-512.
 url = "https://github.com/danfis/libccd/archive/refs/tags/v2.1.tar.gz"
 checksum = "sha256:542b6c47f522d581fbf39e51df32c7d1256ac0c626e7c2b41f1040d4b9d50d1e"
 format = "tar.gz"
 strip-prefix = "libccd-2.1"
-# src/CMakeLists.txt:19 generates ccd/config.h from
-# src/ccd/config.h.cmake.in and installs it with the other public
-# headers (:21-27, :69).  The patch adds it, at its installed path, as
-# configure_file writes it by default: ENABLE_DOUBLE_PRECISION is off
-# (CMakeLists.txt:25-26), so CCD_SINGLE is defined and CCD_DOUBLE is not
-# (src/CMakeLists.txt:14-17).
+# The patch adds ccd/config.h at its installed path, as CMake's
+# configure_file writes it by default: single precision, so CCD_SINGLE is
+# defined and CCD_DOUBLE is not.
 patches = ["patches/0001-add-the-generated-ccd-config-h.patch"]
 
-# The public headers in their installed layout, include/ccd
-# (src/CMakeLists.txt:21-27, :69).  Copying them keeps the private
-# alloc.h, dbg.h, list.h, polytope.h, simplex.h and support.h, which sit
-# in src/ above src/ccd/, off consumers' include path.
+# The public headers in their installed layout, which keeps the private
+# headers in src/ off consumers' include path.
 [[package.upstream.copy]]
 from = "src/ccd/ccd.h"
 to = "include/ccd/ccd.h"
@@ -39,8 +32,8 @@ to = "include/ccd/vec3.h"
 
 [package]
 name = "cabin-ports/ccd"
-# Upstream tags this release v2.1 (its CMakeLists.txt:11-13 and
-# configure.ac:5 still say 2.0); Cabin versions have three components.
+# Upstream tags this release v2.1 (its build files still say 2.0); Cabin
+# versions have three components.
 version = "2.1.0"
 include = [
   "BSD-LICENSE",
@@ -58,39 +51,28 @@ include = [
   "src/support.h",
   "src/vec3.c",
 ]
-# Upstream's CMake build sets no C standard (its hand-written Makefile
-# uses gnu99, src/Makefile.include:67); C11 is the oldest Cabin can
-# lower for MSVC.  The public headers use inline functions and // comments (e.g.
-# vec3.h:50, :106), so C99 is their floor; they are valid C++98.
+# Upstream's CMake build sets no C standard; C11 is the oldest Cabin can
+# lower for MSVC.  The public headers need C99 and are valid C++98.
 c-standard = "c11"
 interface-c-standard = "c99"
 interface-cxx-standard = "c++98"
 
-# The static form of the ccd library upstream's CMake build compiles
-# (src/CMakeLists.txt:29-42), in its default single precision.  Not
-# ported: the double-precision build (ENABLE_DOUBLE_PRECISION, which
-# vcpkg offers as a feature); the shared library CMake builds by default
-# (CMakeLists.txt:23); the -fvisibility=hidden it adds on Unix
-# (src/CMakeLists.txt:78-84), which only a shared object sees; the
-# WIN32 that CMake defines for MSVC, which makes vec3.h:39-41 replace
-# fminf with an equivalent ternary for mpr.c; the test suites; and the
-# documentation.
+# The static form of upstream's ccd library, in its default single
+# precision.  Not ported: the double-precision build
+# (ENABLE_DOUBLE_PRECISION, which vcpkg offers as a feature) and the shared
+# library CMake builds by default.
 [target.ccd]
 type = "library"
 sources = ["src/ccd.c", "src/mpr.c", "src/polytope.c", "src/support.c", "src/vec3.c"]
 include-dirs = ["include"]
 links = "ccd"
-# Without CCD_STATIC_DEFINE, ccd_export.h marks the API, including the
-# data vec3.h:97-103 exports, __declspec(dllimport) on MSVC, which a
-# static library and its consumers cannot use, and visibility("default")
-# elsewhere, which only a shared library needs.  Upstream defines it
-# only for CCD_HIDE_ALL_SYMBOLS (CMakeLists.txt:30-33); vcpkg's static
-# build forces it on in ccd_export.h.
+# Without CCD_STATIC_DEFINE, ccd_export.h marks the API dllimport on MSVC,
+# which a static library and its consumers cannot use.  Upstream defines it
+# only for CCD_HIDE_ALL_SYMBOLS; vcpkg's static build forces it on too.
 defines = ["CCD_STATIC_DEFINE"]
 interface-defines = ["CCD_STATIC_DEFINE"]
 
-# Upstream links libm everywhere but Windows (src/CMakeLists.txt:51-60);
-# the public headers' inline functions call sqrtf and fabsf (vec3.h)
-# and sin and cos (quat.h) too.
+# Upstream links libm everywhere but Windows; the public headers' inline
+# functions call libm too.
 [target.'cfg(family = "unix")'.profile]
 link-libs = ["m"]
