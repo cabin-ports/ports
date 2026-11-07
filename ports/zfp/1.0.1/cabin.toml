@@ -1,0 +1,118 @@
+[package.upstream]
+# The release tarball on GitHub, which carries the tag's library sources
+# byte for byte.
+url = "https://github.com/LLNL/zfp/releases/download/1.0.1/zfp-1.0.1.tar.gz"
+checksum = "sha256:ca0f7b4ae88044ffdda12faead30723fe83dd8f5bb0db74125df84589e60e52b"
+format = "tar.gz"
+strip-prefix = "zfp-1.0.1"
+
+[package]
+name = "cabin-ports/zfp"
+version = "1.0.1"
+# The headers CMake installs without BUILD_CFP: include/ less every
+# path named cfp (CMakeLists.txt:332-337).  zfp/array.h, cfp's header,
+# is installed there too, without the internal headers it includes.
+# LICENSE carries the BSD-3-Clause terms and NOTICE the LLNL notice.
+include = [
+  "LICENSE",
+  "NOTICE",
+  "include/zfp.h",
+  "include/zfp.hpp",
+  "include/zfp/array.h",
+  "include/zfp/array.hpp",
+  "include/zfp/array1.hpp",
+  "include/zfp/array2.hpp",
+  "include/zfp/array3.hpp",
+  "include/zfp/array4.hpp",
+  "include/zfp/bitstream.h",
+  "include/zfp/bitstream.inl",
+  "include/zfp/codec",
+  "include/zfp/constarray1.hpp",
+  "include/zfp/constarray2.hpp",
+  "include/zfp/constarray3.hpp",
+  "include/zfp/constarray4.hpp",
+  "include/zfp/factory.hpp",
+  "include/zfp/index.hpp",
+  "include/zfp/internal/array",
+  "include/zfp/internal/codec",
+  "include/zfp/internal/zfp",
+  "include/zfp/version.h",
+  "src",
+]
+# Upstream asks for C99, or C90 with MSVC and MinGW (CMakeLists.txt:73-79).
+# C11 is the oldest standard Cabin can lower for MSVC.
+c-standard = "c11"
+# zfp/internal/zfp/types.h takes its 64-bit types from <stdint.h> only
+# from C99 and C++11; below those it assumes LP64 off Windows (:58-75),
+# which disagrees with the library on 32-bit targets.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# libzfp (src/CMakeLists.txt:13-28), with upstream's default compile-time
+# options: a 64-bit stream word, which adds no define (CMakeLists.txt:
+# 214-216), and ZFP_ROUND_NEVER, which CMake passes as a private define
+# (:228-230) because EQUAL compares no number there.
+#
+# Static only: upstream's default is a shared library (:99-101), which on
+# Windows adds ZFP_SHARED_LIBS and ZFP_SOURCE for dllexport
+# (src/CMakeLists.txt:38-42).  Serial only: upstream compiles with OpenMP
+# where find_package(OpenMP) finds it (CMakeLists.txt:170-189); without
+# it, zfp_stream_set_execution(zfp, zfp_exec_omp) returns zfp_false
+# (src/zfp.c:935-948) and compression stays serial.
+#
+# Not ported: CUDA (ZFP_WITH_CUDA), the cfp, Fortran (zFORp) and Python
+# (zfpy) bindings, the zfp command-line utility (BUILD_UTILITIES), the
+# examples and tests, and the non-default compile-time options.  Not
+# reproduced: position-independent code (CMakeLists.txt:105-115) and
+# MSVC's warning-only /wd4146 and /wd4305 (:68-69).
+[target.zfp]
+type = "library"
+sources = [
+  "src/bitstream.c",
+  "src/decode1d.c",
+  "src/decode1f.c",
+  "src/decode1i.c",
+  "src/decode1l.c",
+  "src/decode2d.c",
+  "src/decode2f.c",
+  "src/decode2i.c",
+  "src/decode2l.c",
+  "src/decode3d.c",
+  "src/decode3f.c",
+  "src/decode3i.c",
+  "src/decode3l.c",
+  "src/decode4d.c",
+  "src/decode4f.c",
+  "src/decode4i.c",
+  "src/decode4l.c",
+  "src/encode1d.c",
+  "src/encode1f.c",
+  "src/encode1i.c",
+  "src/encode1l.c",
+  "src/encode2d.c",
+  "src/encode2f.c",
+  "src/encode2i.c",
+  "src/encode2l.c",
+  "src/encode3d.c",
+  "src/encode3f.c",
+  "src/encode3i.c",
+  "src/encode3l.c",
+  "src/encode4d.c",
+  "src/encode4f.c",
+  "src/encode4i.c",
+  "src/encode4l.c",
+  "src/zfp.c",
+]
+include-dirs = ["include"]
+defines = ["ZFP_ROUNDING_MODE=ZFP_ROUND_NEVER"]
+links = "zfp"
+
+# What CMake's MSVC, true for cl and clang-cl, adds to every compilation
+# (CMakeLists.txt:62-67).
+[target.'cfg(any(cc = "msvc", cc = "clang-cl"))'.profile]
+defines = ["_CRT_SECURE_NO_WARNINGS", "_SCL_SECURE_NO_WARNINGS"]
+
+# libm, which CMake links where sqrt needs it (CMakeLists.txt:261-271,
+# src/CMakeLists.txt:34-36).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
