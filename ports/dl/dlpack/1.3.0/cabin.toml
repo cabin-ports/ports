@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/dmlc/dlpack/archive/refs/tags/v1.3.tar.gz"
+checksum = "sha256:f3d567f885f6c142183afc91a58873b31d0e0b36faa2e45c232b98c74596404f"
+format = "tar.gz"
+strip-prefix = "dlpack-1.3"
+
+# Upstream calls this release 1.3 (tag v1.3, dlpack.h:19-22); the version
+# in CMakeLists.txt:13 is stale.
+[package]
+name = "cabin-ports/dlpack"
+version = "1.3.0"
+include = ["LICENSE", "include"]
+
+# The INTERFACE target dlpack::dlpack and the one directory upstream's
+# CMake installs, include/ with dlpack/dlpack.h (CMakeLists.txt:61-69,
+# :113-116).  The header holds only the ABI's types and macros.  C needs C99
+# (// comments, trailing enumerator commas, <stdint.h>); C++ needs C++11
+# for DLDeviceType's fixed underlying type (dlpack.h:72), the standard
+# upstream builds with (CMakeLists.txt:42).  Not ported:
+# contrib/dlpack/dlpackcpp.h, an example C++ wrapper that README.md:24
+# calls unstable and CMake exposes only to in-tree builds (:68); the mock
+# programs; the docs; and the Python numpy_dlpack app.
+[target.dlpack]
+type = "header-only"
+include-dirs = ["include"]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
