@@ -5,6 +5,15 @@ url = "https://github.com/pboettch/json-schema-validator/archive/refs/tags/2.4.1
 checksum = "sha256:0c8bf7ba59bd50e312d82da4bab1d49cf3e2211cfbd659472f9c90505d2a4e4c"
 format = "tar.gz"
 strip-prefix = "json-schema-validator-2.4.1"
+# src/json-patch.cpp embeds a JSON Patch schema "originally from
+# http://jsonpatch.com/, http://json.schemastore.org/json-patch with
+# fixes" (:8-9).  It is SchemaStore's src/schemas/json/json-patch.json
+# as of SchemaStore commit f7a0789 (2020), Mads Kristensen's Apache-2.0
+# schema with upstream's author's fixes, and the archive ships no copy
+# of that license, which Apache-2.0 section 4(a) requires redistributors
+# to give.  The patch adds the license text, verbatim from
+# https://www.apache.org/licenses/LICENSE-2.0.txt, beside LICENSE.
+patches = ["patches/0001-add-apache-2.0-license-for-json-patch-schema.patch"]
 
 # The one header upstream's CMake installs, to <prefix>/include/nlohmann
 # (src/CMakeLists.txt:14-15, 65), so that src/, with the private
@@ -19,12 +28,12 @@ to = "include/nlohmann/json-schema.hpp"
 name = "cabin-ports/json-schema-validator"
 version = "2.4.1"
 # LICENSE carries the MIT terms; src/smtp-address-validator.cpp carries
-# its own MIT notice (Gene Hightower) and ships with the sources.  Two
-# schemas are embedded as string literals without a notice of their
-# own: the JSON Patch schema in src/json-patch.cpp (from jsonpatch.com
-# and json.schemastore.org, :8) and the draft-07 meta-schema in
-# src/json-schema-draft7.json.cpp (json-schema.org).
-include = ["LICENSE", "include", "src"]
+# its own MIT notice (Gene Hightower) and ships with the sources.  The
+# JSON Patch schema in src/json-patch.cpp is Apache-2.0
+# (LICENSE.Apache-2.0, added by the patch above).  The draft-07
+# meta-schema in src/json-schema-draft7.json.cpp (json-schema.org) is
+# embedded without a notice of its own.
+include = ["LICENSE", "LICENSE.Apache-2.0", "include", "patches", "src"]
 
 [dependencies]
 "cabin-ports/nlohmann_json" = "^3.12"
