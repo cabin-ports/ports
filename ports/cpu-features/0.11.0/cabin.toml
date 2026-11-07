@@ -1,0 +1,83 @@
+[package.upstream]
+url = "https://github.com/google/cpu_features/archive/refs/tags/v0.11.0.tar.gz"
+checksum = "sha256:ab2463f2d38fcaff1ce806be8e4c91333449931f5e02009d543b2569a3fa471a"
+format = "tar.gz"
+strip-prefix = "cpu_features-0.11.0"
+
+[package]
+name = "cabin-ports/cpu-features"
+version = "0.11.0"
+include = ["LICENSE", "include", "src"]
+# Upstream asks for C99 (CMakeLists.txt:5); C11 is the oldest standard
+# Cabin can lower for MSVC.  The sources build in the strict dialect.
+c-standard = "c11"
+# The headers use // comments, and their enumerator lists end in commas,
+# which C++ accepts from C++11.  For C++ they wrap their declarations in
+# namespace cpu_features and extern "C" (cpu_features_macros.h:147-157).
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# The static library CMake builds by default (CMakeLists.txt:43, 166-184):
+# the utils objects (:126-135) and every src/impl_*.c (:95), each of which
+# compiles only for its own architecture and OS, as cpu_features_macros.h
+# detects them.  include/ is the include root, as in upstream's build tree
+# (:55-63); consumers write `#include <cpuinfo_x86.h>`.  STACK_LINE_READER_
+# BUFFER_SIZE is public there (:61), as here.  Linux and macOS take the
+# results of CMake's checks there that the sources read (:149-159,
+# 181-183).  Elsewhere the build stops with upstream's own #error: off x86
+# on Android, in src/hwcaps_linux_or_android.c:91, and on FreeBSD and
+# OpenBSD, in src/hwcaps_freebsd_or_openbsd.c:50, and on AArch64 iOS, in
+# src/impl_aarch64_macos_or_iphone.c:23.  x86 Android and FreeBSD need none
+# of those results.  OpenBSD and the iOS simulator on x86 have no
+# implementation upstream either, so linking a call to GetX86Info fails
+# there.  Without NDEBUG, as in Cabin's dev profile, the Linux and Android
+# hardware-capability reader prints debug lines to stdout
+# (src/hwcaps_linux_or_android.c:35-44), as upstream's Debug build does.
+#
+# Not ported: the shared library, list_cpu_features (:190-194), Android's
+# ndk_compat shim (:200-202), and the mock-based test suite.
+[target.cpu-features]
+type = "library"
+sources = [
+  "src/filesystem.c",
+  "src/impl_aarch64_cpuid.c",
+  "src/impl_aarch64_freebsd_or_openbsd.c",
+  "src/impl_aarch64_linux_or_android.c",
+  "src/impl_aarch64_macos_or_iphone.c",
+  "src/impl_aarch64_windows.c",
+  "src/impl_arm_linux_or_android.c",
+  "src/impl_loongarch_linux.c",
+  "src/impl_mips_linux_or_android.c",
+  "src/impl_ppc_linux.c",
+  "src/impl_riscv_linux.c",
+  "src/impl_s390x_linux.c",
+  "src/impl_x86_freebsd.c",
+  "src/impl_x86_linux_or_android.c",
+  "src/impl_x86_macos.c",
+  "src/impl_x86_windows.c",
+  "src/stack_line_reader.c",
+  "src/string_view.c",
+]
+include-dirs = ["include"]
+defines = ["STACK_LINE_READER_BUFFER_SIZE=1024"]
+interface-defines = ["STACK_LINE_READER_BUFFER_SIZE=1024"]
+links = "cpu_features"
+
+# The hardware-capability reader joins the library on Unix off x86
+# (CMakeLists.txt:141-161, 170-172).
+[target.'cfg(all(family = "unix", not(any(arch = "x86", arch = "x86_64"))))'.sources]
+cpu-features = [
+  "src/hwcaps.c",
+  "src/hwcaps_freebsd_or_openbsd.c",
+  "src/hwcaps_linux_or_android.c",
+]
+
+# glibc and musl have dlfcn.h and getauxval (glibc since 2.16; AT_HWCAP2,
+# which the reader asks for, is in its headers since 2.18).
+# CMAKE_DL_LIBS is public (:176).
+[target.'cfg(os = "linux")'.profile]
+defines = ["HAVE_DLFCN_H", "HAVE_STRONG_GETAUXVAL"]
+link-libs = ["dl"]
+
+[target.'cfg(os = "macos")'.profile]
+defines = ["HAVE_SYSCTLBYNAME"]
