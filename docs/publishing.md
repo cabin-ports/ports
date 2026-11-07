@@ -20,12 +20,14 @@ same upstream version, which only an `all` dispatch publishes.
 
 - **Credential boundary.**  The `build` job installs the pinned `cabin` and builds `port-publish`
   without any credential.  Only the `publish` job may request the run's OIDC token for a publish,
-  and it runs just those two prebuilt binaries: it builds the probes of the ports it stages but
-  never runs one, because running upstream code next to the token would hand that code the token.
+  and it runs just those two prebuilt binaries and the workflow scripts under `scripts/actions/`:
+  it builds the probes of the ports it stages but never runs one, because running upstream code
+  next to the token would hand that code the token.
   Running the consumer tests is the pull-request and merge-queue dry-run's job: no job of this
   workflow runs port code, the `plan` preview included.  (The `exchange-check` probe below also
   requests the token, but runs only `curl`.)  The `lock` and `record` jobs alone may push, only to
-  the receipts branch, and run only `git`, `gh`, and `jq`.
+  the receipts branch, and run only `scripts/actions/receipts.sh` (`git`, `gh`, and `jq`), checked
+  out at the workflow's own commit.
 - **Registry readiness.**  The `await-deploy` job runs Cabin's own `cargo workflow-await-deploy`
   guard from the pinned commit and waits until the registry has deployed a Cabin commit that
   contains it, so the client never sends metadata the running registry does not accept.
@@ -96,7 +98,8 @@ need a packaging revision.
 
 Every run that may upload, in either mode, holds the log's lock: a `lock` file naming the run and
 attempt, which the `lock` job commits on top of the branch tip it read, so of two runs racing for it
-one push fails and that run uploads nothing.  A run that finds the lock held by a running run
+one push fails and that run uploads nothing.  A push refused while the tip did not move fails the
+run, whatever started it.  A run that finds the lock held by a running run
 uploads nothing: a scheduled one leaves it to a later run, a dispatch fails.  The `publish` job
 uploads only if the lock names its own attempt, so rerunning a run's jobs never uploads under an
 earlier attempt's lock.  The `record` job appends the receipts of the lock's attempt only while the

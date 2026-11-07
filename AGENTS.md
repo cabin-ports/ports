@@ -49,9 +49,11 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
 
 - In `publish.yml`, only the `publish` job and the curl-only `exchange-check` probe request
   `id-token: write`.  The `publish` job runs only the binaries the credential-free `build` job
-  produced: it compiles each port's probe but never runs a port's code, and no other job of the
-  workflow runs one either.  Only the `lock` and `record` jobs request `contents: write`; they run
-  only `git`, `gh`, and `jq` and push only the receipts branch.
+  produced and `scripts/actions/` from its own checkout: it compiles each port's probe but never
+  runs a port's code, and no other job of the workflow runs one either.  Only the `lock` and
+  `record` jobs request `contents: write`; they run only `scripts/actions/receipts.sh` (`git`,
+  `gh`, and `jq`), checked out sparsely at the workflow's own commit, and push only the receipts
+  branch.
 - The schedule uploads only while the `PORTS_AUTO_PUBLISH` variable is exactly `true`.  Setting
   it, initializing or editing the receipts log, and dispatching an upload are operator decisions,
   never part of routine work, and so are deleting the receipts log's lock and retrying a failed
