@@ -62,6 +62,36 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   line, run `gh actions-lock --no-narrow` with the extension version `ci.yml` pins and commit the
   result; never edit it by hand.  `uses:` lines name an exact release tag.
 
+## GitHub Actions maintainability
+
+- Workflows are declarative orchestration: triggers, `needs`, permissions, concurrency, runners,
+  `uses:` steps, artifacts, environment wiring, and `if:` expressions.  Prefer a native Actions
+  feature or an established action to a script.  Keep publication policy, receipts and lock
+  state, and substantial data processing out of YAML: selection, eligibility, holds, and receipts
+  parsing belong in `port-publish` (`src/`, extending `batch.rs`, `select.rs`, or `plan.rs`), and
+  Git and GitHub glue in small single-purpose scripts under `scripts/actions/`.  Before adding
+  workflow logic, extend the CLI or script that already owns the responsibility; never implement
+  one rule in both Rust and shell.
+- Keep each `run:` step to one or a few plain commands; do not add or grow inline control flow,
+  `&&`/`||`, pipelines, command substitution, or heredocs.  An inline script is allowed only where
+  extracting it would weaken a credential boundary, obscure what a privileged job executes, or
+  add disproportionate machinery, and it starts with `# inline: <reason>`.  There is no line-count
+  limit; do not compress logic to pass a check.
+- Scripts use `set -euo pipefail`, take explicit arguments or named variables, quote expansions,
+  pass `shellcheck` and `shfmt -i 2`, and never turn a failure into success (no `|| true`, no
+  `$(...)` whose exit status is lost).  Each nontrivial one has tests in this crate's test suite
+  (temporary repositories, a local `file://` remote, a fake `gh`), or documented validation where
+  a test is impractical.
+- A privileged job is one with `id-token: write` or `contents: write`.  Grant neither to another
+  job, and never widen what a privileged job executes.  A repository script it runs comes only
+  from `scripts/actions/` at `github.workflow_sha`, checked out with `persist-credentials: false`,
+  and in `lock` and `record` only from a sparse checkout of that directory.  Privileged jobs
+  install no toolchain or dependency and never run port code or build scripts; of them, only
+  `publish` runs the `build` job's binaries.  `exchange-check` stays curl-only with no checkout.
+- Preserve the receipts protocol and publication semantics: only fast-forward pushes to the
+  receipts branch, the `lock` file naming run and attempt, `record`'s release rules, the modes,
+  holds, `retry-failed`, and packaging revisions; change them only as a reviewed policy change.
+
 ## Checks and pull requests
 
 - Run the checks in CONTRIBUTING.md ("Checks") before opening or updating a pull request.  A
