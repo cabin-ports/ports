@@ -19,7 +19,7 @@ env:
 
 jobs:
   # The Cabin commit Cargo.lock pins; every job installs the `cabin`
-  # binary from it (README.md, "Cabin revision").
+  # binary from it (docs/maintaining.md, "Cabin revision").
   pin:
     runs-on: ubuntu-slim
     outputs:
@@ -81,7 +81,7 @@ jobs:
 
   # The publisher's tests, then the `--dry-run` preflight: every port
   # the change needs is staged, built, and its consumer test run, on
-  # each platform the ports must support (README.md, "Checks").
+  # each platform the ports must support (docs/maintaining.md, "CI").
   check:
     needs: pin
     runs-on: ${{ matrix.os }}

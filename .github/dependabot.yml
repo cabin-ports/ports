@@ -1,7 +1,7 @@
 # https://docs.github.com/code-security/dependabot/working-with-dependabot/dependabot-options-reference
 
 # No cargo entry: every crate in Cargo.lock comes from Cabin's own
-# lockfile and moves with the Cabin pin (README.md, "Cabin revision"),
+# lockfile and moves with the Cabin pin (docs/maintaining.md, "Cabin revision"),
 # so it matches the versions the pinned `cabin` binary is built with.
 version: 2
 updates:

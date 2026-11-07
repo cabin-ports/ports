@@ -109,7 +109,7 @@ struct Cli {
     #[arg(long)]
     work_dir: Option<PathBuf>,
     /// Cabin binary for preflight builds and uploads, built from the
-    /// Cabin revision this package pins (README.md).
+    /// Cabin revision this package pins (CONTRIBUTING.md).
     #[arg(long)]
     cabin: PathBuf,
 }

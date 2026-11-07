@@ -24,13 +24,13 @@ fn tool() -> Command {
 }
 
 /// The `cabin` binary the tests drive: `PORT_PUBLISH_CABIN`, built
-/// from the Cabin revision this package pins (README.md).  Required,
+/// from the Cabin revision this package pins (CONTRIBUTING.md).  Required,
 /// never looked up on `PATH`: a different Cabin would stage different
 /// packages than the pinned crates do.
 fn cabin_binary() -> PathBuf {
     let cabin = std::env::var_os("PORT_PUBLISH_CABIN")
         .map(PathBuf::from)
-        .expect("set PORT_PUBLISH_CABIN to the pinned cabin binary (README.md)");
+        .expect("set PORT_PUBLISH_CABIN to the pinned cabin binary (CONTRIBUTING.md)");
     assert!(
         cabin.is_file(),
         "PORT_PUBLISH_CABIN={} is not a file",
