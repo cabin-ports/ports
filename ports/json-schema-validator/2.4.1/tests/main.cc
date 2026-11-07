@@ -247,7 +247,8 @@ void test_content() {
                     const json &instance) {
     if (!encoding.empty() || media_type != "application/json")
       throw std::invalid_argument("unexpected content keywords");
-    (void)json::parse(instance.get<std::string>());
+    if (!json::parse(instance.get<std::string>()).is_object())
+      throw std::invalid_argument("embedded JSON is not an object");
   };
   json_validator validator(schema, nullptr, nullptr, checker);
   collecting_handler errors;
@@ -255,6 +256,9 @@ void test_content() {
   check(!errors, "embedded JSON parses");
   validator.validate("{\"a\": ", errors);
   check(errors.has("", "content-checking failed"), "truncated embedded JSON");
+  errors = collecting_handler();
+  validator.validate("[1, 2]", errors);
+  check(errors.has("", "not an object"), "embedded JSON of the wrong type");
 }
 
 void test_uri() {
