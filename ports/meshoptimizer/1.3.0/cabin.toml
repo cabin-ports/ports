@@ -1,0 +1,66 @@
+[package.upstream]
+url = "https://github.com/zeux/meshoptimizer/archive/refs/tags/v1.3.tar.gz"
+checksum = "sha256:ca4f47d451201593904b9e3067fa54b65db94bc34ab5173864950862b748a145"
+format = "tar.gz"
+strip-prefix = "meshoptimizer-1.3"
+
+# Upstream calls this release 1.3 (tag v1.3, CMakeLists.txt:15,
+# meshoptimizer.h:15).
+[package]
+name = "cabin-ports/meshoptimizer"
+version = "1.3.0"
+include = ["LICENSE.md", "src"]
+
+# Upstream's static library (CMakeLists.txt:28-51, :89-95): every
+# src/*.cpp, with src/ as the public include directory.  The default build
+# passes no defines.  vertexcodec.cpp, vertexfilter.cpp, clusterizer.cpp
+# and meshletcodec.cpp pick SSE or NEON code from the compiler's
+# predefined macros (e.g. vertexcodec.cpp:8-53); on x86, vertexcodec.cpp
+# and meshletcodec.cpp compile their SSSE3 and SSE4.1 code regardless and
+# choose it after a CPUID check at run time.  Not ported: the shared
+# library and its MESHOPTIMIZER_API, MESHOPTIMIZER_ALLOC_EXPORT and
+# MESHOPT_STABLE_EXPORTS (:89-118); the install rules' CMake package
+# (meshoptimizer::meshoptimizer, :183-227); the opt-in
+# MESHOPTIMIZER_NO_SIMD, MESHOPTIMIZER_VERTEXCODEC_ZEROCOPY and
+# MESHOPTIMIZER_CLUSTERIZER_INDEXLIMIT defines, which CMake does not
+# expose either (README.md:227, :419); the demo, gltfpack and its Basis
+# Universal and libwebp options; the JavaScript and WebAssembly builds
+# (js/, Makefile); and the tools.  Not reproduced: the warning flags
+# (:75-87).
+[target.meshoptimizer]
+type = "library"
+sources = [
+  "src/allocator.cpp",
+  "src/clusterizer.cpp",
+  "src/indexanalyzer.cpp",
+  "src/indexcodec.cpp",
+  "src/indexgenerator.cpp",
+  "src/meshletcodec.cpp",
+  "src/meshletutils.cpp",
+  "src/opacitymap.cpp",
+  "src/overdrawoptimizer.cpp",
+  "src/partition.cpp",
+  "src/quantization.cpp",
+  "src/rasterizer.cpp",
+  "src/remesher.cpp",
+  "src/simplifier.cpp",
+  "src/spatialorder.cpp",
+  "src/stripifier.cpp",
+  "src/tangentspace.cpp",
+  "src/vcacheoptimizer.cpp",
+  "src/vertexcodec.cpp",
+  "src/vertexfilter.cpp",
+  "src/vfetchoptimizer.cpp",
+]
+include-dirs = ["src"]
+links = "meshoptimizer"
+# Upstream's implementation is C++98 (CONTRIBUTING.md:31); its Makefile
+# compiles it as gnu++98 (Makefile:26) and CMake sets no standard.  C++14
+# is the oldest standard Cabin can lower for MSVC.
+cxx-standard = "c++14"
+# CONTRIBUTING.md:31 promises a C89 interface, but meshoptimizer.h ends
+# five enumerator lists with a comma (:455, :485, :498, :938, :980), a C99
+# and C++11 token that demo/ansi.c's -std=c89 build without -pedantic
+# accepts (Makefile:22).
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
