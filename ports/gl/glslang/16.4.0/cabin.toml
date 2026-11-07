@@ -1,0 +1,202 @@
+[package.upstream]
+url = "https://github.com/KhronosGroup/glslang/archive/refs/tags/16.4.0.tar.gz"
+checksum = "sha256:c634d6237eb0cc04d5ddf5dc9955daa175d82b0f8797acab45b49965e9f6df13"
+format = "tar.gz"
+strip-prefix = "glslang-16.4.0"
+# CMake generates build_info.h from build_info.h.tmpl.  The first copy below
+# places the template at its installed path, and the patch fills in what
+# configure_file writes for 16.4.0.
+patches = ["patches/0001-fill-in-the-generated-build-info-h.patch"]
+
+# The headers upstream installs, at their installed paths under include/;
+# the source tree, with its private headers, stays off consumers' include
+# path.
+[[package.upstream.copy]]
+from = "build_info.h.tmpl"
+to = "include/glslang/build_info.h"
+
+[[package.upstream.copy]]
+from = "glslang/Public/ResourceLimits.h"
+to = "include/glslang/Public/ResourceLimits.h"
+
+[[package.upstream.copy]]
+from = "glslang/Public/ShaderLang.h"
+to = "include/glslang/Public/ShaderLang.h"
+
+[[package.upstream.copy]]
+from = "glslang/Public/resource_limits_c.h"
+to = "include/glslang/Public/resource_limits_c.h"
+
+[[package.upstream.copy]]
+from = "glslang/Include/glslang_c_interface.h"
+to = "include/glslang/Include/glslang_c_interface.h"
+
+[[package.upstream.copy]]
+from = "glslang/Include/glslang_c_shader_types.h"
+to = "include/glslang/Include/glslang_c_shader_types.h"
+
+[[package.upstream.copy]]
+from = "glslang/Include/ResourceLimits.h"
+to = "include/glslang/Include/ResourceLimits.h"
+
+[[package.upstream.copy]]
+from = "glslang/Include/visibility.h"
+to = "include/glslang/Include/visibility.h"
+
+[[package.upstream.copy]]
+from = "glslang/MachineIndependent/Versions.h"
+to = "include/glslang/MachineIndependent/Versions.h"
+
+[[package.upstream.copy]]
+from = "SPIRV/GlslangToSpv.h"
+to = "include/glslang/SPIRV/GlslangToSpv.h"
+
+[[package.upstream.copy]]
+from = "SPIRV/Logger.h"
+to = "include/glslang/SPIRV/Logger.h"
+
+[[package.upstream.copy]]
+from = "SPIRV/SpvTools.h"
+to = "include/glslang/SPIRV/SpvTools.h"
+
+[[package.upstream.copy]]
+from = "SPIRV/disassemble.h"
+to = "include/glslang/SPIRV/disassemble.h"
+
+[[package.upstream.copy]]
+from = "SPIRV/spirv.hpp11"
+to = "include/glslang/SPIRV/spirv.hpp11"
+
+[package]
+name = "cabin-ports/glslang"
+version = "16.4.0"
+# LICENSE.txt and LICENSES/ (mapped by REUSE.toml) carry every licence.  The
+# Bison-generated parser, glslang/MachineIndependent/glslang_tab.cpp and its
+# .h, is GPL-3.0-or-later WITH Bison-exception-2.2, which lets it ship under
+# the library's permissive terms.
+#
+# glslang/MachineIndependent/span.h:42-92 is copied from
+# Vulkan-ValidationLayers v1.3.250 layers/containers/custom_containers.h:
+# 805-855, Copyright (c) 2015-2017, 2019-2023 The Khronos Group Inc., Valve
+# Corporation and LunarG, Inc., under Apache-2.0 (LICENSES/Apache-2.0.txt).
+#
+# Of StandAlone/, only DirStackFileIncluder.h, which the C interface includes.
+include = [
+  "LICENSE.txt",
+  "LICENSES",
+  "REUSE.toml",
+  "SPIRV",
+  "StandAlone/DirStackFileIncluder.h",
+  "glslang",
+  "include",
+  "patches",
+]
+
+# Upstream's default configuration without SPIRV-Tools, as vcpkg builds it.
+# The defines stay private, as upstream's add_compile_definitions do, and
+# only the library's own compiles see the source root.
+[profile]
+defines = ["ENABLE_HLSL", "ENABLE_OPT=0", "ENABLE_SPIRV"]
+include-dirs = ["."]
+
+[target.'cfg(family = "unix")'.profile]
+defines = ["GLSLANG_OSINCLUDE_UNIX"]
+
+# Upstream links Threads on Unix; Android's libc holds pthreads and the NDK
+# has no libpthread.
+[target.'cfg(all(family = "unix", not(os = "android")))'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(family = "windows")'.profile]
+defines = ["GLSLANG_OSINCLUDE_WIN32"]
+
+# One archive of everything upstream's glslang target compiles; its separate
+# GenericCodeGen, MachineIndependent, OSDependent and SPIRV libraries are
+# empty compatibility stubs.  The C interface's anonymous union needs C11.
+# glslang carries its own SPIR-V headers, so it needs no spirv-headers.
+#
+# RTTI and exceptions stay on: upstream's ENABLE_RTTI and ENABLE_EXCEPTIONS
+# default off only to shrink the library, and the sources neither throw nor
+# catch, so the library builds like the consumers it links into.
+#
+# Not ported: SPIRV-Tools (ENABLE_OPT), which has no port.  Without it
+# SPIR-V generated from HLSL is not legalized and may be invalid for Vulkan,
+# and the SPIR-V options to optimize, strip debug info, validate or
+# disassemble do nothing.  Also not ported: the glslang and glslangValidator
+# tools, the WebAssembly build, shared-library builds and the CMake package
+# files.
+[target.glslang]
+type = "library"
+sources = [
+  "SPIRV/CInterface/spirv_c_interface.cpp",
+  "SPIRV/GlslangToSpv.cpp",
+  "SPIRV/InReadableOrder.cpp",
+  "SPIRV/Logger.cpp",
+  "SPIRV/SpvBuilder.cpp",
+  "SPIRV/SpvPostProcess.cpp",
+  "SPIRV/SpvTools.cpp",
+  "SPIRV/disassemble.cpp",
+  "SPIRV/doc.cpp",
+  "glslang/CInterface/glslang_c_interface.cpp",
+  "glslang/GenericCodeGen/CodeGen.cpp",
+  "glslang/GenericCodeGen/Link.cpp",
+  "glslang/HLSL/hlslAttributes.cpp",
+  "glslang/HLSL/hlslGrammar.cpp",
+  "glslang/HLSL/hlslOpMap.cpp",
+  "glslang/HLSL/hlslParseHelper.cpp",
+  "glslang/HLSL/hlslParseables.cpp",
+  "glslang/HLSL/hlslScanContext.cpp",
+  "glslang/HLSL/hlslTokenStream.cpp",
+  "glslang/MachineIndependent/Constant.cpp",
+  "glslang/MachineIndependent/InfoSink.cpp",
+  "glslang/MachineIndependent/Initialize.cpp",
+  "glslang/MachineIndependent/IntermTraverse.cpp",
+  "glslang/MachineIndependent/Intermediate.cpp",
+  "glslang/MachineIndependent/ParseContextBase.cpp",
+  "glslang/MachineIndependent/ParseHelper.cpp",
+  "glslang/MachineIndependent/PoolAlloc.cpp",
+  "glslang/MachineIndependent/RemoveTree.cpp",
+  "glslang/MachineIndependent/Scan.cpp",
+  "glslang/MachineIndependent/ShaderLang.cpp",
+  "glslang/MachineIndependent/SpirvIntrinsics.cpp",
+  "glslang/MachineIndependent/SymbolTable.cpp",
+  "glslang/MachineIndependent/Versions.cpp",
+  "glslang/MachineIndependent/attribute.cpp",
+  "glslang/MachineIndependent/glslang_tab.cpp",
+  "glslang/MachineIndependent/intermOut.cpp",
+  "glslang/MachineIndependent/iomapper.cpp",
+  "glslang/MachineIndependent/limits.cpp",
+  "glslang/MachineIndependent/linkValidate.cpp",
+  "glslang/MachineIndependent/parseConst.cpp",
+  "glslang/MachineIndependent/preprocessor/Pp.cpp",
+  "glslang/MachineIndependent/preprocessor/PpAtom.cpp",
+  "glslang/MachineIndependent/preprocessor/PpContext.cpp",
+  "glslang/MachineIndependent/preprocessor/PpScanner.cpp",
+  "glslang/MachineIndependent/preprocessor/PpTokens.cpp",
+  "glslang/MachineIndependent/propagateNoContraction.cpp",
+  "glslang/MachineIndependent/reflection.cpp",
+]
+include-dirs = ["include"]
+cxx-standard = "c++17"
+interface-c-standard = "c11"
+interface-cxx-standard = "c++11"
+links = "glslang"
+
+[target.'cfg(family = "unix")'.sources]
+glslang = ["glslang/OSDependent/Unix/ossource.cpp"]
+
+[target.'cfg(family = "windows")'.sources]
+glslang = ["glslang/OSDependent/Windows/ossource.cpp"]
+
+# The default resource limits, a separate library as upstream builds them.
+[target.glslang-default-resource-limits]
+type = "library"
+sources = [
+  "glslang/ResourceLimits/ResourceLimits.cpp",
+  "glslang/ResourceLimits/resource_limits_c.cpp",
+]
+include-dirs = ["include"]
+cxx-standard = "c++17"
+interface-c-standard = "c11"
+interface-cxx-standard = "c++11"
+links = "glslang-default-resource-limits"
