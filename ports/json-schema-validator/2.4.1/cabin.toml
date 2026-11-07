@@ -1,0 +1,65 @@
+[package.upstream]
+# The 2.4.1 tag archive, the bytes ConanCenter pins; the release has no
+# assets.
+url = "https://github.com/pboettch/json-schema-validator/archive/refs/tags/2.4.1.tar.gz"
+checksum = "sha256:0c8bf7ba59bd50e312d82da4bab1d49cf3e2211cfbd659472f9c90505d2a4e4c"
+format = "tar.gz"
+strip-prefix = "json-schema-validator-2.4.1"
+
+# The one header upstream's CMake installs, to <prefix>/include/nlohmann
+# (src/CMakeLists.txt:14-15, 65), so that src/, with the private
+# json-patch.hpp and smtp-address-validator.hpp, stays off consumers'
+# include path.  The sources include it as <nlohmann/json-schema.hpp>
+# and reach this copy.
+[[package.upstream.copy]]
+from = "src/nlohmann/json-schema.hpp"
+to = "include/nlohmann/json-schema.hpp"
+
+[package]
+name = "cabin-ports/json-schema-validator"
+version = "2.4.1"
+# LICENSE carries the MIT terms; src/smtp-address-validator.cpp carries
+# its own MIT notice (Gene Hightower) and ships with the sources.  Two
+# schemas are embedded as string literals without a notice of their
+# own: the JSON Patch schema in src/json-patch.cpp (from jsonpatch.com
+# and json.schemastore.org, :8) and the draft-07 meta-schema in
+# src/json-schema-draft7.json.cpp (json-schema.org).
+include = ["LICENSE", "include", "src"]
+
+[dependencies]
+"cabin-ports/nlohmann_json" = "^3.12"
+
+# The static library CMake builds by default (JSON_VALIDATOR_SHARED_LIBS
+# follows BUILD_SHARED_LIBS, CMakeLists.txt:38, 151-154), keyed by its
+# name, from the six sources in src/CMakeLists.txt:1-8.  The DLL export
+# and import defines are set only for the shared library (:17-22), so
+# json-schema.hpp leaves its API macro empty here.  nlohmann_json is a
+# public dependency (:55-56): the header includes <nlohmann/json.hpp>.
+# Upstream requires only cxx_range_for (:24-26), that is C++11, which the
+# header needs too; C++14 is the oldest standard Cabin can request from
+# MSVC.  nlohmann_json orders object keys with std::less<> from C++14 on
+# and std::less<std::string> before (its json.hpp:326-332), so the
+# library and a C++11 consumer differ in that comparator, which is empty
+# and orders alike either way; upstream's build, at the compiler's default
+# standard, mixes standards the same way.  Upstream's Boost.Regex
+# fallback applies to GCC before 4.9 only (:38-53); std::regex is used
+# here, as with every supported compiler.
+#
+# Not ported: the shared library, the examples and tests, and the CMake
+# package files.  Not reproduced: the warning flags (-Wall -Wextra
+# -Wshadow, :28-36).
+[target.nlohmann_json_schema_validator]
+type = "library"
+sources = [
+  "src/json-patch.cpp",
+  "src/json-schema-draft7.json.cpp",
+  "src/json-uri.cpp",
+  "src/json-validator.cpp",
+  "src/smtp-address-validator.cpp",
+  "src/string-format-check.cpp",
+]
+include-dirs = ["include"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "nlohmann_json_schema_validator"
+deps = [{ name = "cabin-ports/nlohmann_json", public = true }]
