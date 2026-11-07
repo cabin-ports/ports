@@ -74,9 +74,8 @@ sources = [
 cxx-standard = "c++14"
 interface-cxx-standard = "c++11"
 links = "octomap"
+# audit probe (never merged): variant B, WIN32 as an unconditional
+# interface define, the only interface form Cabin can express.
+interface-defines = ["WIN32"]
 deps = [{ name = "octomath", public = true }]
 
-# audit probe (never merged): variant C, a Windows-only define.  Profile
-# defines reach only this package's own compiles, not its consumers.
-[target.'cfg(family = "windows")'.profile]
-defines = ["WIN32"]
