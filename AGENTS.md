@@ -1,8 +1,9 @@
 # AGENTS.md
 
 This repository holds Cabin's curated foundation ports (`ports/`) and `port-publish`, the single
-Rust package that verifies and publishes them (`src/`, `tests/`).  README.md documents the layout,
-the pinned Cabin revision, the checks, and publishing; Cabin's
+Rust package that verifies and publishes them (`src/`, `tests/`).  README.md introduces the
+repository, CONTRIBUTING.md documents port authoring and the checks, docs/maintaining.md the pinned
+Cabin revision and CI, and docs/publishing.md publishing; Cabin's
 [Foundation ports](https://cabinpkg.com/docs/foundation-ports/) documents the port contract.
 
 ## Ports
@@ -59,9 +60,9 @@ the pinned Cabin revision, the checks, and publishing; Cabin's
 
 ## Checks and pull requests
 
-- Run the checks in README.md ("Checks") before opening or updating a pull request.  A selective
-  dry-run proves only the selection it prints, and `--port` is a focused local check: before a pull
-  request, run `--changed-since` from the branch's merge base, or the full dry-run.
+- Run the checks in CONTRIBUTING.md ("Checks") before opening or updating a pull request.  A
+  selective dry-run proves only the selection it prints, and `--port` is a focused local check:
+  before a pull request, run `--changed-since` from the branch's merge base, or the full dry-run.
 - Every change lands through a pull request and the merge queue as one squash commit; commit
   subjects follow Conventional Commits.
 - Prefer one port per pull request. Merge prerequisite ports separately

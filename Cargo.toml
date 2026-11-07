@@ -16,7 +16,7 @@ path = "src/main.rs"
 
 # Every Cabin crate comes from one pinned commit of cabinpkg/cabin, and
 # the `cabin` binary the tool drives is installed from the same commit
-# (README.md, "Cabin revision").
+# (docs/maintaining.md, "Cabin revision").
 [dependencies]
 anyhow = "1"
 cabin-core = { package = "cabinpkg-core", git = "https://github.com/cabinpkg/cabin", rev = "75879bd2ec4e50199a7effa8fa59bb22877f349b" }

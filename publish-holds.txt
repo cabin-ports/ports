@@ -1,4 +1,4 @@
-# Port versions the automatic publisher must not upload (README.md,
+# Port versions the automatic publisher must not upload (docs/publishing.md,
 # "Automatic publishing"), one per line: <name> <version> <reason>.
 # A hold binds `--publish-new` only - the scheduled run and the `new`
 # dispatch - and versions that require a held version wait with it.

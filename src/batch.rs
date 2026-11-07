@@ -1,6 +1,6 @@
 //! First publication of new package versions: `--plan-new` previews
 //! and `--publish-new` uploads, never as a packaging revision
-//! (README.md, "Automatic publishing").
+//! (docs/publishing.md, "Automatic publishing").
 //!
 //! Which versions the registry already has is the receipts log's
 //! answer, not the registry's: the read routes serve verified
@@ -18,7 +18,7 @@
 //!   at.  Its upload may have landed with the response lost, and a
 //!   resubmission would revive it if verification rejected it since,
 //!   so it waits for a run with `--retry-failed`, which an operator
-//!   starts after checking the registry (README.md).
+//!   starts after checking the registry (docs/publishing.md).
 //!
 //! A version without a line is a candidate unless the reviewed hold
 //! list ([`HOLDS_FILE`]) names it or a version it requires is blocked.
@@ -249,7 +249,7 @@ pub fn classify(
             if receipts.failed.contains(&key) && !retry_failed {
                 return Status::Blocked(
                     "its upload failed and may have landed: check the registry, then retry with \
-                     --retry-failed (README.md)"
+                     --retry-failed (docs/publishing.md)"
                         .to_owned(),
                 );
             }

@@ -80,7 +80,7 @@ pub fn run(options: &Options) -> Result<()> {
     }
     if !options.cabin.is_file() {
         bail!(
-            "cabin binary not found at {}; install the pinned Cabin revision (README.md) and \
+            "cabin binary not found at {}; install the pinned Cabin revision (CONTRIBUTING.md) and \
              pass it as --cabin",
             options.cabin.display()
         );

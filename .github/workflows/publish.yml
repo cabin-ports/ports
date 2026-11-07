@@ -1,6 +1,6 @@
 name: Publish
 
-# Publishes ports/ as `cabin-ports/*` registry packages (README.md,
+# Publishes ports/ as `cabin-ports/*` registry packages (docs/publishing.md,
 # "Publishing"). Only main publishes: a manual dispatch, or the
 # schedule once the PORTS_AUTO_PUBLISH repository variable is exactly
 # `true`.
@@ -23,7 +23,7 @@ on:
         description: "Exchange and immediately revoke a trusted-publishing token; publish nothing"
         type: boolean
         default: false
-  # Automatic first publication (README.md, "Automatic publishing"),
+  # Automatic first publication (docs/publishing.md, "Automatic publishing"),
   # off the hour, when GitHub's scheduler is least loaded.
   schedule:
     - cron: "17,47 * * * *"
@@ -126,7 +126,7 @@ jobs:
             echo "work=true" >> "$GITHUB_OUTPUT"
             exit 0
           elif [[ "$found" != 0 ]]; then
-            echo "::error::cannot read the $RECEIPTS_BRANCH branch; is the receipts log initialized (README.md, \"Automatic publishing\")?"
+            echo "::error::cannot read the $RECEIPTS_BRANCH branch; is the receipts log initialized (docs/publishing.md, \"Automatic publishing\")?"
             exit 1
           fi
           git -C "$state" fetch -q --no-tags --depth=1 origin "refs/heads/$RECEIPTS_BRANCH"
@@ -158,7 +158,7 @@ jobs:
   # racing for it one push fails. A rerun attempt never inherits it. Only `record` releases it, once the run's receipts are
   # in the log, so no run reads the log while another may still add to
   # it; a run that cannot account for its uploads keeps it, which stops
-  # both modes until an operator reconciles the log (README.md,
+  # both modes until an operator reconciles the log (docs/publishing.md,
   # "Automatic publishing"). Git alone, so it may push that branch.
   lock:
     needs: gate
@@ -209,7 +209,7 @@ jobs:
                 skip "$url is publishing"
               fi
             fi
-            echo "::error::$url (attempt $attempt) ended without recording all its uploads; reconcile the receipts log, then delete its lock (README.md, \"Automatic publishing\")"
+            echo "::error::$url (attempt $attempt) ended without recording all its uploads; reconcile the receipts log, then delete its lock (docs/publishing.md, \"Automatic publishing\")"
             exit 1
           fi
           echo "$GITHUB_RUN_ID $GITHUB_RUN_ATTEMPT" > lock
@@ -387,7 +387,7 @@ jobs:
           git fetch --no-tags --depth=1 origin \
             "+refs/heads/$RECEIPTS_BRANCH:refs/remotes/origin/$RECEIPTS_BRANCH"
           if [[ "$(git show "origin/$RECEIPTS_BRANCH:lock" 2> /dev/null)" != "$GITHUB_RUN_ID $GITHUB_RUN_ATTEMPT" ]]; then
-            echo "::error::this attempt does not hold the $RECEIPTS_BRANCH lock; uploading nothing (README.md, \"Automatic publishing\")"
+            echo "::error::this attempt does not hold the $RECEIPTS_BRANCH lock; uploading nothing (docs/publishing.md, \"Automatic publishing\")"
             exit 1
           fi
 
@@ -470,7 +470,7 @@ jobs:
   # lock's attempt succeeded and left its receipts, or when the lock's
   # attempt skipped it. After a failure or a cancellation an upload may
   # have landed without its receipt, so the lock stays until an operator
-  # reconciles the log (README.md, "Automatic publishing"). After a
+  # reconciles the log (docs/publishing.md, "Automatic publishing"). After a
   # failed push, rerun this job alone; the artifacts last 30 days.
   record:
     needs: [lock, build, publish]
@@ -527,7 +527,7 @@ jobs:
             git -c http.extraheader="$auth" push -q origin "HEAD:refs/heads/$RECEIPTS_BRANCH"
           fi
           if [[ "$released" != true ]]; then
-            echo "::error::the publish job under the lock of attempt $attempt ended '$PUBLISH', or its receipts are missing, so an upload may lack its receipt: the lock stays until the log is reconciled (README.md, \"Automatic publishing\")"
+            echo "::error::the publish job under the lock of attempt $attempt ended '$PUBLISH', or its receipts are missing, so an upload may lack its receipt: the lock stays until the log is reconciled (docs/publishing.md, \"Automatic publishing\")"
             exit 1
           fi
 
