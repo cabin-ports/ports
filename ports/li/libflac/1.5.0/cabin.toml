@@ -1,16 +1,13 @@
 [package.upstream]
-# GitHub's archive of the 1.5.0 tag: the release itself ships only as
-# tar.xz.  The files the two share are byte-identical; the release adds
-# only autotools output and generated documentation (doc/api, man/).
+# GitHub's archive of the tag: the release itself ships only as tar.xz,
+# which adds only autotools output and generated documentation.
 url = "https://github.com/xiph/flac/archive/refs/tags/1.5.0.tar.gz"
 checksum = "sha256:aea54ed186ad07a34750399cb27fc216a2b62d0ffcd6dc2e3064a3518c3146f8"
 format = "tar.gz"
 strip-prefix = "flac-1.5.0"
 
-# The public headers upstream's CMake build installs, every header in
-# include/FLAC and include/FLAC++ (CMakeLists.txt:282-285), in their
-# installed layout.
-# Upstream's include/ also holds the private share/ and test headers.
+# The public headers in their installed layout: upstream's include/ also
+# holds the private share/ and test headers.
 [[package.upstream.copy]]
 from = "include/FLAC/all.h"
 to = "public/FLAC/all.h"
@@ -99,31 +96,19 @@ interface-cxx-standard = "c++11"
 [dependencies]
 "cabin-ports/libogg" = "^1.3"
 
-# config.h, which every source reads under HAVE_CONFIG_H
-# (CMakeLists.txt:198), is configured from config.cmake.h.in; this port
-# passes the values the library sources read as defines instead, and
-# HAVE_CONFIG_H is not defined.  Those below hold on every platform: the
-# 64-bit bit-buffer words ENABLE_64_BIT_WORDS turns on by default
-# (src/CMakeLists.txt:1), Ogg FLAC (WITH_OGG, :21,
-# 36-49), <inttypes.h> and <stdint.h> (:109-110), PACKAGE_VERSION, which
-# FLAC__VERSION_STRING reports (src/libFLAC/format.c:57-58), and
-# HAVE_LROUND, which lpc.c tests only for being defined, as config.h
-# always defines it (lpc.c:61).  The system-extension macros config.h
-# defines (config.cmake.h.in:163-213) and those
-# cmake/UseSystemExtensions.cmake adds (:54-63) are passed as well.
+# config.h is configured by CMake; this port passes the values the library
+# sources read as defines instead and leaves HAVE_CONFIG_H undefined.  Those
+# below hold on every platform, including the system-extension macros that
+# config.h and cmake/UseSystemExtensions.cmake define.  lpc.c only tests
+# whether HAVE_LROUND is defined, and config.h always defines it.
 #
-# Not reproduced: FLAC__OVERFLOW_DETECT, which CMake adds only to Debug
-# and RelWithDebInfo builds (:205-207); _FORTIFY_SOURCE=2 and
-# -fstack-protector-strong (:182-189), left to the toolchain's defaults
-# as Cabin drops a registry package's raw compiler flags; for the same
-# reason, the floating-point flags -fassociative-math -fno-signed-zeros
-# -fno-trapping-math -freciprocal-math and MSVC's /fp:fast
-# (src/libFLAC/CMakeLists.txt:101-109), and -mstackrealign on i686
-# (CMakeLists.txt:191-193); and MSVC's /arch:AVX2 on the four AVX2 and
-# FMA sources (src/libFLAC/CMakeLists.txt:20-23), which Cabin's typed
-# per-source instruction sets do not pass to cl, as cl compiles their
-# intrinsics without it.  The float flags let the encoder's analysis
-# round differently; the coded samples are lossless either way.
+# Not reproduced: FLAC__OVERFLOW_DETECT, which CMake adds only to Debug and
+# RelWithDebInfo builds; the hardening and floating-point flags and
+# -mstackrealign on i686, since Cabin drops a registry package's raw
+# compiler flags; and MSVC's /arch:AVX2 on the AVX2 and FMA sources, which
+# Cabin's typed per-source instruction sets do not pass to cl, as cl
+# compiles their intrinsics without it.  The float flags only let the
+# encoder's analysis round differently; coding stays lossless.
 [profile]
 include-dirs = ["include", "src/libFLAC/include"]
 defines = [
@@ -151,15 +136,11 @@ defines = [
   "__STDC_WANT_MATH_SPEC_FUNCS__",
 ]
 
-# libFLAC, static as CMake builds it by default (BUILD_SHARED_LIBS,
-# CMakeLists.txt:22), from every source upstream lists
-# (src/libFLAC/CMakeLists.txt:37-73), the Ogg mapping included.  Each
-# SIMD source compiles to nothing off its own architecture, and the
-# encoder picks a variant at run time by CPU (cpu.c).  FLAC__NO_DLL is
-# public in a static build (:79-81), so it is defined above for the
-# libraries' own compiles too: export.h otherwise declares the API
-# dllimport on Windows.  Not ported: the shared library, version.rc, the
-# flac and metaflac programs, examples, documentation and tests.
+# libFLAC, static as CMake builds it by default, from every source upstream
+# lists.  Each SIMD source compiles to nothing off its own architecture, and
+# the encoder picks a variant at run time.  FLAC__NO_DLL is defined above
+# for the libraries' own compiles too: export.h otherwise declares the API
+# dllimport on Windows.
 [target.flac]
 type = "library"
 sources = [
@@ -202,13 +183,11 @@ interface-defines = ["FLAC__NO_DLL"]
 links = "FLAC"
 deps = ["cabin-ports/libogg"]
 
-# UTF-8 file names on Windows (src/libFLAC/CMakeLists.txt:68-69), which
-# the file-based init and metadata functions open through
-# (include/share/compat.h:180-187).
+# UTF-8 file names for the file-based APIs on Windows.
 [target.'cfg(os = "windows")'.sources]
 flac = ["src/share/win_utf8_io/win_utf8_io.c"]
 
-# libFLAC++, the C++ wrapper (src/libFLAC++/CMakeLists.txt:1-16).
+# libFLAC++, the C++ wrapper.
 [target.flacxx]
 type = "library"
 sources = [
@@ -221,30 +200,24 @@ deps = [{ name = "flac", public = true }]
 # Its headers are C++ only.
 interface-c-standard = "none"
 
-# x86 and x86-64: the SSE, AVX2 and FMA kernels behind <x86intrin.h>, or
-# <intrin.h> with MSVC (CMakeLists.txt:118-122), with AVX on by default
-# (WITH_AVX, src/libFLAC/CMakeLists.txt:20; config.cmake.h.in:40-44),
-# and 32-byte-aligned buffers (:18-19).
+# x86 and x86-64: the SSE, AVX2 and FMA kernels, with AVX on by default as
+# upstream builds them, and 32-byte-aligned buffers.
 [target.'cfg(any(arch = "x86", arch = "x86_64"))'.profile]
 defines = ["FLAC__ALIGN_MALLOC_DATA", "FLAC__HAS_X86INTRIN=1", "FLAC__USE_AVX"]
 
-# GCC and Clang read CPU features through <cpuid.h> (cpu.c:44, 93, 138);
-# cl and clang-cl through <intrin.h>'s __cpuid.
+# GCC and Clang read CPU features through <cpuid.h>; cl and clang-cl
+# through <intrin.h>'s __cpuid.
 [target.'cfg(all(any(arch = "x86", arch = "x86_64"), any(cc = "gcc", cc = "clang", cc = "apple-clang")))'.profile]
 defines = ["HAVE_CPUID_H"]
 
-# AArch64: the NEON kernels (src/libFLAC/CMakeLists.txt:24-29;
-# CMakeLists.txt:112), where the compiler defines __aarch64__ as
-# upstream's check asks (cmake/CheckCPUArch.cmake:25-27): every one but cl.
+# AArch64: the NEON kernels, where the compiler defines __aarch64__ as
+# upstream's check requires: every one but cl.
 [target.'cfg(all(arch = "aarch64", not(cc = "msvc")))'.profile]
 defines = ["FLAC__CPU_ARM64", "FLAC__HAS_A64NEONINTRIN=1", "FLAC__HAS_NEONINTRIN=1"]
 
-# __builtin_bswap16 and __builtin_bswap32, which CMake's compile checks
-# find with GCC and Clang, clang-cl included (CMakeLists.txt:134-135),
-# for share/endswap.h; and the byte order CMake's TEST_BIG_ENDIAN finds
-# (:145), which every use reads with #if (bitreader.c, bitwriter.c,
-# md5.c, endswap.h), from these compilers' __BYTE_ORDER__.  cl, which
-# targets only little-endian Windows, leaves both undefined: 0 to #if.
+# __builtin_bswap16/32, which CMake finds with GCC and Clang (clang-cl
+# included), and the byte order from these compilers' __BYTE_ORDER__.  cl,
+# which targets only little-endian Windows, leaves both undefined: 0 to #if.
 [target.'cfg(any(cc = "gcc", cc = "clang", cc = "apple-clang", cc = "clang-cl"))'.profile]
 defines = [
   "CPU_IS_BIG_ENDIAN=__BYTE_ORDER__==__ORDER_BIG_ENDIAN__",
@@ -253,33 +226,28 @@ defines = [
   "WORDS_BIGENDIAN=__BYTE_ORDER__==__ORDER_BIG_ENDIAN__",
 ]
 
-# What CMake finds on Linux and macOS but not with MSVC: fseeko
-# (CMakeLists.txt:125-132), <sys/param.h> (src/libFLAC/CMakeLists.txt:4),
-# and pthreads, with which the encoder runs on several threads
-# (ENABLE_MULTITHREADING, CMakeLists.txt:209-216).  libm comes with
-# lround (src/libFLAC/CMakeLists.txt:6-7, 88), pthreads with Threads
-# (:111-113).
+# What CMake finds on Linux and macOS but not with MSVC: fseeko,
+# <sys/param.h>, and pthreads for the multithreaded encoder; libm for lround.
 [target.'cfg(family = "unix")'.profile]
 defines = ["HAVE_FSEEKO", "HAVE_PTHREAD=1", "HAVE_SYS_PARAM_H"]
 link-libs = ["m", "pthread"]
 
-# glibc's <byteswap.h> (CMakeLists.txt:108).
+# glibc's <byteswap.h>.
 [target.'cfg(os = "linux")'.profile]
 defines = ["HAVE_BYTESWAP_H"]
 
-# MinGW-w64, whose runtime also has fseeko and <sys/param.h>, and whose
-# winpthreads CMake's Threads finds.  Upstream builds single-threaded
-# where a toolchain lacks winpthreads; this port cannot check, so it
-# requires them, as the common MinGW-w64 distributions ship them.  Every
-# GCC that builds on Windows has fseeko and <sys/param.h>, and env reads
-# "gnu" under a MinGW --target.  Without --target, env reads "msvc" on
-# any Windows build machine, so Clang targeting MinGW builds
-# single-threaded there, as with cl.
+# MinGW-w64, whose runtime also has fseeko and <sys/param.h>.  Upstream
+# builds single-threaded where a toolchain lacks winpthreads; this port
+# cannot check, so it requires them, as the common MinGW-w64 distributions
+# ship them.  Every GCC that builds on Windows has fseeko and
+# <sys/param.h>, and env reads "gnu" under a MinGW --target.  Without
+# --target, env reads "msvc" on any Windows build machine, so Clang
+# targeting MinGW then builds single-threaded, as with cl.
 [target.'cfg(all(os = "windows", any(cc = "gcc", env = "gnu")))'.profile]
 defines = ["HAVE_FSEEKO", "HAVE_PTHREAD=1", "HAVE_SYS_PARAM_H"]
 link-libs = ["m", "pthread"]
 
-# CMake's MSVC, cl or clang-cl (CMakeLists.txt:200-204): M_PI from
-# <math.h>, and no CRT deprecation warnings.
+# As upstream's MSVC build: M_PI from <math.h>, and no CRT deprecation
+# warnings.
 [target.'cfg(any(cc = "msvc", cc = "clang-cl"))'.profile]
 defines = ["_CRT_SECURE_NO_WARNINGS", "_USE_MATH_DEFINES"]
