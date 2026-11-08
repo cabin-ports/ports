@@ -1,0 +1,51 @@
+[package.upstream]
+# The tag archive; the release tarball has the same library files but is
+# .tar.xz, which Cabin does not accept.
+url = "https://github.com/libsigcplusplus/libsigcplusplus/archive/refs/tags/3.8.1.tar.gz"
+checksum = "sha256:d168c799c32c35b8a036484875df7ac692ec1ad2d7de7f9630c8b1b38617e41f"
+format = "tar.gz"
+strip-prefix = "libsigcplusplus-3.8.1"
+# 0001 fills in sigc++config.h as Meson, upstream's primary build, does
+# (meson.build:236-256): version 3.8.1, deprecated API kept.  0002 adds
+# GPL-3.0, which LGPL-3.0 incorporates and recipients must receive with
+# it; the release ships only COPYING.  Its text is verbatim from
+# https://www.gnu.org/licenses/gpl-3.0.txt, as COPYING.GPL.
+patches = [
+  "patches/0001-configure-config-header.patch",
+  "patches/0002-add-gpl-3.0-license-text.patch",
+]
+
+[[package.upstream.copy]]
+from = "sigc++config.h.meson"
+to = "sigc++config.h"
+
+[package]
+name = "cabin-ports/libsigcpp"
+version = "3.8.1"
+include = ["COPYING", "COPYING.GPL", "patches", "sigc++", "sigc++config.h"]
+cxx-standard = "c++17"
+
+# The package is LGPL-3.0-or-later (meson.build:5, COPYING): most files are
+# LGPL-2.1-or-later, the sigc++/tuple-utils headers LGPL-3.0-or-later.
+# Conveying a binary statically linked with it carries LGPL-3.0 section 4
+# obligations, among them letting recipients relink it with a modified
+# library.
+#
+# Upstream's sigc-3.0 library, static.  LIBSIGCXX_STATIC, which Meson
+# passes to MSVC-style static builds and their consumers
+# (meson.build:230-232, sigc++/meson.build:132), keeps sigc++config.h from
+# declaring the API dllimport; it has no effect without _MSC_VER.  Not
+# ported: the shared library, docs, examples, and tests.
+[target."sigc-3.0"]
+type = "library"
+sources = [
+  "sigc++/connection.cc",
+  "sigc++/functors/slot_base.cc",
+  "sigc++/scoped_connection.cc",
+  "sigc++/signal_base.cc",
+  "sigc++/trackable.cc",
+]
+include-dirs = ["."]
+defines = ["LIBSIGCXX_STATIC"]
+interface-defines = ["LIBSIGCXX_STATIC"]
+links = "sigc-3.0"
