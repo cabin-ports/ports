@@ -1,0 +1,20 @@
+--- a/absl/base/options.h
++++ b/absl/base/options.h
+@@ -99,7 +99,7 @@
+ // the source location type is an alias of std::source_location type, use the
+ // feature macro ABSL_USES_STD_SOURCE_LOCATION.
+ //
+-#define ABSL_OPTION_USE_STD_SOURCE_LOCATION 2
++#define ABSL_OPTION_USE_STD_SOURCE_LOCATION 0
+ 
+ // ABSL_OPTION_USE_STD_ORDERING
+ //
+@@ -126,7 +126,7 @@
+ // the ordering types are aliases of std:: ordering types, use the feature macro
+ // ABSL_USES_STD_ORDERING.
+ 
+-#define ABSL_OPTION_USE_STD_ORDERING 2
++#define ABSL_OPTION_USE_STD_ORDERING 0
+ 
+ // ABSL_OPTION_USE_INLINE_NAMESPACE
+ // ABSL_OPTION_INLINE_NAMESPACE_NAME
