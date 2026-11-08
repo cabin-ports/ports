@@ -1,0 +1,23 @@
+--- a/sigc++config.h
++++ b/sigc++config.h
+@@ -3,16 +3,16 @@
+ #define SIGCXXCONFIG_H_INCLUDED
+ 
+ /* Define to omit deprecated API from the library. */
+-#mesondefine SIGCXX_DISABLE_DEPRECATED
++/* #undef SIGCXX_DISABLE_DEPRECATED */
+ 
+ /* Major version number of sigc++. */
+-#mesondefine SIGCXX_MAJOR_VERSION
++#define SIGCXX_MAJOR_VERSION 3
+ 
+ /* Minor version number of sigc++. */
+-#mesondefine SIGCXX_MINOR_VERSION
++#define SIGCXX_MINOR_VERSION 8
+ 
+ /* Micro version number of sigc++. */
+-#mesondefine SIGCXX_MICRO_VERSION
++#define SIGCXX_MICRO_VERSION 1
+ 
+ /* Detect Win32 platform */
+ #ifdef _WIN32
