@@ -1,0 +1,75 @@
+[package.upstream]
+url = "https://github.com/PJK/libcbor/archive/refs/tags/v0.14.0.tar.gz"
+checksum = "sha256:a8c1516e741562cf95aa4479c64916c3d4d2623e24fdc35e414e2320e7300aae"
+format = "tar.gz"
+strip-prefix = "libcbor-0.14.0"
+# - 0001 adds src/cbor/configuration.h and src/cbor/cbor_export.h as CMake
+#   4.4.5 writes them for the default static library, with the values it
+#   writes for MSVC (CBOR_RESTRICT_SPECIFIER) and for Windows
+#   (CBOR_DEPRECATED) left to the preprocessor.
+# - 0002 and 0003 add the terms of code taken from elsewhere; see [package].
+patches = [
+  "patches/0001-add-the-generated-configuration-and-export-headers.patch",
+  "patches/0002-add-mit-license-for-utf-8-decoder-code.patch",
+  "patches/0003-add-bsd-license-for-rfc-7049-code.patch",
+]
+
+[package]
+name = "cabin-ports/libcbor"
+version = "0.14.0"
+# MIT (LICENSE.md).  Code from elsewhere:
+# - src/cbor/internal/unicode.c:11-95: Bjoern Hoehrmann's UTF-8 decoder, its
+#   table, and a code point count after his example, Copyright (c) 2008-2009
+#   Bjoern Hoehrmann, MIT (LICENSE.utf8-dfa).
+# - src/cbor/internal/loaders.c:52-78: adapted from the half-precision
+#   decoder of RFC 7049 Appendix D, Copyright (c) 2013 IETF Trust and the
+#   persons identified as authors of the code, Simplified BSD License
+#   (LICENSE.RFC7049), which the RFC requires its code components to carry.
+# - src/cbor/common.h:51-60 and :71-73: debug-print macros after Jonathan
+#   Leffler's Stack Overflow answer 1644898, CC BY-SA; no terms ship, a few
+#   lines of a standard do-while idiom being too slight for copyright.
+include = ["LICENSE.RFC7049", "LICENSE.md", "LICENSE.utf8-dfa", "patches", "src"]
+# Upstream builds as C23 where the compiler accepts C's [[nodiscard]], else
+# as C99, or MSVC's default; C11 is the oldest Cabin can lower for MSVC.
+c-standard = "c11"
+# The public headers use restrict, // comments and variadic macros.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# The static library CMake builds by default.  Not ported: the shared
+# library, tests, examples, and CMake and pkg-config files.  Not reproduced:
+# CBOR_HAS_NODISCARD_ATTRIBUTE, set with the C23 switch, without which GCC
+# and Clang warn through warn_unused_result instead; the Debug build's
+# DEBUG=true, which enables CBOR_ASSERT; and IS_BIG_ENDIAN, with which
+# big-endian targets copy integers with memcpy instead of shifting bytes.
+[target.cbor]
+type = "library"
+sources = [
+  "src/allocators.c",
+  "src/cbor.c",
+  "src/cbor/arrays.c",
+  "src/cbor/bytestrings.c",
+  "src/cbor/callbacks.c",
+  "src/cbor/common.c",
+  "src/cbor/encoding.c",
+  "src/cbor/floats_ctrls.c",
+  "src/cbor/internal/builder_callbacks.c",
+  "src/cbor/internal/encoders.c",
+  "src/cbor/internal/loaders.c",
+  "src/cbor/internal/memory_utils.c",
+  "src/cbor/internal/stack.c",
+  "src/cbor/internal/unicode.c",
+  "src/cbor/ints.c",
+  "src/cbor/maps.c",
+  "src/cbor/serialization.c",
+  "src/cbor/streaming.c",
+  "src/cbor/strings.c",
+  "src/cbor/tags.c",
+]
+include-dirs = ["src"]
+links = "cbor"
+
+# What CMake's compile check finds everywhere but cl.  Upstream makes it
+# public, but only the sources read it.
+[target.'cfg(any(cc = "gcc", cc = "clang", cc = "apple-clang", cc = "clang-cl"))'.profile]
+defines = ["CBOR_HAS_BUILTIN_UNREACHABLE"]
