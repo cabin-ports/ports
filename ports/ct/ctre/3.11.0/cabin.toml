@@ -1,11 +1,6 @@
 [package.upstream]
-# The v3.11.0 tag archive, the bytes Conan Center's ctre 3.11.0 recipe
-# pins (SHA-256) and vcpkg's ctre port pins (SHA-512, REF v${VERSION});
-# the release has no assets.  The tag's CMakeLists.txt still declares
-# project(ctre VERSION 3.9.0) (:20-23), which feeds the CMake package
-# version file, the CPack file name, and the pkg-config file (:156-158,
-# :190, :199-200); the headers carry no version, and the registry version
-# follows the tag, as both recipes do.
+# The tag's CMakeLists.txt still declares VERSION 3.9.0; the registry
+# version follows the tag, as Conan Center's and vcpkg's recipes do.
 url = "https://github.com/hanickadot/compile-time-regular-expressions/archive/refs/tags/v3.11.0.tar.gz"
 checksum = "sha256:7d4b30d0bdd8864a47cceb2ab8e7c4d1846f0ec62383f8c45122435d32f19530"
 format = "tar.gz"
@@ -16,31 +11,10 @@ name = "cabin-ports/ctre"
 version = "3.11.0"
 include = ["LICENSE", "include"]
 
-# Header-only, as upstream's default CMake interface target ctre::ctre
-# (CMakeLists.txt:121-140, CTRE_MODULE off): include/ is the include root
-# in the build and install trees (:124-126, :136-137), so consumers write
-# `#include <ctre.hpp>`, as upstream's tests do (tests/ci.cpp:1), and get
-# Unicode properties from <ctre-unicode.hpp>, or <ctre.hpp> with
-# <unicode-db.hpp> (README.md:109-116).  C++20 is upstream's default
-# interface requirement (CTRE_CXX_STANDARD 20, :128-132), which the
-# documented `ctre::match<"REGEX">` patterns need (class-type non-type
-# template parameters, README.md:14, :152-160) and the only standard
-# upstream supports on MSVC (README.md:123).  The install keeps only
-# *.hpp (:136-137); "include" also ships include/ctre/pcre.gram, the
-# grammar source of the generated include/ctre/pcre.hpp (Makefile:55-57),
-# which no header includes.  ctre has no C API.  The consumer opt-in
-# macros are left to consumers and not exercised by the consumer test:
-# CTRE_STRING_IS_UTF8 (include/ctll/fixed_string.hpp:55),
-# CTRE_ENABLE_LITERALS (include/ctre/literals.hpp:23-53, README.md:136),
-# and CTRE_DISABLE_GREEDY_OPT (include/ctre/evaluation.hpp:391);
-# CTRE_MSVC_GREEDY_WORKAROUND is set automatically under MSVC (:16-21).
-#
-# Not ported: the C++ module (CTRE_MODULE, ctre.cppm, C++23 with
-# `import std`, :45-120); a lower CTRE_CXX_STANDARD, under which C++17
-# consumers spell patterns as ctll::fixed_string variables
-# (README.md:138-150); the single-header/ amalgamation (README.md:7); the
-# CMake package files (:142-167); the CPack and pkg-config packaging
-# (:173-207); the tests, the docs, and the benchmarks.
+# C++20 is upstream's default interface standard, which the documented
+# `ctre::match<"REGEX">` patterns need and the only one upstream supports on
+# MSVC.  Not ported: the C++ module (CTRE_MODULE), the C++17 fallback for a
+# lower CTRE_CXX_STANDARD, and the single-header amalgamation.
 [target.ctre]
 type = "header-only"
 include-dirs = ["include"]
