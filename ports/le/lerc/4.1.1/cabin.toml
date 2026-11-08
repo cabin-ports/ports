@@ -1,0 +1,62 @@
+[package.upstream]
+# The v4.1.1 tag is upstream's C++ release; vcpkg's lerc 4.1.1 builds
+# js_v4.1.1, the JavaScript release, whose C++ library is still 4.1.0.
+url = "https://github.com/Esri/lerc/archive/refs/tags/v4.1.1.tar.gz"
+checksum = "sha256:fe2860e10635166cd9f2144e429ec6b870d471e9957f5812ba2da0973770b022"
+format = "tar.gz"
+strip-prefix = "lerc-4.1.1"
+# Adds the CC BY-SA 3.0 text, verbatim from creativecommons.org, which the
+# Wikipedia code noted under [package] requires and the release lacks.
+patches = ["patches/0001-add-cc-by-sa-3.0-license-for-credited-code.patch"]
+
+[package]
+name = "cabin-ports/lerc"
+version = "4.1.1"
+include = [
+  "LICENSE",
+  "LICENSE.CC-BY-SA-3.0",
+  "NOTICE",
+  "patches",
+  "src/LercLib",
+]
+# Upstream builds C++17; Lerc_c_api.h is C99 and Lerc_types.h C++11.
+cxx-standard = "c++17"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# LICENSE is Apache-2.0, and NOTICE records Esri's patent grant.
+# ComputeChecksumFletcher32 (src/LercLib/Lerc2.cpp:1000-1030) is adapted
+# from https://en.wikipedia.org/wiki/Fletcher's_checksum by Wikipedia
+# contributors and is under CC BY-SA 3.0 (LICENSE.CC-BY-SA-3.0).
+#
+# 4.2.0 and 4.3.0 add input size, overflow and decoder bounds checks that
+# this version lacks.
+#
+# Upstream's static library.  Consumers define LERC_STATIC too, as Lerc.pc
+# does, so that Windows builds do not declare the API dllimport.  Lerc
+# works only on little-endian targets with a 32-bit int; elsewhere it
+# builds, but Lerc2 encode and decode fail.  Not ported: the shared
+# library, the Emscripten decoder, src/LercTest, and the bindings under
+# OtherLanguages/.
+[target.Lerc]
+type = "library"
+sources = [
+  "src/LercLib/BitMask.cpp",
+  "src/LercLib/BitStuffer2.cpp",
+  "src/LercLib/Huffman.cpp",
+  "src/LercLib/Lerc.cpp",
+  "src/LercLib/Lerc2.cpp",
+  "src/LercLib/Lerc_c_api_impl.cpp",
+  "src/LercLib/RLE.cpp",
+  "src/LercLib/fpl_Compression.cpp",
+  "src/LercLib/fpl_EsriHuffman.cpp",
+  "src/LercLib/fpl_Lerc2Ext.cpp",
+  "src/LercLib/fpl_Predictor.cpp",
+  "src/LercLib/fpl_UnitTypes.cpp",
+  "src/LercLib/Lerc1Decode/BitStuffer.cpp",
+  "src/LercLib/Lerc1Decode/CntZImage.cpp",
+]
+include-dirs = ["src/LercLib/include"]
+defines = ["LERC_STATIC"]
+interface-defines = ["LERC_STATIC"]
+links = "Lerc"
