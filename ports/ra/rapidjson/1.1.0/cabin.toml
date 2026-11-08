@@ -102,6 +102,9 @@ include = [
 #   overflow in GenericReader::ParseNumber (reader.h), rated 7.8 High.
 # - MSVC targeting ARM64 stops at rapidjson.h's endianness #error unless the
 #   consumer defines RAPIDJSON_ENDIAN as RAPIDJSON_LITTLEENDIAN.
+# - On ARM64EC, internal/diyfp.h and internal/biginteger.h request
+#   _umul128 as an intrinsic, which MSVC does not provide there, so
+#   linking fails unless the consumer links softintrin.lib.
 [target.rapidjson]
 type = "header-only"
 include-dirs = ["include"]
