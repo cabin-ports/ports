@@ -1,0 +1,105 @@
+[package.upstream]
+url = "https://www.oberhumer.com/opensource/lzo/download/lzo-2.10.tar.gz"
+checksum = "sha256:c0f892943208266f9b6543b3ae308fab6284c5c90e627931446fb49b4221a072"
+format = "tar.gz"
+strip-prefix = "lzo-2.10"
+# Patch 0001 adds LICENSE.zlib, the notice of zlib 1.0.4 (Jean-loup Gailly
+# and Mark Adler, zlib License), for lzo_adler32 (src/lzo_util.c:94-145) and
+# lzo_crc32 with its table (src/lzo_crc.c:32-150), adapted from Mark Adler's
+# adler32.c and crc32.c; that license asks source distributions to keep it.
+patches = ["patches/0001-add-zlib-license-for-checksum-code.patch"]
+
+# Upstream's version is two-part (2.10); Cabin versions are SemVer.
+[package]
+name = "cabin-ports/lzo"
+version = "2.10.0"
+# COPYING is the GPL v2, which every source file offers as version 2 or
+# later; a binary linking lzo is a work based on it under those terms.
+include = ["COPYING", "LICENSE.zlib", "include", "patches", "src"]
+
+# Every src/*.c, as upstream's builds compile them (B/src.rsp, CMake's
+# glob), with B/generic/build.sh's LZO_LIBC_ISOC90.  lzodefs.h and
+# src/lzo_supp.h detect the platform, so no configuration header is needed.
+# include/lzo is public too, as in upstream's lzo2.pc; src/ includes its own
+# headers by relative path.
+# Not built: the optional assembler (asm/, declared by lzo_asm.h), minilzo,
+# the examples and the tests.
+[target.lzo2]
+type = "library"
+sources = [
+  "src/lzo_crc.c",
+  "src/lzo_init.c",
+  "src/lzo_ptr.c",
+  "src/lzo_str.c",
+  "src/lzo_util.c",
+  "src/lzo1_99.c",
+  "src/lzo1.c",
+  "src/lzo1a_99.c",
+  "src/lzo1a.c",
+  "src/lzo1b_1.c",
+  "src/lzo1b_2.c",
+  "src/lzo1b_3.c",
+  "src/lzo1b_4.c",
+  "src/lzo1b_5.c",
+  "src/lzo1b_6.c",
+  "src/lzo1b_7.c",
+  "src/lzo1b_8.c",
+  "src/lzo1b_9.c",
+  "src/lzo1b_99.c",
+  "src/lzo1b_9x.c",
+  "src/lzo1b_cc.c",
+  "src/lzo1b_d1.c",
+  "src/lzo1b_d2.c",
+  "src/lzo1b_rr.c",
+  "src/lzo1b_xx.c",
+  "src/lzo1c_1.c",
+  "src/lzo1c_2.c",
+  "src/lzo1c_3.c",
+  "src/lzo1c_4.c",
+  "src/lzo1c_5.c",
+  "src/lzo1c_6.c",
+  "src/lzo1c_7.c",
+  "src/lzo1c_8.c",
+  "src/lzo1c_9.c",
+  "src/lzo1c_99.c",
+  "src/lzo1c_9x.c",
+  "src/lzo1c_cc.c",
+  "src/lzo1c_d1.c",
+  "src/lzo1c_d2.c",
+  "src/lzo1c_rr.c",
+  "src/lzo1c_xx.c",
+  "src/lzo1f_1.c",
+  "src/lzo1f_9x.c",
+  "src/lzo1f_d1.c",
+  "src/lzo1f_d2.c",
+  "src/lzo1x_1.c",
+  "src/lzo1x_1k.c",
+  "src/lzo1x_1l.c",
+  "src/lzo1x_1o.c",
+  "src/lzo1x_9x.c",
+  "src/lzo1x_d1.c",
+  "src/lzo1x_d2.c",
+  "src/lzo1x_d3.c",
+  "src/lzo1x_o.c",
+  "src/lzo1y_1.c",
+  "src/lzo1y_9x.c",
+  "src/lzo1y_d1.c",
+  "src/lzo1y_d2.c",
+  "src/lzo1y_d3.c",
+  "src/lzo1y_o.c",
+  "src/lzo1z_9x.c",
+  "src/lzo1z_d1.c",
+  "src/lzo1z_d2.c",
+  "src/lzo1z_d3.c",
+  "src/lzo2a_9x.c",
+  "src/lzo2a_d1.c",
+  "src/lzo2a_d2.c",
+]
+include-dirs = ["include", "include/lzo"]
+defines = ["LZO_LIBC_ISOC90=1"]
+# C11 is the oldest standard Cabin can lower for MSVC; the public headers
+# are C89 and C++98 clean.
+c-standard = "c11"
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
+links = "lzo2"
