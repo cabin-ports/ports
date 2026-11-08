@@ -1,14 +1,11 @@
 [package.upstream]
-# Conan Center's conandata pins this sha256 for 2.9.4; vcpkg pins the
-# SHA-512 of the same tree archived by its commit, 2343fd6b.
 url = "https://github.com/nodejs/http-parser/archive/refs/tags/v2.9.4.tar.gz"
 checksum = "sha256:467b9e30fd0979ee301065e70f637d525c28193449e1b13fbcb1b1fab3ad224f"
 format = "tar.gz"
 strip-prefix = "http-parser-2.9.4"
 
-# http_parser.h is the one header upstream installs (Makefile:133-134).  It
-# sits at the archive root beside http_parser.c, test.c, and bench.c, so the
-# root stays off the consumer include path.
+# http_parser.h sits at the archive root beside the sources and test
+# programs, so it is copied out and the root stays off the include path.
 [[package.upstream.copy]]
 from = "http_parser.h"
 to = "include/http_parser.h"
@@ -17,36 +14,19 @@ to = "include/http_parser.h"
 name = "cabin-ports/http-parser"
 version = "2.9.4"
 include = ["LICENSE-MIT", "http_parser.c", "http_parser.h", "include"]
-# http_parser.c is C99 (http_parser.gyp:65); C11 is the oldest standard
-# Cabin can request from MSVC.  http_parser.h includes <stdint.h>, which C++
-# has from C++11.
+# http_parser.c is C99; C11 is the oldest standard Cabin can request from
+# MSVC.  http_parser.h includes <stdint.h>, which C++ has from C++11.
 c-standard = "c11"
 interface-c-standard = "c99"
 interface-cxx-standard = "c++11"
 
-# Upstream archived the repository after this release; its successor,
-# llhttp, is ported as cabin-ports/llhttp.  This port packages 2.9.4 as
-# published.
+# Upstream archived the repository after this release; its successor is
+# ported as cabin-ports/llhttp.
 #
-# http_parser, the HTTP/1.x request and response parser, as upstream's
-# Makefile builds libhttp_parser (Makefile:109-116): http_parser.c with
-# HTTP_PARSER_STRICT=0 (:51).  Upstream's GYP build gives its http_parser
-# target the same definition and passes it to the target's dependents
-# (http_parser.gyp:52-60), as this port does, so consumers see the mode the
-# library was built in.  Strict mode, http_parser.h's default when the macro
-# is undefined (:48-53), rejects more input: for example underscores in the
-# host names http_parser_parse_url() splits, tabs and form feeds in URLs, and
-# a further message after one that ends the connection (http_parser.c:236-240,
-# :433-466, :500-504).  Consumers write `#include <http_parser.h>`.
-#
-# HTTP_MAX_HEADER_SIZE (http_parser.h:55-64) acts only on the library's own
-# compile, as the initial limit (http_parser.c:28); this port leaves it at
-# 80 KiB.  http_parser_set_max_header_size() changes the limit at run time,
-# for every parser in the process.
-#
-# Not ported: the strict-mode http_parser_strict library upstream's GYP build
-# also defines (http_parser.gyp:74-95), the shared library, and the test,
-# benchmark, and contrib programs.
+# Built non-strict (HTTP_PARSER_STRICT=0), as upstream's Makefile and GYP
+# builds do; the GYP build also passes the define to dependents, so
+# consumers see the mode the library was built in.  Not ported: the
+# strict-mode http_parser_strict library the GYP build also defines.
 #
 # Licence: MIT, LICENSE-MIT (Joyent, Inc. and other Node contributors).
 # Until 2017 upstream credited NGINX's src/http/ngx_http_parse.c; it removed
