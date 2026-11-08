@@ -1,18 +1,15 @@
 [package.upstream]
-# The v1.1.0 tag archive, the bytes ConanCenter's rapidjson 1.1.0 pins
-# (SHA-256); the release has no assets.  1.1.0 is the last release.
+# 1.1.0 is the last release.
 url = "https://github.com/Tencent/rapidjson/archive/refs/tags/v1.1.0.tar.gz"
 checksum = "sha256:bf7ced29704a1e696fbccf2a2b4ea068e7774fa37f6d7dd4039d0787f8bed98e"
 format = "tar.gz"
 strip-prefix = "rapidjson-1.1.0"
-# include/rapidjson/document.h:319 defines GenericStringRef's copy
-# assignment by assigning to its const members, which GCC 16 and LLVM
-# clang 23 reject even unused (Apple clang 21 accepts it), so nothing that
-# includes document.h compiles there.  Patch 0001 is upstream commit
-# 3b2441b ("Removed non-compiling assignment operator. Fixed #718"), whose
-# parent is the v1.1.0 tag, verbatim: it deletes that operator, and
-# GenericStringRef stays non-assignable, its members being const.
-# ConanCenter ships 1.1.0 unpatched; vcpkg ships a 2025 master snapshot.
+# Patch 0001 is upstream commit 3b2441b ("Removed non-compiling assignment
+# operator. Fixed #718"), whose parent is the v1.1.0 tag, verbatim: it
+# deletes GenericStringRef's copy assignment, which assigns to const members
+# and which GCC 16 and LLVM clang 23 reject even unused, so nothing that
+# includes document.h compiled there.  GenericStringRef stays
+# non-assignable, its members being const.
 # Patches 0002-0008 add the terms of code the headers take from elsewhere,
 # as new files:
 # - 0002, LICENSE.utf8-dfa: the license of Bjoern Hoehrmann's UTF-8
@@ -46,7 +43,6 @@ patches = [
 [package]
 name = "cabin-ports/rapidjson"
 version = "1.1.0"
-# include/rapidjson is what upstream installs (CMakeLists.txt:144-146).
 # license.txt carries RapidJSON's MIT terms and the BSD terms of the
 # bundled msinttypes headers (include/rapidjson/msinttypes, which keep
 # their notice inline); its JSON License covers only bin/jsonchecker, which
@@ -101,44 +97,14 @@ include = [
   "patches",
 ]
 
-# Header-only: upstream installs no library target (its only one,
-# namespacetest, is a unit-test helper, test/unittest/CMakeLists.txt:69),
-# and its RapidJSONConfig.cmake and RapidJSON.pc point only at the include
-# directory.  The headers support C++98 and detect C++11 features
-# themselves (RAPIDJSON_HAS_CXX11_*, rapidjson.h:528-577); the
-# configuration macros (RAPIDJSON_HAS_STDSTRING, which upstream's build
-# defines for its own examples and tests from an option that defaults to
-# OFF, CMakeLists.txt:38-41, and always for the unit tests,
-# test/unittest/CMakeLists.txt:67, RAPIDJSON_SSE2, RAPIDJSON_SSE42,
-# RAPIDJSON_ASSERT and the rest) stay the consumer's to define.
-#
-# Upstream warnings, as shipped (line numbers after patch 0001):
-# document.h:1937 and :1950 memcpy GenericValue and GenericMember objects
-# (GCC's -Wclass-memaccess, Clang's -Wnontrivial-memcall); from C++17
-# GenericMemberIterator's std::iterator base (document.h:102, :110) is
-# deprecated (-Wdeprecated-declarations, MSVC's C4996); and with -Wextra
-# GCC reports switch fallthroughs at internal/regex.h:301, :531 and :542
-# (-Wimplicit-fallthrough).
-#
-# Known upstream issues, as shipped; no release after 1.1.0 carries a fix:
+# Known upstream issues, unfixed in any release:
 # - CVE-2024-38517 and CVE-2024-39684, an integer underflow and an integer
-#   overflow in GenericReader::ParseNumber (reader.h), rated 7.8 High
-#   (CVSS 3.1) by GitHub, the CNA.  Upstream fixed the exponent underflow
-#   on master in 8269bc2 (#1261); NVD names no fix for CVE-2024-39684.
-# - MSVC targeting ARM64 stops at rapidjson.h:244's endianness #error, as
-#   :239 tests only _M_ARM (fixed on master in f914058); defining
-#   RAPIDJSON_ENDIAN as RAPIDJSON_LITTLEENDIAN avoids it.
-# - On ARM64EC, where MSVC also defines _M_AMD64, internal/diyfp.h and
-#   internal/biginteger.h request _umul128 as an intrinsic, which MSVC
-#   does not provide there (warning C4163), so linking fails unless the
-#   consumer links softintrin.lib (#1960); master links it (#1961), keyed
-#   on a macro only <windows.h> defines (PR #2399, open).
-# - internal/stack.h:117 offsets the null stack pointer before the first
-#   allocation, undefined behavior that UBSan reports (fixed on master in
-#   16872af).
-#
-# Not ported: the tests, examples, documentation, bin/ data and the CMake
-# and pkg-config files.
+#   overflow in GenericReader::ParseNumber (reader.h), rated 7.8 High.
+# - MSVC targeting ARM64 stops at rapidjson.h's endianness #error unless the
+#   consumer defines RAPIDJSON_ENDIAN as RAPIDJSON_LITTLEENDIAN.
+# - On ARM64EC, internal/diyfp.h and internal/biginteger.h request
+#   _umul128 as an intrinsic, which MSVC does not provide there, so
+#   linking fails unless the consumer links softintrin.lib.
 [target.rapidjson]
 type = "header-only"
 include-dirs = ["include"]
