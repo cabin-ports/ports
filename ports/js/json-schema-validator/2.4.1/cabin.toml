@@ -39,9 +39,9 @@ version = "2.4.1"
 # https://stackoverflow.com/a/106223 by Jorge Ferreira
 # (https://stackoverflow.com/users/6508, then "smink"), both answering
 # "Regular expression to match DNS hostname or IP Address?" under CC BY-SA
-# 2.5 (https://creativecommons.org/licenses/by-sa/2.5/legalcode).  That
-# line is distributed under CC BY-SA 2.5, the rest under the licenses
-# above.
+# 2.5 (https://creativecommons.org/licenses/by-sa/2.5/legalcode; section
+# 4(a) accepts the URI in place of a copy).  That line is distributed
+# under CC BY-SA 2.5, the rest under the licenses above.
 #
 # The regular expressions src/string-format-check.cpp credits to Jeff
 # Roberson's article
