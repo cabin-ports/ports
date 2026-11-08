@@ -6,7 +6,9 @@ checksum = "sha256:d168c799c32c35b8a036484875df7ac692ec1ad2d7de7f9630c8b1b38617e
 format = "tar.gz"
 strip-prefix = "libsigcplusplus-3.8.1"
 # 0001 fills in sigc++config.h as Meson, upstream's primary build, does
-# (meson.build:236-256): version 3.8.1, deprecated API kept.  0002 adds
+# (meson.build:236-256): version 3.8.1, deprecated API kept.  The result is
+# byte-identical to the release's untracked/MSVC_NMake/sigc++config.h, so
+# it is upstream's generated header, not a modified file.  0002 adds
 # GPL-3.0, which LGPL-3.0 incorporates and recipients must receive with
 # it; the release ships only COPYING.  Its text is verbatim from
 # https://www.gnu.org/licenses/gpl-3.0.txt, as COPYING.GPL.
