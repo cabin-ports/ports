@@ -46,41 +46,32 @@ version = "1.6.0"
 # patent rights and AUTHORS lists the contributors both refer to.
 include = ["AUTHORS", "COPYING", "PATENTS", "include", "sharpyuv", "src"]
 
-# The five libraries upstream's CMake build installs by default, each
-# from the source lists in the Makefile.am files it parses: sharpyuv,
-# webpdecoder (a decode-only subset of webp; link one or the other),
-# webp, webpdemux and webpmux.  Several library targets make the bare
-# package name ambiguous, so consumers name one, as in
-# `cabin-ports/libwebp:webp`.  Not ported: the command-line tools,
-# examples, extras and image I/O helpers, which need libpng, libjpeg,
-# libtiff and giflib, and the shared-library build.  Not reproduced:
-# -fvisibility=hidden (CMakeLists.txt:173-175; Cabin drops a
-# dependency's raw compiler flags), so a shared object linking these
-# archives also exports libwebp's internal symbols, and the
-# warning-only _CRT_SECURE_NO_WARNINGS.
+# The five libraries upstream's CMake build installs by default: sharpyuv,
+# webpdecoder (a decode-only subset of webp; link one or the other), webp,
+# webpdemux and webpmux.  Several library targets make the bare package
+# name ambiguous, so consumers name one, as in `cabin-ports/libwebp:webp`.
+# Not ported: the tools, examples, extras and image I/O helpers.  Not
+# reproduced, since Cabin drops a dependency's raw compiler flags:
+# -fvisibility=hidden, so a shared object linking these archives also
+# exports libwebp's internal symbols.
 #
-# Without the generated config.h, upstream's CMake defaults become
-# private defines: threading (WEBP_USE_THREAD) is on.  Near-lossless
-# encoding is on too, as src/enc/vp8li_enc.h defaults it, and the
-# off-by-default WEBP_ENABLE_SWAP_16BIT_CSP and
-# WEBP_ENABLE_WUNUSED_RESULT stay off.  The sources include their
+# Without the generated config.h, upstream's CMake defaults become private
+# defines, so threading (WEBP_USE_THREAD) is on.  The sources include their
 # headers as "src/..." and "sharpyuv/..." from the archive root.
 [profile]
 include-dirs = ["."]
 defines = ["WEBP_USE_THREAD"]
 
-# As cmake/cpu.cmake does on x86, each *_sse2, *_sse41 and *_avx2
-# source is compiled with its instruction set (the instruction-sets
-# tables below), and config.h's WEBP_HAVE_* let the portable code call
-# those kernels after a runtime CPUID check.  cl.exe needs neither:
-# src/dsp/cpu.h enables them by compiler version.  Every SIMD source
-# guards its body, so off its architecture it compiles to an empty
-# init stub, as in upstream's makefile.unix and Makefile.vc builds.
+# As cmake/cpu.cmake does on x86, each *_sse2, *_sse41 and *_avx2 source
+# is compiled with its instruction set, and WEBP_HAVE_* let the portable
+# code call those kernels after a runtime CPUID check (cl.exe needs
+# neither).  Every SIMD source compiles to an empty stub off its
+# architecture.
 [target.'cfg(any(arch = "x86", arch = "x86_64"))'.profile]
 defines = ["WEBP_HAVE_AVX2", "WEBP_HAVE_SSE2", "WEBP_HAVE_SSE41"]
 
 # libm for sharpyuv's gamma tables and the encoder; pthread for
-# WEBP_USE_THREAD (cmake/deps.cmake).
+# WEBP_USE_THREAD.
 [target.'cfg(os = "linux")'.profile]
 link-libs = ["m", "pthread"]
 
