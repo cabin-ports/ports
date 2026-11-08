@@ -1,0 +1,25 @@
+[package.upstream]
+# Upstream tags no releases; this is the commit vcpkg pins, whose parson.h
+# declares 1.5.3.  The later 1.5.4 (commit ec53fb6, untagged) fixes an
+# out-of-bounds read in is_valid_utf8 on truncated multi-byte sequences (#229).
+url = "https://github.com/kgabis/parson/archive/ba29f4eda9ea7703a9f6a9cf2b0532a2605723c3.tar.gz"
+checksum = "sha256:d311cd3d051965485bff1c89a3980df7ad0ee3f9c0f33c18964d8c1cc32ef2cf"
+format = "tar.gz"
+strip-prefix = "parson-ba29f4eda9ea7703a9f6a9cf2b0532a2605723c3"
+
+[package]
+name = "cabin-ports/parson"
+version = "1.5.3"
+# Licence: MIT (LICENSE).
+include = ["LICENSE", "parson.c", "parson.h"]
+# Upstream builds C89 (meson.build:6, Makefile:2); C11 is the oldest standard
+# Cabin can request from MSVC.
+c-standard = "c11"
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
+
+[target.parson]
+type = "library"
+sources = ["parson.c"]
+include-dirs = ["."]
+links = "parson"
