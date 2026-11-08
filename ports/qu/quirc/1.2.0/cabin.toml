@@ -25,6 +25,9 @@ c-standard = "c11"
 # library's own compiles: a workspace root's `[profile.<name>] defines`
 # reach them, a consumer target's `defines` do not.  This port sets none.
 #
+# Not ported: the demos and test programs, which need libjpeg, libpng, SDL,
+# V4L2, or OpenCV, and the shared library.
+#
 # Licence: ISC, LICENSE (Daniel Beer 2010-2012); README.md calls it
 # BSD-licensed.
 [target.quirc]
