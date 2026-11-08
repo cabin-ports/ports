@@ -9,40 +9,6 @@ name = "cabin-ports/fast-double-parser"
 version = "0.8.1"
 include = ["LICENSE", "LICENSE.BSL", "README.md", "include"]
 
-# fast_double_parser, header-only, as upstream's CMake interface target
-# fast_double_parser: include/ is the include root, so consumers write
-# `#include <fast_double_parser.h>` (CMakeLists.txt:22-27, BUILD.bazel:1-6).
-# It requires C++11 (README.md:12).  The target has no definitions,
-# options, or link libraries: the strtod fallback uses the C library's
-# strtod_l and newlocale, or _strtod_l and _create_locale with MSVC
-# (include/fast_double_parser.h:1105-1117).
-#
-# As upstream ships it:
-# - parse_number expects RFC 7159 (JSON) numbers, with no leading
-#   whitespace or `+`, and reads until the first character that cannot
-#   continue one, so the input must be terminated (README.md:39-51).  The
-#   grammar has no infinities or NaNs, and values that overflow binary64
-#   are rejected by an isfinite check (include/fast_double_parser.h:1131).
-# - On Cygwin, MinGW, and Solaris the fallback reads through a
-#   std::stringstream instead, in the global function cygwin_strtod_l
-#   (include/fast_double_parser.h:13-43, :1109); it overwrites its own
-#   failure result with the end pointer, which is start - 1 when a failed
-#   read stops before the end of the string (:37-41), so an overflow is not
-#   reliably rejected there.
-# - It assumes round-to-nearest (README.md:54) and IEEE semantics that
-#   -ffast-math gives up (infinities, signed zeros; parse_number is
-#   inlined into the consumer, so the consumer's flags apply), and where
-#   FLT_EVAL_METHOD is 2, as for x87 code, it still multiplies in extended
-#   precision on its fast path (include/fast_double_parser.h:901-903),
-#   which can round twice.
-# - The header defines the macros WARN_UNUSED, FASTFLOAT_SMALLEST_POWER,
-#   FASTFLOAT_LARGEST_POWER, and FAST_DOUBLE_PARSER_* unconditionally, and
-#   really_inline and unlikely unless already defined
-#   (include/fast_double_parser.h:13-18, :71-76, :98-99, :101-131).
-#
-# Not ported: the tests, benchmarks, and fuzzers, and the CMake package
-# files.
-#
 # Licence: Apache-2.0 OR BSL-1.0, as README.md states along with its
 # attribution to Michael Eisel (:181-186); both licence texts are included.
 [target.fast_double_parser]
