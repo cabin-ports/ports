@@ -1,0 +1,79 @@
+[package.upstream]
+url = "https://github.com/kuba--/zip/archive/refs/tags/v0.3.15.tar.gz"
+checksum = "sha256:0d66dd898f570cbb98bf4b2a1bf1bd9d113f7579ec35e65485b7711d0aebdef7"
+format = "tar.gz"
+strip-prefix = "zip-0.3.15"
+patches = ["patches/0001-add-info-zip-license.patch"]
+
+# Upstream installs the header as zip/zip.h (CMakeLists.txt:55, 165), so
+# consumers include <zip/zip.h> and the bundled miniz.h stays private.
+[[package.upstream.copy]]
+from = "src/zip.h"
+to = "include/zip/zip.h"
+
+[package]
+name = "cabin-ports/kubazip"
+version = "0.3.15"
+include = [
+  "LICENSE.Info-ZIP",
+  "LICENSE.txt",
+  "include",
+  "patches",
+  "src/miniz.h",
+  "src/zip.c",
+  "src/zip.h",
+]
+# zip.c needs C99 or later; C11 is the oldest standard Cabin can lower for
+# MSVC.  zip.h has // comments and long long.
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# LICENSE.txt is MIT.  src/miniz.h is miniz 3.1.2
+# (https://github.com/richgel999/miniz), amalgamated and modified upstream,
+# under MIT by Rich Geldreich and Tenacious Software LLC, RAD Game Tools and
+# Valve Software, and Martin Raiber; it carries those notices, miniz's
+# Unlicense statement and Alex Evans's public-domain dedication itself
+# (src/miniz.h:1898-1922, 2527-2577, 4088-4092, 4210-4234, 4986-5011).  Its
+# mz_* symbols duplicate cabin-ports/miniz's, so the two must not link into
+# one program: depending on link order the link fails or one copy replaces
+# the other.  src/zip.c:79-86 and 2483-2504 are adapted from Info-ZIP Zip
+# 3.0's unix/unix.c:392-423, Copyright (c) 1990-2008 Info-ZIP, under the
+# Info-ZIP license, which patches/0001-add-info-zip-license.patch adds as
+# LICENSE.Info-ZIP from zip30.tar.gz (sha256
+# f0e8bb1f9b7eb0b01285495a2699df3a4b766784c1765a8f1aeedf63c0806369).
+# zip_basename and its fallback macros (src/zip.c:60-66, 366-383) are the
+# Free Software Foundation's GPL-2.0-or-later base_name (GNU tar 1.13,
+# lib/basename.c) nearly verbatim; no terms apply, as the code is too slight
+# and dictated by its function.
+#
+# Upstream's static library with its default features (inflate, deflate,
+# symlinks).  Upstream sets CMAKE_C_STANDARD only after creating the target
+# (CMakeLists.txt:38, 81), so it compiles in the compiler's default GNU
+# dialect; _DEFAULT_SOURCE keeps glibc declaring the POSIX names zip.c and
+# miniz.h use under Cabin's strict -std.  _LARGEFILE_SOURCE and
+# _FILE_OFFSET_BITS=64 are upstream's defines for 32-bit targets
+# (CMakeLists.txt:31-34), inert on 64-bit ones; on 32-bit Linux the strict
+# -std still makes miniz.h seek with ftell and fseek (src/miniz.h:5205-5207),
+# limiting file archives to 2 GiB, and only 64-bit targets are tested.
+# src/miniz.h:6018 reads an entry's method and DOS time as one value, as
+# miniz itself does, so an archive holding a stored, password-encrypted entry
+# stamped 00:00:00 or 00:00:01 does not open, even one kubazip wrote.  Not
+# reproduced: position-independent code and hidden symbol visibility
+# (CMakeLists.txt:17, 41-45), which matter only to a shared object linking
+# the library, and upstream's warning options (CMakeLists.txt:82-92).  Not
+# ported: the shared library, zipcli and unzipcli, the fuzz targets, and the
+# tests.
+[target.zip]
+type = "library"
+sources = ["src/zip.c"]
+include-dirs = ["include"]
+defines = ["_DEFAULT_SOURCE", "_FILE_OFFSET_BITS=64", "_LARGEFILE_SOURCE"]
+links = "zip"
+
+# src/zip.c:28 tests ZIP_HAVE_SYMLINK, to include <unistd.h> for symlink(),
+# unlink() and ftruncate(), before including zip.h, so this restates zip.h's
+# default of 1 off Windows (src/zip.h:51-58); upstream instead compiles with
+# -Wno-implicit-function-declaration (CMakeLists.txt:91).
+[target.'cfg(family = "unix")'.profile]
+defines = ["ZIP_HAVE_SYMLINK=1"]
