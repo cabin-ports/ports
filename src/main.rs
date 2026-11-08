@@ -153,10 +153,8 @@ fn main() -> ExitCode {
     }
 }
 
-/// Run, and on failure point at the kept scratch directory so the
-/// staged packages and registry can be inspected.  A default scratch
-/// directory (`scratch`) is otherwise removed with its guard once the
-/// run succeeds, as the `--work-dir` help promises.
+/// Run, and on failure keep the scratch directory for inspection; a
+/// default one is otherwise removed with its guard.
 fn run_with_workdir_notice(options: &Options, scratch: Option<tempfile::TempDir>) -> Result<()> {
     let result = run(options);
     if result.is_err() {

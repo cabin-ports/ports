@@ -2,30 +2,14 @@
 //! `--plan-new` previews, and `--publish-new` uploads, never as a
 //! packaging revision (docs/publishing.md, "Automatic publishing").
 //!
-//! Which versions the registry already has is the receipts log's
-//! answer, not the registry's: the read routes serve verified
-//! revisions only, and during the private alpha only to an admitted
-//! token, so pending and rejected uploads are invisible to this tool.
-//! The log holds one JSON object per line for one registry, appended
-//! for every upload the publish workflow makes:
-//!
-//! - an `uploaded` line is the registry's receipt (a created revision,
-//!   or the byte-identical no-op).  That version is never uploaded
-//!   here again, whatever its recipe now stages: a correction ships
-//!   only as a manual packaging revision, and a rejected upload is
-//!   never revived by resubmitting it.
-//! - a `failed` line names the version an upload invocation stopped
-//!   at.  Its upload may have landed with the response lost, and a
-//!   resubmission would revive it if verification rejected it since,
-//!   so it waits for a run with `--retry-failed`, which an operator
-//!   starts after checking the registry (docs/publishing.md).
-//!
-//! A version without a line is a candidate unless the reviewed hold
-//! list ([`HOLDS_FILE`]) names it or a version it requires is blocked.
-//! Only the candidates and what their requirements match stage, and
-//! no probe runs: an uploaded requirement must stage the bytes of its
-//! last receipt, or the candidate was validated against bytes the
-//! registry cannot serve, and it waits for that requirement's manual
+//! The receipts log, not the registry, says what is uploaded: the
+//! registry's read routes hide pending and rejected uploads.  An
+//! `uploaded` line is final, so a rejected upload is never revived by
+//! resubmitting it.  A `failed` line's upload may have landed, so that
+//! version waits for `--retry-failed`.  A version without a line is a
+//! candidate unless [`HOLDS_FILE`] names it or something it requires is
+//! blocked.  No probe runs, and an uploaded requirement must stage the
+//! bytes of its last receipt, or its dependents wait for its packaging
 //! revision.
 
 use std::collections::{BTreeMap, BTreeSet};
@@ -748,8 +732,6 @@ mod tests {
         );
     }
 
-    /// A candidate validated against an uploaded requirement's local
-    /// bytes uploads only when the registry has those same bytes.
     #[test]
     fn a_requirement_staging_other_bytes_than_uploaded_blocks_its_dependents() {
         let (_dir, conversions) = catalog();

@@ -684,7 +684,6 @@ mod receipts {
         );
     }
 
-    /// An `all` run that found no log takes no lock.
     #[test]
     fn acquire_without_a_log_takes_no_lock() {
         let repo = Repo::new(&[("receipts.jsonl", LOG)]);
@@ -1106,7 +1105,6 @@ mod pending_new {
         (output, read(&output_file))
     }
 
-    /// A version to upload is work, and the step prints the list.
     #[test]
     fn pending_new_lists_the_versions_to_upload() {
         let list = "cabin-ports/zlib 1.3.1\ncabin-ports/libpng 1.6.50\n";

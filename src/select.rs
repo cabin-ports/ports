@@ -1,25 +1,18 @@
 //! Which committed ports a dry-run preflights.
 //!
-//! The whole catalog is always loaded and validated
-//! ([`crate::plan::load_conversions`]) and every port's consumer tests
-//! are checked; a selection narrows only the expensive part - fetching,
-//! materializing, staging, building, and running probes.
+//! The whole catalog is always loaded and validated, and every port's
+//! consumer tests are checked; a selection narrows only fetching,
+//! staging, building, and running probes.
 //!
 //! `--changed-since <base>` narrows only a change made of nothing but
-//! package names the base does not have, plus allowlisted
-//! documentation.  Its premise is inductive: in CI the base is `main`,
-//! or the merge-queue entry ahead, and a change reaches `main` only once
-//! its own run - full, or selective under this same argument - passed,
-//! the queue requiring every entry to pass, not just a group's head
-//! (its `ALLGREEN` grouping).  A change of that shape cannot alter
-//! how a base package builds or resolves: its files are unchanged, the
-//! publisher and its inputs are unchanged, and no base package can
-//! require a new name, because the base already validated that every
-//! requirement it declares matches one of its own versions.  So only the
-//! new packages need a preflight, against a registry holding every
-//! version their requirements could resolve to.  Anything else - a new
-//! version of an existing name included, since existing requirements may
-//! match it - preflights every port.
+//! package names the base lacks, plus allowlisted documentation.  The
+//! premise is inductive: in CI the base is `main` or the merge-queue
+//! entry ahead, and every entry passed its own run (the queue's
+//! `ALLGREEN` grouping).  Such a change cannot alter how a base package
+//! builds or resolves: its files and the publisher are unchanged, and no
+//! base package can require a new name, since the base validated that
+//! every requirement matches one of its own versions.  Anything else, a
+//! new version of an existing name included, preflights every port.
 
 use std::collections::BTreeSet;
 use std::path::{Path, PathBuf};
@@ -197,10 +190,8 @@ fn classify(prefix: &str, base_names: &BTreeSet<&str>, changes: &[(&str, &str)])
             }
             return Change::Other(format!("{path} is a shared input"));
         };
-        // `<prefix>/<name>/<version>/<file>`: anything shallower is not
-        // part of a package the publisher loads.  The package is the
-        // `<name>` directory, never its prefix directory, which other
-        // names share; discovery has already refused a misplaced name.
+        // `<prefix>/<name>/<version>/<file>`: the package is the
+        // `<name>` directory, never its prefix, which other names share.
         let mut parts = port_path.splitn(4, '/');
         let (Some(_), Some(name), Some(_), Some(_)) =
             (parts.next(), parts.next(), parts.next(), parts.next())
@@ -437,9 +428,8 @@ mod tests {
         }
     }
 
-    /// The selection is every version of the roots plus every version
-    /// any reached requirement matches - optional, feature-activated,
-    /// and dev edges included - deduplicated, in publication order.
+    /// Optional, feature-activated, and dev edges count; the result is
+    /// deduplicated and in publication order.
     #[test]
     fn the_closure_keeps_every_candidate_version_and_nothing_unrelated() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -570,8 +560,6 @@ mod tests {
         (repo, base)
     }
 
-    /// The delta spans every commit since the base, not just the last,
-    /// plus uncommitted and untracked files.
     #[test]
     fn a_change_spans_every_commit_since_the_base_and_the_working_tree() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -630,10 +618,8 @@ mod tests {
         ));
     }
 
-    /// The base's names are the directories below its prefix
-    /// directories: a new name under a prefix the base has is new, a
-    /// new version of a name the base has is not, and a move between
-    /// two places (deleting one path, adding another) is no addition.
+    /// A new version of a name the base has is not new, and a move
+    /// (deleting one path, adding another) is no addition.
     #[test]
     fn a_new_name_under_an_existing_prefix_is_new() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -661,8 +647,7 @@ mod tests {
         ));
     }
 
-    /// A pull request's test merge compared with its first parent sees
-    /// only the pull request, though `main` moved meanwhile.
+    /// `main` gains its own commit after the pull request branches.
     #[test]
     fn a_test_merge_compared_with_its_first_parent_sees_only_the_pull_request() {
         let dir = assert_fs::TempDir::new().unwrap();
@@ -686,7 +671,6 @@ mod tests {
         ));
     }
 
-    /// A base Git cannot verify fails the run rather than narrowing it.
     #[test]
     fn an_unverifiable_base_is_an_error() {
         let dir = assert_fs::TempDir::new().unwrap();
