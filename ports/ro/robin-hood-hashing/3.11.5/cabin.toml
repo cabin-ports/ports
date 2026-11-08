@@ -3,13 +3,10 @@ url = "https://github.com/martinus/robin-hood-hashing/archive/refs/tags/3.11.5.t
 checksum = "sha256:3693e44dda569e9a8b87ce8263f7477b23af448a3c3600c8ab9004fe79c20ad0"
 format = "tar.gz"
 strip-prefix = "robin-hood-hashing-3.11.5"
-# robin_hood.h uses uint64_t, UINT64_C and SIZE_MAX but gets <cstdint>
-# only transitively, which not every standard library provides; without
-# it the SIZE_MAX == UINT32_MAX bitness test compares 0 with 0 and picks
-# the 32-bit branch, which then fails at uint32_t.  Conan Center patches
-# the same include in for GCC 15 (conan-center-index#27631) and vcpkg for
-# MinGW (vcpkg#48009).  Patch 0001 adds just that include.  Upstream has
-# no fix and takes none: the repository is archived.  Patch 0002 adds the
+# robin_hood.h gets <cstdint> only transitively, which not every standard
+# library provides; without it the bitness test picks the 32-bit branch,
+# which then fails.  Patch 0001 adds just that include, as Conan Center and
+# vcpkg do; upstream is archived and takes no fix.  Patch 0002 adds the
 # Creative Commons Attribution-ShareAlike 3.0 Unported legal code,
 # verbatim from https://creativecommons.org/licenses/by-sa/3.0/legalcode.txt,
 # as LICENSE.CC-BY-SA-3.0.
@@ -34,21 +31,9 @@ version = "3.11.5"
 # the public domain.
 include = ["LICENSE", "LICENSE.CC-BY-SA-3.0", "patches", "src/include/robin_hood.h"]
 
-# Upstream's robin_hood INTERFACE target, which its CMake defines when
-# the project is not the top-level one (CMakeLists.txt:125-137):
-# src/include is the include root and robin_hood.h the one header it
-# installs (:146-149).  The header supports C++11/14/17/20
-# (robin_hood.h:8); the target sets no compile features or definitions,
-# so ROBIN_HOOD_DISABLE_INTRINSICS and the ROBIN_HOOD_LOG_ENABLED,
-# ROBIN_HOOD_TRACE_ENABLED and ROBIN_HOOD_COUNT_ENABLED debugging
-# switches stay the consumer's to define.
-#
-# Upstream is archived and unmaintained: its README on master names
-# ankerl::unordered_dense as the successor.  Master's one header change
-# since 3.11.5 (#166, bd632059) keeps Clang off the deprecated
-# __has_trivial_copy builtin; it is unreleased and not taken.  Not
-# ported: the standalone test and benchmark build and the CMake package
-# files.
+# Upstream is archived and unmaintained; its README names
+# ankerl::unordered_dense as the successor.  Master's one unreleased header
+# change since 3.11.5 (bd632059) is not taken.
 [target.robin-hood-hashing]
 type = "header-only"
 include-dirs = ["src/include"]
