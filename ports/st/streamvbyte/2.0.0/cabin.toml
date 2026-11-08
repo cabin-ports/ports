@@ -12,33 +12,20 @@ version = "2.0.0"
 # tables from it.  AUTHORS is upstream's list of copyright holders.
 include = ["AUTHORS", "LICENSE", "include", "src"]
 
-# Upstream's streamvbyte library (CMakeLists.txt:105-117, static by
-# default) and its public include/ (:128-133), whose three headers are
-# the ones upstream installs (:135-141).  src/streamvbytedelta.c is not
-# one of upstream's sources and is not built.
+# Upstream's static streamvbyte library.  src/streamvbytedelta.c is not one
+# of upstream's sources and is not built.
 #
-# On x86-64 the library picks its SSE4.1 kernels at run time (cpuid, and
-# per-function target attributes on GCC and Clang), so it needs no ISA
-# flags.  The NEON kernels build where the compiler itself defines
-# __ARM_NEON__, as Apple Clang does on arm64.  Upstream's CMake adds
-# -D__ARM_NEON__ on aarch64 (:100-103) through target_link_libraries
-# (:118), which passes it to the linker rather than the compiler, so
-# that build, like this port, compiles the scalar kernels (same output,
-# slower) with GCC and Clang on aarch64 Linux; upstream's Makefile
-# instead passes it to the compiler (Makefile:8-10).  Windows on arm64
-# does not build: under _MSC_VER, src/streamvbyte_isadetection.h:47-51
-# includes the x86-only <tmmintrin.h> and <smmintrin.h>, and upstream's
-# CI builds Windows only for Win32 and x64 (.github/workflows/vs.yml).
+# On x86-64 the library picks its SSE4.1 kernels at run time, so it needs no
+# ISA flags.  The NEON kernels build only where the compiler itself defines
+# __ARM_NEON__, as Apple Clang does on arm64; GCC and Clang on aarch64 Linux
+# compile the scalar kernels (same output, slower), as upstream's CMake
+# build effectively does.  Windows on arm64 does not build: under _MSC_VER
+# the library includes x86-only intrinsics headers.  Big-endian targets are
+# not supported upstream.
 #
-# Big-endian targets are not supported (README.md:18): the scalar codecs
-# copy partial words assuming little-endian storage (e.g.
-# src/streamvbyte_encode.c:23-27).
-#
-# Not ported: the Makefile build, examples/, tests/, utils/, the shared
-# library build, and the warning and sanitizer options.  Not reproduced:
-# position-independent code (:115; Cabin drops a dependency's raw
-# compiler flags), so the archive is not built for linking into a
-# shared object.
+# Not reproduced: position-independent code (Cabin drops a dependency's raw
+# compiler flags), so the archive is not built for linking into a shared
+# object.
 [target.streamvbyte]
 type = "library"
 sources = [
@@ -51,18 +38,15 @@ sources = [
   "src/streamvbyte_0124_decode.c",
 ]
 include-dirs = ["include"]
-# Upstream requires C99 (:7-8) and, with CMake's default extensions,
-# builds as gnu99.  Cabin rejects C99 and GNU dialects on MSVC, so the
-# library builds as strict C11 everywhere.  On x86-64 GCC and Clang that
-# selects the C11-atomics variant of the cached CPU-feature check
-# (src/streamvbyte_isadetection.h:214-240) over C99's plain static.
+# Upstream requires C99; Cabin rejects C99 and GNU dialects on MSVC, so the
+# library builds as strict C11 everywhere.
 c-standard = "c11"
 # The public headers include <stdbool.h> and <stdint.h>: C99 / C++11.
 interface-c-standard = "c99"
 interface-cxx-standard = "c++11"
 links = "streamvbyte"
 
-# Upstream's if(MSVC) definition (CMakeLists.txt:96-98).  Only the
-# library's own sources spell __restrict__; the public headers do not.
+# As upstream's MSVC build.  Only the library's own sources spell
+# __restrict__; the public headers do not.
 [target.'cfg(any(cc = "msvc", cc = "clang-cl"))'.profile]
 defines = ["__restrict__=__restrict"]
