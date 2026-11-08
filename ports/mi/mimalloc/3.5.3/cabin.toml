@@ -3,18 +3,14 @@ url = "https://github.com/microsoft/mimalloc/archive/refs/tags/v3.5.3.tar.gz"
 checksum = "sha256:3b4a15153a59905995f7070296ed604bb5ccc00cabb8b93446931aff77224d47"
 format = "tar.gz"
 strip-prefix = "mimalloc-3.5.3"
-# Built as C with GCC or Clang, src/alloc.c:804-810 defines a weak
-# std::get_new_handler() that returns NULL, which a static C++ runtime's
-# definition replaces, so that mi_new can call the program's new_handler.
-# Upstream compiles with -fvisibility=hidden (CMakeLists.txt:746), a raw
-# flag Cabin drops for registry packages; without it an ELF executable
-# exports the fallback to libstdc++, whose operator new then stops calling
-# the program's new_handler.  The first patch gives the fallback hidden
-# visibility in the source, as upstream's build does.  As with upstream's
-# static library, the fallback still answers a program's own calls to
-# std::get_new_handler() with NULL when the C++ runtime is shared, on ELF
-# and macOS alike (upstream PR #1438, after 3.5.3, adds
-# MI_NO_CXX_NEW_HANDLER to opt out and keeps the default).
+# Built as C with GCC or Clang, src/alloc.c defines a weak
+# std::get_new_handler() fallback that a static C++ runtime replaces.
+# Upstream hides it with -fvisibility=hidden, a raw flag Cabin drops;
+# without it an ELF executable exports the fallback to libstdc++, whose
+# operator new then stops calling the program's new_handler.  The first
+# patch gives the fallback hidden visibility in the source instead.  As with
+# upstream's static library, the fallback still answers a program's own
+# std::get_new_handler() calls with NULL when the C++ runtime is shared.
 patches = [
   "patches/0001-hide-the-weak-get-new-handler-fallback.patch",
   "patches/0002-add-a-c++-translation-unit-for-msvc.patch",
@@ -26,60 +22,41 @@ version = "3.5.3"
 # bin/ holds prebuilt Windows redirection DLLs and minject, which only the
 # shared library uses.
 include = ["LICENSE", "include", "patches", "src"]
-# Upstream's CMake compiles C11 and C++17 (CMakeLists.txt:4-5).
-# mimalloc.h needs C99 (<stdbool.h>), and its C++ part (mi_stl_allocator)
-# C++11.
+# Upstream compiles C11 and C++17; mimalloc.h needs C99, and its C++ part
+# (mi_stl_allocator) C++11.
 c-standard = "c11"
 cxx-standard = "c++17"
 interface-c-standard = "c99"
 interface-cxx-standard = "c++11"
 
 # The static library of upstream's CMake build (mimalloc-static), from its
-# mi_sources (CMakeLists.txt:107-128): alloc.c includes alloc-override.c
-# and free.c, page.c includes page-queue.c, and prim/prim.c includes the
-# platform's prim/<os>/prim.c.  include/ is public, as in upstream's build
-# tree; upstream installs mimalloc.h, mimalloc-override.h,
-# mimalloc-new-delete.h and mimalloc-stats.h from it.
+# mi_sources; several of them #include the others.
 #
-# With MSVC, upstream's CMake compiles those sources as C++ (MI_USE_CXX,
-# CMakeLists.txt:251-260, :899-901), so that include/mimalloc/atomic.h
-# uses the C++ atomics rather than its MSVC C wrapper, which upstream marks
-# deprecated (atomic.h:162-163; see also upstream issue #1126).  Cabin
-# picks a source's language by its extension and a target's sources by
-# platform, so the second patch adds src/static-cxx.cpp, which includes
-# upstream's single-translation-unit src/static.c, and the MSVC
-# environment (every compiler on a Windows host without --target; CMake
-# does this for MSVC and clang-cl, not MinGW) compiles that instead of the
-# C sources.  CMake also passes MSVC /Zc:__cplusplus (CMakeLists.txt:269),
-# a raw flag Cabin drops; in the library that changes only attribute
-# spellings.
+# With MSVC, upstream compiles those sources as C++ (MI_USE_CXX), so that
+# atomic.h uses the C++ atomics rather than its deprecated MSVC C wrapper.
+# Cabin picks a source's language by its extension, so the second patch adds
+# src/static-cxx.cpp, which includes upstream's single-translation-unit
+# src/static.c, and the MSVC environment (every compiler on a Windows host
+# without --target; CMake does this for MSVC and clang-cl, not MinGW)
+# compiles that instead of the C sources.
 #
-# Cabin's release profile defines NDEBUG, from which
-# include/mimalloc/types.h:76-101 derives the settings of CMake's Release
-# build (MI_DEBUG 0, MI_STATS 1, MI_PROFILE 1, no MI_GUARDED).  The dev
-# profile gets that header's debug defaults, MI_DEBUG 2 and MI_STATS 2 as
-# in CMake's single-config Debug build, and the dev overlay below adds its
-# fine-grained guarding and profiling, MI_GUARDED 2 and MI_PROFILE 2
-# (CMakeLists.txt:455-466, :525-536).
+# Cabin's release profile defines NDEBUG, from which types.h derives the
+# settings of CMake's Release build; the dev profile gets its debug
+# defaults, and the dev overlay below adds the guarding and profiling of
+# CMake's Debug build.
 #
 # Deviations from upstream's CMake defaults:
-# - MI_OVERRIDE is off (CMakeLists.txt:10 turns it on; vcpkg and Conan
-#   turn it off).  With it the static library defines malloc, free, new
-#   and delete for every program that links it, even through other
-#   packages, and only on some platforms: not under MSVC's /MD
-#   (alloc-override.c:13), and not through macOS interposing, which needs
-#   a shared library.  A program overrides explicitly as readme.md
-#   ("Overriding Standard Malloc") describes: mimalloc-override.h in each
-#   of its own sources, or mimalloc-new-delete.h in one C++ source;
-#   mimalloc.o and the shared library are not built here.
-# - No compiler flags: MI_OPT_ARCH (on for arm64 by default,
-#   CMakeLists.txt:230-236, e.g. -march=armv8.1-a) would raise the CPU
-#   baseline, and -ftls-model=initial-exec, -fvisibility=hidden (but see
-#   the first patch) and the warning flags are raw flags, which Cabin
-#   drops for registry packages.
+# - MI_OVERRIDE is off, as in vcpkg and Conan: on, the static library would
+#   replace malloc, free, new and delete for every program that links it,
+#   even through other packages, and only on some platforms.  A program
+#   overrides explicitly, as readme.md ("Overriding Standard Malloc")
+#   describes.
+# - No compiler flags: MI_OPT_ARCH (on for arm64) would raise the CPU
+#   baseline, and the others are raw flags, which Cabin drops for registry
+#   packages.
 # Also not ported: the shared library with its Windows redirection, the
-# single-object mimalloc.o, MI_SECURE and the other options that are off
-# by default, the pkg-config file and the tests.
+# single-object mimalloc.o, and MI_SECURE and the other options that are
+# off by default.
 [target.mimalloc]
 type = "library"
 include-dirs = ["include"]
@@ -116,9 +93,9 @@ mimalloc = ["src/static-cxx.cpp"]
 [target.'cfg(any(family = "unix", family = "windows"))'.profile.dev]
 defines = ["MI_GUARDED=2", "MI_PROFILE=2"]
 
-# CMake links pthread and rt where they exist (CMakeLists.txt:884-891); it
-# also links libatomic where it exists, which mimalloc's word-sized atomics
-# do not need on x86_64 or arm64.
+# Upstream links pthread and, where it exists, rt (below); it also links
+# libatomic where it exists, which mimalloc's word-sized atomics do not need
+# on x86_64 or arm64.
 [target.'cfg(family = "unix")'.profile]
 link-libs = ["pthread"]
 
