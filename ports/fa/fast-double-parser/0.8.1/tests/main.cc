@@ -64,7 +64,7 @@ int main() {
   CHECK(parses_to("1.7976931348623157e308", 0x7fefffffffffffffULL));
   CHECK(parses_to("1e-300", 0x01a56e1fc2f8f359ULL));
   // The 128-bit refinement of the product, and a mantissa that rounds up to
-  // 2^53 (include/fast_double_parser.h:1021-1044, :1083-1089).
+  // 2^53.
   CHECK(parses_to("605e-30", 0x3a47f76dccb9957aULL));
   CHECK(parses_to("7.2057594037927933e+16", 0x4370000000000000ULL));
 

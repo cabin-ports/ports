@@ -1,10 +1,5 @@
-// The C++ consumer: TCLAP in C++98 - labeled values with defaults, switches
-// (combined, counted and defaulting to true), repeated and unlabeled
-// arguments, a custom delimiter, parsing argc and argv, value constraints,
-// exclusive alternatives, the parse errors and ignoring unmatched words,
-// --help and --version through a custom CmdLineOutput, the handled-failure
-// path, the usage, version, failure, DocBook and zsh outputs, and `--`
-// (last, because its state is process-wide).
+// The C++ consumer: TCLAP in C++98.  `--` comes last, because its state is
+// process-wide.
 #include <tclap/CmdLine.h>
 #include <tclap/DocBookOutput.h>
 #include <tclap/ZshCompletionOutput.h>

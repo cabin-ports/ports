@@ -34,7 +34,7 @@ constexpr std::optional<std::string_view> number_after_letters(
 static_assert(number_after_letters("abc42") == std::string_view("42"));
 static_assert(!number_after_letters("42abc"));
 
-// README's C++17 spelling (README.md:138-150), which C++20 accepts too: a
+// README's C++17 spelling, which C++20 accepts too: a
 // pattern held in a ctll::fixed_string variable.
 static constexpr auto hello_pattern = ctll::fixed_string{"h.*o"};
 

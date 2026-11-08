@@ -1,10 +1,6 @@
 // The consumer: parallel-hashmap's containers through the headers upstream
-// installs, at its C++11 floor.  The flat and node hash maps and sets (with a
-// hash_value() friend combined through phmap::HashState, as upstream's
-// examples/hash_value.h does), the free erase_if, a parallel map shared by
-// threads through the locked API upstream's examples/mt_word_counter.cc
-// uses, the B-tree map and set, and phmap_dump.h's binary dump and load
-// (examples/dump_load.cc), through a string stream.
+// installs, at its C++11 floor; parts follow upstream's
+// examples/hash_value.h, mt_word_counter.cc and dump_load.cc.
 #include <parallel_hashmap/btree.h>
 #include <parallel_hashmap/phmap.h>
 #include <parallel_hashmap/phmap_dump.h>

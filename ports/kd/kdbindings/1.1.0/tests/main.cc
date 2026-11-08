@@ -13,8 +13,8 @@
 #include <kdbindings/property.h>
 #include <kdbindings/signal.h>
 
-// Upstream's CMake target defines this for its consumers by default
-// (src/kdbindings/CMakeLists.txt:36-38), marking connect() [[nodiscard]].
+// Upstream's CMake target defines this for its consumers by default,
+// marking connect() [[nodiscard]].
 #ifndef KDBINDINGS_ENABLE_WARN_UNUSED
 #error "KDBINDINGS_ENABLE_WARN_UNUSED does not reach consumers"
 #endif
@@ -217,8 +217,8 @@ void immediate_bindings() {
   KDBindings::Property<int> width{800};
   KDBindings::Property<int> height{600};
   // A property constructed from a binding compares its uninitialized value
-  // with the first result (property.h:237-241, :265, :362-372), so scalars are
-  // initialized first and then given their binding.
+  // with the first result, so scalars are initialized first and then given
+  // their binding.
   KDBindings::Property<int> size{0};
   size = KDBindings::makeBinding(bytes_per_pixel * width * height);
   CHECK(size.get() == 4 * 800 * 600);

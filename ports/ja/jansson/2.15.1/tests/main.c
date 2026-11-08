@@ -89,7 +89,7 @@ static void decode_and_encode(void) {
     json_decref(root);
 }
 
-/* dtoa's shortest round-trip digits, in jansson's format (strconv.c:69-168):
+/* dtoa's shortest round-trip digits, in jansson's format:
    without dtoa, 0.1 would print as 0.10000000000000001 and 1.23e47 as
    1.2299999999999999e47 (test/suites/valid/real-exponent-no-dtoa). */
 static void reals(void) {
@@ -236,7 +236,7 @@ static void buffers_and_callbacks(void) {
 }
 
 /* Descriptor I/O, which jansson compiles only where configure finds
-   <unistd.h> (dump.c:59-65, load.c:995-1001), so not with cl; checked
+   <unistd.h>, so not with cl; checked
    through pipe() off Windows. */
 static void descriptors(void) {
 #ifndef _WIN32

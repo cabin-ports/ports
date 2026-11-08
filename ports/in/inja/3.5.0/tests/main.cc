@@ -14,7 +14,6 @@
 #include <system_error>
 #include <type_traits>
 
-// inja::json is the nlohmann_json dependency's type (json.hpp:7-8).
 static_assert(std::is_same<inja::json, nlohmann::json>::value,
               "inja renders nlohmann::json data");
 
@@ -50,7 +49,7 @@ inja::json sample() {
   return data;
 }
 
-// The README's tutorial (README.md:62-344) and upstream's tests.
+// The README's tutorial and upstream's tests.
 void test_render() {
   const inja::json data = sample();
   check(inja::render("Hello {{ name }}!", data) == "Hello Peter!",
@@ -207,9 +206,9 @@ void test_environment() {
   inja::Environment ws;
   check(ws.render("   {{- name -}}   !", data) == "Peter!",
         "- strips whitespace by hand");
-  // A leading - strips only a line that is all whitespace up to the block
-  // (lexer.hpp:262-274, test/test-renderer.cpp:248), so README.md:375's
-  // "Hello       {{- name -}}     !" keeps the spaces after "Hello".
+  // A leading - strips only a line that is all whitespace up to the block,
+  // so the README's "Hello       {{- name -}}     !" keeps the spaces after
+  // "Hello".
   check(ws.render("Hello   {{- name -}}   !", data) == "Hello   Peter!",
         "- keeps whitespace after other text on the line");
   ws.set_trim_blocks(true);
@@ -234,8 +233,8 @@ void test_environment() {
 }
 
 // The file API: an Environment rooted at a directory reads templates and
-// JSON from it, resolves includes relative to the including file
-// (parser.hpp:91-114), and writes results there.
+// JSON from it, resolves includes relative to the including file, and
+// writes results there.
 void test_files() {
   namespace fs = std::filesystem;
   // A directory of this run's own: create_directory() is false if taken.

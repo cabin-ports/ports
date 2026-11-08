@@ -13,9 +13,9 @@ namespace {
 constexpr double kPi = 3.14159265358979323846;
 
 // Upstream's tests accept |a - b| / (1 + |b|) below 1e-14 in long double,
-// 1e-10 on Windows (tests/gcem_tests.hpp:36-46, :292).  These checks run in
-// double, where gcem's series leave a few 1e-14 (erf(1.9) is 4e-14 from
-// <cmath>), so they accept 1e-12 on every platform.
+// 1e-10 on Windows.  These checks run in double, where gcem's series leave a
+// few 1e-14 (erf(1.9) is 4e-14 from <cmath>), so they accept 1e-12 on every
+// platform.
 constexpr double kTol = 1e-12;
 
 constexpr bool agree(double a, double b) {
@@ -52,8 +52,8 @@ static_assert(std::is_same<decltype(gcem::sqrt(4.0f)), float>::value,
 static_assert(std::is_same<decltype(gcem::factorial(10)), int>::value,
               "integral factorial stays integral");
 #ifndef _MSC_VER
-// MSVC's signbit() of a zero is not constexpr (signbit.hpp:37-38); these
-// are checked at run time on every compiler below.
+// MSVC's signbit() of a zero is not constexpr; these are checked at run
+// time on every compiler below.
 static_assert(gcem::signbit(-0.0) && !gcem::signbit(0.0), "signbit(+-0)");
 static_assert(gcem::copysign(1.0, -0.0) == -1.0, "copysign(x, -0)");
 #endif
@@ -110,8 +110,7 @@ int main() {
     SAME(atan2, -x, -2.0);
     SAME(hypot, x, 2.0);
     SAME(fmod, 10.0, x);
-    // lgamma is only compared above zero: gcem's is +inf below DBL_MIN
-    // (lgamma.hpp:106-107), as the manifest documents.
+    // lgamma is only compared above zero: gcem's is +inf below DBL_MIN.
     if (x > 0) {
       SAME(sqrt, x);
       SAME(log, x);
@@ -134,8 +133,8 @@ int main() {
     }
   }
 
-  // Below 1e-4 expm1 and log1p switch to series (expm1.hpp:51,
-  // log1p.hpp:55); compare them relatively there.
+  // Below 1e-4 expm1 and log1p switch to series; compare them relatively
+  // there.
   volatile double tiny = 3e-5;
   CHECK(std::fabs(gcem::expm1(tiny) / std::expm1(tiny) - 1) < kTol);
   CHECK(std::fabs(gcem::log1p(tiny) / std::log1p(tiny) - 1) < kTol);
@@ -150,7 +149,7 @@ int main() {
   CHECK_NEAR(gcem::incomplete_gamma_inv(2.0, 1 - 2 / std::exp(1.0)), 1.0);
   CHECK_NEAR(gcem::beta(2.5, 1.5),
              std::tgamma(2.5) * std::tgamma(1.5) / std::tgamma(4.0));
-  // A non-integral factorial is tgamma(x + 1) (factorial.hpp:77).
+  // A non-integral factorial is tgamma(x + 1).
   CHECK_NEAR(gcem::factorial(4.5 * one), std::tgamma(5.5));
 
   // Special values, as <cmath> gives them.
@@ -163,7 +162,7 @@ int main() {
   CHECK(std::isnan(gcem::tgamma(-2 * one)));
   CHECK(gcem::signbit(-zero) && !gcem::signbit(zero));
   CHECK(gcem::copysign(one, -zero) == -1.0);
-  // At the origin the signs of the zeros pick the quadrant (atan2.hpp:41-46).
+  // At the origin the signs of the zeros pick the quadrant.
   CHECK(gcem::atan2(-zero, -zero) == std::atan2(-zero, -zero));
   CHECK(gcem::atan2(zero, -zero) == std::atan2(zero, -zero));
   CHECK_NEAR(gcem::tgamma(0.5) * gcem::tgamma(0.5), kPi);

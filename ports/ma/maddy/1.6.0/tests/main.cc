@@ -1,10 +1,4 @@
-// The C++ consumer: maddy's Markdown-to-HTML parser in C++14 - the version,
-// headlines with and without inline parsing, paragraphs with italic,
-// emphasized, strong, struck-through and inline-code text, links, images and
-// line breaks, code blocks, unordered, ordered and nested lists, check lists,
-// quotes, tables, horizontal lines, the HTML and LaTeX block parsers that only
-// a config enables, a config without the table parser, and a config that
-// keeps only some parsers.
+// The C++ consumer: maddy's Markdown-to-HTML parser in C++14.
 #include <maddy/parser.h>
 
 #include <cstdio>

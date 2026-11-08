@@ -1,10 +1,4 @@
-// Consumer test (C++98): in-situ parsing with entity expansion, the
-// parser flags (declaration and comment nodes, whitespace trimming and
-// normalization, closing-tag validation, non-destructive mode), parse
-// errors with their positions, DOM construction and editing, printing
-// with and without indentation (rapidxml_print.hpp, as patched), a
-// user-supplied allocator, wide characters, and rapidxml_utils.hpp's
-// stream loader and counters.
+// Consumer test (C++98), printing through rapidxml_print.hpp as patched.
 #include <rapidxml.hpp>
 #include <rapidxml_print.hpp>
 #include <rapidxml_utils.hpp>

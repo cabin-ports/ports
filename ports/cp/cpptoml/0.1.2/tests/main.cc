@@ -1,10 +1,4 @@
-// The C++ consumer: cpptoml in C++11 - strings (basic, literal, multi-line,
-// escapes), integers (separators, hex, octal, binary), floats (exponents,
-// inf, nan), booleans, the four date and time types, arrays (nested and of
-// tables), inline and nested tables, qualified lookups, defaults,
-// range-checked integer conversions, CRLF input, parse errors with their
-// line, parse_file, building a table, writing it and the parsed document
-// and parsing them back, cloning, erasing, and a visitor.
+// The C++ consumer: cpptoml in C++11.
 #include <cpptoml.h>
 
 #include <cmath>

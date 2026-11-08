@@ -71,9 +71,9 @@ void ordered() {
   int seven = 7 + salt;
   check(*primes.lower_bound(seven) == 7 && *primes.upper_bound(seven) == 11,
         "set bounds of a member");
-  // Unlike std::set, frozen::set's lower_bound of a non-member is end()
-  // (set.h:114-121; upstream's tests/test_set.cpp:89-96 pin it for keys
-  // outside the range); frozen::map's is std::map's.
+  // Unlike std::set, frozen::set's lower_bound of a non-member is end(), as
+  // upstream's tests pin for keys outside the range; frozen::map's is
+  // std::map's.
   check(primes.lower_bound(seven - 6) == primes.end() &&
             primes.lower_bound(seven - 1) == primes.end(),
         "set lower_bound of a non-member");

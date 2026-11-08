@@ -104,7 +104,7 @@ int main() {
   if (failures != 0) {
     return 1;
   }
-  // Not qh_version: libqhull_r.h:53 declares it outside its extern "C"
+  // Not qh_version: libqhull_r.h declares it outside its extern "C"
   // block, so MSVC decorates the name in C++ and it does not link.
   std::printf("qhull C++ API OK\n");
   return 0;

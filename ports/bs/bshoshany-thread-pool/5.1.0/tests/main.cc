@@ -1,10 +1,4 @@
-// Consumer test: submit_task's future carries a result and a thrown
-// exception; detached tasks all run before wait() returns; submit_loop,
-// submit_blocks and submit_sequence cover an index range exactly once;
-// BS::this_thread names the worker and its pool; reset resizes the pool; a
-// paused pool queues tasks until unpaused and purge drops them; a priority
-// pool runs higher priorities first; wait() from a worker of a deadlock-
-// checking pool throws; synced_stream keeps lines whole; and the version.
+// Consumer test for BS::thread_pool.
 #include <BS_thread_pool.hpp>
 
 #include <algorithm>
@@ -87,7 +81,6 @@ int main() {
   void* const self = &pool;
   CHECK(pool.submit_task([self] { return BS::this_thread::get_pool() == std::optional<void*>(self); }).get());
 
-  // reset replaces the workers with a new number of threads.
   pool.reset(2);
   CHECK(pool.get_thread_count() == 2 && pool.get_thread_ids().size() == 2);
 

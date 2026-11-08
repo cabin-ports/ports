@@ -1,13 +1,8 @@
-// The C++ consumer: nameof in C++17 - names of variables, members,
-// functions and macros (NAMEOF, NAMEOF_FULL, NAMEOF_RAW); enum names at run
-// time and at compile time, with a fallback, as flags, beyond the default
-// range through customize::enum_range, and from customize::enum_name;
-// short, unqualified and full type names, a custom type name, and a dynamic
-// type through RTTI; member and pointer names where upstream supports them
-// (not MSVC before C++20, doc/reference.md:91); and nameof::cstring.  Type
-// spellings are compiler-specific (README.md:76, doc/reference.md:42), so
-// only spellings upstream's own tests expect alike on GCC, Clang and MSVC
-// are compared, and otherwise only the parts they share.
+// The C++ consumer: nameof in C++17.  Member and pointer names are checked
+// only where upstream supports them (not MSVC before C++20).  Type spellings
+// are compiler-specific, so only spellings upstream's own tests expect alike
+// on GCC, Clang and MSVC are compared, and otherwise only the parts they
+// share.
 #include <nameof.hpp>
 
 #include <cstdio>

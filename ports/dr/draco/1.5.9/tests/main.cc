@@ -113,8 +113,7 @@ static void check_meshes() {
 
   // Edgebreaker with each connectivity coder, which it writes right after
   // the header; 14-bit positions: a step of 4/16383 over the largest extent.
-  // Unforced, a mesh under 1000 faces always gets the standard coder
-  // (mesh_edgebreaker_encoder.cc:34-46).
+  // Unforced, a mesh under 1000 faces always gets the standard coder.
   for (int coder : {draco::MESH_EDGEBREAKER_STANDARD_ENCODING, draco::MESH_EDGEBREAKER_VALENCE_ENCODING}) {
     draco::Encoder encoder;
     encoder.SetEncodingMethod(draco::MESH_EDGEBREAKER_ENCODING);

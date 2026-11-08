@@ -101,8 +101,7 @@ void check_kernel(const simdjson::implementation* impl) {
             .error() != simdjson::SUCCESS);
 
   // 100 documents in 64-byte batches, so the stream crosses many batch
-  // boundaries, on a worker thread except in unoptimized Apple builds
-  // (include/simdjson/portability.h:176-187).
+  // boundaries, on a worker thread except in unoptimized Apple builds.
   std::string lines;
   for (int i = 1; i <= 100; ++i) {
     lines += "{\"id\":" + std::to_string(i) + "}\n";

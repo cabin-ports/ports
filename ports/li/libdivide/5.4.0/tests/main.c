@@ -1,4 +1,4 @@
-/* Opt into the vector API the host has, as README.md:106-133 shows. */
+/* Opt into the vector API the host has, as the README shows. */
 #if defined(__x86_64__) || defined(_M_X64)
 #define LIBDIVIDE_SSE2
 #elif defined(__aarch64__)
@@ -35,7 +35,7 @@ static const int64_t edges[] = {
 /* Checks the branchfull and branchfree dividers for d against the compiler's
  * own division, over the edge values and random numerators, and checks that
  * both recover d.  MIN / -1 has no representable quotient and is skipped; an
- * unsigned branchfree divider rejects d == 1 (libdivide.h:833). */
+ * unsigned branchfree divider rejects d == 1. */
 #define DEFINE_CHECK(T, SFX, MIN, IS_SIGNED, FMT, CAST)                                     \
     static void check_##SFX(T d) {                                                          \
         struct libdivide_##SFX##_t fast = libdivide_##SFX##_gen(d);                         \
@@ -137,7 +137,7 @@ int main(void) {
     for (i = 0; i < EDGE_COUNT; ++i) check_divisor((uint64_t)edges[i]);
     for (i = 0; i < RANDOM_DIVISORS; ++i) check_divisor(next_random());
 
-    /* README.md:51-69: one divider reused across an array. */
+    /* The README's example: one divider reused across an array. */
     for (i = 0; i < 100; ++i) numbers[i] = (int64_t)(i * i) * 7919 - 40000;
     d = libdivide_s64_gen(-37);
     for (i = 0; i < 100; ++i) sum += libdivide_s64_do(numbers[i], &d) - numbers[i] / -37;

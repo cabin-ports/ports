@@ -93,7 +93,7 @@ int from_object(void* object, DLManagedTensorVersioned** out) {
     return 0;
 }
 
-// Steals the tensor (dlpack.h:497): the new object shares the framework
+// Steals the tensor: the new object shares the framework
 // tensor, and the export is released.
 int to_object(DLManagedTensorVersioned* tensor, void** out) {
     *out = new std::shared_ptr<FrameworkTensor>(static_cast<Export*>(tensor->manager_ctx)->owner);

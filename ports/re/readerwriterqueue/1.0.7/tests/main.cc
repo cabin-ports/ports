@@ -1,10 +1,5 @@
-// Consumer test for cabin-ports/readerwriterqueue: the lock-free
-// single-producer single-consumer queue (try_enqueue bounded by the
-// reserved capacity, enqueue growing it, emplace of a move-only type,
-// peek/pop/size_approx), the blocking queue's semaphore timed waits, the
-// fixed-capacity blocking circular buffer, and both under a producer and a
-// consumer thread.  The two include spellings are upstream's
-// installed-package and CMake-target forms (README.md:162, :141).
+// Consumer test for cabin-ports/readerwriterqueue.  The two include
+// spellings are upstream's installed-package and CMake-target forms.
 #include <readerwriterqueue/readerwriterqueue.h>
 #include <readerwritercircularbuffer.h>
 
@@ -56,8 +51,8 @@ void test_queue() {
   for (int i = 0; i < 46; ++i) fifo = q.try_dequeue(v) && v == i && fifo;
   check(fifo, "FIFO across reused blocks");
 
-  // Above twice the block size the constructor reserves several blocks
-  // (readerwriterqueue.h:117-144): 10 elements in blocks of 4 take 5.
+  // Above twice the block size the constructor reserves several blocks:
+  // 10 elements in blocks of 4 take 5.
   moodycamel::ReaderWriterQueue<int, 4> multi(10);
   check(multi.max_capacity() == 15, "multi-block reservation");
   taken = 0;

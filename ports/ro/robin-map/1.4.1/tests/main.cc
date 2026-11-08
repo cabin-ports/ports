@@ -192,7 +192,7 @@ static void precalculated_and_stored_hash() {
   CHECK(map.find(key, hash) != map.end() && map.at(key, hash) == 617);
   CHECK(map.count("key1000", map.hash_function()("key1000")) == 0);
   // Lookup trusts the given hash and compares it with the stored one, so a
-  // wrong hash misses (as upstream's tests/robin_map_tests.cpp:1396 checks).
+  // wrong hash misses, as upstream's tests check.
   CHECK(map.count(key, hash ^ 1) == 0);
   CHECK(map.erase(key, hash) == 1 && map.count(key) == 0 && map.size() == 999);
 }

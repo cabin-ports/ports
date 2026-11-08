@@ -45,7 +45,7 @@ struct cat {
   double softness, temperature, size, roundness, fur_amount;
 };
 
-// The README's examples (README.md:66-68, :79-195).
+// The README's examples.
 void test_readme() {
   const std::vector<int> values{24, 11, 65, 44, 80, 18, 73, 90, 69, 18};
   check(fplus::keep_if(is_odd, values) == std::vector<int>{11, 65, 73, 69},

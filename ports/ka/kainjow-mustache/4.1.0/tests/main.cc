@@ -1,11 +1,4 @@
-// The C++ consumer: kainjow-mustache in C++11 - variables with HTML
-// escaping and the unescaped forms, dotted names, missing and non-string
-// values, sections over booleans, objects and lists, inverted sections,
-// {{.}}, comments, set delimiters, standalone section lines with LF and
-// CRLF, string and function partials, lambdas and lambda2 renderers, a
-// custom escape, stream and handler output, a custom context,
-// std::wstring, the data API, and the parse and render errors with their
-// positions.
+// The C++ consumer: kainjow-mustache in C++11.
 #include <mustache.hpp>
 
 #include <cstdio>
