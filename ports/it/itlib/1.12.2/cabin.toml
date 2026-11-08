@@ -9,105 +9,14 @@ name = "cabin-ports/itlib"
 version = "1.12.2"
 include = ["LICENSE.txt", "include/itlib"]
 
-# itlib, header-only, as upstream's CMake interface target itlib::itlib:
-# include/ is the include root, so consumers write
-# `#include <itlib/small_vector.hpp>` (include/CMakeLists.txt:4-7).  Each
-# header is a standalone library that needs only the standard library
-# (README.md:19).  The target has no definitions, options, compile
-# features, or link libraries, not even a thread library: upstream's tests
-# link one themselves (test/CMakeLists.txt:32).  This port ships every
-# header in include/itlib, as vcpkg does, including opt_ref_buffer.hpp,
-# rand_dist.hpp, and ref_ptr.hpp, which README.md lists but the target's
-# header set omits (include/CMakeLists.txt:7-40), so a CMake install leaves
-# them out.
-#
-# Standards: the interface standard is C++11, the floor of most headers
-# (README.md:23-56).  pmr_allocator.hpp, rand_dist.hpp, and strutil.hpp
-# need C++17, and generator.hpp, opt_ref_buffer.hpp, and transparent_umap.hpp
-# need C++20 (upstream tests the last at C++20 only,
-# test/t-transparent_umap-20.cpp); a consumer that includes one raises its
-# own standard.  The headers choose their C++17 and C++20 additions by
-# __cplusplus alone (for example sentry.hpp:77-103, span.hpp:323,
-# throw_ex.hpp:60-64), which MSVC reports as 199711L unless /Zc:__cplusplus
-# is given.  Upstream passes that flag only in its own development builds
-# (dev.cmake:9-14), not to consumers, and Cabin does not pass it, so with
-# MSVC those headers always take their pre-C++17 branches: no deduction
-# guides, _v aliases, concepts, or [[nodiscard]] sentry; weak_from_this in
-# shared_from.hpp falls back to shared_from_this, which throws for an object
-# no shared_ptr owns (:79-95); and throw_ex.hpp calls
+# Ships every header in include/itlib, as vcpkg does, including
+# opt_ref_buffer.hpp, rand_dist.hpp, and ref_ptr.hpp, which upstream's CMake
+# target omits.  C++11 is the floor of most headers; a consumer that includes
+# one of the C++17 or C++20 headers raises its own standard.  The headers
+# pick their C++17 and C++20 branches by __cplusplus, which MSVC reports as
+# 199711L without /Zc:__cplusplus (Cabin does not pass it), so with MSVC they
+# always take the older branches; throw_ex.hpp then calls
 # std::uncaught_exception, which MSVC's library removes from C++20 on.
-# The example in mem_streambuf.hpp, a mem_ostreambuf over std::string (:62),
-# needs C++17 as well, where std::string::data() is no longer const.
-#
-# Configuration macros are the consumer's, defined before the include and
-# identically in every translation unit: ITLIB_SMALL_VECTOR_ERROR_HANDLING
-# and ITLIB_STATIC_VECTOR_ERROR_HANDLING (default: throw std::out_of_range),
-# ITLIB_FLAT_MAP_NO_THROW, the ITLIB_*_NO_DEBUG_BOUNDS_CHECK switches for the
-# assert-based bounds checks of span, stride_span, small_vector,
-# static_vector, memory_view, and poly_span, ITLIB_RSTREAM_OVERLOAD_RSHIFT,
-# ITLIB_NODISCARD, ITLIB_DEPRECATED, and ITLIB_RAND_DIST_CONSTEXPR.
-#
-# As upstream ships it (the list is not exhaustive):
-# - any.hpp and pmr_allocator.hpp have neither an include guard nor
-#   #pragma once, so a translation unit that includes either twice, even
-#   through two other headers, fails with redefinitions.
-# - The vector types do not give std::vector's guarantees.  An argument
-#   that refers to one of the container's own elements can be read after it
-#   was overwritten, destroyed, or freed: small_vector's insert, push_back,
-#   resize, and assign, static_vector's insert and assign, and pod_vector's
-#   insert (small_vector.hpp:586-605, :653-657, :762-818,
-#   static_vector.hpp:271-274, :465-484, pod_vector.hpp:538-548).  Erasing an
-#   empty range from a small_vector or static_vector, or inserting no
-#   elements into a small_vector, destroys live elements in place
-#   (small_vector.hpp:775-780, :844-848, static_vector.hpp:657-661).  An
-#   element constructor that throws can leave them counting unconstructed
-#   elements.
-#   pod_vector::resize(n, value) writes n copies from the old end after
-#   reserving only n elements (pod_vector.hpp:607-613), the default
-#   pod_vector allocator's malloc and realloc results are never checked
-#   (:128-143, :450-455), recast_take_from checks only that both allocators
-#   align alike, not the element alignments (:267-278), and == compares
-#   bytes with memcmp (:909-915).
-# - any's converting constructor and assignment store an lvalue argument by
-#   reference, not as a copy (any.hpp:101-108, :174-186; a.emplace<T>(x)
-#   copies), copy-assigning an any to itself empties it (:169-172,
-#   :237-240), and move assignment keeps the target's allocator (:156-162).
-# - expected's emplace and expected<T, void>'s copy assignment leave a
-#   destroyed or unconstructed value marked live if the new value's
-#   constructor throws (expected.hpp:248-261, :572-575).
-# - dynamic_bitset::all() is false for full uint8_t or uint16_t words, since
-#   ~word_type(0) promotes to int (dynamic_bitset.hpp:195-207); copy drops
-#   source bits when its last partial word spans two source words
-#   (:381-403); resize sets the size before the buffer grows (:256-264).
-# - stride_span's and poly_span's iterator differences divide by an unsigned
-#   stride, so a negative difference comes out as a huge positive one
-#   (stride_span.hpp:216, poly_span.hpp:230), and poly_span calls its
-#   accessor through a cast function pointer type, which is undefined
-#   behaviour (poly_span.hpp:132-140).
-# - flat_map and flat_set look a converting argument up before converting
-#   it, so inserting 1.5 into a flat_set<int> holding 1 stores a second 1
-#   (flat_set.hpp:285-294, flat_map.hpp:317-326, :412-423).
-# - mem_streambuf's seeks do not check the position against the buffer
-#   (mem_streambuf.hpp:177-187, :243-250), and an output buffer over a
-#   static_vector is not reusable after get_container (:119-137).
-# - transparent_umap.hpp (0.10) enables its heterogeneous overloads only for
-#   lookup types that themselves define is_transparent, not through the hash
-#   and key-equality types (:59-64, :84-96), and its hinted try_emplace
-#   returns emplace_hint's iterator where it declares a pair (:108-114), so
-#   that overload fails to compile once used.  Upstream's test of the header
-#   only includes it.
-# - tep_vector.hpp (0.10 beta) has no operations yet, and it uses size_t but
-#   includes only <cstdint> (:44-54).
-# - memory_view and const_memory_view are deprecated in favour of span
-#   (memory_view.hpp:141, :341).
-#
-# The consumer test builds at the C++11 floor, so it covers neither the
-# C++17 and C++20 headers nor the headers' C++17 and C++20 branches.
-#
-# Not ported: the tests, build-failure tests, and benchmarks, and the CMake
-# package files, whose version is the stale project VERSION 1.11.9
-# (CMakeLists.txt:15-18, itlib-config-version.in.cmake:4); the headers carry
-# no library-wide version.
 #
 # Licence: MIT, LICENSE.txt (Chobolabs Inc. 2016-2019, Borislav Stanimirov
 # 2020-2026); each header repeats the notice.
