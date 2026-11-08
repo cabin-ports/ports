@@ -1,0 +1,75 @@
+--- /dev/null
++++ b/src/cbor/configuration.h
+@@ -0,0 +1,21 @@
++#ifndef LIBCBOR_CONFIGURATION_H
++#define LIBCBOR_CONFIGURATION_H
++
++#define CBOR_MAJOR_VERSION 0
++#define CBOR_MINOR_VERSION 14
++#define CBOR_PATCH_VERSION 0
++
++#define CBOR_BUFFER_GROWTH 2
++#define CBOR_MAX_STACK_SIZE 2048
++#define CBOR_PRETTY_PRINTER 1
++
++/* Empty where CMake's MSVC is set (cl, clang-cl).  _MSC_VER also matches
++   Clang's GNU driver targeting MSVC, which then loses this optimization
++   hint. */
++#ifdef _MSC_VER
++#define CBOR_RESTRICT_SPECIFIER
++#else
++#define CBOR_RESTRICT_SPECIFIER restrict
++#endif
++
++#endif //LIBCBOR_CONFIGURATION_H
+--- /dev/null
++++ b/src/cbor/cbor_export.h
+@@ -0,0 +1,48 @@
++
++#ifndef CBOR_EXPORT_H
++#define CBOR_EXPORT_H
++
++#ifdef CBOR_STATIC_DEFINE
++#  define CBOR_EXPORT
++#  define CBOR_NO_EXPORT
++#else
++#  ifndef CBOR_EXPORT
++#    ifdef cbor_EXPORTS
++        /* We are building this library */
++#      define CBOR_EXPORT 
++#    else
++        /* We are using this library */
++#      define CBOR_EXPORT 
++#    endif
++#  endif
++
++#  ifndef CBOR_NO_EXPORT
++#    define CBOR_NO_EXPORT 
++#  endif
++#endif
++
++/* CMake writes __declspec(deprecated) where WIN32 is set. */
++#ifndef CBOR_DEPRECATED
++#  ifdef _WIN32
++#    define CBOR_DEPRECATED __declspec(deprecated)
++#  else
++#    define CBOR_DEPRECATED __attribute__ ((__deprecated__))
++#  endif
++#endif
++
++#ifndef CBOR_DEPRECATED_EXPORT
++#  define CBOR_DEPRECATED_EXPORT CBOR_EXPORT CBOR_DEPRECATED
++#endif
++
++#ifndef CBOR_DEPRECATED_NO_EXPORT
++#  define CBOR_DEPRECATED_NO_EXPORT CBOR_NO_EXPORT CBOR_DEPRECATED
++#endif
++
++/* NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if) */
++#if 0 /* DEFINE_NO_DEPRECATED */
++#  ifndef CBOR_NO_DEPRECATED
++#    define CBOR_NO_DEPRECATED
++#  endif
++#endif
++
++#endif /* CBOR_EXPORT_H */
