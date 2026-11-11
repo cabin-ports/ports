@@ -6,6 +6,12 @@ strip-prefix = "spdlog-1.17.0"
 [package]
 name = "cabin-ports/spdlog"
 version = "1.17.0"
+# MIT, and MIT with the {fmt} exception for the bundled fmt
+# (include/spdlog/fmt/bundled/fmt.license.rst).
+license = "MIT AND MIT WITH fmt-exception"
+# logos/ holds a JetBrains logo that no grant covers, so only the
+# headers and the license ship.
+include = ["LICENSE", "include"]
 
 # spdlog is consumed in its upstream-default header-only form. The
 # opt-in compiled variant (src/*.cpp with SPDLOG_COMPILED_LIB) is
