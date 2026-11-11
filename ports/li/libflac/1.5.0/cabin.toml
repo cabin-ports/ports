@@ -140,7 +140,8 @@ defines = [
 # lists.  Each SIMD source compiles to nothing off its own architecture, and
 # the encoder picks a variant at run time.  FLAC__NO_DLL is defined above
 # for the libraries' own compiles too: export.h otherwise declares the API
-# dllimport on Windows.
+# dllimport on Windows.  Not ported: the shared library and the flac and
+# metaflac programs.
 [target.flac]
 type = "library"
 sources = [

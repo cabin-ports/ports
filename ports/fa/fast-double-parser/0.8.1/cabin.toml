@@ -9,6 +9,15 @@ name = "cabin-ports/fast-double-parser"
 version = "0.8.1"
 include = ["LICENSE", "LICENSE.BSL", "README.md", "include"]
 
+# On Cygwin, MinGW and Solaris the strtod fallback reads through a
+# std::stringstream and does not reliably reject an overflowing value.
+# It assumes round-to-nearest and the IEEE semantics that -ffast-math gives
+# up, and parse_number is inlined, so the consumer's flags apply; where
+# FLT_EVAL_METHOD is 2, as for x87 code, its fast path can round twice.
+# The header defines WARN_UNUSED, FASTFLOAT_SMALLEST_POWER,
+# FASTFLOAT_LARGEST_POWER and the FAST_DOUBLE_PARSER_* macros in every
+# consumer, and really_inline and unlikely unless already defined.
+#
 # Licence: Apache-2.0 OR BSL-1.0, as README.md states along with its
 # attribution to Michael Eisel (:181-186); both licence texts are included.
 [target.fast_double_parser]

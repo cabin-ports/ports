@@ -28,11 +28,15 @@ interface-cxx-standard = "c++11"
 
 # MSVC's C library has no <strings.h>, so the library's own MSVC compiles
 # use upstream's replacement in visualc/include, as vcpkg's port does;
-# consumers do not see it.
+# consumers do not see it.  As upstream ships it, gumbo.h defines
+# _CRT_SECURE_NO_WARNINGS and maps fileno to _fileno in every MSVC
+# consumer.
 #
 # The generated tag tables and the character-reference table
 # (src/char_ref_gperf.c, built from WHATWG's entities.json) are committed
 # upstream; this port builds them as shipped.
+#
+# Not ported: the shared library and the Python bindings.
 #
 # Licence: Apache-2.0, doc/COPYING (Google Inc.).  src/utf8.c also embeds
 # Bjoern Hoehrmann's MIT-licensed UTF-8 decoder, whose notice it carries
