@@ -3,18 +3,28 @@ url = "https://github.com/google/draco/archive/refs/tags/1.5.9.tar.gz"
 checksum = "sha256:5b84e0e212ccc7b03ace681760a65a66fe2481a5f54df65154cfc8f0cbb87148"
 format = "tar.gz"
 strip-prefix = "draco-1.5.9"
-# The patch adds src/draco/draco_features.h, which CMake generates
+# Patch 0001 adds src/draco/draco_features.h, which CMake generates
 # (cmake/draco_options.cmake:292-357) from the default options: the
 # eight feature macros they enable, and, only when MSVC builds, eight
 # warning-suppression pragmas.  The pragmas sit under #ifdef _MSC_VER so
 # one header serves every platform; that guard is this port's only
 # structural deviation from the generated file.  Like upstream's, the
 # pragmas also reach MSVC consumers that include the header.
-patches = ["patches/0001-add-the-generated-draco-features-h.patch"]
+# Patch 0002 adds LICENSE.libvpx, libvpx's BSD-3-Clause terms, copyright
+# The WebM Project authors (LICENSE at
+# webmproject/libvpx v1.6.0, sha256
+# 8267348d5af1262c11d1a08de2f5afc77457755f1ac658627dd9acf71011d615), for
+# core/divide.h, core/divide.cc and compression/entropy/ans.h, which say
+# they are based off libvpx's.
+patches = [
+  "patches/0001-add-the-generated-draco-features-h.patch",
+  "patches/0002-add-the-libvpx-bsd-license.patch",
+]
 
 [package]
 name = "cabin-ports/draco"
 version = "1.5.9"
+license = "Apache-2.0 AND BSD-3-Clause"
 # The directories holding the default library's sources and headers,
 # with their tests and the transcoder's files, which nothing here
 # compiles, and the four texture/ headers the default build includes
@@ -22,6 +32,7 @@ version = "1.5.9"
 # content is guarded by DRACO_TRANSCODER_SUPPORTED.
 include = [
   "LICENSE",
+  "LICENSE.libvpx",
   "patches",
   "src/draco/animation",
   "src/draco/attributes",
