@@ -7,6 +7,23 @@ strip-prefix = "multi_array-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-multi-array"
 version = "1.92.0"
+license = "BSL-1.0 AND HPND-sell-variant AND LicenseRef-Boost-pre-BSL"
+# include/boost/multi_array/algorithm.hpp:6-27 carries the HP and SGI STL
+# notice.  test/Jamfile.v2:1-5 carries David Abrahams' 2003 Boost permission
+# notice.  `include` leaves out doc/, which nothing here builds:
+# doc/iterator_categories.html is WG21 paper N1297, with no stated terms.
+include = [
+  ".gitattributes",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "appveyor.yml",
+  "build.jam",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-array" = "=1.92.0"

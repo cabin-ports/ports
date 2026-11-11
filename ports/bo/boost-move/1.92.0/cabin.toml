@@ -7,6 +7,26 @@ strip-prefix = "move-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-move"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: doc/move.qbk adapts
+# several pages of Hinnant, Stroustrup and Kozicki's article "A Brief
+# Introduction to Rvalue References", which has no stated terms.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  "CMakeLists.txt",
+  "LICENSE",
+  "README.md",
+  "build.jam",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-config" = "=1.92.0"

@@ -3,10 +3,23 @@ url = "https://github.com/boostorg/intrusive/archive/refs/tags/boost-1.92.0.tar.
 checksum = "sha256:1df09194b4e223cbc86616d6747f6df35d3bb2b24456a58e4fb5b8483ca37f26"
 format = "tar.gz"
 strip-prefix = "intrusive-boost-1.92.0"
+# include/boost/intrusive/rbtree_algorithms.hpp:115-127 reproduces, lightly
+# edited, SGI stl_tree.h's description of its red-black tree, and
+# treap_algorithms.hpp:71-79 its points (1) and (2); the release does not ship
+# the HP 1994 and SGI 1996-1997 notices that cover them.  The patch adds them as
+# LICENSE.sgi-stl.txt, verbatim (comment leaders removed) from lines 11-32 of
+# include/boost/multi_index/detail/ord_index_node.hpp in Boost.MultiIndex at
+# boost-1.92.0, a file with
+# sha256:ca04fd908574125dcc99ff1cc7c4e03f069e2a522028035e981c3e6b05ae5e39.
+patches = ["patches/0001-add-hp-and-sgi-notices-for-stl-tree-code.patch"]
 
 [package]
 name = "cabin-ports/boost-intrusive"
 version = "1.92.0"
+license = "BSL-1.0 AND HPND-sell-variant AND LicenseRef-Courpron-2007 AND LicenseRef-Boost-pre-BSL"
+# include/boost/intrusive/detail/function_detector.hpp:12-19 is under
+# Alexandre Courpron's 2007 notice.  splaytree_algorithms.hpp:21-26 is under
+# Ralf Mattethat's 2004 Boost permission notice.
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

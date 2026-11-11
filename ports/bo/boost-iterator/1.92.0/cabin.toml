@@ -7,6 +7,24 @@ strip-prefix = "iterator-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-iterator"
 version = "1.92.0"
+license = "BSL-1.0 AND LicenseRef-Boost-pre-BSL"
+# include/boost/iterator/shared_container_iterator.hpp:1-4 is under Ronald
+# Garcia's 2002 Boost permission notice.  `include` leaves out doc/, which
+# nothing here builds: doc/docutils.sty (Alexander Schmolck, 2002) has an
+# empty licence field.
+include = [
+  ".gitattributes",
+  ".github",
+  "CMakeLists.txt",
+  "README.md",
+  "appveyor.yml",
+  "build.jam",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-concept-check" = "=1.92.0"

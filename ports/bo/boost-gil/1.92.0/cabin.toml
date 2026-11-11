@@ -7,6 +7,33 @@ strip-prefix = "gil-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-gil"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, example/ and test/, which nothing here builds.
+# They hold third-party images with no stated terms: a photograph in
+# doc/images, sample photos in example/, and the bmpsuite, PngSuite and
+# other sample sets in test/extension/io/images.
+include = [
+  ".appveyor.yml",
+  ".ci",
+  ".clang-tidy",
+  ".editorconfig",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  ".markdownlint.json",
+  "CMakeLists.txt",
+  "CONTRIBUTING.md",
+  "LICENSE.txt",
+  "README.md",
+  "RELEASES.md",
+  "build.jam",
+  "codecov.yml",
+  "conanfile.txt",
+  "include",
+  "index.html",
+  "meta",
+  "sublibs",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"
