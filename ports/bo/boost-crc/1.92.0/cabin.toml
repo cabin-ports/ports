@@ -3,6 +3,10 @@ url = "https://github.com/boostorg/crc/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:c41b93fdde01afec96c39e4c4e6d3bf8734a62ecec9c4875699e0f73c3b0144e"
 format = "tar.gz"
 strip-prefix = "crc-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-crc"
@@ -18,6 +22,7 @@ include = [
   ".github",
   ".travis.yml",
   "CMakeLists.txt",
+  "LICENSE_1_0.txt",
   "appveyor.yml",
   "build.jam",
   "crc.html",
@@ -25,6 +30,7 @@ include = [
   "include",
   "index.html",
   "meta",
+  "patches",
   "test",
 ]
 

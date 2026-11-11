@@ -5,11 +5,17 @@ format = "tar.gz"
 strip-prefix = "process-boost-1.92.0"
 # include/boost/process/v2/ext/detail/proc_info.hpp:39-101 copies three NT
 # structure layouts from phnt (https://github.com/processhacker/phnt) under
-# CC BY 4.0, whose text the release does not ship.  The patch adds
+# CC BY 4.0, whose text the release does not ship.  Patch 0001 adds
 # LICENSE.CC-BY-4.0, verbatim from
 # https://creativecommons.org/licenses/by/4.0/legalcode.txt (sha256:
 # 9ba9550ad48438d0836ddab3da480b3b69ffa0aac7b7878b5a0039e7ab429411).
-patches = ["patches/0001-add-cc-by-4.0-license-for-phnt-code.patch"]
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = [
+  "patches/0001-add-cc-by-4.0-license-for-phnt-code.patch",
+  "patches/0002-add-the-boost-software-license-text.patch",
+]
 
 [package]
 name = "cabin-ports/boost-process"

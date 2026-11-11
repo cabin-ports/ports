@@ -3,6 +3,10 @@ url = "https://github.com/boostorg/bloom/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:549f1de63e84a1ef4a33fe3c3433968ff30465a636fd907020f50f6b48255cff"
 format = "tar.gz"
 strip-prefix = "bloom-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-bloom"

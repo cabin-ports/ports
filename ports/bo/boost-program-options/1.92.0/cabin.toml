@@ -3,6 +3,10 @@ url = "https://github.com/boostorg/program_options/archive/refs/tags/boost-1.92.
 checksum = "sha256:dd07c28e75ceec90a514494a5318c9d6c84308d036b6e24a91503fa344a57cd4"
 format = "tar.gz"
 strip-prefix = "program_options-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-program-options"
@@ -19,6 +23,7 @@ include = [
   ".github",
   ".travis.yml",
   "CMakeLists.txt",
+  "LICENSE_1_0.txt",
   "README.md",
   "appveyor.yml",
   "build.jam",
@@ -27,6 +32,7 @@ include = [
   "include",
   "index.html",
   "meta",
+  "patches",
   "src",
   "test",
 ]

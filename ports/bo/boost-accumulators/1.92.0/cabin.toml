@@ -3,6 +3,10 @@ url = "https://github.com/boostorg/accumulators/archive/refs/tags/boost-1.92.0.t
 checksum = "sha256:e90e7d574f8e08c63ff2d9297cb78afacf4ebd8938c18adf75a3ef9a9f54be25"
 format = "tar.gz"
 strip-prefix = "accumulators-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-accumulators"

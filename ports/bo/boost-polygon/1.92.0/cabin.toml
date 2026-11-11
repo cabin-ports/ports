@@ -3,6 +3,10 @@ url = "https://github.com/boostorg/polygon/archive/refs/tags/boost-1.92.0.tar.gz
 checksum = "sha256:a87bd8a6390fd03800cdb38dd25610054f7703f4713b409f09bd369b5916f002"
 format = "tar.gz"
 strip-prefix = "polygon-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-polygon"
@@ -16,12 +20,14 @@ include = [
   ".travis.yml",
   "CMakeLists.txt",
   "Jamfile.v2",
+  "LICENSE_1_0.txt",
   "appveyor.yml",
   "benchmark",
   "example",
   "include",
   "index.html",
   "meta",
+  "patches",
   "test",
 ]
 
