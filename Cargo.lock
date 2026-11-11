@@ -171,7 +171,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-artifact"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
+source = "git+https://github.com/cabinpkg/cabin?rev=ab7491914e7023990ca19853900eaf7a31f6b330#ab7491914e7023990ca19853900eaf7a31f6b330"
 dependencies = [
  "atomic-write-file",
  "cabinpkg-core",
@@ -189,7 +189,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-core"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
+source = "git+https://github.com/cabinpkg/cabin?rev=ab7491914e7023990ca19853900eaf7a31f6b330#ab7491914e7023990ca19853900eaf7a31f6b330"
 dependencies = [
  "cabinpkg-env",
  "cabinpkg-fs",
@@ -199,6 +199,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha2",
+ "spdx",
  "thiserror",
  "url",
 ]
@@ -206,7 +207,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-credentials"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
+source = "git+https://github.com/cabinpkg/cabin?rev=ab7491914e7023990ca19853900eaf7a31f6b330#ab7491914e7023990ca19853900eaf7a31f6b330"
 dependencies = [
  "atomic-write-file",
  "cabinpkg-env",
@@ -223,7 +224,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-env"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
+source = "git+https://github.com/cabinpkg/cabin?rev=ab7491914e7023990ca19853900eaf7a31f6b330#ab7491914e7023990ca19853900eaf7a31f6b330"
 dependencies = [
  "shlex 2.0.1",
  "thiserror",
@@ -232,7 +233,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-fs"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
+source = "git+https://github.com/cabinpkg/cabin?rev=ab7491914e7023990ca19853900eaf7a31f6b330#ab7491914e7023990ca19853900eaf7a31f6b330"
 dependencies = [
  "atomic-write-file",
  "dunce",
@@ -241,7 +242,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-index"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
+source = "git+https://github.com/cabinpkg/cabin?rev=ab7491914e7023990ca19853900eaf7a31f6b330#ab7491914e7023990ca19853900eaf7a31f6b330"
 dependencies = [
  "cabinpkg-core",
  "semver",
@@ -254,7 +255,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-index-http"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
+source = "git+https://github.com/cabinpkg/cabin?rev=ab7491914e7023990ca19853900eaf7a31f6b330#ab7491914e7023990ca19853900eaf7a31f6b330"
 dependencies = [
  "cabinpkg-core",
  "cabinpkg-credentials",
@@ -270,7 +271,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-manifest"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
+source = "git+https://github.com/cabinpkg/cabin?rev=ab7491914e7023990ca19853900eaf7a31f6b330#ab7491914e7023990ca19853900eaf7a31f6b330"
 dependencies = [
  "cabinpkg-core",
  "camino",
@@ -286,7 +287,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-package"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
+source = "git+https://github.com/cabinpkg/cabin?rev=ab7491914e7023990ca19853900eaf7a31f6b330#ab7491914e7023990ca19853900eaf7a31f6b330"
 dependencies = [
  "cabinpkg-core",
  "cabinpkg-fs",
@@ -304,7 +305,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-publish"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
+source = "git+https://github.com/cabinpkg/cabin?rev=ab7491914e7023990ca19853900eaf7a31f6b330#ab7491914e7023990ca19853900eaf7a31f6b330"
 dependencies = [
  "cabinpkg-artifact",
  "cabinpkg-core",
@@ -320,7 +321,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-registry-file"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=75879bd2ec4e50199a7effa8fa59bb22877f349b#75879bd2ec4e50199a7effa8fa59bb22877f349b"
+source = "git+https://github.com/cabinpkg/cabin?rev=ab7491914e7023990ca19853900eaf7a31f6b330#ab7491914e7023990ca19853900eaf7a31f6b330"
 dependencies = [
  "cabinpkg-core",
  "cabinpkg-fs",
@@ -1373,6 +1374,15 @@ name = "smallvec"
 version = "1.15.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "67b1b7a3b5fe4f1376887184045fcf45c69e92af734b7aaddc05fb777b6fbd03"
+
+[[package]]
+name = "spdx"
+version = "0.13.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "646c5a367da914e3babcb9cd8e91c37ccaac42325b8f86f036513ad103f2a716"
+dependencies = [
+ "smallvec",
+]
 
 [[package]]
 name = "stable_deref_trait"
