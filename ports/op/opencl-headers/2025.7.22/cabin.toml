@@ -9,6 +9,7 @@ strip-prefix = "OpenCL-Headers-2025.07.22"
 [package]
 name = "cabin-ports/opencl-headers"
 version = "2025.7.22"
+license = "Apache-2.0"
 # LICENSE is Apache-2.0, which every CL/ header also carries; upstream has no
 # NOTICE file.
 include = ["CL", "LICENSE"]

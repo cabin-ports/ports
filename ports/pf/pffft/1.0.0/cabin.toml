@@ -18,6 +18,7 @@ to = "include/pffft.h"
 [package]
 name = "cabin-ports/pffft"
 version = "1.0.0"
+license = "NCL"
 include = ["include", "pffft.c"]
 
 # The library is pffft.c with pffft.h as its API (README.md:66-67);

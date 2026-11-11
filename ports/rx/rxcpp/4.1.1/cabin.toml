@@ -15,6 +15,7 @@ patches = ["patches/0001-delete-on-error-notification-assignment.patch"]
 [package]
 name = "cabin-ports/rxcpp"
 version = "4.1.1"
+license = "Apache-2.0"
 # Credited code too slight to carry copyright: Rx/v2/src/rxcpp/rx-util.hpp:77-85
 # copies range-v3's as_const (Eric Niebler, BSL-1.0), two one-line templates,
 # and :172-187 (types_checked_from) follows the void_t idiom of WG21 N3911.

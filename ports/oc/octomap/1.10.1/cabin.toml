@@ -18,6 +18,7 @@ patches = ["patches/0001-test-the-predefined-win32-macro.patch"]
 [package]
 name = "cabin-ports/octomap"
 version = "1.10.1"
+license = "BSD-3-Clause"
 include = [
   "octomap/LICENSE.txt",
   "octomap/include",

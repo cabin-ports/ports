@@ -30,6 +30,7 @@ to = "include/readerwriterqueue/readerwritercircularbuffer.h"
 [package]
 name = "cabin-ports/readerwriterqueue"
 version = "1.0.7"
+license = "BSD-2-Clause AND Zlib"
 # LICENSE.md is the Simplified BSD licence; atomicops.h carries the zlib
 # notice of Jeff Preshing's semaphore itself (LICENSE.md:1-4).
 include = ["LICENSE.md", "include"]

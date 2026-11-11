@@ -10,6 +10,7 @@ strip-prefix = "parson-ba29f4eda9ea7703a9f6a9cf2b0532a2605723c3"
 [package]
 name = "cabin-ports/parson"
 version = "1.5.3"
+license = "MIT"
 # Licence: MIT (LICENSE).
 include = ["LICENSE", "parson.c", "parson.h"]
 # Upstream builds C89 (meson.build:6, Makefile:2); C11 is the oldest standard

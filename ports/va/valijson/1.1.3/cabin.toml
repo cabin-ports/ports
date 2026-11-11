@@ -7,6 +7,7 @@ strip-prefix = "valijson-1.1.3"
 [package]
 name = "cabin-ports/valijson"
 version = "1.1.3"
+license = "BSD-2-Clause"
 include = ["LICENSE", "include"]
 
 # Upstream's valijson INTERFACE target: include/ (CMakeLists.txt:40-42),

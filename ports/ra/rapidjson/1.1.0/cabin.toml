@@ -43,6 +43,7 @@ patches = [
 [package]
 name = "cabin-ports/rapidjson"
 version = "1.1.0"
+license = "MIT AND BSD-3-Clause AND BSL-1.0 AND HPND-sell-variant"
 # license.txt carries RapidJSON's MIT terms and the BSD terms of the
 # bundled msinttypes headers (include/rapidjson/msinttypes, which keep
 # their notice inline); its JSON License covers only bin/jsonchecker, which

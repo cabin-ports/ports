@@ -7,6 +7,7 @@ strip-prefix = "slick-shm-0.1.6"
 [package]
 name = "cabin-ports/slick-shm"
 version = "0.1.6"
+license = "MIT"
 # Licence: MIT (LICENSE).
 include = ["LICENSE", "include"]
 

@@ -7,6 +7,7 @@ strip-prefix = "tclap-1.2.5"
 [package]
 name = "cabin-ports/tclap"
 version = "1.2.5"
+license = "MIT"
 # The headers upstream installs (include/tclap/Makefile.am).
 include = [
   "COPYING",

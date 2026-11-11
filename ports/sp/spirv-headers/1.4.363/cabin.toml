@@ -17,6 +17,7 @@ strip-prefix = "SPIRV-Headers-vulkan-sdk-1.4.363.0"
 [package]
 name = "cabin-ports/spirv-headers"
 version = "1.4.363"
+license = "MIT AND MIT-Khronos-old"
 include = ["LICENSE", "LICENSES/MIT.txt", "include"]
 
 # The INTERFACE target SPIRV-Headers::SPIRV-Headers and the directory

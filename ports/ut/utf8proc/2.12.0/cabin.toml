@@ -7,6 +7,7 @@ strip-prefix = "utf8proc-2.12.0"
 [package]
 name = "cabin-ports/utf8proc"
 version = "2.12.0"
+license = "MIT AND LicenseRef-Unicode-Data-2007"
 # LICENSE.md carries both the MIT terms and the Unicode data license
 # that covers utf8proc_data.c.
 include = ["LICENSE.md", "utf8proc.c", "utf8proc.h", "utf8proc_data.c"]

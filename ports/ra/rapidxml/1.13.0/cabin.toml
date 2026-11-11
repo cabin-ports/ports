@@ -18,6 +18,7 @@ patches = ["patches/0001-declare-print-functions-before-print-node.patch"]
 [package]
 name = "cabin-ports/rapidxml"
 version = "1.13.0"
+license = "BSL-1.0 OR MIT"
 # license.txt grants the Boost Software License 1.0 or the MIT license, at
 # the user's choice.  Left out: manual.html, the documentation.
 include = [
