@@ -1,0 +1,50 @@
+[package.upstream]
+url = "https://github.com/simd-everywhere/simde/archive/refs/tags/v0.8.2.tar.gz"
+checksum = "sha256:ed2a3268658f2f2a9b5367628a85ccd4cf9516460ed8604eed369653d49b25fb"
+format = "tar.gz"
+strip-prefix = "simde-0.8.2"
+# Patch 0001 adds LICENSE.dhuertas-aes, the MIT terms and copyright line of
+# Dani Huertas's AES code (github.com/dhuertas/AES, LICENSE at ebfea72),
+# which x86/aes.h:28-290 and simde-aes.h:38-261 adapt; simde ships only
+# its permission text.
+patches = ["patches/0001-add-mit-license-for-dhuertas-aes-code.patch"]
+
+# 0.8.4-rc3 is a pre-release.
+[package]
+name = "cabin-ports/simde"
+version = "0.8.2"
+# COPYING is MIT.  simde/hedley.h, debug-trap.h, check.h, simde-align.h,
+# simde-arch.h and simde-detect-clang.h are CC0-1.0 by their headers.
+# simde-f16.h:185-225 and :239-258 adapt Fabian Giesen's CC0 half-float
+# conversions, simde-math.h:1465-1508 is John D. Cook's public-domain
+# normal CDF, x86/avx512/ternarylogic.h follows Wojciech Muła's
+# public-domain ternary-logic, and arm/neon/aes.h:48, :98 and :146 follow
+# the Unlicense tiny-AES-c, so none carries terms.  No terms ship for code
+# too slight to carry copyright, each an intrinsic idiom or a published
+# formula and its constants: simde-math.h:1512-1641, with vector forms at
+# x86/svml.h:5761-6003, Chad Sprouse's C port of Peter Acklam's
+# inverse-normal approximation; 18 links to 9 Stack Overflow posts
+# (CC BY-SA), e.g. x86/sse4.2.h:158 and the magic-number conversion at
+# x86/avx512/cvt.h:52-67; wasm/simd128.h:5268, :5305, :5565 and :5603,
+# after V8's (BSD-3-Clause) SSE lowerings; arm/neon/clz.h:290, shl_n.h:308
+# and :443, shr_n.h:357 and :501, cle.h:350 and rbit.h:29-31, after blog
+# posts and a gist; and the reciprocal square-root seeds from two papers at
+# arm/neon/rsqrte.h:66, :110, :207, :264, :373 and :430 and x86/sse.h:3769.
+include = ["COPYING", "LICENSE.dhuertas-aes", "simde", "patches"]
+
+# All of simde/, the headers meson.build:476-552 installs; consumers write
+# <simde/x86/sse2.h>.  Native paths follow the consumer's target, its -m,
+# -march or /arch flags and the compiler's defaults, and simde emulates what
+# the target lacks.  The tests cover x86/sse2.h, ssse3.h, sse4.1.h,
+# sse4.2.h, avx2.h, avx512.h and svml.h, arm/neon.h, wasm/simd128.h and
+# simde-f16.h.
+[target.simde]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+
+# x86/svml.h and the other math emulation call libm functions such as expf,
+# a separate library on glibc, so every consumer's link line gets it.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
