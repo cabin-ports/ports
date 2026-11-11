@@ -1,0 +1,37 @@
+[package.upstream]
+url = "https://github.com/KhronosGroup/OpenCL-Headers/archive/refs/tags/v2025.07.22.tar.gz"
+checksum = "sha256:98f0a3ea26b4aec051e533cb1750db2998ab8e82eda97269ed6efe66ec94a240"
+format = "tar.gz"
+strip-prefix = "OpenCL-Headers-2025.07.22"
+
+# The version is upstream's tag v2025.07.22 without the leading zero SemVer
+# forbids, the release ConanCenter packages; v2026.05.29 is newer.
+[package]
+name = "cabin-ports/opencl-headers"
+version = "2025.7.22"
+# LICENSE is Apache-2.0, which every CL/ header also carries; upstream has no
+# NOTICE file.
+include = ["CL", "LICENSE"]
+
+# CL/, which CMakeLists.txt:53-56 installs; consumers write <CL/cl.h>.
+# Upstream's CMake also exposes it as <OpenCL/...> on Darwin through
+# configure- and install-time symlinks (CMakeLists.txt:25-40), which a port
+# cannot make; there <OpenCL/...> still resolves to the SDK's
+# OpenCL.framework headers (OpenCL 1.2), so write <CL/...>.  Without
+# CL_TARGET_OPENCL_VERSION, cl_version.h:21-24 prints a message and targets
+# OpenCL 3.0.  cl_d3d10.h, cl_d3d11.h and cl_dx9_media_sharing*.h, and on
+# Windows cl_icd.h and cl_layer.h, need the Windows SDK's Direct3D headers;
+# cl_va_api_media_sharing_intel.h needs libva's <va/va.h>, which no port
+# provides.  The package links nothing and no port provides an ICD loader,
+# so consumers that call the API link the platform's OpenCL library.  In C,
+# cl_half_to_float shifts a negative half's sign into int's bit 31
+# (cl_half.h:391, :397 and :426), which is undefined; C++ defines that shift
+# (CWG 1457), though cl_half.h's union type punning relies on a C++ compiler
+# extension.
+[target.opencl-headers]
+type = "header-only"
+include-dirs = ["."]
+# cl_half.h needs C99, though the other headers compile as C89, and C++98
+# compilers accept its trailing enum comma as an extension.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
