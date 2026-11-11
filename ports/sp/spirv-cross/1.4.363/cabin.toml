@@ -1,0 +1,134 @@
+[package.upstream]
+url = "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/vulkan-sdk-1.4.363.0.tar.gz"
+checksum = "sha256:f708982e88b763ef5b0394ed468fc2c3628f68cdab89f2e7a946cd628c04e721"
+format = "tar.gz"
+strip-prefix = "SPIRV-Cross-vulkan-sdk-1.4.363.0"
+# Patch 0001 adds LICENSE.glm and LICENSE.openexr for f16_to_f32 in
+# spirv_common.hpp:1266-1316, "based on the GLM implementation": GLM's
+# toFloat32 (glm/detail/type_half.inl; MIT, Copyright (c) 2005 - G-Truc
+# Creation), itself OpenEXR's halfToFloat (IlmBase/Half/toFloat.cpp;
+# BSD-3-Clause, Copyright (c) 2002, Industrial Light & Magic, a division of
+# Lucas Digital Ltd. LLC).
+patches = ["patches/0001-add-glm-and-openexr-terms-for-half-conversion.patch"]
+
+# Upstream releases with the Vulkan SDK under tags such as
+# vulkan-sdk-1.4.363.0; the version drops the tag's fourth component, which
+# is 0, as the spirv-headers and vulkan-headers ports do.  The C API carries
+# its own version, 0.68.0 (spirv_cross_c.h:40-45).
+[package]
+name = "cabin-ports/spirv-cross"
+version = "1.4.363"
+# Licence: (Apache-2.0 OR MIT) AND Apache-2.0 AND MIT AND BSD-3-Clause AND
+# LicenseRef-KhronosFreeUse.  The 25 library sources are Apache-2.0 OR MIT
+# (LICENSE, LICENSES/), apart from the half-float conversion above and
+# spvGradientCube in spirv_msl.cpp:6399-6420, which follows Alexey
+# Knyazev's GLSL in
+# https://github.com/KhronosGroup/MoltenVK/issues/2068#issuecomment-1817799067;
+# posted to a repository under Apache-2.0, it comes under those terms
+# (GitHub Terms of Service D.6), which LICENSE carries.  Too slight to carry
+# copyright: the one-line subgroupBarrier of spirv_glsl.cpp:4973-4976, after
+# an IrrlichtBAW commit, and the HLSL keywords of spirv_hlsl.cpp:1633-1663,
+# from Microsoft's documentation.  The bundled SPIR-V headers, spirv.h,
+# spirv.hpp, GLSL.std.450.h and NonSemanticShaderDebugInfo100.h, are
+# LicenseRef-KhronosFreeUse in .reuse/dep5, whose text the last of them
+# carries; GLSL.std.450.h, spirv.h and spirv.hpp mark themselves MIT, each
+# with Khronos's MODIFICATIONS notice.  README.md and CODE_OF_CONDUCT.adoc,
+# the CC-BY-4.0 files, stay out.
+include = [
+  "GLSL.std.450.h",
+  "LICENSE",
+  "LICENSE.glm",
+  "LICENSE.openexr",
+  "LICENSES/Apache-2.0.txt",
+  "LICENSES/LicenseRef-KhronosFreeUse.txt",
+  "LICENSES/MIT.txt",
+  "NonSemanticShaderDebugInfo100.h",
+  "patches",
+  "spirv.h",
+  "spirv.hpp",
+  "spirv_cfg.cpp",
+  "spirv_cfg.hpp",
+  "spirv_common.hpp",
+  "spirv_cpp.cpp",
+  "spirv_cpp.hpp",
+  "spirv_cross.cpp",
+  "spirv_cross.hpp",
+  "spirv_cross_c.cpp",
+  "spirv_cross_c.h",
+  "spirv_cross_containers.hpp",
+  "spirv_cross_error_handling.hpp",
+  "spirv_cross_parsed_ir.cpp",
+  "spirv_cross_parsed_ir.hpp",
+  "spirv_cross_util.cpp",
+  "spirv_cross_util.hpp",
+  "spirv_glsl.cpp",
+  "spirv_glsl.hpp",
+  "spirv_hlsl.cpp",
+  "spirv_hlsl.hpp",
+  "spirv_msl.cpp",
+  "spirv_msl.hpp",
+  "spirv_parser.cpp",
+  "spirv_parser.hpp",
+  "spirv_reflect.cpp",
+  "spirv_reflect.hpp",
+]
+
+# Upstream's default static build, as vcpkg builds it: every backend, the
+# util module and the C API (CMakeLists.txt:39-51), in one archive instead
+# of upstream's eight (spirv-cross-core, -glsl, -hlsl, -msl, -cpp,
+# -reflect, -util and -c).  The SPIRV_CROSS_C_API_* defines, which
+# CMakeLists.txt:326-355 gives spirv-cross-c privately, enable the C API's
+# backends.  Exceptions stay on, as SPIRV_CROSS_EXCEPTIONS_TO_ASSERTIONS
+# defaults off.  Consumers include the headers by bare name
+# (<spirv_cross_c.h>, <spirv_glsl.hpp>), as through upstream's installed
+# targets, whose include directory is include/spirv_cross (:174-176).
+# Upstream builds C++11 (:23), which MSVC cannot select, so the library
+# compiles as C++14; the headers need C++11.  spirv_cross_c.h and spirv.h
+# need C99 for their trailing enumerator commas and long long, though
+# upstream's own C test builds with -std=c89 without -pedantic (:562-564).
+#
+# No gitversion.h is generated, so spvc_get_commit_revision_and_timestamp()
+# returns "", spirv_cross_c.cpp:2973-2980's fallback without
+# HAVE_SPIRV_CROSS_GIT_VERSION; CMake would embed `git describe` output, or
+# "unknown", and the configure time (CMakeLists.txt:79-96).
+#
+# The bundled SPIR-V headers are an older snapshot of SPIRV-Headers'
+# unified1 headers than the spirv-headers port's, with the same include
+# guards, so a translation unit that includes both packages' copies of one
+# gets whichever comes first.  SPIRV-Cross never uses spirv-headers.
+#
+# Not reproduced, since Cabin drops a dependency's raw compiler flags:
+# upstream's warning flags and the /bigobj it gives MSVC Debug builds, the
+# configuration closest to Cabin's dev profile (:114, :148-149).  Not
+# ported: the spirv-cross command-line tool (main.cpp), the shared C library
+# (SPIRV_CROSS_SHARED), the CMake, pkg-config, GN, Makefile and Swift
+# package builds, the tests and samples, and include/spirv_cross, the
+# runtime headers that code from the C++ backend includes, which upstream
+# does not install.
+[target.spirv-cross]
+type = "library"
+sources = [
+  "spirv_cfg.cpp",
+  "spirv_cpp.cpp",
+  "spirv_cross.cpp",
+  "spirv_cross_c.cpp",
+  "spirv_cross_parsed_ir.cpp",
+  "spirv_cross_util.cpp",
+  "spirv_glsl.cpp",
+  "spirv_hlsl.cpp",
+  "spirv_msl.cpp",
+  "spirv_parser.cpp",
+  "spirv_reflect.cpp",
+]
+include-dirs = ["."]
+defines = [
+  "SPIRV_CROSS_C_API_CPP=1",
+  "SPIRV_CROSS_C_API_GLSL=1",
+  "SPIRV_CROSS_C_API_HLSL=1",
+  "SPIRV_CROSS_C_API_MSL=1",
+  "SPIRV_CROSS_C_API_REFLECT=1",
+]
+cxx-standard = "c++14"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "spirv-cross"
