@@ -3,9 +3,61 @@ url = "https://github.com/troydhanson/uthash/archive/refs/tags/v2.4.0.tar.gz"
 checksum = "sha256:387ba027946d7c64e9aa19cc53b2edcd714f8f9dca9fa8e3aaef17e0e8e3d736"
 format = "tar.gz"
 strip-prefix = "uthash-2.4.0"
+# Code from two other projects ships without its terms.  HASH_SRT
+# (src/uthash.h:886-972) and LL_SORT2, DL_SORT2 and CDL_SORT2
+# (src/utlist.h:107-311) adapt Simon Tatham's listsort.c, whose MIT-style
+# license requires its notice in all copies; patch 0001 adds that notice,
+# verbatim from the header comment of
+# https://www.chiark.greenend.org.uk/~sgtatham/algorithms/listsort.c
+# (:19-40, without the comment markers), as LICENSE.listsort (SHA-256
+# 38f42531...d6aa).  HASH_SFH (src/uthash.h:688-742) is Paul Hsieh's
+# SuperFastHash, with his comments; of the terms he offers for it
+# (http://www.azillionmonkeys.com/qed/hash.html) the package takes his
+# old-style BSD license, which requires its notice with every source copy.
+# Patch 0002 adds it as LICENSE.superfasthash, verbatim from Chromium's
+# base/third_party/superfasthash/LICENSE at e30e2947 (SHA-256
+# 90b2201c...7ae8), word for word the text at
+# http://www.azillionmonkeys.com/qed/license-oldbsd.html.
+patches = [
+  "patches/0001-add-mit-license-for-listsort-code.patch",
+  "patches/0002-add-old-bsd-license-for-superfasthash-code.patch",
+]
 [package]
 name = "cabin-ports/uthash"
 version = "2.4.0"
+# LICENSE is BSD-1-Clause; MIT and LicenseRef-Paul-Hsieh-OLD-BSD are
+# LICENSE.listsort and LICENSE.superfasthash above; tests/test65.c
+# dedicates itself to the public domain through the Unlicense (:8).
+license = "BSD-1-Clause AND MIT AND LicenseRef-Paul-Hsieh-OLD-BSD AND Unlicense"
+# Everything but upstream's CI and Git files and doc/rss.png, the generic
+# feed icon that no grant covers.
+include = [
+  "LICENSE",
+  "LICENSE.listsort",
+  "LICENSE.superfasthash",
+  "README.md",
+  "doc/ChangeLog.txt",
+  "doc/Makefile",
+  "doc/banner.png",
+  "doc/banner.svg",
+  "doc/google315d692c9c632ed0.html",
+  "doc/index.html",
+  "doc/license.html",
+  "doc/styles.css",
+  "doc/userguide.txt",
+  "doc/utarray.txt",
+  "doc/uthash-mini.png",
+  "doc/uthash-mini.svg",
+  "doc/uthash.png",
+  "doc/utlist.txt",
+  "doc/utringbuffer.txt",
+  "doc/utstack.txt",
+  "doc/utstring.txt",
+  "package.json",
+  "patches",
+  "src",
+  "tests",
+]
 
 # uthash is a set of header-only C macro libraries: uthash.h (hash
 # tables) plus the companion utlist.h / utarray.h / utstring.h /
