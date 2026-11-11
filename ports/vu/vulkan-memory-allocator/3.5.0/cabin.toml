@@ -1,0 +1,49 @@
+[package.upstream]
+url = "https://github.com/GPUOpen-LibrariesAndSDKs/VulkanMemoryAllocator/archive/refs/tags/v3.5.0.tar.gz"
+checksum = "sha256:c5f3db848fca9cb9726b41f256cc3007773321fa92a86d1e0902e66474e8a9e3"
+format = "tar.gz"
+strip-prefix = "VulkanMemoryAllocator-3.5.0"
+
+[package]
+name = "cabin-ports/vulkan-memory-allocator"
+version = "3.5.0"
+# Licence: MIT (LICENSE.txt; the same notice heads vk_mem_alloc.h).
+include = ["LICENSE.txt", "include"]
+
+[dependencies]
+# vk_mem_alloc.h includes <vulkan/vulkan.h> (:132-136) unless the consumer
+# included it first or defines VMA_VULKAN_HEADERS_ALREADY_INCLUDED, and its
+# API is built on Vulkan's types.  Upstream's CMake target and vcpkg leave the
+# headers to the consumer; Conan Center requires vulkan-headers.
+"cabin-ports/vulkan-headers" = "^1.4.363"
+
+# The INTERFACE target VulkanMemoryAllocator (GPUOpen::VulkanMemoryAllocator,
+# CMakeLists.txt:27-31): the single header vk_mem_alloc.h.  Its API is plain
+# C; one C++ translation unit of the consumer defines VMA_IMPLEMENTATION
+# before including it to compile the implementation.  By default that
+# implementation takes Vulkan's functions from the loader's prototypes
+# (VMA_STATIC_VULKAN_FUNCTIONS 1, :3126-3128), so the program links the
+# Vulkan loader (libvulkan or vulkan-1), which this package does not provide;
+# with VMA_STATIC_VULKAN_FUNCTIONS 0 and VMA_DYNAMIC_VULKAN_FUNCTIONS 1 it
+# fetches them through the vkGetInstanceProcAddr and vkGetDeviceProcAddr the
+# consumer passes in VmaVulkanFunctions (:17695-17700).  Upstream
+# limitations, as released: below C++17, except on Windows, Apple platforms,
+# Android and Linux with a libstdc++ that lacks aligned_alloc, the default
+# host allocation is unimplemented (upstream issue #332), so such a consumer
+# defines VMA_SYSTEM_ALIGNED_MALLOC or compiles the implementation as C++17;
+# a virtual block's metadata ignores its pAllocationCallbacks; and the
+# linear algorithm's statistics omit virtual allocations with null pUserData
+# and undercount ring-buffer use.
+# vcpkg installs the header under include/vma on Windows, as the Vulkan SDK
+# does; here it is <vk_mem_alloc.h>, as upstream installs it.  Not ported:
+# the optional Doxygen documentation (VMA_BUILD_DOCUMENTATION) and sample
+# application (VMA_BUILD_SAMPLES, src/), both off by default.
+[target.vulkan-memory-allocator]
+type = "header-only"
+include-dirs = ["include"]
+# The implementation requires C++14 (README.md:70, vk_mem_alloc.h:17442), the
+# standard upstream builds its sample with (src/CMakeLists.txt:40).  The C API
+# is C99: the header uses // comments, and vulkan.h includes <stdint.h>.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++14"
+deps = [{ name = "cabin-ports/vulkan-headers", public = true }]
