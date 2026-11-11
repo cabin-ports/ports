@@ -7,6 +7,7 @@ strip-prefix = "lambda2-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-lambda2"
 version = "1.92.0"
+license = "BSL-1.0"
 
 [target.boost_lambda2]
 type = "header-only"

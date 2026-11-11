@@ -7,6 +7,7 @@ strip-prefix = "outcome-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-outcome"
 version = "1.92.0"
+license = "BSL-1.0 AND MIT AND (Apache-2.0 OR BSL-1.0)"
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"
