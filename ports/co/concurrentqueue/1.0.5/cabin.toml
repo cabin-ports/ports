@@ -25,6 +25,7 @@ to = "include/moodycamel/lightweightsemaphore.h"
 [package]
 name = "cabin-ports/concurrentqueue"
 version = "1.0.5"
+license = "(BSD-2-Clause OR BSL-1.0) AND Zlib"
 # LICENSE.md holds the BSD-2-Clause and Boost licenses the queue is
 # offered under; lightweightsemaphore.h carries its zlib notice itself.
 include = ["LICENSE.md", "include"]

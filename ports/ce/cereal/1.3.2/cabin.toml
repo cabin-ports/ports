@@ -7,6 +7,7 @@ strip-prefix = "cereal-1.3.2"
 [package]
 name = "cabin-ports/cereal"
 version = "1.3.2"
+license = "BSD-3-Clause AND BSL-1.0 AND MIT AND LicenseRef-Nyffenegger-base64"
 # include/cereal is what upstream's CMake installs, with the licenses of
 # the bundled RapidJSON (and its msinttypes), RapidXML and base64 code
 # under external/.

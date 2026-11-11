@@ -7,6 +7,7 @@ strip-prefix = "Clipper2-Clipper2_2.0.1"
 [package]
 name = "cabin-ports/clipper2"
 version = "2.0.1"
+license = "BSL-1.0"
 # LICENSE carries the library's BSL-1.0 terms.  Two pieces are by GitHub
 # user alexisnaveros, who posted them in the upstream repository for
 # inclusion: the MSVC x64 fmin, fmax and nearbyint macros

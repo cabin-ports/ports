@@ -10,6 +10,7 @@ strip-prefix = "gcem-1.18.0"
 [package]
 name = "cabin-ports/gcem"
 version = "1.18.0"
+license = "Apache-2.0"
 include = ["LICENSE", "NOTICE.txt", "contributors.txt", "include"]
 
 # On MSVC, signbit() tests the sign of a zero with the non-constexpr

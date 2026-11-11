@@ -7,6 +7,7 @@ strip-prefix = "fast_double_parser-0.8.1"
 [package]
 name = "cabin-ports/fast-double-parser"
 version = "0.8.1"
+license = "Apache-2.0 OR BSL-1.0"
 include = ["LICENSE", "LICENSE.BSL", "README.md", "include"]
 
 # On Cygwin, MinGW and Solaris the strtod fallback reads through a

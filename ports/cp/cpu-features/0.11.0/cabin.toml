@@ -7,6 +7,7 @@ strip-prefix = "cpu_features-0.11.0"
 [package]
 name = "cabin-ports/cpu-features"
 version = "0.11.0"
+license = "Apache-2.0"
 include = ["LICENSE", "include", "src"]
 # Upstream asks for C99 (CMakeLists.txt:5); C11 is the oldest standard
 # Cabin can lower for MSVC.  The sources build in the strict dialect.
