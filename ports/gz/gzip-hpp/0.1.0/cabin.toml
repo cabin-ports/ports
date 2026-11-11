@@ -7,6 +7,7 @@ strip-prefix = "gzip-hpp-0.1.0"
 [package]
 name = "cabin-ports/gzip-hpp"
 version = "0.1.0"
+license = "BSD-2-Clause"
 include = ["LICENSE.md", "include"]
 
 [dependencies]

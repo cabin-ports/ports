@@ -16,6 +16,7 @@ patches = ["patches/0001-add-cc-by-sa-3.0-license-for-credited-code.patch"]
 [package]
 name = "cabin-ports/functionalplus"
 version = "0.2.28"
+license = "BSL-1.0 AND CC-BY-SA-3.0"
 # LICENSE is the Boost Software License 1.0.  include/fplus/function_traits.hpp
 # is kennytm's utils/traits.hpp, under the same licence with its own notice
 # kept in the file (:1-8, :32).  The include/fplus blocks below are copied,

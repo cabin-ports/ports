@@ -7,6 +7,7 @@ strip-prefix = "sml-1.2.0"
 [package]
 name = "cabin-ports/bext-sml"
 version = "1.2.0"
+license = "BSL-1.0"
 include = ["LICENSE.md", "include"]
 
 # boost-ext/sml is not part of Boost and needs none of it.  On MSVC

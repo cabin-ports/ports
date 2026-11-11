@@ -57,6 +57,7 @@ patches = [
 [package]
 name = "cabin-ports/doctest"
 version = "2.5.3"
+license = "MIT AND BSL-1.0 AND Apache-2.0 AND BSD-3-Clause AND ISC"
 # The headers upstream installs (CMakeLists.txt): doctest/doctest.h and
 # doctest/extensions/*.h.  The rest of doctest/ is the split source the
 # single header is generated from, plus doctest.cpp.

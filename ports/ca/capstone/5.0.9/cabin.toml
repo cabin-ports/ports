@@ -19,6 +19,7 @@ to = "private-include/platform.h"
 [package]
 name = "cabin-ports/capstone"
 version = "5.0.9"
+license = "BSD-3-Clause AND NCSA AND MIT"
 include = [
   "LICENSE.TXT",
   "LICENSE_LLVM.TXT",

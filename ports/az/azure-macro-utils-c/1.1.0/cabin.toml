@@ -19,6 +19,7 @@ patches = ["patches/0001-select-macro-branches-by-msvc-preprocessor-mode.patch"]
 [package]
 name = "cabin-ports/azure-macro-utils-c"
 version = "1.1.0"
+license = "MIT"
 # Licence: MIT (LICENSE).
 include = ["LICENSE", "inc", "patches"]
 

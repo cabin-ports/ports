@@ -11,6 +11,7 @@ strip-prefix = "cpuinfo-4628dc060ce4e82345dc166bbac875609db4ff69"
 [package]
 name = "cabin-ports/cpuinfo"
 version = "2026.6.12"
+license = "BSD-2-Clause"
 # src/log.c:18-130, the stdio log writer, is adapted from the bundled clog
 # library (deps/clog/src/clog.c:17-124), BSD-2-Clause, Copyright (C) 2018
 # Marat Dukhan, (c) 2017-2018 Facebook Inc. and (c) 2017 Georgia Institute

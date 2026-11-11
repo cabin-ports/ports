@@ -9,6 +9,7 @@ strip-prefix = "gsl-lite-1.1.1"
 [package]
 name = "cabin-ports/gsl-lite"
 version = "1.1.1"
+license = "MIT"
 # include/ is what upstream installs (src/CMakeLists.txt:58-62).
 include = ["LICENSE", "include"]
 
