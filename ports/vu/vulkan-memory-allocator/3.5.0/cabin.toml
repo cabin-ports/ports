@@ -29,18 +29,11 @@ include = ["LICENSE.txt", "include"]
 # consumer passes in VmaVulkanFunctions (:17695-17700).  Upstream
 # limitations, as released: below C++17, except on Windows, Apple platforms,
 # Android and Linux with a libstdc++ that lacks aligned_alloc, the default
-# host allocation is unimplemented (vma_aligned_alloc asserts and returns
-# null, :3227-3302; upstream issue #332), so such a consumer defines
-# VMA_SYSTEM_ALIGNED_MALLOC or compiles the implementation as C++17; a
-# virtual block's metadata allocates through that default even when
-# VmaVirtualBlockCreateInfo::pAllocationCallbacks is set (:10551-10558),
-# although the field promises all CPU-side allocations (:1688); a virtual
-# block with VMA_VIRTUAL_BLOCK_CREATE_LINEAR_ALGORITHM_BIT leaves allocations
-# whose pUserData is null out of its allocation counts, detailed statistics
-# and JSON dump (VmaBlockMetadata_Linear takes a null userData for a free
-# item, :7899-8491), though it allocates and frees them correctly; and the
-# linear algorithm's basic statistics (vmaGetVirtualBlockStatistics,
-# vmaGetPoolStatistics) undercount allocations in ring-buffer use (:8077).
+# host allocation is unimplemented (upstream issue #332), so such a consumer
+# defines VMA_SYSTEM_ALIGNED_MALLOC or compiles the implementation as C++17;
+# a virtual block's metadata ignores its pAllocationCallbacks; and the
+# linear algorithm's statistics omit virtual allocations with null pUserData
+# and undercount ring-buffer use.
 # vcpkg installs the header under include/vma on Windows, as the Vulkan SDK
 # does; here it is <vk_mem_alloc.h>, as upstream installs it.  Not ported:
 # the optional Doxygen documentation (VMA_BUILD_DOCUMENTATION) and sample
