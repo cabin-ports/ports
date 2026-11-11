@@ -1,0 +1,33 @@
+--- a/include/semver/version.hh
++++ b/include/semver/version.hh
+@@ -1,23 +1,23 @@
+ // DO NOT MODIFY, THIS FILE IS GENERATED FROM template/version.in
+ //
+-// @PROJECT_NAME@/@PROJECT_VERSION@@PROJECT_VERSION_STABILITY@
++// semver/0.1.1-beta
+ //
+ // Copyright (c) 2020 midnightBITS
+ // This code is licensed under MIT license (see LICENSE for details)
+ 
+ #pragma once
+ 
+-#define SEMVER_NAME "@PROJECT_NAME@"
+-#define SEMVER_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+-#define SEMVER_VERSION_MINOR @PROJECT_VERSION_MINOR@
+-#define SEMVER_VERSION_PATCH @PROJECT_VERSION_PATCH@
+-#define SEMVER_VERSION_STABILITY "@PROJECT_VERSION_STABILITY@"
++#define SEMVER_NAME "semver"
++#define SEMVER_VERSION_MAJOR 0
++#define SEMVER_VERSION_MINOR 1
++#define SEMVER_VERSION_PATCH 1
++#define SEMVER_VERSION_STABILITY "-beta"
+ 
+ #ifndef RC_INVOKED
+ #include <semver/semver.hh>
+ 
+ namespace semver {
+-	inline constexpr semver::project_version version{"@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@@PROJECT_VERSION_STABILITY@"};
++	inline constexpr semver::project_version version{"0.1.1-beta"};
+ 	semver::project_version get_version() noexcept;
+ }  // namespace semver
+ #endif

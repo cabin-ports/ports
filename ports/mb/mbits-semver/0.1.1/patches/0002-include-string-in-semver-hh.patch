@@ -1,0 +1,10 @@
+--- a/include/semver/semver.hh
++++ b/include/semver/semver.hh
+@@ -5,6 +5,7 @@
+ 
+ // #include <charconv>
+ // #include <optional>
++#include <string>
+ #include <string_view>
+ #include <utility>
+ #include <variant>

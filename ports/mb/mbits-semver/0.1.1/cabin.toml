@@ -1,0 +1,40 @@
+[package.upstream]
+url = "https://github.com/mbits-libs/semver/archive/refs/tags/v0.1.1.tar.gz"
+checksum = "sha256:edfa9b04bdffd8efbdea31c9cfd7064801483d8cab0b2de5734018bdb318cf18"
+format = "tar.gz"
+strip-prefix = "semver-0.1.1"
+# CMake generates include/semver/version.hh from src/version.hh.in.  The copy
+# places the template there, and 0001 fills in what configure_file writes for
+# 0.1.1, byte for byte.  0002 includes <string> in semver.hh, which uses
+# std::string but relied on <string_view> to declare it; MSVC's no longer does.
+patches = [
+  "patches/0001-fill-in-the-generated-version-hh.patch",
+  "patches/0002-include-string-in-semver-hh.patch",
+]
+
+[[package.upstream.copy]]
+from = "src/version.hh.in"
+to = "include/semver/version.hh"
+
+[package]
+name = "cabin-ports/mbits-semver"
+version = "0.1.1"
+# MIT (LICENSE).  The comments in include/semver/semver.hh quote clauses of
+# Semantic Versioning 2.0.0 by Tom Preston-Werner, CC BY 3.0
+# (https://creativecommons.org/licenses/by/3.0/), credited by its Source line.
+include = ["LICENSE", "include", "patches", "src"]
+cxx-standard = "c++17"
+interface-cxx-standard = "c++17"
+
+# The static library CMake builds.  Not ported: tests and CMake files.
+# Upstream defects in semver.hh: version_view compares a differing patch
+# number against major, and component::get_number() returns bool, so numeric
+# pre-release identifiers compare and print as 0 or 1.  project_version splits
+# the pre-release at its first dot only, holds string_views into the text it
+# parses, which must outlive it, and leaves a copy's pre-release identifiers
+# pointing into the original object.
+[target.semver]
+type = "library"
+sources = ["src/semver.cc", "src/version.cc"]
+include-dirs = ["include"]
+links = "semver"
