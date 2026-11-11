@@ -1,0 +1,16 @@
+[package.upstream]
+url = "https://github.com/steinwurf/recycle/archive/refs/tags/8.0.0.tar.gz"
+checksum = "sha256:d27ae7c263d9e3a2102ac857d17b6b42d8f4200e4a177e6d571dc8343c30464c"
+format = "tar.gz"
+strip-prefix = "recycle-8.0.0"
+
+[package]
+name = "cabin-ports/recycle"
+version = "8.0.0"
+# Licence: BSD-3-Clause (LICENSE.rst).
+include = ["LICENSE.rst", "src"]
+
+[target.recycle]
+type = "header-only"
+include-dirs = ["src"]
+interface-cxx-standard = "c++14"
