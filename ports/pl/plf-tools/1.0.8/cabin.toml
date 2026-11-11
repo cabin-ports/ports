@@ -1,0 +1,46 @@
+[package.upstream]
+# Upstream tags no releases; this is the commit vcpkg pins.  Its subject is
+# "v1.0.08", and upstream's version history (https://plflib.org/tools.htm)
+# lists it as "2026-10-03: v1.0.8".
+url = "https://github.com/mattreecebentley/plf_tools/archive/6460c9d22ba67fe39bb9203ffddc429b04fbeac1.tar.gz"
+checksum = "sha256:2c9181e2f18985ca6c4efedf1ee81253ea201b213db37f68a2547d1449b03907"
+format = "tar.gz"
+strip-prefix = "plf_tools-6460c9d22ba67fe39bb9203ffddc429b04fbeac1"
+# The patch adds LICENSE.bits_to_chars: lines 3-16 of plf_bitset.h at
+# github.com/mattreecebentley/plf_bitsets commit
+# 4080dd9f3d52b27c115bc6ca168944abac8f6d3d, with CRLF line endings made LF
+# (sha256 343798cfbce16d9d12f90a30b64405befc5fe8de54c8a358968b86ade996fecf).
+patches = ["patches/0001-add-the-bits-to-chars-licence.patch"]
+
+[package]
+name = "cabin-ports/plf-tools"
+version = "1.0.8"
+# Licence: Zlib AND LicenseRef-CFG-1.02.  LICENSE.md (Zlib) covers all but
+# plf_tools.h:577-621, bits_to_chars, which is by Michiel van Slobbe,
+# contributed as plf_bitsets PR #9 (merged as 4080dd9f3d) under that
+# repository's Computing For Good License; upstream moved it into this Zlib
+# file, but no source shows him granting Zlib for it.  LICENSE.bits_to_chars
+# is the v1.02 text from plf_bitset.h's header (the repository's LICENSE file
+# says v1.01); its section 4 field-of-use terms reach users of bits_to_chars.
+include = [
+  "LICENSE.bits_to_chars",
+  "LICENSE.md",
+  "patches",
+  "plf_tools.h",
+  "plf_tools_undef.h",
+]
+
+# The two headers at the archive root, which vcpkg copies into include/.
+# Bit-tool defects that upstream fixed in 1.0.11: before C++20, GCC and Clang's
+# countl_zero misses a factor of 8 when correcting for types narrower than
+# unsigned int (countl_zero<unsigned char>(1) is 28); and countr_one and
+# countl_one complement such types after promotion to int, so countl_one
+# returns 0 for them, and neither compiles where C++20's std::countr_zero
+# and std::countl_zero are used.  Unfixed as of 1.0.16: with MSVC or
+# clang-cl targeting 32-bit x86, or ARM64 before C++20, countr_zero and
+# countl_zero pass 64-bit values to the 32-bit _BitScanForward and
+# _BitScanReverse, which see only the low 32 bits.
+[target.plf-tools]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++98"
