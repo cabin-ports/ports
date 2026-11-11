@@ -5,11 +5,12 @@ format = "tar.gz"
 strip-prefix = "cpuinfo-4628dc060ce4e82345dc166bbac875609db4ff69"
 
 # Upstream tags no releases and declares no version (CMakeLists.txt:4-7):
-# 0.0.20260612 is commit 4628dc0 of 2026-06-12, which implemented
-# cpuinfo_deinitialize() (#387).
+# 2026.6.12 is commit 4628dc0 of 2026-06-12, which implemented
+# cpuinfo_deinitialize() (#387), dated as stb's and picohttpparser's ports
+# date their untagged commits.
 [package]
 name = "cabin-ports/cpuinfo"
-version = "0.0.20260612"
+version = "2026.6.12"
 # src/log.c:18-130, the stdio log writer, is adapted from the bundled clog
 # library (deps/clog/src/clog.c:17-124), BSD-2-Clause, Copyright (C) 2018
 # Marat Dukhan, (c) 2017-2018 Facebook Inc. and (c) 2017 Georgia Institute
