@@ -1,0 +1,31 @@
+[package.upstream]
+url = "https://github.com/lv2/lv2/archive/refs/tags/v1.18.10.tar.gz"
+checksum = "sha256:250a9a213551795f7f11ea44ae1013a1a9ee2dbb910dc2616a954797bd0e272f"
+format = "tar.gz"
+strip-prefix = "lv2-1.18.10"
+
+# The top-level <lv2.h> that upstream's default old_headers option installs
+# as a copy of the core header (meson.build:146-147).
+[[package.upstream.copy]]
+from = "include/lv2/core/lv2.h"
+to = "include/lv2.h"
+
+[package]
+name = "cabin-ports/lv2"
+version = "1.18.10"
+include = ["COPYING", "include"]
+
+# The headers meson installs (meson.build:132, :146-147).  Not provided: the
+# URI-style tree that old_headers also adds under lv2/lv2plug.in/ns/
+# (:149-166), whose 30 files would exceed Cabin's limit of 16 copy steps,
+# so code using those paths includes <lv2/core/lv2.h> or
+# <lv2/<ext>/<name>.h> instead; and the *.lv2 Turtle bundles, which are
+# specification data that hosts read at run time, not build inputs.  Not
+# ported: the example plugins, the lv2_validate script and the docs.
+[target.lv2]
+type = "header-only"
+include-dirs = ["include"]
+# meson.build:11 builds with C99; upstream also compiles every header as
+# C++ (test/meson.build:69-79), where <stdint.h> is standard from C++11.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
