@@ -1,0 +1,69 @@
+[package.upstream]
+# The v1.0.12 tag archive from hoshimoe/NekoFunction, the bytes vcpkg pins.
+url = "https://github.com/hoshimoe/NekoFunction/archive/refs/tags/v1.0.12.tar.gz"
+checksum = "sha256:7e2fccac424a7a43165d587f1ecdb097750f8f5a78f7649bb7ba8e4cd6637983"
+format = "tar.gz"
+strip-prefix = "NekoFunction-1.0.12"
+# Patch 0001 adds the Creative Commons Attribution-ShareAlike 3.0 Unported
+# legal code, verbatim from
+# https://creativecommons.org/licenses/by-sa/3.0/legalcode.txt (sha256
+# 3f941b3b89cf7b8370ceb83cc76d2120d471b58735d8ca60238a751a48d7f72f), as
+# LICENSE.CC-BY-SA-3.0.
+patches = ["patches/0001-add-cc-by-sa-3.0-license-for-stack-overflow-code.patch"]
+
+[package]
+name = "cabin-ports/neko-function"
+version = "1.0.12"
+# (MIT OR Apache-2.0) AND CC-BY-SA-3.0.  LICENSE carries both texts of the
+# MIT OR Apache-2.0 choice.  include/neko/function/utilities.hpp:602-665
+# (base64Chars, base64Encode, base64Decode) is modified (identifiers
+# renamed, e.g. valb to bits, 0x3F named b63, and the alphabet hoisted into
+# base64Chars) from the answer to "Base64 decode snippet in C++",
+# https://stackoverflow.com/a/34571089 (revision 1, 2016-01-02), by Manuel
+# Martinez (https://stackoverflow.com/users/5739045), CC BY-SA 3.0; that
+# block is distributed under CC BY-SA 3.0 (LICENSE.CC-BY-SA-3.0), and the
+# rest of the package stays under MIT OR Apache-2.0.
+include = [
+  "LICENSE",
+  "LICENSE.CC-BY-SA-3.0",
+  "include/neko/function/archive.hpp",
+  "include/neko/function/detectFileType.hpp",
+  "include/neko/function/hash.hpp",
+  "include/neko/function/pattern.hpp",
+  "include/neko/function/utilities.hpp",
+  "include/neko/function/uuid.hpp",
+  "patches",
+]
+
+[dependencies]
+# Upstream pins no NekoSchema version (CMakeLists.txt:25, :74-80); every
+# symbol it uses is in 1.1.0 and 1.1.6.
+"cabin-ports/neko-schema" = "^1.1"
+
+# Upstream's header-only NekoFunction INTERFACE target
+# (CMakeLists.txt:150-157), vcpkg's default build (neither its archive nor
+# its hash feature): include/ at C++20, linked to NekoSchema, whose
+# exceptions and types the headers use.
+# archive.hpp and hash.hpp ship, as upstream installs them, but serve only
+# the features below: they #error unless NEKO_FUNCTION_ENABLE_ARCHIVE, or
+# NEKO_FUNCTION_ENABLE_HASH with NEKO_IMPORT_OPENSSL, is defined
+# (archive.hpp:14-16, hash.hpp:7-16), and without hash support
+# uuid::uuidV3 throws neko::ex::NotImplemented (uuid.hpp:130-133).
+# Upstream limitations: neko::ops::fallback's || returns *r, r its local
+# copy of f(x), through decltype(auto) (utilities.hpp:79-88), so g must
+# return exactly that type (int& for an int* f), and for a std::optional f
+# the reference into r dangles whenever f succeeds; neko::ops::logic's >>=
+# returns the input's type when it is empty (:102-108), so f must return
+# that type too.
+# Not ported: the archive feature (src/neko/function/archiveZip.cpp,
+# needing minizip-ng) and the hash feature (OpenSSL), since neither is a
+# cabin-ports package; the C++20 module units (*.cppm), since a Cabin
+# target cannot build a module unit (upstream builds them only with
+# NEKO_FUNCTION_ENABLE_MODULE, CMakeLists.txt:16, off by default, though its
+# install rule copies them, :344-349); the tests and the vcpkg and Conan
+# recipes.
+[target.neko-function]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
+deps = [{ name = "cabin-ports/neko-schema", public = true }]
