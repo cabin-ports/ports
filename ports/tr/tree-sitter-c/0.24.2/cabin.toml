@@ -7,6 +7,7 @@ strip-prefix = "tree-sitter-c-0.24.2"
 [package]
 name = "cabin-ports/tree-sitter-c"
 version = "0.24.2"
+license = "MIT"
 include = ["LICENSE", "bindings/c/tree_sitter", "src/parser.c", "src/tree_sitter"]
 
 [dependencies]

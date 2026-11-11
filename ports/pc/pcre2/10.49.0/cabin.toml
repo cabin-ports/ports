@@ -28,6 +28,7 @@ to = "src/pcre2_chartables.c"
 name = "cabin-ports/pcre2"
 # Upstream 10.49; Cabin versions have three components.
 version = "10.49.0"
+license = "BSD-3-Clause WITH PCRE2-exception"
 include = ["COPYING", "LICENCE.md", "include", "src"]
 # Upstream compiles as C99 (CMakeLists.txt:122); C11 is the oldest
 # standard Cabin can lower for MSVC.

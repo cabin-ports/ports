@@ -7,6 +7,7 @@ strip-prefix = "recycle-8.0.0"
 [package]
 name = "cabin-ports/recycle"
 version = "8.0.0"
+license = "BSD-3-Clause"
 # Licence: BSD-3-Clause (LICENSE.rst).
 include = ["LICENSE.rst", "src"]
 

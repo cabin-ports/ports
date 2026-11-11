@@ -9,6 +9,7 @@ strip-prefix = "serd-v0.32.10"
 [package]
 name = "cabin-ports/serd"
 version = "0.32.10"
+license = "ISC"
 # Licence: ISC (COPYING), under which every published file is available;
 # LICENSES/ also holds the other texts REUSE cites.
 include = ["COPYING", "LICENSES", "include", "src"]

@@ -29,6 +29,7 @@ name = "cabin-ports/pcre"
 # Upstream 8.45, the final PCRE1 release; Cabin versions have three
 # components.
 version = "8.45.0"
+license = "BSD-3-Clause"
 include = [
   "COPYING",
   "LICENCE",

@@ -6,6 +6,7 @@ strip-prefix = "picohttpparser-f4d94b48b31e0abae029ebeafcfd9ca0680ede58"
 [package]
 name = "cabin-ports/picohttpparser"
 version = "2026.4.6"
+license = "MIT"
 
 # picohttpparser is a single translation unit: picohttpparser.c plus
 # its header at the archive root. The repository's test.c/bench.c

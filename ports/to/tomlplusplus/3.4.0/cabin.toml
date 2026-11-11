@@ -9,6 +9,7 @@ strip-prefix = "tomlplusplus-3.4.0"
 [package]
 name = "cabin-ports/tomlplusplus"
 version = "3.4.0"
+license = "MIT"
 # The headers under include/toml++, which both of upstream's builds
 # install, and the MIT license.
 include = ["LICENSE", "include/toml++"]

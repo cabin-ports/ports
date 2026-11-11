@@ -13,6 +13,7 @@ patches = ["patches/0001-add-mit-license-for-dhuertas-aes-code.patch"]
 [package]
 name = "cabin-ports/simde"
 version = "0.8.2"
+license = "MIT AND CC0-1.0"
 # COPYING is MIT.  simde/hedley.h, debug-trap.h, check.h, simde-align.h,
 # simde-arch.h and simde-detect-clang.h are CC0-1.0 by their headers.
 # simde-f16.h:185-225 and :239-258 adapt Fabian Giesen's CC0 half-float

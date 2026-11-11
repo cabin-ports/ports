@@ -7,6 +7,7 @@ strip-prefix = "tree-sitter-0.27.1"
 [package]
 name = "cabin-ports/tree-sitter"
 version = "0.27.1"
+license = "MIT AND LicenseRef-Unicode-ICU-58 AND ICU"
 # lib/src/unicode carries the Unicode license of the ICU headers the
 # library bundles.
 include = ["LICENSE", "lib/include", "lib/src"]
