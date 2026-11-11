@@ -7,6 +7,28 @@ strip-prefix = "algorithm-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-algorithm"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` lists the tree without test/, tests nothing here builds:
+# iterator_test.hpp closely follows libc++'s test_iterators.h, whose licence
+# text does not ship, and search_test_data/ holds a scanned photograph whose
+# origin and terms are not stated.
+include = [
+  ".gitattributes",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "LICENSE",
+  "README.md",
+  "appveyor.yml",
+  "build.jam",
+  "doc",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "minmax",
+  "string",
+  "sublibs",
+]
 
 [dependencies]
 "cabin-ports/boost-array" = "=1.92.0"

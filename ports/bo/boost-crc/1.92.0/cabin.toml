@@ -7,6 +7,26 @@ strip-prefix = "crc-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-crc"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` lists the tree without doc/, the documentation nothing here
+# builds: crc.qbk quotes Ross Williams's CRC guide, whose terms allow only
+# verbatim copies of the whole guide with its notice.
+include = [
+  ".drone",
+  ".drone.jsonnet",
+  ".gitattributes",
+  ".github",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "appveyor.yml",
+  "build.jam",
+  "crc.html",
+  "crc_example.cpp",
+  "include",
+  "index.html",
+  "meta",
+  "test",
+]
 
 [target.boost_crc]
 type = "header-only"

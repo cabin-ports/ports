@@ -7,6 +7,40 @@ strip-prefix = "contract-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-contract"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` lists the tree without example/, examples nothing here builds;
+# several reprogram examples from books (Meyer's OOSC, Mitchell and McKim's)
+# and from N1962, whose terms are not established.  It also leaves out
+# test/cmake_test/, upstream's CMake smoke test, whose main.cpp is a copy of
+# example/mitchell02/stack.cpp.
+include = [
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "appveyor.yml",
+  "build.jam",
+  "doc",
+  "include",
+  "index.html",
+  "meta",
+  "src",
+  "test/Jamfile.v2",
+  "test/call_if",
+  "test/check",
+  "test/constructor",
+  "test/destructor",
+  "test/detail",
+  "test/disable",
+  "test/function",
+  "test/invariant",
+  "test/old",
+  "test/public_function",
+  "test/result",
+  "test/specify",
+]
 
 [dependencies]
 "cabin-ports/boost-any" = "=1.92.0"
