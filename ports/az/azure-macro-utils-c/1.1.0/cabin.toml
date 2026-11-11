@@ -1,0 +1,36 @@
+[package.upstream]
+# Upstream tags no releases; this is the commit vcpkg pins (2019-10-17), whose
+# CMakeLists.txt:12 declares 1.1.0.  master still declares 1.1.0, so here
+# 1.1.0 names this commit.  The repository is now Azure/macro-utils-c; the old
+# name redirects to the same archive bytes.
+url = "https://github.com/Azure/macro-utils-c/archive/5926caf4e42e98e730e6d03395788205649a3ada.tar.gz"
+checksum = "sha256:1b266b4c91338f2f36a41f276b3d134e6c7da8764d38829f1182edb8913b10b0"
+format = "tar.gz"
+strip-prefix = "macro-utils-c-5926caf4e42e98e730e6d03395788205649a3ada"
+# Patch 0001 keeps the generated header's eight `#ifdef _MSC_VER` branches,
+# written for cl's traditional preprocessor, off its conforming one
+# (_MSVC_TRADITIONAL == 0), as upstream later did (commit 4240222); compilers
+# that predate the macro (VS 2017 15.8) keep them.  cl's /std:c11, the lowest
+# C standard Cabin requests from it, enables the conforming preprocessor,
+# under which those branches leave MU_FOR_EACH_1 and the other dispatchers
+# unexpanded.
+patches = ["patches/0001-select-macro-branches-by-msvc-preprocessor-mode.patch"]
+
+[package]
+name = "cabin-ports/azure-macro-utils-c"
+version = "1.1.0"
+# Licence: MIT (LICENSE).
+include = ["LICENSE", "inc", "patches"]
+
+# The INTERFACE target azure_macro_utils_c (CMakeLists.txt:31-35); consumers
+# write <azure_macro_utils/macro_utils.h>.  macro_utils_generated.h is the
+# committed output of the T4 template in macro_utils_h_generator/, which the
+# build only installs.  C needs C99 (variadic macros, // comments, the loop
+# declaration in MU_DEFINE_ENUM_STRINGS_2 at macro_utils.h:186); C++ needs
+# C++11 for variadic macros.  Not ported: the generator, the tests and the
+# CMake package files.
+[target.azure-macro-utils-c]
+type = "header-only"
+include-dirs = ["inc"]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
