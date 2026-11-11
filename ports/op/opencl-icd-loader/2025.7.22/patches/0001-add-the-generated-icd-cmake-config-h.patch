@@ -1,0 +1,5 @@
+--- /dev/null
++++ b/loader/icd_cmake_config.h
+@@ -0,0 +1,2 @@
++/* Stands in for CMake's configure_file output: cabin.toml defines
++   HAVE_SECURE_GETENV where the libc has secure_getenv. */
