@@ -11,6 +11,28 @@ patches = [
 [package]
 name = "cabin-ports/boost-sort"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: its Doxygen output
+# bundles jQuery (MIT or GPL-2.0) without a licence text, and doc/papers holds
+# the 2002 PDPTA spreadsort paper, whose publisher's terms are unknown.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".vscode",
+  "CMakeLists.txt",
+  "README.md",
+  "benchmark",
+  "build.jam",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+  "test",
+  "tune.pl",
+]
 
 [dependencies]
 "cabin-ports/boost-config" = "=1.92.0"

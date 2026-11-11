@@ -3,10 +3,18 @@ url = "https://github.com/boostorg/poly_collection/archive/refs/tags/boost-1.92.
 checksum = "sha256:aa865ba27fdc46a0332d44c2619dcc0fee79a7045e84a7133995b9821aa9f6ce"
 format = "tar.gz"
 strip-prefix = "poly_collection-boost-1.92.0"
+# include/boost/poly_collection/detail/allocator_adaptor.hpp:49 adapts libc++'s
+# std::scoped_allocator_adaptor, under its MIT and University of Illinois/NCSA
+# dual licence, whose text the release does not ship.  The patch adds libc++'s
+# LICENSE.TXT, verbatim from llvm-project llvmorg-8.0.1 libcxx/LICENSE.TXT
+# (sha256:c3b21ee90de785b9e45590253fd08fb22b269abccaadb175c4d96d7f420340cd), as
+# LICENSE.libcxx.txt.
+patches = ["patches/0001-add-mit-and-ncsa-licenses-for-libcxx-code.patch"]
 
 [package]
 name = "cabin-ports/boost-poly-collection"
 version = "1.92.0"
+license = "BSL-1.0 AND (MIT OR NCSA)"
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

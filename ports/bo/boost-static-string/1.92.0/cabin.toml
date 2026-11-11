@@ -7,6 +7,30 @@ strip-prefix = "static_string-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-static-string"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out test/, which nothing here builds: test/static_string.cpp
+# reproduces libc++'s std::string test tables, and which of libc++'s licences
+# covers them cannot be established.
+include = [
+  ".appveyor.yml",
+  ".codecov.yml",
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  "CHANGELOG.md",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "build.jam",
+  "doc",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "tools",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

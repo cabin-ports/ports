@@ -7,6 +7,32 @@ strip-prefix = "spirit-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-spirit"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds:
+# doc/refcard/spirit-reference.tex reuses Stephen Gildea's multicolumn macros
+# from the GNU Emacs reference card, whose terms do not ship, and a doc/x3
+# slide deck embeds a photograph with no stated source.
+include = [
+  ".appveyor.yml",
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "README.md",
+  "build.jam",
+  "classic",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "repository",
+  "sublibs",
+  "test",
+  "workbench",
+]
 
 [dependencies]
 "cabin-ports/boost-array" = "=1.92.0"

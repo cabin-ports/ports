@@ -7,6 +7,27 @@ strip-prefix = "regex-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-regex"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out test/, which nothing here builds:
+# test/regress/test_perl_ex.cpp takes its cases from PCRE's test data, whose
+# licence does not ship.
+include = [
+  ".gitattributes",
+  ".github",
+  "CMakeLists.txt",
+  "README.md",
+  "build.jam",
+  "doc",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "module",
+  "performance",
+  "readme.txt",
+  "src",
+  "tools",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

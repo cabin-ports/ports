@@ -7,6 +7,29 @@ strip-prefix = "program_options-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-program-options"
 version = "1.92.0"
+license = "BSL-1.0 AND LicenseRef-Boost-pre-BSL"
+# include/boost/program_options/detail/utf8_codecvt_facet.hpp:1-6 is under
+# Ronald Garcia and Andrew Lumsdaine's 2001 Boost permission notice.
+# `include` leaves out doc/, which nothing here builds:
+# doc/requirements-Rozental is a 2001 mailing-list message and doc/todo.txt
+# quotes review mails, neither with stated terms.
+include = [
+  ".codecov.yml",
+  ".gitattributes",
+  ".github",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "README.md",
+  "appveyor.yml",
+  "build.jam",
+  "ci",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "src",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-any" = "=1.92.0"

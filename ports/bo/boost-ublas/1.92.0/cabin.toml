@@ -7,6 +7,28 @@ strip-prefix = "ublas-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-ublas"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: doc/js bundles jQuery
+# 1.3.2 (MIT or GPL) and jquery.toc-gw.js (Apache-2.0) without their licence
+# texts.
+include = [
+  ".appveyor.yml",
+  ".ci",
+  ".gitattributes",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "Changelog",
+  "IDEs",
+  "README.md",
+  "benchmarks",
+  "clblas.jam",
+  "examples",
+  "include",
+  "index.html",
+  "meta",
+  "opencl.jam",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-concept-check" = "=1.92.0"

@@ -7,6 +7,25 @@ strip-prefix = "preprocessor-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-preprocessor"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds:
+# doc/AppendixA-AnIntroductiontoPreprocessorMetaprogramming.html is an appendix
+# of the book "C++ Template Metaprogramming", copyright Pearson Education and
+# reprinted with permission, with no grant to redistribute.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "appveyor.yml",
+  "build.jam",
+  "include",
+  "index.html",
+  "meta",
+  "test",
+]
 
 [target.boost_preprocessor]
 type = "header-only"
