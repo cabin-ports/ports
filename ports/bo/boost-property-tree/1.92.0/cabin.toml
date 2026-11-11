@@ -7,6 +7,27 @@ strip-prefix = "property_tree-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-property-tree"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out test/, which nothing here builds:
+# test/xml_parser_test_data.hpp embeds the W3C XLink working draft and
+# Netscape's RSS 0.91 DTD, with no stated terms.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  "CMakeLists.txt",
+  "README.md",
+  "appveyor.yml",
+  "breaking_changes.txt",
+  "build.jam",
+  "cmake",
+  "doc",
+  "examples",
+  "include",
+  "index.html",
+  "meta",
+]
 
 [dependencies]
 "cabin-ports/boost-any" = "=1.92.0"

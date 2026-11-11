@@ -7,6 +7,24 @@ strip-prefix = "predef-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-predef"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: doc/amber.css and
+# doc/index.html embed normalize.css (MIT) without its licence text.
+include = [
+  ".cirrus.yml",
+  ".gitattributes",
+  ".gitignore",
+  "CMakeLists.txt",
+  "appveyor.yml",
+  "azure-pipelines.yml",
+  "build.jam",
+  "check",
+  "include",
+  "index.html",
+  "meta",
+  "test",
+  "tools",
+]
 
 [target.boost_predef]
 type = "header-only"

@@ -7,6 +7,23 @@ strip-prefix = "polygon-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-polygon"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: doc/GTL_boostcon2009.pdf
+# carries ACM's copying restrictions, and doc/images holds the Intel logo and
+# photographs with no stated terms.
+include = [
+  ".gitattributes",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "Jamfile.v2",
+  "appveyor.yml",
+  "benchmark",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-config" = "=1.92.0"

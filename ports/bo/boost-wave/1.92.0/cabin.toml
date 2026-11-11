@@ -7,6 +7,30 @@ strip-prefix = "wave-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-wave"
 version = "1.92.0"
+license = "BSL-1.0 AND BSD-2-Clause"
+# 126 files in test/testwave/testfiles carry Kiyoshi Matsui's mcpp notice.
+# `include` leaves out doc/, which nothing here builds: doc/theme/uc.gif is clip
+# art of unknown origin.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "ChangeLog",
+  "README.md",
+  "appveyor.yml",
+  "build.jam",
+  "include",
+  "index.html",
+  "meta",
+  "samples",
+  "src",
+  "test",
+  "tool",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"
