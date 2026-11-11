@@ -1,0 +1,12 @@
+--- a/Rx/v2/src/rxcpp/rx-notification.hpp
++++ b/Rx/v2/src/rxcpp/rx-notification.hpp
+@@ -150,7 +150,8 @@
+         }
+         on_error_notification(const on_error_notification& o) : ep(o.ep) {}
+         on_error_notification(const on_error_notification&& o) : ep(std::move(o.ep)) {}
+-        on_error_notification& operator=(on_error_notification o) { ep = std::move(o.ep); return *this; }
++        // Changed for cabin-ports on 2026-11-11: operator= deleted (ReactiveX/RxCpp#606).
++        on_error_notification& operator=(on_error_notification o) RXCPP_DELETE;
+         virtual void out(std::ostream& os) const {
+             os << "on_error(";
+             os << rxu::what(ep);
