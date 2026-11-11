@@ -7,6 +7,22 @@ strip-prefix = "bimap-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-bimap"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` lists the tree without doc/, the documentation nothing here
+# builds: doc/html/images/extern/googlesoc.png is Google's Summer of Code
+# logo, with no grant.
+include = [
+  ".gitattributes",
+  ".github",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "build.jam",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-concept-check" = "=1.92.0"

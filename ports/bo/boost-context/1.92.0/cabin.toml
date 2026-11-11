@@ -7,6 +7,31 @@ strip-prefix = "context-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-context"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` lists the tree without cmake/, the ASM_ARMASM language modules
+# for upstream's CMake build, which Cabin does not use:
+# CMakeTestASM_ARMASMCompiler.cmake carries Kitware's BSD-3-Clause notice but
+# not the licence text.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "README.md",
+  "boost-context-features.jam",
+  "build.jam",
+  "doc",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "performance",
+  "src",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"
