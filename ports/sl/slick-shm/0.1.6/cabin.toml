@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/SlickQuant/slick-shm/archive/refs/tags/v0.1.6.tar.gz"
+checksum = "sha256:5a63c99743e85d8c8cf4e180ea1b3baead296259e2c6cd36d556f7318bac060b"
+format = "tar.gz"
+strip-prefix = "slick-shm-0.1.6"
+
+[package]
+name = "cabin-ports/slick-shm"
+version = "0.1.6"
+# Licence: MIT (LICENSE).
+include = ["LICENSE", "include"]
+
+# Not ported: the examples, the tests and the CMake package files.  On 32-bit
+# Windows, detail/windows/shared_memory_impl.hpp:111 shifts the 32-bit size_t
+# by 32, which is undefined behaviour.
+[target.slick-shm]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+
+# Upstream supports Windows, Linux and macOS (README.md:22-28) and links
+# Threads::Threads on every Unix (CMakeLists.txt:29-45).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# shm_open lives in librt on glibc before 2.34 and on NetBSD.  Upstream links
+# rt on every Unix but Apple's (CMakeLists.txt:36-38); OpenBSD has no librt.
+[target.'cfg(any(os = "linux", os = "netbsd"))'.profile]
+link-libs = ["rt"]
