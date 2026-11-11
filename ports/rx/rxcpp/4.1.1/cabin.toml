@@ -1,0 +1,43 @@
+[package.upstream]
+url = "https://github.com/ReactiveX/RxCpp/archive/refs/tags/v4.1.1.tar.gz"
+checksum = "sha256:054a9be63e66904ecaa552ce56d6458b4545d6da5ea32f5103c7fc379cebb374"
+format = "tar.gz"
+strip-prefix = "RxCpp-4.1.1"
+# GCC 14 and later check non-dependent assignments in templates (GCC PR
+# c++/18474), so every file that includes rxcpp fails on
+# on_error_notification's operator=, which assigns to a const member; the
+# patch deletes it as upstream's unmerged ReactiveX/RxCpp#606 does.  The
+# struct is private to notification<T>, which holds it only through
+# shared_ptr.  The patch's comment line is the change notice Apache-2.0
+# section 4(b) requires.
+patches = ["patches/0001-delete-on-error-notification-assignment.patch"]
+
+[package]
+name = "cabin-ports/rxcpp"
+version = "4.1.1"
+# Credited code too slight to carry copyright: Rx/v2/src/rxcpp/rx-util.hpp:77-85
+# copies range-v3's as_const (Eric Niebler, BSL-1.0), two one-line templates,
+# and :172-187 (types_checked_from) follows the void_t idiom of WG21 N3911.
+include = [
+  "AUTHORS.txt",
+  "license.md",
+  "patches",
+  "Rx/v2/license.txt",
+  "Rx/v2/src",
+]
+
+# Upstream compiles its own tests with /bigobj and /await
+# (projects/CMake/shared.cmake:39-52); like upstream's exported target, the
+# package adds neither, so an MSVC consumer hitting the object file's section
+# limit (C1128) adds /bigobj, and one using rx-coroutine.hpp, which rx.hpp
+# does not include, adds /await.
+[target.rxcpp]
+type = "header-only"
+include-dirs = ["Rx/v2/src"]
+# Upstream's minimum is C++11.
+interface-cxx-standard = "c++11"
+
+# The schedulers run on std::thread; upstream's tests and examples link
+# CMAKE_THREAD_LIBS_INIT.
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["pthread"]
