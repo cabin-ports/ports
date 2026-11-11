@@ -12,8 +12,17 @@ include = ["LICENSE.md", "include"]
 # boost-ext/sml is not part of Boost and needs none of it.  On MSVC
 # upstream's CMake target also exports NOMINMAX and the CRT, SCL and C++17
 # deprecation warning silencers; the headers need none of them, so like the
-# vcpkg and Conan packages this port does not export them.  Licence:
-# BSL-1.0 (LICENSE.md).
+# vcpkg and Conan packages this port does not export them.
+#
+# On MSVC, sml.hpp disables warnings C4503 and C4200 for the rest of the
+# including translation unit, and the "name"_s and "name"_e literals
+# need C++20; state<T> and event<T> work on every compiler.  With glibc,
+# an unqualified on_exit<_> under `using namespace boost::sml` is
+# ambiguous with <stdlib.h>'s on_exit: write sml::on_exit<_>.  A state
+# machine constructed from a const lvalue dependency fails to compile in
+# this release (upstream #711): pass a non-const object.
+#
+# Licence: BSL-1.0 (LICENSE.md).
 [target.bext-sml]
 type = "header-only"
 include-dirs = ["include"]

@@ -15,6 +15,11 @@ include = ["LICENSES/MIT.txt", "src/kdbindings"]
 # `defines` entry changes only its value, never removes it;
 # ConnectionHandle::release() discards a handle explicitly.
 #
+# Qt defines `emit` as a macro, which signal.h rejects with a
+# static_assert: Qt consumers define QT_NO_EMIT (as upstream's
+# off-by-default KDBindings_QT_NO_EMIT option would) or QT_NO_KEYWORDS
+# themselves.
+#
 # The v1.1.0 tag still carries CMake's project version 1.0.95; the registry
 # version follows the tag.
 #

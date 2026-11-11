@@ -13,7 +13,9 @@ include = ["LICENSE", "include"]
 # already passes to every cl compile.  The fs_std*.hpp headers select
 # std::filesystem when available; toolchains that keep it in a separate
 # library (stdc++fs, c++fs) then need that linked, which this port does not
-# do.
+# do.  On Windows, used header-only, filesystem.hpp includes <windows.h>,
+# <shellapi.h> and <winioctl.h> in every translation unit that includes it,
+# without WIN32_LEAN_AND_MEAN or NOMINMAX.
 [target.ghc_filesystem]
 type = "header-only"
 include-dirs = ["include"]

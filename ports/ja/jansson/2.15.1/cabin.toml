@@ -44,7 +44,9 @@ interface-cxx-standard = "c++11"
 #
 # Big-endian targets are not supported: WORDS_BIGENDIAN is never set, so
 # dtoa.c would misformat reals.  Not ported: the shared library and
-# JANSSON_STATIC_CRT.
+# JANSSON_STATIC_CRT.  Not reproduced: position-independent code (Cabin
+# drops a dependency's raw compiler flags), so the archive is not built
+# for linking into a shared object.
 [target.jansson]
 type = "library"
 sources = [

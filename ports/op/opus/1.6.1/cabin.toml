@@ -36,6 +36,7 @@ include = ["COPYING", "celt", "include", "public", "silk", "src"]
 # libopus as upstream's CMake build compiles it by default: the
 # floating-point codec with the float API, without custom modes or the
 # optional DNN features (deep PLC, DRED, OSCE), so dnn/ is not packaged.
+# Not ported: the opus_demo, opus_compare and test programs.
 [target.opus]
 type = "library"
 sources = [
