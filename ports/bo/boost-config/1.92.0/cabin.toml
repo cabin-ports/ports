@@ -8,6 +8,7 @@ patches = ["patches/0001-disable-msvc-auto-linking.patch"]
 [package]
 name = "cabin-ports/boost-config"
 version = "1.92.0"
+license = "BSL-1.0 AND FSFUL"
 
 [target.boost_config]
 type = "header-only"

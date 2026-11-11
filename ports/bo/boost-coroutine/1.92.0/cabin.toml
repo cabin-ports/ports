@@ -7,6 +7,7 @@ strip-prefix = "coroutine-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-coroutine"
 version = "1.92.0"
+license = "BSL-1.0"
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"
