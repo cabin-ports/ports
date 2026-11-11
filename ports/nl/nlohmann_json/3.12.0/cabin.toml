@@ -6,6 +6,12 @@ strip-prefix = "json-3.12.0"
 [package]
 name = "cabin-ports/nlohmann_json"
 version = "3.12.0"
+# MIT, and Apache-2.0 for the Abseil code in
+# include/nlohmann/detail/meta/cpp_future.hpp (:40-144).
+license = "MIT AND Apache-2.0"
+# The archive's tests/thirdparty and docs carry third-party terms whose
+# texts do not ship, so only the headers and their licenses ship.
+include = ["LICENSE.MIT", "LICENSES/Apache-2.0.txt", "include"]
 
 # JSON for Modern C++ is header-only; consumers include
 # <nlohmann/json.hpp> from the multi-header include/ root (the
