@@ -19,10 +19,10 @@ path = "src/main.rs"
 # (docs/maintaining.md, "Cabin revision").
 [dependencies]
 anyhow = "1"
-cabin-core = { package = "cabinpkg-core", git = "https://github.com/cabinpkg/cabin", rev = "ab7491914e7023990ca19853900eaf7a31f6b330" }
-cabin-env = { package = "cabinpkg-env", git = "https://github.com/cabinpkg/cabin", rev = "ab7491914e7023990ca19853900eaf7a31f6b330" }
-cabin-manifest = { package = "cabinpkg-manifest", git = "https://github.com/cabinpkg/cabin", rev = "ab7491914e7023990ca19853900eaf7a31f6b330" }
-cabin-publish = { package = "cabinpkg-publish", git = "https://github.com/cabinpkg/cabin", rev = "ab7491914e7023990ca19853900eaf7a31f6b330" }
+cabin-core = { package = "cabinpkg-core", git = "https://github.com/cabinpkg/cabin", rev = "797ae6449c32920d974a765bf4d12e7a05016877" }
+cabin-env = { package = "cabinpkg-env", git = "https://github.com/cabinpkg/cabin", rev = "797ae6449c32920d974a765bf4d12e7a05016877" }
+cabin-manifest = { package = "cabinpkg-manifest", git = "https://github.com/cabinpkg/cabin", rev = "797ae6449c32920d974a765bf4d12e7a05016877" }
+cabin-publish = { package = "cabinpkg-publish", git = "https://github.com/cabinpkg/cabin", rev = "797ae6449c32920d974a765bf4d12e7a05016877" }
 clap = { version = "4", features = ["derive", "env"] }
 etcetera = "0.11"
 semver = "1"
