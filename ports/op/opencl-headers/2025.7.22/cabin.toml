@@ -22,8 +22,8 @@ include = ["CL", "LICENSE"]
 # OpenCL 3.0.  cl_d3d10.h, cl_d3d11.h and cl_dx9_media_sharing*.h, and on
 # Windows cl_icd.h and cl_layer.h, need the Windows SDK's Direct3D headers;
 # cl_va_api_media_sharing_intel.h needs libva's <va/va.h>, which no port
-# provides.  The package links nothing and no port provides an ICD loader,
-# so consumers that call the API link the platform's OpenCL library.  In C,
+# provides.  The package links nothing, so consumers that call the API link
+# cabin-ports/opencl-icd-loader or the platform's OpenCL library.  In C,
 # cl_half_to_float shifts a negative half's sign into int's bit 31
 # (cl_half.h:391, :397 and :426), which is undefined; C++ defines that shift
 # (CWG 1457), though cl_half.h's union type punning relies on a C++ compiler
