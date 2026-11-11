@@ -7,6 +7,7 @@ strip-prefix = "yap-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-yap"
 version = "1.92.0"
+license = "BSL-1.0 AND MIT"
 
 [dependencies]
 "cabin-ports/boost-hana" = "=1.92.0"

@@ -8,6 +8,7 @@ patches = ["patches/0001-exclude-clang-from-gcc7-alignment-workaround.patch"]
 [package]
 name = "cabin-ports/boost-pfr"
 version = "1.92.0"
+license = "BSL-1.0"
 
 [target.boost_pfr]
 type = "header-only"
