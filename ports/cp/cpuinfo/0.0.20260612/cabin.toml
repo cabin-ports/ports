@@ -1,0 +1,162 @@
+[package.upstream]
+url = "https://github.com/pytorch/cpuinfo/archive/4628dc060ce4e82345dc166bbac875609db4ff69.tar.gz"
+checksum = "sha256:a550205e891f9f1982044a306cb54556347645cba129af34cd907160f83bd0f1"
+format = "tar.gz"
+strip-prefix = "cpuinfo-4628dc060ce4e82345dc166bbac875609db4ff69"
+
+# Upstream tags no releases and declares no version (CMakeLists.txt:4-7):
+# 0.0.20260612 is commit 4628dc0 of 2026-06-12, which implemented
+# cpuinfo_deinitialize() (#387).
+[package]
+name = "cabin-ports/cpuinfo"
+version = "0.0.20260612"
+# src/log.c:18-130, the stdio log writer, is adapted from the bundled clog
+# library (deps/clog/src/clog.c:17-124), BSD-2-Clause, Copyright (C) 2018
+# Marat Dukhan, (c) 2017-2018 Facebook Inc. and (c) 2017 Georgia Institute
+# of Technology, so deps/clog/LICENSE ships beside LICENSE.  Credited code
+# too slight to carry copyright: src/arm/mach/init.c:32-82 copies Apple CPU
+# family IDs from ncnn's src/cpu.cpp; src/arm/linux/api.h:54-147,
+# src/riscv/linux/riscv-isa.c:6-17 and riscv-hw.c:28-86 copy Linux's UAPI
+# hwcap and hwprobe bit values and its two-field struct riscv_hwprobe: bare
+# numeric identifiers and an ABI layout.
+include = ["LICENSE", "deps/clog/LICENSE", "include/cpuinfo.h", "src"]
+# Upstream asks for strict C99 (CMakeLists.txt:37-41, 264); C11 is the
+# oldest standard Cabin can lower for MSVC.
+c-standard = "c11"
+# cpuinfo.h needs stdbool.h and stdint.h and declares its API extern "C".
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# The library CMake builds (CMakeLists.txt:161-262): the core sources
+# here, and below the per-architecture and per-OS lists, which CMake adds
+# only on a supported architecture and OS (:90-118).  CPUINFO_LOG_LEVEL=2
+# is upstream's default (:284-286).  CPUINFO_LOG_TO_STDIO (:283) is left to
+# src/log.c:18-24, whose default, off on Android and on elsewhere, matches
+# the option's (:16-20).  include/ is the public include root and src/ the
+# private one (:280-281).
+#
+# On an unsupported architecture or OS, CMake compiles only the core
+# sources and exports CPUINFO_SUPPORTED_PLATFORM=0 (:305-318); Cabin has no
+# conditional interface defines, so consumers see 1 everywhere.  There, as
+# upstream, cpuinfo_initialize() fails, or on WebAssembly outside
+# Emscripten the link does (src/init.c:55-63).  The CI legs build x86_64
+# Linux, AArch64 macOS and x86_64 Windows; the other lists below are
+# unexercised.  Emscripten (src/emscripten/init.c, :230-233) is not mapped:
+# Cabin has no Emscripten target.  Android armeabi's -marm (:206-208) is
+# not reproduced: current NDKs no longer target armeabi.
+#
+# Not ported: cpuinfo_internals, the mock header include/cpuinfo-mock.h,
+# the tools, unit and mock tests, benchmarks and pkg-config file.
+[target.cpuinfo]
+type = "library"
+sources = ["src/api.c", "src/cache.c", "src/init.c", "src/log.c"]
+include-dirs = ["include"]
+defines = ["CPUINFO_LOG_LEVEL=2"]
+interface-defines = ["CPUINFO_SUPPORTED_PLATFORM=1"]
+links = "cpuinfo"
+
+[profile]
+include-dirs = ["src"]
+
+[target.'cfg(all(any(arch = "x86", arch = "x86_64"), any(os = "linux", os = "android", os = "macos", os = "ios", os = "windows", os = "freebsd")))'.sources]
+cpuinfo = [
+  "src/x86/cache/descriptor.c",
+  "src/x86/cache/deterministic.c",
+  "src/x86/cache/init.c",
+  "src/x86/info.c",
+  "src/x86/init.c",
+  "src/x86/isa.c",
+  "src/x86/name.c",
+  "src/x86/topology.c",
+  "src/x86/uarch.c",
+  "src/x86/vendor.c",
+]
+
+[target.'cfg(all(any(arch = "x86", arch = "x86_64"), any(os = "linux", os = "android")))'.sources]
+cpuinfo = ["src/x86/linux/cpuinfo.c", "src/x86/linux/init.c"]
+
+[target.'cfg(all(any(arch = "x86", arch = "x86_64"), any(os = "macos", os = "ios")))'.sources]
+cpuinfo = ["src/x86/mach/init.c"]
+
+[target.'cfg(all(any(arch = "x86", arch = "x86_64"), os = "windows"))'.sources]
+cpuinfo = ["src/x86/windows/init.c"]
+
+[target.'cfg(all(any(arch = "x86", arch = "x86_64"), os = "freebsd"))'.sources]
+cpuinfo = ["src/x86/freebsd/init.c"]
+
+[target.'cfg(all(arch = "aarch64", os = "windows"))'.sources]
+cpuinfo = [
+  "src/arm/uarch.c",
+  "src/arm/windows/init-by-logical-sys-info.c",
+  "src/arm/windows/init.c",
+]
+
+[target.'cfg(all(any(arch = "arm", all(arch = "aarch64", not(os = "windows"))), any(os = "linux", os = "android", os = "macos", os = "ios", os = "windows", os = "freebsd")))'.sources]
+cpuinfo = ["src/arm/cache.c", "src/arm/uarch.c"]
+
+[target.'cfg(all(any(arch = "arm", arch = "aarch64"), any(os = "linux", os = "android")))'.sources]
+cpuinfo = [
+  "src/arm/linux/chipset.c",
+  "src/arm/linux/clusters.c",
+  "src/arm/linux/cpuinfo.c",
+  "src/arm/linux/hwcap.c",
+  "src/arm/linux/init.c",
+  "src/arm/linux/midr.c",
+]
+
+[target.'cfg(all(arch = "arm", any(os = "linux", os = "android")))'.sources]
+cpuinfo = ["src/arm/linux/aarch32-isa.c"]
+
+[target.'cfg(all(arch = "aarch64", any(os = "linux", os = "android")))'.sources]
+cpuinfo = ["src/arm/linux/aarch64-isa.c"]
+
+[target.'cfg(all(arch = "aarch64", any(os = "macos", os = "ios")))'.sources]
+cpuinfo = ["src/arm/mach/init.c"]
+
+[target.'cfg(all(any(arch = "arm", arch = "aarch64"), os = "android"))'.sources]
+cpuinfo = ["src/arm/android/properties.c"]
+
+[target.'cfg(all(any(arch = "riscv32", arch = "riscv64"), any(os = "linux", os = "android", os = "macos", os = "ios", os = "windows", os = "freebsd")))'.sources]
+cpuinfo = ["src/riscv/uarch.c"]
+
+[target.'cfg(all(any(arch = "riscv32", arch = "riscv64"), any(os = "linux", os = "android")))'.sources]
+cpuinfo = [
+  "src/riscv/linux/init.c",
+  "src/riscv/linux/riscv-hw.c",
+  "src/riscv/linux/riscv-isa.c",
+]
+
+[target.'cfg(all(any(arch = "x86", arch = "x86_64", arch = "arm", arch = "aarch64", arch = "riscv32", arch = "riscv64"), any(os = "linux", os = "android")))'.sources]
+cpuinfo = [
+  "src/linux/cpulist.c",
+  "src/linux/multiline.c",
+  "src/linux/processors.c",
+  "src/linux/smallfile.c",
+]
+
+[target.'cfg(all(any(arch = "x86", arch = "x86_64", arch = "arm", arch = "aarch64", arch = "riscv32", arch = "riscv64"), any(os = "macos", os = "ios")))'.sources]
+cpuinfo = ["src/mach/topology.c"]
+
+[target.'cfg(all(any(arch = "x86", arch = "x86_64", arch = "arm", arch = "aarch64", arch = "riscv32", arch = "riscv64"), os = "freebsd"))'.sources]
+cpuinfo = ["src/freebsd/topology.c"]
+
+# Windows 7 API level (:267-269).
+[target.'cfg(os = "windows")'.profile]
+defines = ["_WIN32_WINNT=0x0601", "_CRT_SECURE_NO_WARNINGS"]
+
+# RegGetValueW (src/arm/windows/init.c:47-100) is in advapi32, which
+# CMake's MSVC default libraries include and Cabin's do not.
+[target.'cfg(all(arch = "aarch64", os = "windows"))'.profile]
+link-libs = ["advapi32"]
+
+# On a supported architecture, threads are public on Linux and FreeBSD, and
+# in Android's libc (:247-251, 307-314).  Android logs through liblog
+# (:276-278).
+[target.'cfg(all(any(arch = "x86", arch = "x86_64", arch = "arm", arch = "aarch64", arch = "riscv32", arch = "riscv64"), any(os = "linux", os = "android")))'.profile]
+defines = ["_GNU_SOURCE=1"]
+
+[target.'cfg(all(any(arch = "x86", arch = "x86_64", arch = "arm", arch = "aarch64", arch = "riscv32", arch = "riscv64"), any(os = "linux", os = "freebsd")))'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(os = "android")'.profile]
+link-libs = ["log"]
