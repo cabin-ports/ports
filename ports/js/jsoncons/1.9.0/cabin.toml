@@ -52,6 +52,7 @@ patches = [
 [package]
 name = "cabin-ports/jsoncons"
 version = "1.9.0"
+license = "BSL-1.0 AND Apache-2.0 AND BSD-3-Clause AND MIT AND Zlib AND LicenseRef-Unicode-ConvertUTF"
 # include/ holds the jsoncons and jsoncons_ext directories upstream installs
 # (CMakeLists.txt:51-53).  LICENSE carries the Boost terms, and the other
 # LICENSE.* files come from the patches above; jsoncons/detail/grisu3.hpp

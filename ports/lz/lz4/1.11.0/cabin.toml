@@ -31,6 +31,7 @@ to = "include/lz4file.h"
 [package]
 name = "cabin-ports/lz4"
 version = "1.11.0"
+license = "BSD-2-Clause"
 # lib/ is the BSD-2-Clause library and carries its LICENSE; the rest of
 # the repository (the CLI, tests, examples) is GPL-2.0-or-later unless a
 # file states otherwise, and is not part of liblz4.

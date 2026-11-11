@@ -14,6 +14,7 @@ patches = ["patches/0001-add-the-encrypt-only-aes-source.patch"]
 [package]
 name = "cabin-ports/libtomcrypt"
 version = "1.18.2"
+license = "WTFPL AND (CC0-1.0 OR OpenSSL OR Apache-2.0)"
 include = ["LICENSE", "patches", "src"]
 
 [dependencies]

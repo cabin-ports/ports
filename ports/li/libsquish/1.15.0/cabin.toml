@@ -17,6 +17,7 @@ to = "include/squish.h"
 [package]
 name = "cabin-ports/libsquish"
 version = "1.15.0"
+license = "MIT"
 include = [
   "LICENSE.txt",
   "include",

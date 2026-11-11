@@ -18,6 +18,7 @@ patches = ["patches/0001-add-the-generated-hpdf-config-h.patch"]
 [package]
 name = "cabin-ports/libharu"
 version = "2.4.6"
+license = "Zlib AND LicenseRef-libharu-HPND-sell AND libtiff"
 include = ["LICENSE", "include", "patches", "src"]
 # Upstream sets no C standard; C11 is the oldest Cabin can lower for
 # MSVC.  The public headers use long long (hpdf_types.h:50-51) and //

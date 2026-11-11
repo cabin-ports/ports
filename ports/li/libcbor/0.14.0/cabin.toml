@@ -17,6 +17,7 @@ patches = [
 [package]
 name = "cabin-ports/libcbor"
 version = "0.14.0"
+license = "MIT AND BSD-3-Clause"
 # MIT (LICENSE.md).  Code from elsewhere:
 # - src/cbor/internal/unicode.c:11-95: Bjoern Hoehrmann's UTF-8 decoder, its
 #   table, and a code point count after his example, Copyright (c) 2008-2009

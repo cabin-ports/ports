@@ -13,6 +13,7 @@ to = "include/lv2.h"
 [package]
 name = "cabin-ports/lv2"
 version = "1.18.10"
+license = "ISC"
 include = ["COPYING", "include"]
 
 # The headers meson installs (meson.build:132, :146-147).  Not provided: the

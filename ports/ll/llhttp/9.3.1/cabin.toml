@@ -7,6 +7,7 @@ strip-prefix = "llhttp-release-v9.3.1"
 [package]
 name = "cabin-ports/llhttp"
 version = "9.3.1"
+license = "MIT"
 include = ["LICENSE", "include", "src"]
 # Upstream's CMake builds C99; C11 is the oldest standard Cabin can lower
 # for MSVC.  llhttp.h includes <stdint.h>, which C++ has from C++11.

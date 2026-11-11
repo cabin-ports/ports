@@ -42,6 +42,7 @@ to = "include/webp/sharpyuv/sharpyuv_csp.h"
 [package]
 name = "cabin-ports/libwebp"
 version = "1.6.0"
+license = "BSD-3-Clause AND FSFULLRWD"
 # COPYING is the BSD-3-Clause license; PATENTS grants the additional
 # patent rights and AUTHORS lists the contributors both refer to.
 include = ["AUTHORS", "COPYING", "PATENTS", "include", "sharpyuv", "src"]

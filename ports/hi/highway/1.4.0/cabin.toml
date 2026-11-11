@@ -10,6 +10,7 @@ strip-prefix = "highway-1.4.0"
 [package]
 name = "cabin-ports/highway"
 version = "1.4.0"
+license = "Apache-2.0 OR BSD-3-Clause"
 include = [
   "LICENSE",
   "hwy/abort.h",

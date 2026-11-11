@@ -9,6 +9,7 @@ name = "cabin-ports/kainjow-mustache"
 # Upstream tags this release v4.1 (mustache.hpp:4); Cabin versions have
 # three components.
 version = "4.1.0"
+license = "BSL-1.0"
 include = ["LICENSE", "mustache.hpp"]
 
 # kainjow/Mustache, a header-only Mustache template renderer (namespace

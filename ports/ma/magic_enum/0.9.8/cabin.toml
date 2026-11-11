@@ -8,6 +8,7 @@ format = "tar.gz"
 [package]
 name = "cabin-ports/magic_enum"
 version = "0.9.8"
+license = "MIT"
 include = ["LICENSE", "include"]
 
 # Upstream's magic_enum INTERFACE target (CMakeLists.txt:45-50):
