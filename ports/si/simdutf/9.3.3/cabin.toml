@@ -10,12 +10,27 @@ strip-prefix = "simdutf-9.3.3"
 # LICENSE-APACHE and LICENSE-MIT, at the user's choice (README.md:3243);
 # include/simdutf/internal/isadetection.h, derived from PyTorch, carries
 # its BSD-3-Clause terms in the file itself (:1-43).  The UTF-8 validators
-# of include/simdutf/scalar/utf8.h credit Google Fuchsia code, "Apache
-# Licensed" (:11, :254).
+# of include/simdutf/scalar/utf8.h (:11-110, :254-380) credit Google
+# Fuchsia code as "Apache Licensed", and validate_with_errors (:117-218)
+# follows the same code uncredited; they are the validator simdjson took
+# from Fuchsia's zircon/system/ulib/fidl/validate_string.cc (Copyright 2020
+# The Fuchsia Authors), which is under Fuchsia's BSD-3-Clause LICENSE, and
+# the release ships no Fuchsia notice.  The patch adds that LICENSE as
+# LICENSE-BSD-3-Clause.fuchsia, the text of Fuchsia 11537de04854 (2020)
+# that the simdjson port ships (SHA-256 03b114f5...845b).
+patches = ["patches/0001-add-bsd-3-clause-license-for-fuchsia-code.patch"]
 [package]
 name = "cabin-ports/simdutf"
 version = "9.3.3"
-include = ["LICENSE-APACHE", "LICENSE-MIT", "include", "src"]
+license = "(Apache-2.0 OR MIT) AND BSD-3-Clause"
+include = [
+  "LICENSE-APACHE",
+  "LICENSE-BSD-3-Clause.fuchsia",
+  "LICENSE-MIT",
+  "include",
+  "patches",
+  "src",
+]
 
 # The sources src/simdutf.cpp includes reach their private headers by paths
 # relative to src/.
