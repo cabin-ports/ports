@@ -7,6 +7,7 @@ strip-prefix = "random-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-random"
 version = "1.92.0"
+license = "BSL-1.0 AND 0BSD"
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"
