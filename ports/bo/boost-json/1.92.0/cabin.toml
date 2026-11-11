@@ -7,6 +7,34 @@ strip-prefix = "json-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-json"
 version = "1.92.0"
+license = "BSL-1.0 AND MIT AND (Apache-2.0 OR BSL-1.0)"
+# `include` leaves out bench/, which nothing here builds: bench/data holds
+# third-party JSON samples (Twitter and GitHub API output and others) with
+# no stated terms.
+include = [
+  ".appveyor.yml",
+  ".codecov.yml",
+  ".drone",
+  ".drone.star",
+  ".github",
+  ".gitignore",
+  "CHANGELOG.adoc",
+  "CMakeLists.txt",
+  "CONTRIBUTING.md",
+  "LICENSE_1_0.txt",
+  "README.adoc",
+  "build.jam",
+  "cmake",
+  "doc",
+  "example",
+  "fuzzing",
+  "include",
+  "index.html",
+  "meta",
+  "pretty_printers",
+  "src",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

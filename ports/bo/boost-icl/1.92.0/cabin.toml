@@ -7,6 +7,24 @@ strip-prefix = "icl-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-icl"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: the doc/boostcon09
+# slides embed a painting reproduction ("klee06") with no stated source or
+# terms.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "build.jam",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

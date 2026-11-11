@@ -7,6 +7,30 @@ strip-prefix = "openmethod-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-openmethod"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: its Asciidoctor
+# stylesheets (zajo-*.css) are labelled MIT but ship no licence text.
+include = [
+  ".clang-format",
+  ".clang-tidy",
+  ".codecov.yml",
+  ".drone",
+  ".drone.jsonnet",
+  ".github",
+  ".gitignore",
+  "CMakeLists.txt",
+  "CODEOWNERS",
+  "LICENSE",
+  "README.adoc",
+  "build.jam",
+  "ce",
+  "clang-llvm",
+  "dev",
+  "include",
+  "index.html",
+  "meta",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

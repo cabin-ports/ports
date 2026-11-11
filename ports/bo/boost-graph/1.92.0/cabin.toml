@@ -7,6 +7,31 @@ strip-prefix = "graph-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-graph"
 version = "1.92.0"
+license = "BSL-1.0 AND HPND-sell-variant AND (BSL-1.0 OR MIT)"
+# `include` leaves out example/ and CODE_OF_CONDUCT.md, which nothing here
+# builds: example/girth.cpp:11 adapts the Stanford GraphBase's GIRTH, whose
+# terms allow changes only in a renamed file marked as not part of the
+# GraphBase, and CODE_OF_CONDUCT.md:74 adapts the Contributor Covenant
+# (CC BY 4.0) without its licence.
+include = [
+  ".clang-format",
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  "CMakeLists.txt",
+  "CONTRIBUTING.md",
+  "README.md",
+  "SECURITY.md",
+  "build.jam",
+  "doc",
+  "include",
+  "index.html",
+  "meta",
+  "src",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-algorithm" = "=1.92.0"

@@ -7,6 +7,28 @@ strip-prefix = "iostreams-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-iostreams"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out test/, which nothing here builds: it vendors the zlib
+# 1.2.11 and bzip2 1.0.8 trees, whose files carry further terms (GPL in
+# zlib's contrib/ada, Info-ZIP in minizip).
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "LICENSE",
+  "README.md",
+  "appveyor.yml",
+  "build.jam",
+  "doc",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "src",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

@@ -7,6 +7,33 @@ strip-prefix = "multiprecision-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-multiprecision"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out performance/, which nothing here builds:
+# performance/linpack-benchmark.cpp is an f2c translation of netlib's LINPACK
+# benchmark (1000d.f), with no stated terms.
+include = [
+  ".circleci",
+  ".clang-format",
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  "CMakeLists.txt",
+  "LICENSE",
+  "README.md",
+  "build.jam",
+  "codecov.yml",
+  "config",
+  "doc",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "plots",
+  "test",
+  "tools",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

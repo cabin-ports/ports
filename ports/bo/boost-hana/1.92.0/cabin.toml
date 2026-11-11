@@ -3,10 +3,45 @@ url = "https://github.com/boostorg/hana/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:93ede285b530027c4b74f0eb0141e021182b2aa20bd0f693bc7e26d807bce699"
 format = "tar.gz"
 strip-prefix = "hana-boost-1.92.0"
+# The patch adds LICENSE.CC-BY-SA-3.0, verbatim from
+# https://creativecommons.org/licenses/by-sa/3.0/legalcode.txt.
+patches = ["patches/0001-add-cc-by-sa-3.0-license-for-credited-code.patch"]
 
 [package]
 name = "cabin-ports/boost-hana"
 version = "1.92.0"
+license = "BSL-1.0 AND CC-BY-SA-3.0"
+# include/boost/hana/detail/algorithm.hpp:31-104 and 126-183 adapt the possible
+# implementations on cppreference.com's std::reverse, std::next_permutation,
+# std::lexicographical_compare, std::equal, std::find, std::iota, std::count,
+# std::accumulate and std::min_element pages
+# (https://en.cppreference.com/w/cpp/algorithm/<name>), by cppreference.com
+# contributors under CC BY-SA 3.0 (LICENSE.CC-BY-SA-3.0); upstream credits
+# them at test/detail/algorithm.cpp:12.  `include` leaves out doc/, which
+# nothing here builds: doc/js/highcharts*.js are under Highcharts' own
+# licence, which does not ship.
+include = [
+  ".appveyor.yml",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "CONTRIBUTING.md",
+  "LICENSE.CC-BY-SA-3.0",
+  "LICENSE.md",
+  "README.md",
+  "benchmark",
+  "build.jam",
+  "cmake",
+  "example",
+  "hana.sublime-project",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-config" = "=1.92.0"
