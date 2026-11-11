@@ -19,6 +19,7 @@ patches = ["patches/0001-add-the-generated-imathconfig-h.patch"]
 [package]
 name = "cabin-ports/imath"
 version = "3.2.3"
+license = "BSD-3-Clause AND Graphics-Gems"
 include = ["LICENSE.md", "patches", "src/Imath"]
 
 # The Imath library as upstream's CMake build compiles it statically

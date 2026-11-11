@@ -12,6 +12,7 @@ strip-prefix = "inja-3.5.0"
 [package]
 name = "cabin-ports/inja"
 version = "3.5.0"
+license = "MIT"
 include = ["LICENSE", "include"]
 
 [dependencies]

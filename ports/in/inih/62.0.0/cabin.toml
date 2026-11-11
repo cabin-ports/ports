@@ -6,6 +6,7 @@ strip-prefix = "inih-r62"
 [package]
 name = "cabin-ports/inih"
 version = "62.0.0"
+license = "BSD-3-Clause"
 
 # inih's C core is a single translation unit: ini.c plus the ini.h
 # header at the archive root. The cpp/ directory's INIReader is a

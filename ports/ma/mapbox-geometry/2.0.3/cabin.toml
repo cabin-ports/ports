@@ -9,6 +9,7 @@ strip-prefix = "geometry.hpp-2.0.3"
 [package]
 name = "cabin-ports/mapbox-geometry"
 version = "2.0.3"
+license = "ISC"
 include = ["LICENSE", "include"]
 
 [dependencies]

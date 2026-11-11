@@ -29,6 +29,7 @@ to = "include/nlohmann/json-schema.hpp"
 [package]
 name = "cabin-ports/json-schema-validator"
 version = "2.4.1"
+license = "MIT AND Apache-2.0 AND CC-BY-SA-2.5 AND LicenseRef-NOTICE.RFC AND (BSD-3-Clause OR AFL-3.0)"
 # LICENSE is MIT, and src/smtp-address-validator.cpp carries its own MIT
 # notice; the draft-07 meta-schema in src/json-schema-draft7.json.cpp has
 # no notice of its own.

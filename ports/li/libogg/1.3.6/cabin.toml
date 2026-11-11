@@ -16,6 +16,7 @@ patches = ["patches/0001-add-config-types-h.patch"]
 [package]
 name = "cabin-ports/libogg"
 version = "1.3.6"
+license = "BSD-3-Clause AND FSFULLRWD"
 include = ["COPYING", "include", "patches", "src"]
 c-standard = "c11"
 # ogg.h's integer types are the C99 exact-width ones (os_types.h).

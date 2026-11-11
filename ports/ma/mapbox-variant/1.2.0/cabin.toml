@@ -9,6 +9,7 @@ strip-prefix = "variant-1.2.0"
 [package]
 name = "cabin-ports/mapbox-variant"
 version = "1.2.0"
+license = "BSD-3-Clause AND BSL-1.0"
 # LICENSE (BSD-3-Clause) covers the library; recursive_wrapper.hpp,
 # derived from Boost's, also carries the Boost Software License in
 # LICENSE_1_0.txt.

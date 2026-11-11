@@ -7,6 +7,7 @@ strip-prefix = "libyaml-0.2.5"
 [package]
 name = "cabin-ports/libyaml"
 version = "0.2.5"
+license = "MIT"
 include = ["License", "include", "src"]
 # Upstream's sources and yaml.h are C89; C11 is the oldest standard
 # Cabin can lower for MSVC.

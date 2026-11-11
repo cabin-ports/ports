@@ -9,6 +9,7 @@ strip-prefix = "jsoncpp-1.9.8"
 [package]
 name = "cabin-ports/jsoncpp"
 version = "1.9.8"
+license = "MIT"
 include = ["LICENSE", "include", "src/lib_json"]
 
 # The static library upstream's CMake builds (src/lib_json/CMakeLists.txt:

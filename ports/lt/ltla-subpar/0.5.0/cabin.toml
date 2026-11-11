@@ -18,6 +18,7 @@ patches = ["patches/0001-include-exception.patch"]
 [package]
 name = "cabin-ports/ltla-subpar"
 version = "0.5.0"
+license = "MIT"
 include = ["LICENSE", "include", "patches"]
 
 # subpar's headers include "sanisizer/sanisizer.hpp" (range.hpp:13), and

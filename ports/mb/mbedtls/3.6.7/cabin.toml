@@ -10,6 +10,7 @@ strip-prefix = "mbedtls-3.6.7"
 [package]
 name = "cabin-ports/mbedtls"
 version = "3.6.7"
+license = "Apache-2.0 OR GPL-2.0-or-later"
 include = ["LICENSE", "include", "library"]
 # Upstream compiles C99; Cabin has no C99 flag for MSVC, so the sources
 # compile as C11, and the headers stay C99.  C++ consumers need C++11 for a
