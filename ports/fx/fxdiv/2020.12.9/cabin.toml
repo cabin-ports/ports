@@ -1,0 +1,33 @@
+[package.upstream]
+# Upstream tags no releases and declares no version; this is the commit vcpkg
+# pins, master's head, versioned YYYY.M.D by its commit date (2020-12-09).
+url = "https://github.com/Maratyszcza/FXdiv/archive/63058eff77e11aa15bf531df5dd34395ec3017c8.tar.gz"
+checksum = "sha256:ec74d882a0a47cfd9c0f95bc4fae9901a4ade802a96a3b76e02671bb7340a4c5"
+format = "tar.gz"
+strip-prefix = "FXdiv-63058eff77e11aa15bf531df5dd34395ec3017c8"
+# Patch 0001 adds LICENSE.hackers-delight, the terms of Henry S. Warren, Jr.'s
+# Hacker's Delight website for its code: include/fxdiv.h:281-316 adapts its
+# divlu2, and :139-165 and :230-263 its nlz2.  The terms are those of the
+# Wayback Machine's snapshot 20140313003119 (2014-03-13 00:31:19 UTC) of
+# http://www.hackersdelight.org/permissions.htm, whose raw page (id_) has
+# sha256 8104c8d6123735b33663df91dcb6a6eab5630b5ebf7ea874be342b11c3d07d8f.
+patches = ["patches/0001-add-hackers-delight-terms-for-adapted-code.patch"]
+
+[package]
+name = "cabin-ports/fxdiv"
+version = "2020.12.9"
+# Licence: MIT AND LicenseRef-Hackers-Delight.
+include = ["LICENSE", "LICENSE.hackers-delight", "include", "patches"]
+
+# The INTERFACE target fxdiv (CMakeLists.txt:45-51) with its default
+# FXDIV_USE_INLINE_ASSEMBLY=0.  C needs C99 (<stdint.h>, inline, mixed
+# declarations); C++ needs C++11, the standard upstream's tests build with
+# (:66).  Not ported: the option's x86 inline assembly, which gives the same
+# results, the tests and the benchmarks.  The Bazel, confu and Android builds
+# export the same header.
+[target.fxdiv]
+type = "header-only"
+include-dirs = ["include"]
+interface-defines = ["FXDIV_USE_INLINE_ASSEMBLY=0"]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
