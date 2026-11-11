@@ -8,6 +8,10 @@ strip-prefix = "pugixml-1.16"
 [package]
 name = "cabin-ports/pugixml"
 version = "1.16.0"
+license = "MIT"
+# docs/samples holds copies of W3C XML Conformance Test Suite files
+# without the W3C notice, so only the library and its license ship.
+include = ["LICENSE.md", "readme.txt", "src"]
 
 # The static library upstream's CMake builds by default: src/pugixml.cpp
 # with no option defines, so XPath, the STL interface, and exceptions
