@@ -1,0 +1,43 @@
+[package.upstream]
+# Upstream tags no releases.  This is the commit vcpkg pins (2025-05-27, its
+# version-date), which changes only api/egl.xml; the version is the date the
+# packaged headers declare, 20240909 (EGL_EGLEXT_VERSION,
+# api/EGL/eglext.h:22), as YYYY.M.D.  EGL 1.5 is the API version, not a
+# release.
+url = "https://github.com/KhronosGroup/EGL-Registry/archive/3ae2b7c48690d2ce13cc6db3db02dfc0572be65e.tar.gz"
+checksum = "sha256:00f6d5656d8a075ee72ec2ccbe9b803d29bb56695b05622ac4cde95d760a1528"
+format = "tar.gz"
+strip-prefix = "EGL-Registry-3ae2b7c48690d2ce13cc6db3db02dfc0572be65e"
+# The repository has no licence file.  The patch adds LICENSE.Apache-2.0,
+# https://www.apache.org/licenses/LICENSE-2.0.txt (sha256
+# cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30).
+patches = ["patches/0001-add-the-apache-2.0-license.patch"]
+
+[package]
+name = "cabin-ports/egl-registry"
+version = "2024.9.9"
+# Licence: Apache-2.0 AND LicenseRef-khrplatform.  EGL/egl.h, eglext.h and
+# eglplatform.h are Apache-2.0 (their SPDX lines; LICENSE.Apache-2.0).
+# KHR/khrplatform.h carries its own MIT-style grant for "the Materials" in its
+# header comment (:4-24), which ships with it.  No SPDX id matches: the grant
+# says "this software and/or associated documentation files", which MIT's
+# template does not accept, and lacks MIT-Khronos-old's further paragraph.
+include = ["LICENSE.Apache-2.0", "api/EGL", "api/KHR", "patches"]
+
+# The two header directories vcpkg installs.  Not ported: api/egl.xml, the
+# registry data that generators read, which vcpkg installs under
+# share/opengl.  Headers only: a consumer that calls EGL links a libEGL from
+# the system or ANGLE, which this package does not provide.  eglplatform.h
+# includes <windows.h> on Windows, and X11's headers when the consumer
+# defines USE_X11.  With EGL_NO_PLATFORM_SPECIFIC_TYPES, MSVC C++ gets no
+# intptr_t (egl.h:268), so such a consumer includes <stdint.h> first.
+# KHR/khrplatform.h is the master copy (khrplatform.h:28-29): vcpkg's
+# opengl-registry depends on egl-registry for it, while ANGLE and glad bundle
+# their own copies at the same KHR/ include path.
+[target.egl-registry]
+type = "header-only"
+include-dirs = ["api"]
+# egl.h's EGL 1.5 section uses intptr_t (EGLAttrib, :268) and an unsigned
+# long long literal (EGL_FOREVER, :293).
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
