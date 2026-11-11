@@ -7,6 +7,7 @@ strip-prefix = "fiber-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-fiber"
 version = "1.92.0"
+license = "BSL-1.0"
 
 [dependencies]
 "cabin-ports/boost-algorithm" = "=1.92.0"
