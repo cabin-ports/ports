@@ -16,8 +16,9 @@ include = ["LICENSE.md", "include"]
 # and decompress.hpp under DEBUG, use <cstdint> types without including it;
 # and a zlib.h included before them needs ZLIB_CONST, which config.hpp
 # defines.  decompress() returns a truncated stream's partial output without
-# an error, and on a zlib stream that asks for a preset dictionary builds
-# its exception message from a null pointer.
+# an error, and can crash on untrusted input: a zlib stream that asks for a
+# preset dictionary makes it build its exception message from a null
+# pointer.
 [target.gzip-hpp]
 type = "header-only"
 include-dirs = ["include"]
