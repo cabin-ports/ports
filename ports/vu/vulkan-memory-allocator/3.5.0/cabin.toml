@@ -7,6 +7,7 @@ strip-prefix = "VulkanMemoryAllocator-3.5.0"
 [package]
 name = "cabin-ports/vulkan-memory-allocator"
 version = "3.5.0"
+license = "MIT"
 # Licence: MIT (LICENSE.txt; the same notice heads vk_mem_alloc.h).
 include = ["LICENSE.txt", "include"]
 

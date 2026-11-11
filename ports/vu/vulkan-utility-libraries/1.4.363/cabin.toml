@@ -10,6 +10,7 @@ strip-prefix = "Vulkan-Utility-Libraries-vulkan-sdk-1.4.363.0"
 [package]
 name = "cabin-ports/vulkan-utility-libraries"
 version = "1.4.363"
+license = "Apache-2.0"
 # Apache-2.0: LICENSE.md names it and LICENSES/Apache-2.0.txt holds its
 # text.  LICENSES/CC-BY-4.0.txt covers only CONTRIBUTING.md, which does not
 # ship.
