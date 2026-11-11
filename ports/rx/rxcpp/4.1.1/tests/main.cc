@@ -120,5 +120,6 @@ int main() {
     if (xs.subscriptions() != rxcpp::util::to_vector({on.subscribe(200, 300)}))
       return fail("debounce subscription");
   }
+  std::puts("rxcpp consumer ok");
   return 0;
 }
