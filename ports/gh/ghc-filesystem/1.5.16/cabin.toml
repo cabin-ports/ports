@@ -7,6 +7,7 @@ strip-prefix = "filesystem-1.5.16"
 [package]
 name = "cabin-ports/ghc-filesystem"
 version = "1.5.16"
+license = "MIT"
 include = ["LICENSE", "include"]
 
 # The target's one interface option, /utf-8 for MSVC, is a flag Cabin

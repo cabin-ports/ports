@@ -22,6 +22,7 @@ to = "include/zstd_errors.h"
 [package]
 name = "cabin-ports/zstd"
 version = "1.5.7"
+license = "(BSD-3-Clause OR GPL-2.0-only) AND BSD-2-Clause AND MIT"
 # zstd is dual-licensed: BSD (LICENSE) or GPLv2 (COPYING), at the
 # user's choice.
 include = ["COPYING", "LICENSE", "include", "lib"]

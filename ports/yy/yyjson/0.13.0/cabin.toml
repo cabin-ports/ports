@@ -3,11 +3,19 @@ url = "https://github.com/ibireme/yyjson/archive/refs/tags/0.13.0.tar.gz"
 checksum = "sha256:34e0f62a2bc11ab20d601e8ca1cc2b2079503aa45119a19133d89d19b94a0fae"
 format = "tar.gz"
 strip-prefix = "yyjson-0.13.0"
+# src/yyjson.c's slow path for reading doubles (:4343-4470) is translated
+# from google/double-conversion (:4348-4349), Copyright 2006-2011 the V8
+# project authors, BSD-3-Clause, whose license requires its notice with
+# every source copy; the release ships only yyjson's MIT LICENSE.  The
+# patch adds that notice, verbatim from double-conversion's LICENSE at
+# v3.3.1 (SHA-256 4af93c12...97ca), as LICENSE.double-conversion.
+patches = ["patches/0001-add-bsd-3-clause-license-for-double-conversion-code.patch"]
 
 [package]
 name = "cabin-ports/yyjson"
 version = "0.13.0"
-include = ["LICENSE", "src"]
+license = "MIT AND BSD-3-Clause"
+include = ["LICENSE", "LICENSE.double-conversion", "patches", "src"]
 
 # Upstream's library (CMakeLists.txt:56-57): src/yyjson.c, with src/ as
 # the public include directory.  The default build enables every

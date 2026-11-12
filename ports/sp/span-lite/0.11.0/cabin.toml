@@ -21,6 +21,7 @@ patches = [
 [package]
 name = "cabin-ports/span-lite"
 version = "0.11.0"
+license = "BSL-1.0"
 include = ["LICENSE.txt", "include", "patches"]
 
 # Header-only, as upstream's CMake interface target nonstd::span-lite:

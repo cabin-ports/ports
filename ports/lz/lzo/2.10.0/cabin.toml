@@ -13,6 +13,7 @@ patches = ["patches/0001-add-zlib-license-for-checksum-code.patch"]
 [package]
 name = "cabin-ports/lzo"
 version = "2.10.0"
+license = "GPL-2.0-or-later AND Zlib"
 # COPYING is the GPL v2, which every source file offers as version 2 or
 # later; a binary linking lzo is a work based on it under those terms.
 include = ["COPYING", "LICENSE.zlib", "include", "patches", "src"]

@@ -29,6 +29,7 @@ patches = [
 [package]
 name = "cabin-ports/xtl"
 version = "0.8.2"
+license = "BSD-3-Clause AND BSL-1.0 AND MIT AND CC-BY-SA-3.0"
 # LICENSE is xtl's BSD-3-Clause license; LICENSE_1_0.txt, LICENSE.Loki and
 # LICENSE.CC-BY-SA-3.0 come from the patches above.  These blocks are
 # modified from the Loki library, Copyright (c) 2001 by Andrei Alexandrescu,

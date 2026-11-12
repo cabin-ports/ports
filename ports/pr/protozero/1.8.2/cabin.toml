@@ -8,6 +8,7 @@ strip-prefix = "protozero-1.8.2"
 [package]
 name = "cabin-ports/protozero"
 version = "1.8.2"
+license = "BSD-2-Clause AND Apache-2.0"
 # The headers CMake installs (CMakeLists.txt:159), the BSD-2-Clause
 # license, and the Apache-2.0 license of the folly varint decoder
 # include/protozero/varint.hpp:33 adapts.

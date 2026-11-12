@@ -11,6 +11,7 @@ strip-prefix = "sanisizer-0.2.2"
 [package]
 name = "cabin-ports/ltla-sanisizer"
 version = "0.2.2"
+license = "MIT"
 include = ["LICENSE", "include"]
 
 # Header-only, as upstream's CMake interface target ltla::sanisizer

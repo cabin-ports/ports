@@ -7,6 +7,29 @@ strip-prefix = "geometry-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-geometry"
 version = "1.92.0"
+license = "BSL-1.0 AND MIT"
+# `include` leaves out doc/, which nothing here builds: its logo font
+# doc/other/logo/DENMARK.TTF (Altsys Fontographer, 1992) has no notice or
+# stated terms.
+include = [
+  ".circleci",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  "CITATION.cff",
+  "CMakeLists.txt",
+  "CONTRIBUTING.md",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "build.jam",
+  "example",
+  "include",
+  "index",
+  "index.html",
+  "meta",
+  "sublibs",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-algorithm" = "=1.92.0"

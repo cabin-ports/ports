@@ -1,0 +1,174 @@
+--- /dev/null
++++ b/wolfssl/wolfcrypt/user_settings.h
+@@ -0,0 +1,171 @@
++/* The configuration a default ./configure of wolfSSL 5.9.4 writes to
++   wolfssl/options.h (configure.ac:14087-14171), with the config.h macros the
++   library reads, for the build in cabin.toml.  settings.h includes this file
++   whenever WOLFSSL_USER_SETTINGS is defined, in the library and in its
++   consumers, which must see the same macros.  Where configure probes the
++   host, the compiler's predefined macros choose; numbers are configure.ac
++   lines. */
++#ifndef WOLFSSL_CABIN_USER_SETTINGS_H
++#define WOLFSSL_CABIN_USER_SETTINGS_H
++
++/* Header, type and function probes (224-293, 13455, 13585). */
++#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
++  #define WORDS_BIGENDIAN 1
++#endif
++#define HAVE_LIMITS_H 1
++#define HAVE_ERRNO_H 1
++#define WOLFSSL_HAVE_ASSERT_H
++#ifndef _MSC_VER
++  #define HAVE_SYS_TIME_H 1
++  #define HAVE_GETPID 1
++#endif
++#ifndef _WIN32
++  #define HAVE_SYS_UN_H 1
++  #define HAVE_GMTIME_R 1
++  #define HAVE_GETADDRINFO 1
++  #define HAVE_NETDB_H 1
++  #define HAVE_SYS_IOCTL_H 1
++  #define HAVE_STRINGS_H 1
++#endif
++#ifdef __GNUC__
++  #define HAVE_C___ATOMIC 1
++  #define WOLFSSL_HAVE_ATOMIC_H
++#endif
++#ifdef __SIZEOF_INT128__
++  #define HAVE___UINT128_T 1
++#endif
++/* getrandom and accept4 are in glibc and musl, and in FreeBSD since 12 and
++   10; Android has them from API levels 28 and 21. */
++#if (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__)
++  #define HAVE_GETRANDOM 1
++  #define HAVE_ACCEPT4 1
++#elif defined(__ANDROID__)
++  #if __ANDROID_API__ >= 28
++    #define HAVE_GETRANDOM 1
++  #endif
++  #if __ANDROID_API__ >= 21
++    #define HAVE_ACCEPT4 1
++  #endif
++#endif
++
++/* SP math declares variable-length arrays from C99 on (sp_int.h:872-876);
++   C11 makes them optional and MSVC lacks them, unlike configure's MinGW. */
++#ifdef __STDC_NO_VLA__
++  #define WOLFSSL_SP_NO_DYN_STACK
++#endif
++
++/* Thread-local storage (322-330) and the error queue it enables (3331-3351). */
++#define HAVE_THREAD_LS
++#define ERROR_QUEUE_PER_THREAD
++
++/* The default options, in configure's order. */
++#define NO_DO178
++#define WOLFSSL_ASN_TEMPLATE
++#define TFM_TIMING_RESISTANT
++#define ECC_TIMING_RESISTANT
++#define WC_RSA_BLINDING
++#define WOLFSSL_ARMASM_NO_HW_CRYPTO
++#define WOLFSSL_USE_ALIGN
++#define WOLFSSL_SHA512
++#define WOLFSSL_SHA384
++#define HAVE_HKDF
++#define NO_DSA
++#define HAVE_ECC
++#define ECC_SHAMIR
++#define ECC_MIN_KEY_SZ 224
++#define NO_OLD_TLS
++#define WC_RSA_PSS
++#define WOLFSSL_PSS_LONG_SALT
++#define WOLFSSL_SHA3
++#define WOLFSSL_SHAKE128
++#define WOLFSSL_SHAKE256
++#define WOLFSSL_HAVE_MLKEM
++#define WOLFSSL_TLS_NO_MLKEM_STANDALONE
++#define WOLFSSL_PQC_HYBRIDS
++#define HAVE_POLY1305
++#define HAVE_CHACHA
++#define HAVE_HASHDRBG
++#define WOLFSSL_DRBG_SHA512
++#define HAVE_TLS_EXTENSIONS
++#define HAVE_SUPPORTED_CURVES
++#define HAVE_FFDHE_2048
++#define WOLFSSL_TLS13
++#define HAVE_EXTENDED_MASTER
++#define NO_RC4
++#define HAVE_ENCRYPT_THEN_MAC
++#define NO_PSK
++#define NO_MD4
++#define WOLFSSL_SP_MATH_ALL
++#define WC_NO_ASYNC_THREADING
++#define HAVE_DH_DEFAULT_PARAMS
++#define WOLFSSL_SYS_CA_CERTS
++#define NO_MD5
++#define NO_DES3
++#define NO_DES3_TLS_SUITES
++#define GCM_TABLE_4BIT
++#define HAVE_AESGCM
++#define HAVE_SERVER_RENEGOTIATION_INFO
++#define HAVE_DH
++#define HAVE_WC_INTROSPECTION
++
++/* What configure adds for the host CPU: the 64-bit build flags (1226-1238),
++   SP math's inline assembly (11541-11590), and SHA-224, SNI and Base64
++   encoding, which it enables only on x86_64 and aarch64 (5433-5444,
++   9241-9267) and x86_64 (6905-6918).  MSVC on Arm64 has no GCC-style inline
++   assembly, so it gets aarch64's build macro and features without SP math's
++   assembly. */
++#if defined(__x86_64__) || defined(_M_X64)
++  #define WOLFSSL_X86_64_BUILD
++  #define WOLFSSL_SP_X86_64
++  #define WOLFSSL_SHA224
++  #define WOLFSSL_BASE64_ENCODE
++  #define HAVE_SNI
++#elif defined(__aarch64__) || defined(_M_ARM64)
++  #ifdef __aarch64__
++    #define WOLFSSL_SP_ARM64
++  #endif
++  #define WOLFSSL_AARCH64_BUILD
++  #define WOLFSSL_SHA224
++  #define HAVE_SNI
++#elif defined(__i386__) || defined(_M_IX86)
++  #define WOLFSSL_X86_BUILD
++#elif defined(__arm__)
++  #define WOLFSSL_SP_ARM32
++#elif defined(__powerpc64__)
++  #define WOLFSSL_SP_PPC64
++#elif defined(__powerpc__)
++  #define WOLFSSL_SP_PPC
++#elif defined(__mips64)
++  #define WOLFSSL_SP_MIPS64
++#elif defined(__mips__)
++  #define WOLFSSL_SP_MIPS
++#elif defined(__riscv) && __riscv_xlen == 64
++  #define WOLFSSL_SP_RISCV64
++#elif defined(__riscv) && __riscv_xlen == 32
++  #define WOLFSSL_SP_RISCV32
++#elif defined(__s390x__)
++  #define WOLFSSL_SP_S390X
++#endif
++
++/* What configure adds for the host system: the ASN.1 printing API on Linux,
++   Apple systems and FreeBSD (6748-6755); the RNG's fork handlers, whose link
++   test (13489-13579) passes on Linux and FreeBSD but fails on Apple systems
++   and on Android, which has no thread cancellation; and which Security
++   framework API loads the system's CA certificates on Apple systems
++   (12561-12587). */
++#if defined(__linux__) || defined(__APPLE__) || defined(__FreeBSD__)
++  #define WOLFSSL_ASN_PRINT
++#endif
++#if (defined(__linux__) && !defined(__ANDROID__)) || defined(__FreeBSD__)
++  #define WC_RNG_AUTOFORK
++#endif
++#ifdef __APPLE__
++  #include <TargetConditionals.h>
++  #if TARGET_OS_OSX
++    #define HAVE_SECURITY_SECTRUSTSETTINGS_H 1
++  #else
++    #define WOLFSSL_APPLE_NATIVE_CERT_VALIDATION
++  #endif
++#endif
++
++#endif /* WOLFSSL_CABIN_USER_SETTINGS_H */

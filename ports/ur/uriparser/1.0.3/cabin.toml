@@ -21,6 +21,7 @@ patches = ["patches/0001-add-the-generated-uriconfig-h.patch"]
 [package]
 name = "cabin-ports/uriparser"
 version = "1.0.3"
+license = "BSD-3-Clause"
 # COPYING.BSD-3-Clause covers the library; the LGPL-2.1 and Apache-2.0
 # texts cover test/ and fuzz/, which are not shipped (README.md:14-20).
 include = ["COPYING.BSD-3-Clause", "include", "patches", "src"]

@@ -18,6 +18,7 @@ patches = [
 [package]
 name = "cabin-ports/robin-hood-hashing"
 version = "3.11.5"
+license = "MIT AND CC-BY-SA-3.0"
 # LICENSE carries robin_hood.h's MIT terms.  ROBIN_HOOD_IS_TRIVIALLY_COPYABLE
 # (src/include/robin_hood.h:207-213 as released, :208-214 after patch
 # 0001) is modified from Stack Overflow answer

@@ -15,6 +15,7 @@ patches = ["patches/0001-add-the-bits-to-chars-licence.patch"]
 [package]
 name = "cabin-ports/plf-tools"
 version = "1.0.8"
+license = "Zlib AND LicenseRef-CFG-1.02"
 # Licence: Zlib AND LicenseRef-CFG-1.02.  LICENSE.md (Zlib) covers all but
 # plf_tools.h:577-621, bits_to_chars, which is by Michiel van Slobbe,
 # contributed as plf_bitsets PR #9 (merged as 4080dd9f3d) under that

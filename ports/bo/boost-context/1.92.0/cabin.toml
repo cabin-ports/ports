@@ -3,10 +3,41 @@ url = "https://github.com/boostorg/context/archive/refs/tags/boost-1.92.0.tar.gz
 checksum = "sha256:d18e24462d8414c6f98abd6bce877dad94b8d50afa230693ce295289a3519597"
 format = "tar.gz"
 strip-prefix = "context-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-context"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` lists the tree without cmake/, the ASM_ARMASM language modules
+# for upstream's CMake build, which Cabin does not use:
+# CMakeTestASM_ARMASMCompiler.cmake carries Kitware's BSD-3-Clause notice but
+# not the licence text.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "boost-context-features.jam",
+  "build.jam",
+  "doc",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+  "performance",
+  "src",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

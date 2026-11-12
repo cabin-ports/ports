@@ -23,6 +23,7 @@ to = "jconfig.h"
 [package]
 name = "cabin-ports/libjpeg"
 version = "9.6.0"
+license = "IJG"
 include = [
   "README",
   "jconfig.h",

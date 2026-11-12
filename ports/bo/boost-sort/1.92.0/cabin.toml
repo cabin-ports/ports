@@ -3,14 +3,41 @@ url = "https://github.com/boostorg/sort/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:b25005996555c9ed7b6c2bb0cdd42bd0fbed4b73ae59a6bf2c4527d7b89f6578"
 format = "tar.gz"
 strip-prefix = "sort-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
 patches = [
   "patches/0001-include-cstdint.patch",
   "patches/0002-include-string.patch",
+  "patches/0003-add-the-boost-software-license-text.patch",
 ]
 
 [package]
 name = "cabin-ports/boost-sort"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: its Doxygen output
+# bundles jQuery (MIT or GPL-2.0) without a licence text, and doc/papers holds
+# the 2002 PDPTA spreadsort paper, whose publisher's terms are unknown.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".vscode",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "benchmark",
+  "build.jam",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+  "test",
+  "tune.pl",
+]
 
 [dependencies]
 "cabin-ports/boost-config" = "=1.92.0"

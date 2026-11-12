@@ -7,6 +7,7 @@ strip-prefix = "GSL-5.0.1"
 [package]
 name = "cabin-ports/ms-gsl"
 version = "5.0.1"
+license = "MIT"
 # include/gsl is what upstream installs (CMakeLists.txt); include/
 # itself also holds a CMakeLists.txt.
 include = ["LICENSE", "ThirdPartyNotices.txt", "include/gsl"]

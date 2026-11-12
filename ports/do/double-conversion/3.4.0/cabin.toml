@@ -7,6 +7,7 @@ strip-prefix = "double-conversion-3.4.0"
 [package]
 name = "cabin-ports/double-conversion"
 version = "3.4.0"
+license = "BSD-3-Clause"
 include = ["LICENSE", "double-conversion"]
 
 # The static library upstream's CMake builds by default: its eight

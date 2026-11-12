@@ -24,6 +24,7 @@ to = "sigc++config.h"
 [package]
 name = "cabin-ports/libsigcpp"
 version = "3.8.1"
+license = "LGPL-3.0-or-later"
 include = ["COPYING", "COPYING.GPL", "patches", "sigc++", "sigc++config.h"]
 cxx-standard = "c++17"
 

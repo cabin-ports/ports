@@ -14,6 +14,7 @@ patches = ["patches/0001-add-cc-by-sa-3.0-license-for-stack-overflow-code.patch"
 [package]
 name = "cabin-ports/neko-function"
 version = "1.0.12"
+license = "(MIT OR Apache-2.0) AND CC-BY-SA-3.0"
 # (MIT OR Apache-2.0) AND CC-BY-SA-3.0.  LICENSE carries both texts of the
 # MIT OR Apache-2.0 choice.  include/neko/function/utilities.hpp:602-665
 # (base64Chars, base64Encode, base64Decode) is modified (identifiers

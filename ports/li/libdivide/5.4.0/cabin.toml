@@ -14,6 +14,7 @@ to = "include/libdivide.h"
 [package]
 name = "cabin-ports/libdivide"
 version = "5.4.0"
+license = "Zlib OR BSL-1.0"
 include = ["LICENSE.txt", "include"]
 
 # The INTERFACE target libdivide::libdivide (CMakeLists.txt:312-323).  It

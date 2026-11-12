@@ -3,10 +3,37 @@ url = "https://github.com/boostorg/property_tree/archive/refs/tags/boost-1.92.0.
 checksum = "sha256:54b52227bc6e18be982bb997de6732d85ebe3c9ceb7017fdc443c907abcadd17"
 format = "tar.gz"
 strip-prefix = "property_tree-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-property-tree"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out test/, which nothing here builds:
+# test/xml_parser_test_data.hpp embeds the W3C XLink working draft and
+# Netscape's RSS 0.91 DTD, with no stated terms.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "appveyor.yml",
+  "breaking_changes.txt",
+  "build.jam",
+  "cmake",
+  "doc",
+  "examples",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+]
 
 [dependencies]
 "cabin-ports/boost-any" = "=1.92.0"

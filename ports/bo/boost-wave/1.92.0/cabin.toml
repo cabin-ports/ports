@@ -3,10 +3,40 @@ url = "https://github.com/boostorg/wave/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:2d93e784bf4cb3d2357d4ec26c86a4f13372ea1ee08c0e0ee22e65ad3f631319"
 format = "tar.gz"
 strip-prefix = "wave-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-wave"
 version = "1.92.0"
+license = "BSL-1.0 AND BSD-2-Clause"
+# 126 files in test/testwave/testfiles carry Kiyoshi Matsui's mcpp notice.
+# `include` leaves out doc/, which nothing here builds: doc/theme/uc.gif is clip
+# art of unknown origin.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "ChangeLog",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "appveyor.yml",
+  "build.jam",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+  "samples",
+  "src",
+  "test",
+  "tool",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

@@ -15,6 +15,7 @@ strip-prefix = "flatbuffers-25.12.19-2026-02-06-03fffb2"
 [package]
 name = "cabin-ports/flatbuffers"
 version = "25.12.19"
+license = "Apache-2.0"
 include = [
   "LICENSE",
   "include/flatbuffers",

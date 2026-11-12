@@ -8,15 +8,38 @@ strip-prefix = "parallel-hashmap-2.0.0"
 # Software License 1.0 (phmap_utils.h:294-296, 317-319), whose terms must
 # accompany every source copy; the release ships only the Apache-2.0
 # LICENSE.  The patch adds the license text, verbatim from
-# https://www.boost.org/LICENSE_1_0.txt.
-patches = ["patches/0001-add-bsl-1.0-license-for-hash-combiners.patch"]
+# https://www.boost.org/LICENSE_1_0.txt.  meminfo.h carries Stack Overflow
+# code, listed under [package], whose CC BY-SA 3.0 requires a copy of that
+# license or its URI with every copy (sections 4(a) and 4(b)); patch 0002
+# adds the license text, verbatim from
+# https://creativecommons.org/licenses/by-sa/3.0/legalcode.txt (SHA-256
+# 3f941b3b...f72f), as LICENSE.CC-BY-SA-3.0.
+patches = [
+  "patches/0001-add-bsl-1.0-license-for-hash-combiners.patch",
+  "patches/0002-add-cc-by-sa-3.0-license-for-meminfo-code.patch",
+]
 
 [package]
 name = "cabin-ports/parallel-hashmap"
 version = "2.0.0"
+# The Windows and Linux branches of parallel_hashmap/meminfo.h's
+# GetSystemMemory, GetTotalMemoryUsed, GetProcessMemoryUsed and
+# GetPhysicalMemory (:38-50, :77-90, :119-153, :168-180) are modified from
+# the answer to "How to determine CPU and memory consumption from inside a
+# process?", https://stackoverflow.com/a/64166 (revision 7, 2012), by
+# Lanzelot (https://stackoverflow.com/users/7381), CC BY-SA 3.0; that code
+# is distributed under CC BY-SA 3.0 (LICENSE.CC-BY-SA-3.0), the rest of the
+# package under the licenses above.
+license = "Apache-2.0 AND BSL-1.0 AND CC-BY-SA-3.0"
 # parallel_hashmap/ is what upstream's CMake installs, whole (CMakeLists.txt:
 # 73-75), with the licenses above; upstream ships no NOTICE file.
-include = ["LICENSE", "LICENSE_1_0.txt", "parallel_hashmap", "patches"]
+include = [
+  "LICENSE",
+  "LICENSE.CC-BY-SA-3.0",
+  "LICENSE_1_0.txt",
+  "parallel_hashmap",
+  "patches",
+]
 
 # Upstream's header-only phmap target (CMakeLists.txt:41, 60), whose include
 # directory is the source root (:64-67): consumers include

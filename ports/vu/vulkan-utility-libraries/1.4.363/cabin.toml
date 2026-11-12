@@ -1,0 +1,103 @@
+[package.upstream]
+url = "https://github.com/KhronosGroup/Vulkan-Utility-Libraries/archive/refs/tags/vulkan-sdk-1.4.363.0.tar.gz"
+checksum = "sha256:a5308b62e3bac84cf45c4d7dd5b830aabace4847fdb71f4fd7db3be034c2bebf"
+format = "tar.gz"
+strip-prefix = "Vulkan-Utility-Libraries-vulkan-sdk-1.4.363.0"
+
+# The Vulkan SDK 1.4.363.0 tag.  The version is upstream's project version
+# (CMakeLists.txt:9), the Vulkan-Headers release its generated sources come
+# from and that it requires (:27).
+[package]
+name = "cabin-ports/vulkan-utility-libraries"
+version = "1.4.363"
+license = "Apache-2.0"
+# Apache-2.0: LICENSE.md names it and LICENSES/Apache-2.0.txt holds its
+# text.  LICENSES/CC-BY-4.0.txt covers only CONTRIBUTING.md, which does not
+# ship.
+include = ["LICENSE.md", "LICENSES/Apache-2.0.txt", "include", "src"]
+cxx-standard = "c++17"
+# vk_layer_settings.h, vk_dispatch_table.h, vk_format_utils.h and
+# vk_enum_string_helper.h are C headers, tested as C99
+# (tests/integration/CMakeLists.txt:8-20); vk_small_containers.hpp,
+# vk_sparse_range_map.hpp and vk_concurrent_unordered_map.hpp need C++17.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++17"
+
+[dependencies]
+"cabin-ports/vulkan-headers" = "=1.4.363"
+
+# Upstream's two static libraries, Vulkan::LayerSettings and
+# Vulkan::SafeStruct (src/layer/CMakeLists.txt, src/vulkan/CMakeLists.txt).
+# Both export include/ (include/CMakeLists.txt), which also holds the
+# header-only Vulkan::UtilityHeaders, and link VulkanCompilerConfiguration
+# privately (src/CMakeLists.txt): its defines, here and in the profiles
+# below, reach only the libraries' own sources.  A consumer sees the
+# beta-extension and platform safe structs only if it defines those macros
+# itself, and the platform ones have definitions only for the platform the
+# library is built for, as upstream.  Its warning options are diagnostics
+# only.  Not reproduced: MSVC's /permissive- (src/CMakeLists.txt:34-35),
+# position-independent code and the hidden visibility presets
+# (CMakeLists.txt:16-19; Cabin drops a dependency's raw compiler flags), so
+# the archives are not built for linking into a shared object.  The header-only
+# utility headers come with both archives, so a C program using only them
+# still links the C++ libraries.  As released, vk_small_containers.hpp uses
+# std::numeric_limits (:39) without including <limits>, so a consumer includes
+# <limits> first, as upstream's tests/small_containers.cpp:10-12 does, and
+# vk_format_utils.h defines its format table in the header (:372), with
+# external linkage in C, so a C program includes it from one translation unit
+# only.  Not ported: the BUILD_SHARED_LIBS mode
+# (src/layer/CMakeLists.txt:9-14, src/vulkan/CMakeLists.txt:9-14), the
+# Vulkan::CompilerConfiguration export (CMakeLists.txt:79-81), the code
+# generator (scripts/) and the tests.
+[target.VulkanLayerSettings]
+type = "library"
+sources = [
+  "src/layer/layer_settings_manager.cpp",
+  "src/layer/layer_settings_util.cpp",
+  "src/layer/vk_layer_settings.cpp",
+  "src/layer/vk_layer_settings_helper.cpp",
+]
+include-dirs = ["include"]
+defines = ["VK_ENABLE_BETA_EXTENSIONS"]
+links = "VulkanLayerSettings"
+deps = [{ name = "cabin-ports/vulkan-headers", public = true }]
+
+[target.VulkanSafeStruct]
+type = "library"
+sources = [
+  "src/vulkan/vk_safe_struct_core.cpp",
+  "src/vulkan/vk_safe_struct_ext.cpp",
+  "src/vulkan/vk_safe_struct_khr.cpp",
+  "src/vulkan/vk_safe_struct_manual.cpp",
+  "src/vulkan/vk_safe_struct_utils.cpp",
+  "src/vulkan/vk_safe_struct_vendor.cpp",
+]
+include-dirs = ["include"]
+defines = ["VK_ENABLE_BETA_EXTENSIONS"]
+links = "VulkanSafeStruct"
+deps = [{ name = "cabin-ports/vulkan-headers", public = true }]
+
+# The layer settings read the registry (RegOpenKeyEx,
+# src/layer/layer_settings_manager.cpp:164-196) and the process token
+# (:94-117) from advapi32, which MSVC does not link by default.
+[target.'cfg(os = "windows")'.profile]
+defines = ["NOMINMAX", "WIN32_LEAN_AND_MEAN", "VK_USE_PLATFORM_WIN32_KHR"]
+link-libs = ["advapi32"]
+
+# Mirrors CMake's default MSVC flags, which define WIN32.  The layer
+# sources test WIN32, not _WIN32, for the registry and process-token code
+# (src/layer/layer_settings_manager.cpp:94, :164) and the ';' delimiter of
+# settings lists read from the environment (layer_settings_util.cpp:102),
+# which upstream's test expects under MSVC (tests/test_setting_util.cpp:59).
+# No header under include/ tests WIN32, so it stays private.
+[target.'cfg(any(cxx = "msvc", cxx = "clang-cl"))'.profile]
+defines = ["WIN32"]
+
+[target.'cfg(os = "android")'.profile]
+defines = ["VK_USE_PLATFORM_ANDROID_KHR"]
+
+[target.'cfg(os = "macos")'.profile]
+defines = ["VK_USE_PLATFORM_METAL_EXT", "VK_USE_PLATFORM_MACOS_MVK"]
+
+[target.'cfg(os = "ios")'.profile]
+defines = ["VK_USE_PLATFORM_METAL_EXT", "VK_USE_PLATFORM_IOS_MVK"]

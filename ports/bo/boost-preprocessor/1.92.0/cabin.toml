@@ -3,10 +3,35 @@ url = "https://github.com/boostorg/preprocessor/archive/refs/tags/boost-1.92.0.t
 checksum = "sha256:7c8f444bb5cf5f37d594ca421938ef0271f7d9866275347f25ceabffb931de7d"
 format = "tar.gz"
 strip-prefix = "preprocessor-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-preprocessor"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds:
+# doc/AppendixA-AnIntroductiontoPreprocessorMetaprogramming.html is an appendix
+# of the book "C++ Template Metaprogramming", copyright Pearson Education and
+# reprinted with permission, with no grant to redistribute.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "appveyor.yml",
+  "build.jam",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+  "test",
+]
 
 [target.boost_preprocessor]
 type = "header-only"

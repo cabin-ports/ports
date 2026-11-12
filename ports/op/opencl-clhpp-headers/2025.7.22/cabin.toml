@@ -1,0 +1,43 @@
+[package.upstream]
+url = "https://github.com/KhronosGroup/OpenCL-CLHPP/archive/refs/tags/v2025.07.22.tar.gz"
+checksum = "sha256:c1031afde6e9eb042e6fcfbc17078f4b437a7e8d55482a1ca6e0fa762d262a89"
+format = "tar.gz"
+strip-prefix = "OpenCL-CLHPP-2025.07.22"
+
+# The version is upstream's tag v2025.07.22 without the leading zero SemVer
+# forbids, as for opencl-headers.
+[package]
+name = "cabin-ports/opencl-clhpp-headers"
+version = "2025.7.22"
+license = "Apache-2.0"
+include = ["LICENSE.txt", "include"]
+
+# Upstream releases OpenCL-Headers under the same tag, and Conan Center pins
+# that version.
+[dependencies]
+"cabin-ports/opencl-headers" = "=2025.7.22"
+
+# include/, which upstream's HeadersCpp target exports; consumers write
+# <CL/opencl.hpp>, and <CL/cl2.hpp> forwards to it with a deprecation
+# message.  On Apple, opencl.hpp:533-537 includes <OpenCL/opencl.h>, which
+# upstream's OpenCL-Headers CMake points at its own headers through symlinks
+# a port cannot make (see opencl-headers), so it resolves to the SDK's
+# OpenCL 1.2 framework and the default OpenCL 3.0 target fails to compile:
+# include <CL/opencl.h> first, whose include guard the SDK header shares, or
+# define both CL_HPP_TARGET_OPENCL_VERSION and CL_HPP_MINIMUM_OPENCL_VERSION
+# as 120 to use the framework (the minimum defaults to 200, and
+# opencl.hpp:487-489 rejects one above the target).  Without
+# CL_HPP_TARGET_OPENCL_VERSION, opencl.hpp:446-450 prints a message and
+# targets OpenCL 3.0.  Like upstream's target, the package links no OpenCL
+# library, though even a bare include of opencl.hpp references entry points
+# such as clReleaseContext for its default context: consumers link
+# cabin-ports/opencl-icd-loader or the platform's OpenCL library.  The
+# getDefault accessors use std::call_once, which opencl.hpp:222-224 warns may
+# need -pthread on some platforms; like upstream's target, the package adds
+# no thread library.
+[target.opencl-clhpp-headers]
+type = "header-only"
+include-dirs = ["include"]
+# opencl.hpp:529-531 rejects anything older than C++11.
+interface-cxx-standard = "c++11"
+deps = [{ name = "cabin-ports/opencl-headers", public = true }]

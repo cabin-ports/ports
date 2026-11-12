@@ -32,9 +32,19 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   non-default features or unsupported configurations.
 - Publish by default.  Resolve license, notice, and attribution gaps
   through packaging, and never hold a version for an ordinary upstream
-  bug or an open question; CONTRIBUTING.md ("Upstream fidelity" and
-  "Pull requests") gives the rules and the grounds for a
-  `publish-holds.txt` line.
+  bug or an open question; CONTRIBUTING.md ("Upstream fidelity",
+  "Licenses and notices", and "Pull requests") gives the rules and the
+  grounds for a `publish-holds.txt` line.
+- Preserve the license information redistribution requires, by the
+  simplest means that complies: no license patch when the published
+  package already carries it, otherwise one patch that adds
+  `THIRD_PARTY_NOTICES`.  Never add one license file per component,
+  Creative Commons legal code where the license's URI suffices, or
+  `license` terms for code the package does not contain.  Follow up the
+  third-party code upstream itself identifies; do not research the
+  provenance of short functions and common idioms that upstream does
+  not identify as copied, and never treat a copy as permitted because
+  it is small.
 
 ## Comments
 
@@ -42,9 +52,11 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   intent, constraints, invariants, and trade-offs; do not restate what
   the code, configuration, or tests already make clear.
 - In `cabin.toml`, document non-obvious packaging decisions, patches,
-  compatibility limitations, platform workarounds, and required license
-  or attribution information. Avoid upstream API documentation,
-  exhaustive bug or feature inventories, and lengthy source citations.
+  compatibility limitations, platform workarounds, and the reason for a
+  non-obvious `license` term. Third-party notices belong in the
+  package's notice files, not in comments. Avoid upstream API
+  documentation, exhaustive bug or feature inventories, and lengthy
+  source citations.
 - Apply the same principles to Rust, tests, scripts, and workflows.
   Preserve public API contracts and reasoning essential to correctness,
   security, or publication safety. Avoid duplicating existing documentation.

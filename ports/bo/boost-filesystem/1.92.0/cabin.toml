@@ -3,10 +3,56 @@ url = "https://github.com/boostorg/filesystem/archive/refs/tags/boost-1.92.0.tar
 checksum = "sha256:40789a21ec8105cfe788edd8eb90bf4be25ba300836b699e048d3c147e3b95dd"
 format = "tar.gz"
 strip-prefix = "filesystem-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-filesystem"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` lists the tree without doc/POSIX_filename_encoding.txt, a working
+# note that quotes a 2001 linux-utf8 mailing-list post verbatim, with no grant.
+include = [
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "appveyor.yml",
+  "bug",
+  "build.jam",
+  "cmake",
+  "config",
+  "doc/Jamfile.v2",
+  "doc/deprecated.html",
+  "doc/design.htm",
+  "doc/do_list.html",
+  "doc/faq.htm",
+  "doc/index.htm",
+  "doc/issue_reporting.html",
+  "doc/path_table.cpp",
+  "doc/path_table.txt",
+  "doc/portability_guide.htm",
+  "doc/reference.html",
+  "doc/relative_proposal.html",
+  "doc/release_history.html",
+  "doc/styles.css",
+  "doc/tickets.html",
+  "doc/tutorial.html",
+  "doc/v3.html",
+  "doc/v3_design.html",
+  "doc/v4.html",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+  "src",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

@@ -18,8 +18,9 @@ patches = ["patches/0001-add-glm-and-openexr-terms-for-half-conversion.patch"]
 [package]
 name = "cabin-ports/spirv-cross"
 version = "1.4.363"
+license = "(Apache-2.0 OR MIT) AND Apache-2.0 AND MIT AND BSD-3-Clause AND MIT-Khronos-old"
 # Licence: (Apache-2.0 OR MIT) AND Apache-2.0 AND MIT AND BSD-3-Clause AND
-# LicenseRef-KhronosFreeUse.  The 25 library sources are Apache-2.0 OR MIT
+# MIT-Khronos-old.  The 25 library sources are Apache-2.0 OR MIT
 # (LICENSE, LICENSES/), apart from the half-float conversion above and
 # spvGradientCube in spirv_msl.cpp:6399-6420, which follows Alexey
 # Knyazev's GLSL in

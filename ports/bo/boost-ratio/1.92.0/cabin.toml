@@ -3,10 +3,44 @@ url = "https://github.com/boostorg/ratio/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:648454873dc5230c469324d5bb5f8b0b082ed96eb2fd2bba95dfc06ef89fbbea"
 format = "tar.gz"
 strip-prefix = "ratio-boost-1.92.0"
+# include/boost/ratio/ratio.hpp:30 and ratio_fwd.hpp:30 take ratio_less's
+# overflow handling from libc++, and 23 tests adapt libc++ tests, under its MIT
+# and University of Illinois/NCSA dual licence, whose text the release does not
+# ship.  Patch 0001 adds libc++'s LICENSE.TXT, verbatim from llvm-project
+# llvmorg-8.0.1 libcxx/LICENSE.TXT
+# (sha256:c3b21ee90de785b9e45590253fd08fb22b269abccaadb175c4d96d7f420340cd), as
+# LICENSE.libcxx.txt.
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = [
+  "patches/0001-add-mit-and-ncsa-licenses-for-libcxx-code.patch",
+  "patches/0002-add-the-boost-software-license-text.patch",
+]
 
 [package]
 name = "cabin-ports/boost-ratio"
 version = "1.92.0"
+license = "BSL-1.0 AND (MIT OR NCSA)"
+# `include` leaves out doc/, which nothing here builds: doc/ratio.qbk:217-232
+# reproduces the ratio prose of WG21 paper N2661, whose terms do not ship.
+include = [
+  ".gitattributes",
+  ".github",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "LICENSE.libcxx.txt",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "appveyor.yml",
+  "build.jam",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+  "test",
+]
 
 [target.boost_ratio]
 type = "header-only"

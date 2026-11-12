@@ -8,6 +8,29 @@ patches = ["patches/0001-include-exception.patch"]
 [package]
 name = "cabin-ports/boost-safe-numerics"
 version = "1.92.0"
+license = "BSL-1.0 AND LicenseRef-Boost-pre-BSL"
+# test/test_rational.cpp:16-19 is under Paul Moore's 1999 Boost permission
+# notice.  `include` leaves out doc/ and example/, which nothing here builds:
+# example/motor*.c and the doc pages that embed them reproduce David Austin's
+# 2004 Embedded.com stepper-motor code and figures, with no grant.
+include = [
+  ".drone",
+  ".drone.star",
+  ".github",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "Jamfile.v2",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "appveyor.yml",
+  "b2.log",
+  "html",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-concept-check" = "=1.92.0"

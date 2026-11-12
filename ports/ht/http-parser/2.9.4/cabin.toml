@@ -13,6 +13,7 @@ to = "include/http_parser.h"
 [package]
 name = "cabin-ports/http-parser"
 version = "2.9.4"
+license = "MIT"
 include = ["LICENSE-MIT", "http_parser.c", "http_parser.h", "include"]
 # http_parser.c is C99; C11 is the oldest standard Cabin can request from
 # MSVC.  http_parser.h includes <stdint.h>, which C++ has from C++11.

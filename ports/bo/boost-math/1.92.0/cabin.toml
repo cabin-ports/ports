@@ -9,6 +9,7 @@ strip-prefix = "math-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-math"
 version = "1.92.0"
+license = "BSL-1.0"
 include = ["LICENSE", "include"]
 
 [dependencies]

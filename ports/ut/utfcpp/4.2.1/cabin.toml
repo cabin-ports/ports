@@ -7,6 +7,7 @@ strip-prefix = "utfcpp-4.2.1"
 [package]
 name = "cabin-ports/utfcpp"
 version = "4.2.1"
+license = "BSL-1.0"
 include = ["LICENSE", "source"]
 
 # Header-only, as upstream's CMake interface target utf8cpp: source/

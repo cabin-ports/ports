@@ -9,6 +9,7 @@ strip-prefix = "thread-pool-5.1.0"
 [package]
 name = "cabin-ports/bshoshany-thread-pool"
 version = "5.1.0"
+license = "MIT"
 # LICENSE.txt is the plain MIT licence.  The header's and README's request
 # for a repository link and a citation (BS_thread_pool.hpp:12;
 # README.md:3451-3455) is a request, not a licence term, and the header

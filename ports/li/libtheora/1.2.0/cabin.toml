@@ -10,6 +10,7 @@ strip-prefix = "libtheora-1.2.0"
 [package]
 name = "cabin-ports/libtheora"
 version = "1.2.0"
+license = "BSD-3-Clause AND FSFULLRWD"
 # BSD-3-Clause (COPYING); LICENSE carries On2's patent grant for VP3.
 include = ["COPYING", "LICENSE", "include", "lib"]
 c-standard = "c11"

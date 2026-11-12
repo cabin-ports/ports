@@ -3,10 +3,15 @@ url = "https://github.com/boostorg/mp11/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:a5754dc5ff9e7ff34119983889530e3ab8d8fb43ce2b4fea9c18673044df45d9"
 format = "tar.gz"
 strip-prefix = "mp11-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-mp11"
 version = "1.92.0"
+license = "BSL-1.0"
 
 [target.boost_mp11]
 type = "header-only"

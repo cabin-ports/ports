@@ -7,6 +7,30 @@ strip-prefix = "container-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-container"
 version = "1.92.0"
+license = "BSL-1.0 AND CC0-1.0 AND LicenseRef-Courpron-2007"
+# `include` lists the tree without doc/, the documentation nothing here
+# builds: container.qbk quotes several paragraphs of Matt Austern's Dr.
+# Dobb's article and of SGI's STL slist documentation, with no grant.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "bench",
+  "build.jam",
+  "example",
+  "experimental",
+  "extra",
+  "include",
+  "index.html",
+  "meta",
+  "src",
+  "test",
+]
 
 # These C++-only headers are included by the C++ sources alone, never by
 # src/alloc_lib.c, so the edges are exempt from requiring a C interface.

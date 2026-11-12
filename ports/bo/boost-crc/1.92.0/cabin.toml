@@ -3,10 +3,36 @@ url = "https://github.com/boostorg/crc/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:c41b93fdde01afec96c39e4c4e6d3bf8734a62ecec9c4875699e0f73c3b0144e"
 format = "tar.gz"
 strip-prefix = "crc-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-crc"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` lists the tree without doc/, the documentation nothing here
+# builds: crc.qbk quotes Ross Williams's CRC guide, whose terms allow only
+# verbatim copies of the whole guide with its notice.
+include = [
+  ".drone",
+  ".drone.jsonnet",
+  ".gitattributes",
+  ".github",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "appveyor.yml",
+  "build.jam",
+  "crc.html",
+  "crc_example.cpp",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+  "test",
+]
 
 [target.boost_crc]
 type = "header-only"

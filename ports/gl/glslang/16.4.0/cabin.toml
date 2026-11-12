@@ -70,6 +70,7 @@ to = "include/glslang/SPIRV/spirv.hpp11"
 [package]
 name = "cabin-ports/glslang"
 version = "16.4.0"
+license = "BSD-3-Clause AND BSD-2-Clause AND AML-glslang AND Apache-2.0 AND MIT-Khronos-old AND MIT AND LicenseRef-gl-types AND GPL-3.0-or-later WITH Bison-exception-2.2"
 # LICENSE.txt and LICENSES/ (mapped by REUSE.toml) carry every licence.  The
 # Bison-generated parser, glslang/MachineIndependent/glslang_tab.cpp and its
 # .h, is GPL-3.0-or-later WITH Bison-exception-2.2, which lets it ship under

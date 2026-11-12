@@ -7,6 +7,7 @@ strip-prefix = "PEGTL-3.2.8"
 [package]
 name = "cabin-ports/pegtl"
 version = "3.2.8"
+license = "MIT"
 # The headers and the MIT license they all refer to; doc/ and src/ (tests
 # and examples) are not needed.
 include = ["LICENSE", "include"]

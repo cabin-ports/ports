@@ -3,10 +3,34 @@ url = "https://github.com/boostorg/icl/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:cc6a692c52933a6f6927cbf62ad33da3e8901103598da8177c6921ce4c02f826"
 format = "tar.gz"
 strip-prefix = "icl-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-icl"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: the doc/boostcon09
+# slides embed a painting reproduction ("klee06") with no stated source or
+# terms.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "build.jam",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

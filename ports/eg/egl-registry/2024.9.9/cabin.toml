@@ -16,6 +16,7 @@ patches = ["patches/0001-add-the-apache-2.0-license.patch"]
 [package]
 name = "cabin-ports/egl-registry"
 version = "2024.9.9"
+license = "Apache-2.0 AND LicenseRef-khrplatform"
 # Licence: Apache-2.0 AND LicenseRef-khrplatform.  EGL/egl.h, eglext.h and
 # eglplatform.h are Apache-2.0 (their SPDX lines; LICENSE.Apache-2.0).
 # KHR/khrplatform.h carries its own MIT-style grant for "the Materials" in its

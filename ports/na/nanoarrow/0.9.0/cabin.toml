@@ -14,6 +14,7 @@ patches = ["patches/0001-add-the-generated-nanoarrow-config-h.patch"]
 [package]
 name = "cabin-ports/nanoarrow"
 version = "0.9.0"
+license = "Apache-2.0"
 # The core library's sources and the headers upstream installs
 # (CMakeLists.txt:150-172), at the paths they include each other by, so
 # that src/ is the include root and the unit tests beside them stay out.

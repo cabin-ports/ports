@@ -19,6 +19,7 @@ to = "include/libdeflate.h"
 name = "cabin-ports/libdeflate"
 # Upstream 1.26; Cabin versions have three components.
 version = "1.26.0"
+license = "MIT"
 include = ["COPYING", "common_defs.h", "include", "lib", "libdeflate.h"]
 
 # The static library upstream's CMake builds (libdeflate_static) with

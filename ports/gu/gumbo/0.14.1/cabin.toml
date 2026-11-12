@@ -19,6 +19,7 @@ to = "include/tag_enum.h"
 [package]
 name = "cabin-ports/gumbo"
 version = "0.14.1"
+license = "Apache-2.0 AND MIT"
 include = ["doc/COPYING", "include", "src", "visualc"]
 # Upstream builds C99; C11 is the oldest standard Cabin can request from
 # MSVC.  gumbo.h needs <stdbool.h>, which C++ has from C++11.

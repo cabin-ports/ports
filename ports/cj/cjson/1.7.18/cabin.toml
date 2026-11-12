@@ -6,6 +6,10 @@ strip-prefix = "cJSON-1.7.18"
 [package]
 name = "cabin-ports/cjson"
 version = "1.7.18"
+license = "MIT"
+# Leaves out tests/: json-patch-tests is Apache-2.0, whose text upstream does
+# not ship.
+include = ["CONTRIBUTORS.md", "LICENSE", "README.md", "cJSON.c", "cJSON.h", "cJSON_Utils.c", "cJSON_Utils.h"]
 
 # cJSON's core parser/printer is a single translation unit. The
 # optional `cJSON_Utils.c` (JSON Pointer / Patch / Merge-Patch

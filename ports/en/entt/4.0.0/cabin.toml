@@ -10,6 +10,7 @@ strip-prefix = "entt-4.0.0"
 [package]
 name = "cabin-ports/entt"
 version = "4.0.0"
+license = "MIT"
 include = ["LICENSE", "src"]
 
 # Header-only, as upstream's CMake interface target EnTT::EnTT

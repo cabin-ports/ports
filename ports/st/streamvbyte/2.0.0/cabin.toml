@@ -7,6 +7,7 @@ strip-prefix = "streamvbyte-2.0.0"
 [package]
 name = "cabin-ports/streamvbyte"
 version = "2.0.0"
+license = "Apache-2.0 AND BSD-3-Clause"
 # src/ ships whole: the encoders and decoders #include their x64 and ARM
 # kernels (src/*_x64_*.c, src/streamvbyte_arm_*.c) and the shuffle
 # tables from it.  AUTHORS is upstream's list of copyright holders.

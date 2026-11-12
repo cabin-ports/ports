@@ -19,6 +19,7 @@ to = "include/semver/version.hh"
 [package]
 name = "cabin-ports/mbits-semver"
 version = "0.1.1"
+license = "MIT AND CC-BY-3.0"
 # MIT (LICENSE).  The comments in include/semver/semver.hh quote clauses of
 # Semantic Versioning 2.0.0 by Tom Preston-Werner, CC BY 3.0
 # (https://creativecommons.org/licenses/by/3.0/), credited by its Source line.

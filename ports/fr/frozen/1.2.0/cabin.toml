@@ -6,11 +6,37 @@ url = "https://github.com/serge-sans-paille/frozen/archive/refs/tags/1.2.0.tar.g
 checksum = "sha256:ed8339c017d7c5fe019ac2c642477f435278f0dc643c1d69d3f3b1e95915e823"
 format = "tar.gz"
 strip-prefix = "frozen-1.2.0"
+# include/frozen/algorithm.h adapts code from three Wikipedia articles,
+# crediting two of them only by URL, and the release ships no copy of their
+# licence, CC BY-SA 3.0, whose sections 4(a) and 4(b) require a copy or its
+# URI with every copy.  The patch adds the licence text, verbatim from
+# https://creativecommons.org/licenses/by-sa/3.0/legalcode.txt (sha256
+# 3f941b3b89cf7b8370ceb83cc76d2120d471b58735d8ca60238a751a48d7f72f), as
+# LICENSE.CC-BY-SA-3.0.
+patches = ["patches/0001-add-cc-by-sa-3.0-license-for-credited-code.patch"]
 
 [package]
 name = "cabin-ports/frozen"
 version = "1.2.0"
-include = ["LICENSE", "include"]
+license = "Apache-2.0 AND CC-BY-SA-3.0"
+# LICENSE is Apache-2.0.  These include/frozen/algorithm.h blocks are adapted
+# from Wikipedia text under the Creative Commons Attribution-ShareAlike 3.0
+# Unported licence, and are distributed under CC BY-SA 3.0
+# (LICENSE.CC-BY-SA-3.0, from the patch above); the rest of the package
+# stays under Apache-2.0.
+# - :43-91 (knuth_morris_pratt_searcher), translated from the kmp_table and
+#   kmp_search pseudocode in "Knuth–Morris–Pratt algorithm",
+#   https://en.wikipedia.org/w/index.php?oldid=796082887, by its Wikipedia
+#   contributors (https://en.wikipedia.org/w/index.php?title=Knuth%E2%80%93Morris%E2%80%93Pratt_algorithm&action=history).
+# - :101-189 (boyer_moore_searcher), modified from the C implementation in
+#   "Boyer–Moore string-search algorithm",
+#   https://en.wikipedia.org/w/index.php?oldid=802511758, by its Wikipedia
+#   contributors (https://en.wikipedia.org/w/index.php?title=Boyer%E2%80%93Moore_string-search_algorithm&action=history).
+#   Its skip table (:109-114) is also the preprocess pseudocode in
+#   "Boyer–Moore–Horspool algorithm", the article :98-99 credits,
+#   https://en.wikipedia.org/w/index.php?oldid=799960954, by its Wikipedia
+#   contributors (https://en.wikipedia.org/w/index.php?title=Boyer%E2%80%93Moore%E2%80%93Horspool_algorithm&action=history).
+include = ["LICENSE", "LICENSE.CC-BY-SA-3.0", "include", "patches"]
 
 # Upstream's header-only frozen::frozen target (CMakeLists.txt:61-86):
 # consumers include <frozen/*.h> from include/, with C++14 or newer

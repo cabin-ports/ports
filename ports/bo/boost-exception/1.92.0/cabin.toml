@@ -7,6 +7,32 @@ strip-prefix = "exception-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-exception"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` lists the tree without doc/, the documentation nothing here
+# builds: its Asciidoctor stylesheets (zajo-*.css, labelled MIT, with no
+# licence text) and Rouge theme (rouge-github.css, no notice) have no
+# established terms.
+include = [
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  ".travis.yml",
+  ".vscode",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "appveyor.yml",
+  "build.jam",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "scripts",
+  "src",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

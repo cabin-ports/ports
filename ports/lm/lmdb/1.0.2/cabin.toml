@@ -16,6 +16,7 @@ to = "include/lmdb.h"
 [package]
 name = "cabin-ports/lmdb"
 version = "1.0.2"
+license = "OLDAP-2.8 AND ISC"
 include = [
   "include",
   "libraries/liblmdb/COPYRIGHT",

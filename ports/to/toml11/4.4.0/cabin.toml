@@ -9,6 +9,7 @@ strip-prefix = "toml11-4.4.0"
 [package]
 name = "cabin-ports/toml11"
 version = "4.4.0"
+license = "MIT"
 include = ["LICENSE", "include"]
 
 # toml11 in its default header-only mode, as upstream's CMake interface

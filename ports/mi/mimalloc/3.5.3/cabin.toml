@@ -19,6 +19,7 @@ patches = [
 [package]
 name = "cabin-ports/mimalloc"
 version = "3.5.3"
+license = "MIT"
 # bin/ holds prebuilt Windows redirection DLLs and minject, which only the
 # shared library uses.
 include = ["LICENSE", "include", "patches", "src"]

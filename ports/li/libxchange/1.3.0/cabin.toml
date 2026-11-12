@@ -7,6 +7,7 @@ strip-prefix = "xchange-1.3.0"
 [package]
 name = "cabin-ports/libxchange"
 version = "1.3.0"
+license = "Unlicense"
 # The Unlicense (LICENSE).
 include = ["LICENSE", "include", "src"]
 # Upstream sets no C standard, so each compiler's default applies; C11 is the

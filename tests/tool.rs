@@ -821,8 +821,8 @@ impl FakeRegistry {
                             request,
                             200,
                             &format!(
-                                "{{\"schema\":1,\"kind\":\"file-registry\",\"packages\":\
-                                 \"packages\",\"artifacts\":\"artifacts\",\"auth-required\":\
+                                "{{\"schema\":2,\"kind\":\"file-registry\",\"packages\":\
+                                 \"packages\",\"archives\":\"archives\",\"auth-required\":\
                                  true,\"api\":\"{base}\"}}"
                             ),
                         );
@@ -1054,7 +1054,7 @@ fn assert_preflight_products(work: &Path) {
     assert!(
         registry_dir
             .join(format!(
-                "artifacts/cabin-ports/zlib/cabin-ports-zlib-1.3.1-{revision}.zip"
+                "archives/cabin-ports/zlib/cabin-ports-zlib-1.3.1-{revision}.zip"
             ))
             .is_file()
     );

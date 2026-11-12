@@ -17,6 +17,7 @@ patches = ["patches/0001-add-third-party-license-texts.patch"]
 [package]
 name = "cabin-ports/async-simple"
 version = "1.4.0"
+license = "Apache-2.0 AND Apache-2.0 WITH LLVM-exception AND MIT AND GPL-3.0-or-later WITH GCC-exception-3.1"
 # Apache-2.0 AND Apache-2.0 WITH LLVM-exception AND MIT AND
 # GPL-3.0-or-later WITH GCC-exception-3.1.  LICENSE and NOTICE cover
 # Alibaba's code and the third-party headers NOTICE lists.

@@ -6,6 +6,11 @@ strip-prefix = "tinyxml2-11.0.0"
 [package]
 name = "cabin-ports/tinyxml2"
 version = "11.0.0"
+license = "Zlib"
+# Only the library and its license ship: the generated docs and test
+# resources carry third-party terms (GPL-labelled Doxygen scripts, a
+# Shakespeare text under its own grant) that the library does not need.
+include = ["LICENSE.txt", "tinyxml2.cpp", "tinyxml2.h"]
 
 # tinyxml2 is a single C++ translation unit plus its header. The
 # repository's `xmltest.cpp` is the upstream test harness, not part

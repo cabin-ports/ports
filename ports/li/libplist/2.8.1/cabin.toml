@@ -1,0 +1,132 @@
+[package.upstream]
+# The 2.8.1 tag archive, the bytes vcpkg's port pins (SHA-512), not the
+# release's autotools .tar.bz2.  The frozen vcpkg tree (661e42cd) pins 2.8.0;
+# vcpkg moved to 2.8.1 in aadc0260e4, and this port takes 2.8.1 for its
+# memory-safety fixes (a use-after-free in plist_copy_node, a double free in
+# xplist's error paths, a cap on parsed bplist nodes).
+url = "https://github.com/libimobiledevice/libplist/archive/refs/tags/2.8.1.tar.gz"
+checksum = "sha256:454f710c6c9edb762860bdb68f954ac5c52fb995498c96185aee2fe22926f5c3"
+format = "tar.gz"
+strip-prefix = "libplist-2.8.1"
+# Patch 0001 spells src/bplist.c's typeof as __typeof__, which GCC and Clang
+# accept in ISO modes (see c-standard below); MSVC and clang-cl take the
+# file's _MSC_VER branch, which has none.  Patch 0002 has src/plist.h, which
+# bplist.c and plist.c (the only readers of __BIG_ENDIAN__) include first,
+# define __BIG_ENDIAN__ from the compiler's __BYTE_ORDER__ unless already
+# defined, standing in for the
+# config.h define of configure's AC_C_BIGENDIAN, which Cabin's cfg (no
+# byte-order key) cannot express.
+patches = [
+  "patches/0001-spell-typeof-as-gnu-keyword.patch",
+  "patches/0002-detect-big-endian-from-compiler.patch",
+]
+
+[package]
+name = "cabin-ports/libplist"
+version = "2.8.1"
+license = "LGPL-2.1-or-later AND MIT"
+# The libraries are LGPL-2.1-or-later (COPYING.LESSER, whose text
+# libcnary/COPYING repeats).  src/jsmn.c and jsmn.h (Serge A. Zaitsev's jsmn) and
+# src/time64.c, time64.h and time64_limits.h (Michael G Schwern's y2038
+# code) are MIT, with the notices in jsmn.c, jsmn.h and time64.c.
+# src/plist.c:161-209, the memmem used where the C library has none, is
+# Christian Thaeter's 2007 replacement for glibc's memmem.c (libc-alpha,
+# 2007-12), Copyright (C) 1991-2004 Free Software Foundation, Inc.,
+# LGPL-2.1-or-later.  Not ported: plistutil, the Cython bindings, the
+# documentation, the tests and the fuzzers.
+include = [
+  "COPYING.LESSER",
+  "include",
+  "libcnary/include",
+  "libcnary/node.c",
+  "libcnary/node_list.c",
+  "patches",
+  "src",
+]
+# Upstream sets no standard, so it builds in the compilers' default GNU
+# dialects.  Cabin rejects gnu-extensions on MSVC, so this port builds in ISO
+# modes, the oldest MSVC accepts: GCC and Clang still take the GNU statement
+# expressions and __typeof__ of src/bplist.c's non-MSVC branch, and the Unix
+# profile below defines _DEFAULT_SOURCE for the POSIX and BSD declarations
+# glibc's GNU mode exposes (gmtime_r, strndup, tm_gmtoff, ...).
+c-standard = "c11"
+cxx-standard = "c++14"
+
+# config.h comes from configure; this port passes the values the sources
+# read as defines instead and leaves HAVE_CONFIG_H undefined.
+# LIBPLIST_STATIC, which configure sets for a static-only build, keeps
+# PLIST_API off dllexport and dllimport on Windows.
+[profile]
+include-dirs = ["libcnary/include", "src"]
+defines = ["LIBPLIST_STATIC", 'PACKAGE_VERSION="2.8.1"']
+
+# libplist-2.0, static, from the sources src/Makefile.am lists and the
+# libcnary convenience library it links in (libcnary/Makefile.am).
+# Consumers write <plist/plist.h>.
+[target.plist]
+type = "library"
+sources = [
+  "libcnary/node.c",
+  "libcnary/node_list.c",
+  "src/base64.c",
+  "src/bplist.c",
+  "src/bytearray.c",
+  "src/common.c",
+  "src/hashtable.c",
+  "src/jplist.c",
+  "src/jsmn.c",
+  "src/oplist.c",
+  "src/out-default.c",
+  "src/out-limd.c",
+  "src/out-plutil.c",
+  "src/plist.c",
+  "src/ptrarray.c",
+  "src/time64.c",
+  "src/xplist.c",
+]
+include-dirs = ["include"]
+interface-defines = ["LIBPLIST_STATIC"]
+# plist.h uses <stdint.h> and 64-bit integers.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "plist-2.0"
+
+# libplist++-2.0, the C++ wrapper: the PList classes of <plist/plist++.h>.
+[target.plistxx]
+type = "library"
+sources = [
+  "src/Array.cpp",
+  "src/Boolean.cpp",
+  "src/Data.cpp",
+  "src/Date.cpp",
+  "src/Dictionary.cpp",
+  "src/Integer.cpp",
+  "src/Key.cpp",
+  "src/Node.cpp",
+  "src/Real.cpp",
+  "src/String.cpp",
+  "src/Structure.cpp",
+  "src/Uid.cpp",
+]
+deps = [{ name = "plist", public = true }]
+interface-c-standard = "none"
+interface-cxx-standard = "c++11"
+links = "plist++-2.0"
+
+# What configure finds on Linux, macOS and the BSDs, and the libm that
+# AC_SEARCH_LIBS([fmin], [m]) adds (floor, round, fabs, fmin, pow).  MSVC has
+# none of these functions or struct tm members; there the sources use their
+# own strndup and memmem and the CRT's gmtime_s and localtime_s.
+[target.'cfg(family = "unix")'.profile]
+defines = [
+  "_DEFAULT_SOURCE",
+  "HAVE_GMTIME_R",
+  "HAVE_LOCALTIME_R",
+  "HAVE_MEMMEM",
+  "HAVE_STRNDUP",
+  "HAVE_STRPTIME",
+  "HAVE_TIMEGM",
+  "HAVE_TM_TM_GMTOFF",
+  "HAVE_TM_TM_ZONE",
+]
+link-libs = ["m"]

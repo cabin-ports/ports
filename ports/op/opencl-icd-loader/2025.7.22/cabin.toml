@@ -1,0 +1,119 @@
+[package.upstream]
+url = "https://github.com/KhronosGroup/OpenCL-ICD-Loader/archive/refs/tags/v2025.07.22.tar.gz"
+checksum = "sha256:dff7a0b11ad5b63a669358e3476e3dc889a4a361674e5b69b267b944d0794142"
+format = "tar.gz"
+strip-prefix = "OpenCL-ICD-Loader-2025.07.22"
+# CMake generates icd_cmake_config.h in its build tree from its secure_getenv
+# and __secure_getenv probes (CMakeLists.txt:66-69); the patch adds it to
+# loader/ without definitions, and the profiles below define
+# HAVE_SECURE_GETENV instead.
+patches = ["patches/0001-add-the-generated-icd-cmake-config-h.patch"]
+
+# The version is upstream's tag v2025.07.22 without the leading zero SemVer
+# forbids, the release of cabin-ports/opencl-headers whose dispatch table the
+# loader fills; v2026.05.29 is newer.
+[package]
+name = "cabin-ports/opencl-icd-loader"
+version = "2025.7.22"
+# Every source carries the Apache-2.0 header; upstream has no NOTICE file.
+license = "Apache-2.0"
+include = [
+  "LICENSE",
+  "include",
+  "loader/icd.c",
+  "loader/icd.h",
+  "loader/icd_cmake_config.h",
+  "loader/icd_dispatch.c",
+  "loader/icd_dispatch.h",
+  "loader/icd_dispatch_generated.c",
+  "loader/icd_envvars.h",
+  "loader/icd_platform.h",
+  "loader/icd_version.h",
+  "loader/linux/icd_linux.c",
+  "loader/linux/icd_linux_envvars.c",
+  "loader/windows",
+  "patches",
+]
+# Upstream's C_STANDARD 99 (CMakeLists.txt:14), which CMake compiles as gnu99
+# on GCC and Clang.  Cabin has no C99 flag for MSVC, so the build is strict
+# C11; consumers only need the OpenCL headers' floors.
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+
+[dependencies]
+"cabin-ports/opencl-headers" = "=2025.7.22"
+
+# Upstream's OpenCL library with its default layer support and loader-managed
+# dispatch (CMakeLists.txt:54-55, 159-167), built static, which upstream
+# discourages for end-user installs (CMakeLists.txt:16-43): the loader then
+# cannot be updated apart from the application and may not work with every
+# installed ICD.  It finds ICDs through OCL_ICD_FILENAMES and, off Windows,
+# the .icd files in OCL_ICD_VENDORS or /etc/OpenCL/vendors
+# (/system/vendor/Khronos/OpenCL/vendors on Android); on Windows through the
+# registry, display adapters and the OpenCL compatibility pack instead.
+# Apple's OpenCL.framework is not an ICD, so a macOS consumer links either the
+# framework or this package.  Off Linux, Android, Apple, FreeBSD, QNX and
+# Windows the build stops with upstream's own #error (icd_platform.h:40).  Not
+# ported: the shared library with its export map and .def files, the
+# cllayerinfo tool, and the tests.
+[target.OpenCL]
+type = "library"
+sources = [
+  "loader/icd.c",
+  "loader/icd_dispatch.c",
+  "loader/icd_dispatch_generated.c",
+]
+defines = [
+  "CL_TARGET_OPENCL_VERSION=300",
+  "CL_NO_NON_ICD_DISPATCH_EXTENSION_PROTOTYPES",
+  "OPENCL_ICD_LOADER_VERSION_MAJOR=3",
+  "OPENCL_ICD_LOADER_VERSION_MINOR=0",
+  "OPENCL_ICD_LOADER_VERSION_REV=7",
+  "CL_ENABLE_LAYERS",
+  "CL_ENABLE_LOADER_MANAGED_DISPATCH",
+]
+deps = [{ name = "cabin-ports/opencl-headers", public = true }]
+links = "OpenCL"
+
+[profile]
+include-dirs = ["include", "loader"]
+
+[target.'cfg(not(os = "windows"))'.sources]
+OpenCL = ["loader/linux/icd_linux.c", "loader/linux/icd_linux_envvars.c"]
+
+[target.'cfg(os = "windows")'.sources]
+OpenCL = [
+  "loader/windows/icd_windows.c",
+  "loader/windows/icd_windows_apppackage.c",
+  "loader/windows/icd_windows_dxgk.c",
+  "loader/windows/icd_windows_envvars.c",
+  "loader/windows/icd_windows_hkr.c",
+]
+
+# Upstream links Threads off Windows and CMAKE_DL_LIBS, which is dl on Linux
+# and Android (CMakeLists.txt:137, 179); Android's libc holds pthreads and the
+# NDK has no libpthread.
+[target.'cfg(all(family = "unix", not(os = "android")))'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(any(os = "linux", os = "android"))'.profile]
+link-libs = ["dl"]
+
+# glibc 2.17, musl 1.1.24 and FreeBSD 14.0 added secure_getenv, which
+# icd_linux_envvars.c declares through _GNU_SOURCE and upstream's probe finds;
+# an older libc fails to build, where upstream would use glibc's earlier
+# __secure_getenv or fall back to getenv.  macOS checks its process
+# credentials instead.
+[target.'cfg(any(os = "linux", os = "freebsd"))'.profile]
+defines = ["HAVE_SECURE_GETENV"]
+
+# _DEFAULT_SOURCE keeps glibc's declarations as upstream's gnu99 sees them.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_DEFAULT_SOURCE"]
+
+# cfgmgr32 for the device queries, and advapi32 and ole32, which CMake links
+# by default, for the registry and token calls and StringFromGUID2;
+# upstream's runtimeobject resolves nothing the sources call.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["advapi32", "cfgmgr32", "ole32"]

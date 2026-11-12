@@ -59,6 +59,7 @@ patches = [
 [package]
 name = "cabin-ports/simdjson"
 version = "5.1.1"
+license = "(Apache-2.0 OR MIT) AND BSL-1.0 AND MIT AND BSD-3-Clause AND (Apache-2.0 OR MIT OR BSL-1.0)"
 # simdjson is Apache-2.0 or MIT, at the user's option;
 # LICENSE_1_0.txt and the LICENSE-*.* notices come from the patches
 # above.  fast_float (include/simdjson/internal/fast_float.h) and the
