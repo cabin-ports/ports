@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/mjansson/mdns/archive/refs/tags/1.4.3.tar.gz"
+checksum = "sha256:be1fd8e35599cb7de179decbd0633c121d11a2dcb9cc193ff5c590bd0d480483"
+format = "tar.gz"
+strip-prefix = "mdns-1.4.3"
+
+[package]
+name = "cabin-ports/mdns"
+version = "1.4.3"
+license = "Unlicense"
+include = ["LICENSE", "mdns.h"]
+
+# mdns.h, upstream's INTERFACE target and its only installed header
+# (CMakeLists.txt:14-22, :75); every function is static inline.  Not
+# ported: mdns.c, upstream's example program.  CMakeLists.txt still says
+# VERSION 1.4.2; the 1.4.3 tag is the release.
+[target.mdns]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+# Upstream's target builds in CMake's default GNU dialect; in strict C, glibc
+# declares strncasecmp (mdns.h:600) and struct ip_mreq (mdns.h:403) only
+# under _DEFAULT_SOURCE.
+interface-defines = ["_DEFAULT_SOURCE"]
+
+# Upstream's target links these on Windows (CMakeLists.txt:18-20).
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32", "iphlpapi"]
