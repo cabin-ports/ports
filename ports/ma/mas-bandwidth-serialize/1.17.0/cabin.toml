@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/mas-bandwidth/serialize/archive/refs/tags/v1.17.0.tar.gz"
+checksum = "sha256:8bde39558934f51cdc3d1cedbfbb4061cfda2b78103eb75a12e09428249436b9"
+format = "tar.gz"
+strip-prefix = "serialize-1.17.0"
+
+[package]
+name = "cabin-ports/mas-bandwidth-serialize"
+version = "1.17.0"
+license = "BSD-3-Clause"
+# Upstream installs serialize.h alone (CMakeLists.txt:39).
+include = ["LICENSE", "serialize.h"]
+
+# Consumers include <serialize.h>, a C++ header that upstream's CI also builds
+# at -std=c++03.  Its float wire format needs exact float32 rounding, so
+# consumers must not build with -ffast-math or -Ofast (BUILDING.md, "Floating
+# point flags").
+[target.mas-bandwidth-serialize]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++98"
