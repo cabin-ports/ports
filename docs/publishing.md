@@ -21,7 +21,7 @@ same upstream version, which only an `all` dispatch publishes.
 - **Credential boundary.**  The `build` job installs the pinned `cabin` and builds `port-publish`
   without any credential.  Only the `prepare` job builds ports: it stages what the run would
   upload and builds the probe of each port it stages, with no OIDC token and no permission to
-  push.  A build is where a port's build script runs once the pinned Cabin has build scripts, so
+  push.  A build is where a port's build script runs, so
   no other job builds.  `prepare` records the commit it staged, the run, and the checksums of each
   version's archive and metadata document.  Only the `publish` job may request the run's OIDC
   token for a publish.  It runs just the two prebuilt binaries and the workflow scripts under

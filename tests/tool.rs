@@ -274,8 +274,8 @@ fn write_port_package(
     let dir = ports.child(format!("{}/{name}/{version}", port_prefix(name)));
     dir.child("cabin.toml")
         .write_str(&format!(
-            "[package]\nname = \"cabin-ports/{name}\"\nversion = \"{version}\"\n\n\
-             [package.upstream]\nurl = \
+            "[package]\nname = \"cabin-ports/{name}\"\nversion = \"{version}\"\nlicense = \
+             \"MIT\"\n\n[package.upstream]\nurl = \
              \"https://ports.invalid/{name}-{version}.tar.gz\"\nchecksum = \
              \"sha256:{sha256}\"\nformat = \"tar.gz\"\nstrip-prefix = \
              \"{name}-{version}\"\n{patches}\n{body}"
