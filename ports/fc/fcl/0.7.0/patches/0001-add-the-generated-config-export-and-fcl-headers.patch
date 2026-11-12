@@ -1,0 +1,275 @@
+--- /dev/null
++++ b/include/fcl/config.h
+@@ -0,0 +1,86 @@
++/*
++ * Software License Agreement (BSD License)
++ *
++ *  Copyright (c) 2012-2014, Willow Garage, Inc.
++ *  Copyright (c) 2014-2016, Open Source Robotics Foundation
++ *  Copyright (c) 2020, Toyota Research Institute, Inc.
++ *  All rights reserved.
++ *
++ *  Redistribution and use in source and binary forms, with or without
++ *  modification, are permitted provided that the following conditions
++ *  are met:
++ *
++ *   * Redistributions of source code must retain the above copyright
++ *     notice, this list of conditions and the following disclaimer.
++ *   * Redistributions in binary form must reproduce the above
++ *     copyright notice, this list of conditions and the following
++ *     disclaimer in the documentation and/or other materials provided
++ *     with the distribution.
++ *   * Neither the name of the copyright holder nor the names of its
++ *     contributors may be used to endorse or promote products derived
++ *     from this software without specific prior written permission.
++ *
++ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
++ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
++ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
++ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
++ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
++ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
++ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ *  POSSIBILITY OF SUCH DAMAGE.
++ */
++
++// GENERATED FILE DO NOT EDIT.
++
++#ifndef FCL_CONFIG_H_
++#define FCL_CONFIG_H_
++
++#define FCL_VERSION "0.7.0"
++#define FCL_MAJOR_VERSION 0
++#define FCL_MINOR_VERSION 7
++#define FCL_PATCH_VERSION 0
++
++#define FCL_HAVE_SSE 0
++#define FCL_HAVE_OCTOMAP 1
++
++#define FCL_ENABLE_PROFILING 0
++
++// Detect the operating systems
++#if defined(__APPLE__)
++  #define FCL_OS_MACOS
++#elif defined(__gnu_linux__)
++  #define FCL_OS_LINUX
++#elif defined(_WIN32)
++  #define FCL_OS_WINDOWS
++#endif
++
++// Detect the compiler
++#if defined(__clang__)
++  #define FCL_COMPILER_CLANG
++#elif defined(__GNUC__) || defined(__GNUG__)
++  #define FCL_COMPILER_GCC
++#elif defined(_MSC_VER)
++  #define FCL_COMPILER_MSVC
++#endif
++
++#if FCL_HAVE_OCTOMAP
++  #define OCTOMAP_MAJOR_VERSION 1
++  #define OCTOMAP_MINOR_VERSION 10
++  #define OCTOMAP_PATCH_VERSION 1
++
++  #define OCTOMAP_VERSION_AT_LEAST(x,y,z) \
++    (OCTOMAP_MAJOR_VERSION > x || (OCTOMAP_MAJOR_VERSION >= x && \
++    (OCTOMAP_MINOR_VERSION > y || (OCTOMAP_MINOR_VERSION >= y && \
++    OCTOMAP_PATCH_VERSION >= z))))
++
++  #define OCTOMAP_VERSION_AT_MOST(x,y,z) \
++    (OCTOMAP_MAJOR_VERSION < x || (OCTOMAP_MAJOR_VERSION <= x && \
++    (OCTOMAP_MINOR_VERSION < y || (OCTOMAP_MINOR_VERSION <= y && \
++    OCTOMAP_PATCH_VERSION <= z))))
++#endif  // FCL_HAVE_OCTOMAP
++
++#endif  // FCL_CONFIG_H_
+--- /dev/null
++++ b/include/fcl/export.h
+@@ -0,0 +1,48 @@
++
++#ifndef FCL_EXPORT_H
++#define FCL_EXPORT_H
++
++#ifdef FCL_STATIC_DEFINE
++#  define FCL_EXPORT
++#  define FCL_NO_EXPORT
++#else
++#  ifndef FCL_EXPORT
++#    ifdef fcl_EXPORTS
++        /* We are building this library */
++#      define FCL_EXPORT 
++#    else
++        /* We are using this library */
++#      define FCL_EXPORT 
++#    endif
++#  endif
++
++#  ifndef FCL_NO_EXPORT
++#    define FCL_NO_EXPORT 
++#  endif
++#endif
++
++/* CMake writes __declspec(deprecated) where WIN32 is set. */
++#ifndef FCL_DEPRECATED
++#  ifdef _WIN32
++#    define FCL_DEPRECATED __declspec(deprecated)
++#  else
++#    define FCL_DEPRECATED __attribute__ ((__deprecated__))
++#  endif
++#endif
++
++#ifndef FCL_DEPRECATED_EXPORT
++#  define FCL_DEPRECATED_EXPORT FCL_EXPORT FCL_DEPRECATED
++#endif
++
++#ifndef FCL_DEPRECATED_NO_EXPORT
++#  define FCL_DEPRECATED_NO_EXPORT FCL_NO_EXPORT FCL_DEPRECATED
++#endif
++
++/* NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if) */
++#if 0 /* DEFINE_NO_DEPRECATED */
++#  ifndef FCL_NO_DEPRECATED
++#    define FCL_NO_DEPRECATED
++#  endif
++#endif
++
++#endif /* FCL_EXPORT_H */
+--- /dev/null
++++ b/include/fcl/fcl.h
+@@ -0,0 +1,132 @@
++/*
++ * Software License Agreement (BSD License)
++ *
++ *  Copyright (c) 2016, Open Source Robotics Foundation
++ *  Copyright (c) 2020, Toyota Research Institute, Inc.
++ *  All rights reserved.
++ *
++ *  Redistribution and use in source and binary forms, with or without
++ *  modification, are permitted provided that the following conditions
++ *  are met:
++ *
++ *   * Redistributions of source code must retain the above copyright
++ *     notice, this list of conditions and the following disclaimer.
++ *   * Redistributions in binary form must reproduce the above
++ *     copyright notice, this list of conditions and the following
++ *     disclaimer in the documentation and/or other materials provided
++ *     with the distribution.
++ *   * Neither the name of the copyright holder nor the names of its
++ *     contributors may be used to endorse or promote products derived
++ *     from this software without specific prior written permission.
++ *
++ *  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
++ *  "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
++ *  LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS
++ *  FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE
++ *  COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
++ *  INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
++ *  BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
++ *  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
++ *  CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
++ *  LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
++ *  ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
++ *  POSSIBILITY OF SUCH DAMAGE.
++ */
++
++/** @author Jeongseok Lee <jslee02@gmail.com> */
++
++// GENERATED FILE DO NOT EDIT.
++
++#ifndef FCL_FCL_H_
++#define FCL_FCL_H_
++
++#include "fcl/config.h"
++#include "fcl/export.h"
++#include "fcl/broadphase/broadphase_SSaP.h"
++#include "fcl/broadphase/broadphase_SaP.h"
++#include "fcl/broadphase/broadphase_bruteforce.h"
++#include "fcl/broadphase/broadphase_collision_manager.h"
++#include "fcl/broadphase/broadphase_continuous_collision_manager.h"
++#include "fcl/broadphase/broadphase_dynamic_AABB_tree.h"
++#include "fcl/broadphase/broadphase_dynamic_AABB_tree_array.h"
++#include "fcl/broadphase/broadphase_interval_tree.h"
++#include "fcl/broadphase/broadphase_spatialhash.h"
++#include "fcl/broadphase/default_broadphase_callbacks.h"
++#include "fcl/common/exception.h"
++#include "fcl/common/profiler.h"
++#include "fcl/common/time.h"
++#include "fcl/common/types.h"
++#include "fcl/common/unused.h"
++#include "fcl/common/warning.h"
++#include "fcl/geometry/bvh/BVH_internal.h"
++#include "fcl/geometry/bvh/BVH_model.h"
++#include "fcl/geometry/bvh/BVH_utility.h"
++#include "fcl/geometry/bvh/BV_node.h"
++#include "fcl/geometry/bvh/BV_node_base.h"
++#include "fcl/geometry/collision_geometry.h"
++#include "fcl/geometry/geometric_shape_to_BVH_model.h"
++#include "fcl/geometry/octree/octree.h"
++#include "fcl/geometry/shape/box.h"
++#include "fcl/geometry/shape/capsule.h"
++#include "fcl/geometry/shape/cone.h"
++#include "fcl/geometry/shape/convex.h"
++#include "fcl/geometry/shape/cylinder.h"
++#include "fcl/geometry/shape/ellipsoid.h"
++#include "fcl/geometry/shape/halfspace.h"
++#include "fcl/geometry/shape/plane.h"
++#include "fcl/geometry/shape/shape_base.h"
++#include "fcl/geometry/shape/sphere.h"
++#include "fcl/geometry/shape/triangle_p.h"
++#include "fcl/geometry/shape/utility.h"
++#include "fcl/math/bv/AABB.h"
++#include "fcl/math/bv/OBB.h"
++#include "fcl/math/bv/OBBRSS.h"
++#include "fcl/math/bv/RSS.h"
++#include "fcl/math/bv/kDOP.h"
++#include "fcl/math/bv/kIOS.h"
++#include "fcl/math/bv/utility.h"
++#include "fcl/math/constants.h"
++#include "fcl/math/geometry.h"
++#include "fcl/math/motion/bv_motion_bound_visitor.h"
++#include "fcl/math/motion/interp_motion.h"
++#include "fcl/math/motion/motion_base.h"
++#include "fcl/math/motion/screw_motion.h"
++#include "fcl/math/motion/spline_motion.h"
++#include "fcl/math/motion/taylor_model/interval.h"
++#include "fcl/math/motion/taylor_model/interval_matrix.h"
++#include "fcl/math/motion/taylor_model/interval_vector.h"
++#include "fcl/math/motion/taylor_model/taylor_matrix.h"
++#include "fcl/math/motion/taylor_model/taylor_model.h"
++#include "fcl/math/motion/taylor_model/taylor_vector.h"
++#include "fcl/math/motion/taylor_model/time_interval.h"
++#include "fcl/math/motion/tbv_motion_bound_visitor.h"
++#include "fcl/math/motion/translation_motion.h"
++#include "fcl/math/motion/triangle_motion_bound_visitor.h"
++#include "fcl/math/rng.h"
++#include "fcl/math/sampler/sampler_base.h"
++#include "fcl/math/sampler/sampler_r.h"
++#include "fcl/math/sampler/sampler_se2.h"
++#include "fcl/math/sampler/sampler_se2_disk.h"
++#include "fcl/math/sampler/sampler_se3_euler.h"
++#include "fcl/math/sampler/sampler_se3_euler_ball.h"
++#include "fcl/math/sampler/sampler_se3_quat.h"
++#include "fcl/math/sampler/sampler_se3_quat_ball.h"
++#include "fcl/math/triangle.h"
++#include "fcl/math/variance3.h"
++#include "fcl/narrowphase/collision.h"
++#include "fcl/narrowphase/collision_object.h"
++#include "fcl/narrowphase/collision_request.h"
++#include "fcl/narrowphase/collision_result.h"
++#include "fcl/narrowphase/contact.h"
++#include "fcl/narrowphase/contact_point.h"
++#include "fcl/narrowphase/continuous_collision.h"
++#include "fcl/narrowphase/continuous_collision_object.h"
++#include "fcl/narrowphase/continuous_collision_request.h"
++#include "fcl/narrowphase/continuous_collision_result.h"
++#include "fcl/narrowphase/cost_source.h"
++#include "fcl/narrowphase/distance.h"
++#include "fcl/narrowphase/distance_request.h"
++#include "fcl/narrowphase/distance_result.h"
++#include "fcl/narrowphase/gjk_solver_type.h"
++
++#endif  // FCL_FCL_H_

@@ -1,0 +1,176 @@
+[package.upstream]
+url = "https://github.com/flexible-collision-library/fcl/archive/refs/tags/0.7.0.tar.gz"
+checksum = "sha256:90409e940b24045987506a6b239424a4222e2daf648c86dd146cbcb692ebdcbc"
+format = "tar.gz"
+strip-prefix = "fcl-0.7.0"
+# Patch 0001 adds include/fcl/config.h, export.h and fcl.h as CMake 4.4.5
+# writes them for the static library with OctoMap 1.10.1, with the
+# deprecation attribute CMake writes for Windows (export.h) left to the
+# preprocessor.  Notices that upstream's files lack are in
+# THIRD_PARTY_NOTICES (patch 0002).
+patches = [
+  "patches/0001-add-the-generated-config-export-and-fcl-headers.patch",
+  "patches/0002-add-third-party-notices.patch",
+]
+
+[package]
+name = "cabin-ports/fcl"
+version = "0.7.0"
+# BSD-3-Clause: fcl's LICENSE, and libccd's for the code copied from it.
+# Zlib: Bullet's, for the GJK and EPA fcl rewrote from its btGjkEpa2.cpp.
+# convexity_based_algorithm/list.h:35-82, five list macros and their
+# comments from libccd, follow the Linux kernel's list.h (GPL-2.0-only)
+# uncredited, of uncertain copyright significance; no term is declared.
+# math/motion/taylor_model/ is "based on code developed by Stephane Redon
+# at UNC and Inria for the CATCH library", whose terms upstream does not
+# give; no term is declared.
+license = "BSD-3-Clause AND Zlib"
+include = ["LICENSE", "THIRD_PARTY_NOTICES", "include", "patches", "src"]
+
+# libccd, Eigen 3.0.5 or later (CMakeLists.txt:160-170) and OctoMap, which
+# FCL_WITH_OCTOMAP turns on by default (:237).  The catalog's ccd is
+# single precision, libccd's default, which upstream builds with
+# (CHANGELOG.md:61); queries through libccd's GJK, MPR and EPA then
+# compute in float.
+[dependencies]
+"cabin-ports/ccd" = "^2.1"
+"cabin-ports/eigen3" = "^5.0"
+"cabin-ports/octomap" = "^1.10"
+
+# The library upstream's CMake builds from every src/**/*.cpp, static, as
+# FCL_STATIC_LIBRARY makes it by default with MSVC (CMakeLists.txt:76-80).
+# Not ported: the tests and the docs.  Not reproduced, since Cabin drops a
+# dependency's raw compiler flags: the public -mfpmath=sse -msse through
+# -mssse3 of FCL_USE_X64_SSE on x86 GCC and Clang (:84, :110;
+# src/CMakeLists.txt:51), which only let the compiler emit those
+# instructions (FCL_HAVE_SSE stays 0), and MSVC's /bigobj
+# (CMakeModules/CompilerSettings.cmake:67), so an MSVC consumer whose
+# translation unit exceeds the object file's section limit (C1128) adds
+# /bigobj itself.
+[target.fcl]
+type = "library"
+sources = [
+  "src/broadphase/broadphase_SSaP.cpp",
+  "src/broadphase/broadphase_SaP.cpp",
+  "src/broadphase/broadphase_bruteforce.cpp",
+  "src/broadphase/broadphase_collision_manager.cpp",
+  "src/broadphase/broadphase_continuous_collision_manager.cpp",
+  "src/broadphase/broadphase_dynamic_AABB_tree.cpp",
+  "src/broadphase/broadphase_dynamic_AABB_tree_array.cpp",
+  "src/broadphase/broadphase_interval_tree.cpp",
+  "src/broadphase/broadphase_spatialhash.cpp",
+  "src/broadphase/detail/interval_tree.cpp",
+  "src/broadphase/detail/interval_tree_node.cpp",
+  "src/broadphase/detail/morton.cpp",
+  "src/broadphase/detail/simple_interval.cpp",
+  "src/broadphase/detail/spatial_hash.cpp",
+  "src/common/detail/profiler.cpp",
+  "src/common/exception.cpp",
+  "src/common/time.cpp",
+  "src/geometry/bvh/BVH_utility.cpp",
+  "src/geometry/bvh/BV_node_base.cpp",
+  "src/geometry/bvh/detail/BVH_front.cpp",
+  "src/geometry/collision_geometry.cpp",
+  "src/geometry/octree/octree.cpp",
+  "src/geometry/shape/box.cpp",
+  "src/geometry/shape/capsule.cpp",
+  "src/geometry/shape/cone.cpp",
+  "src/geometry/shape/convex.cpp",
+  "src/geometry/shape/cylinder.cpp",
+  "src/geometry/shape/ellipsoid.cpp",
+  "src/geometry/shape/halfspace.cpp",
+  "src/geometry/shape/plane.cpp",
+  "src/geometry/shape/shape_base.cpp",
+  "src/geometry/shape/sphere.cpp",
+  "src/geometry/shape/triangle_p.cpp",
+  "src/geometry/shape/utility.cpp",
+  "src/math/bv/AABB.cpp",
+  "src/math/bv/OBB.cpp",
+  "src/math/bv/OBBRSS.cpp",
+  "src/math/bv/RSS.cpp",
+  "src/math/bv/kDOP.cpp",
+  "src/math/bv/kIOS.cpp",
+  "src/math/bv/utility.cpp",
+  "src/math/constants.cpp",
+  "src/math/detail/polysolver.cpp",
+  "src/math/detail/project.cpp",
+  "src/math/detail/seed.cpp",
+  "src/math/geometry.cpp",
+  "src/math/motion/interp_motion.cpp",
+  "src/math/motion/motion_base.cpp",
+  "src/math/motion/screw_motion.cpp",
+  "src/math/motion/spline_motion.cpp",
+  "src/math/motion/taylor_model/interval.cpp",
+  "src/math/motion/taylor_model/interval_matrix.cpp",
+  "src/math/motion/taylor_model/interval_vector.cpp",
+  "src/math/motion/taylor_model/taylor_matrix.cpp",
+  "src/math/motion/taylor_model/taylor_model.cpp",
+  "src/math/motion/taylor_model/taylor_vector.cpp",
+  "src/math/motion/taylor_model/time_interval.cpp",
+  "src/math/motion/translation_motion.cpp",
+  "src/math/motion/triangle_motion_bound_visitor.cpp",
+  "src/math/rng.cpp",
+  "src/math/sampler/sampler_base.cpp",
+  "src/math/sampler/sampler_se2.cpp",
+  "src/math/sampler/sampler_se2_disk.cpp",
+  "src/math/sampler/sampler_se3_euler.cpp",
+  "src/math/sampler/sampler_se3_euler_ball.cpp",
+  "src/math/sampler/sampler_se3_quat.cpp",
+  "src/math/sampler/sampler_se3_quat_ball.cpp",
+  "src/math/triangle.cpp",
+  "src/math/variance3.cpp",
+  "src/narrowphase/collision.cpp",
+  "src/narrowphase/collision_object.cpp",
+  "src/narrowphase/collision_request.cpp",
+  "src/narrowphase/collision_result.cpp",
+  "src/narrowphase/contact.cpp",
+  "src/narrowphase/contact_point.cpp",
+  "src/narrowphase/continuous_collision.cpp",
+  "src/narrowphase/continuous_collision_object.cpp",
+  "src/narrowphase/continuous_collision_request.cpp",
+  "src/narrowphase/continuous_collision_result.cpp",
+  "src/narrowphase/cost_source.cpp",
+  "src/narrowphase/detail/convexity_based_algorithm/epa.cpp",
+  "src/narrowphase/detail/convexity_based_algorithm/gjk.cpp",
+  "src/narrowphase/detail/convexity_based_algorithm/gjk_libccd.cpp",
+  "src/narrowphase/detail/convexity_based_algorithm/minkowski_diff.cpp",
+  "src/narrowphase/detail/failed_at_this_configuration.cpp",
+  "src/narrowphase/detail/gjk_solver_indep.cpp",
+  "src/narrowphase/detail/gjk_solver_libccd.cpp",
+  "src/narrowphase/detail/primitive_shape_algorithm/box_box.cpp",
+  "src/narrowphase/detail/primitive_shape_algorithm/capsule_capsule.cpp",
+  "src/narrowphase/detail/primitive_shape_algorithm/halfspace.cpp",
+  "src/narrowphase/detail/primitive_shape_algorithm/intersect.cpp",
+  "src/narrowphase/detail/primitive_shape_algorithm/plane.cpp",
+  "src/narrowphase/detail/primitive_shape_algorithm/sphere_box.cpp",
+  "src/narrowphase/detail/primitive_shape_algorithm/sphere_capsule.cpp",
+  "src/narrowphase/detail/primitive_shape_algorithm/sphere_cylinder.cpp",
+  "src/narrowphase/detail/primitive_shape_algorithm/sphere_sphere.cpp",
+  "src/narrowphase/detail/primitive_shape_algorithm/sphere_triangle.cpp",
+  "src/narrowphase/detail/primitive_shape_algorithm/triangle_distance.cpp",
+  "src/narrowphase/detail/traversal/collision/collision_traversal_node_base.cpp",
+  "src/narrowphase/detail/traversal/collision/mesh_collision_traversal_node.cpp",
+  "src/narrowphase/detail/traversal/collision/mesh_continuous_collision_traversal_node.cpp",
+  "src/narrowphase/detail/traversal/collision_node.cpp",
+  "src/narrowphase/detail/traversal/distance/conservative_advancement_stack_data.cpp",
+  "src/narrowphase/detail/traversal/distance/distance_traversal_node_base.cpp",
+  "src/narrowphase/detail/traversal/distance/mesh_conservative_advancement_traversal_node.cpp",
+  "src/narrowphase/detail/traversal/distance/mesh_distance_traversal_node.cpp",
+  "src/narrowphase/detail/traversal/traversal_node_base.cpp",
+  "src/narrowphase/detail/traversal/traversal_recurse.cpp",
+  "src/narrowphase/distance.cpp",
+  "src/narrowphase/distance_request.cpp",
+  "src/narrowphase/distance_result.cpp",
+]
+include-dirs = ["include"]
+# Upstream compiles C++11 (CompilerSettings.cmake:36-56); Eigen 5, whose
+# headers fcl's include, requires C++14.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++14"
+links = "fcl"
+# fcl's public headers include <ccd/ccd.h>, Eigen and octomap/octomap.h.
+deps = [
+  { name = "cabin-ports/ccd", public = true },
+  { name = "cabin-ports/eigen3", public = true },
+  { name = "cabin-ports/octomap:octomap", public = true },
+]
