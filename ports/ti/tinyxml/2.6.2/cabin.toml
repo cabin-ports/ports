@@ -1,0 +1,43 @@
+[package.upstream]
+url = "https://downloads.sourceforge.net/project/tinyxml/tinyxml/2.6.2/tinyxml_2_6_2.tar.gz"
+checksum = "sha256:15bdfdcec58a7da30adc87ac2b078e4417dbe5392f3afb719f9ba6d062645593"
+format = "tar.gz"
+strip-prefix = "tinyxml"
+
+# 2.6.2 (2011) is the last release and upstream is unmaintained.  Two
+# parser bugs have no upstream fix and are not patched here:
+# CVE-2021-42260 (an infinite loop in TiXmlParsingData::Stamp) and
+# CVE-2023-34194 (an assertion failure in TiXmlDeclaration::Parse).
+# Do not parse untrusted XML with it; tinyxml2 is the maintained successor.
+[package]
+name = "cabin-ports/tinyxml"
+version = "2.6.2"
+# Every source carries the zlib notice; readme.txt repeats it.
+license = "Zlib"
+# The rest of the archive is the xmltest harness with its Makefile and
+# data, the changelog, generated docs, and Visual Studio projects.
+include = [
+  "readme.txt",
+  "tinystr.cpp",
+  "tinystr.h",
+  "tinyxml.cpp",
+  "tinyxml.h",
+  "tinyxmlerror.cpp",
+  "tinyxmlparser.cpp",
+]
+
+# The library sources of upstream's Makefile (all of SRCS but xmltest.cpp).
+[target.tinyxml]
+type = "library"
+sources = ["tinystr.cpp", "tinyxml.cpp", "tinyxmlerror.cpp", "tinyxmlparser.cpp"]
+include-dirs = ["."]
+cxx-standard = "c++17"
+# Pre-C++11 code; the headers need nothing newer.
+interface-cxx-standard = "c++98"
+# TIXML_USE_STL selects std::string and the stream operators over the
+# bundled TiXmlString (tinystr.cpp then compiles to nothing).  It changes
+# the public classes, so consumers must see it too.  Upstream leaves the
+# choice to the user; vcpkg and Conan Center both build with it.
+defines = ["TIXML_USE_STL"]
+interface-defines = ["TIXML_USE_STL"]
+links = "tinyxml"
