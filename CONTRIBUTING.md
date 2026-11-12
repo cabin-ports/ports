@@ -14,11 +14,11 @@ native `cabin.toml` - to Cabin's build model.  The catalog is curated, and found
 - **not** Cabin's public registry;
 - **not** a submission queue for arbitrary C/C++ libraries;
 - **not** a mechanism for distributing pre-built binaries or compiled artifacts;
-- **not** a workaround for missing build-script support - they only describe libraries whose
+- **not** a place for build scripts - they only describe libraries whose
   source layout fits Cabin's existing target model (a list of sources plus include directories),
   optionally placing a prebuilt file with a static `[[package.upstream.copy]]` step or correcting
   one with a declared byte-exact patch.  Ports that need code generation or a configure run do
-  not belong here until the build graph runs generated actions.
+  not belong here until the pinned Cabin runs the build script of a registry package.
 
 A foundation port should be **retired** once its upstream project ships and maintains a native
 `cabin.toml`.
