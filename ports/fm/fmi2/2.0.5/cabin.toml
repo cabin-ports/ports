@@ -1,0 +1,21 @@
+[package.upstream]
+# The release zip ConanCenter pins; it has no top directory.
+url = "https://github.com/modelica/fmi-standard/releases/download/v2.0.5/FMI-Standard-2.0.5.zip"
+checksum = "sha256:2695efc7f3aac3443957b0784880e16eec84013558995547f5d706cbf2104909"
+format = "zip"
+
+# The zip also holds the specification (a PDF, CC-BY-SA-4.0) and the XML
+# schemas of an FMU's modelDescription.xml, which no C or C++ build reads;
+# only the C headers are packaged.
+[package]
+name = "cabin-ports/fmi2"
+version = "2.0.5"
+license = "BSD-2-Clause"
+include = ["LICENSE.txt", "headers"]
+
+[target.fmi2]
+type = "header-only"
+include-dirs = ["headers"]
+# The headers use nothing beyond C89 and C++98.
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
