@@ -3,6 +3,10 @@ url = "https://github.com/boostorg/multi_array/archive/refs/tags/boost-1.92.0.ta
 checksum = "sha256:94db0d8475d9f5a7645519a9bac1988e9fa0f7c46b5c54bc512ee543893520f1"
 format = "tar.gz"
 strip-prefix = "multi_array-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-multi-array"
@@ -16,12 +20,14 @@ include = [
   ".gitattributes",
   ".travis.yml",
   "CMakeLists.txt",
+  "LICENSE_1_0.txt",
   "appveyor.yml",
   "build.jam",
   "example",
   "include",
   "index.html",
   "meta",
+  "patches",
   "test",
 ]
 

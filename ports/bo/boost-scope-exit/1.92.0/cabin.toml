@@ -3,6 +3,10 @@ url = "https://github.com/boostorg/scope_exit/archive/refs/tags/boost-1.92.0.tar
 checksum = "sha256:f40580cba6de47195f686e8da70298097acf93aecf98fd52e37e2da4de3789c4"
 format = "tar.gz"
 strip-prefix = "scope_exit-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-scope-exit"

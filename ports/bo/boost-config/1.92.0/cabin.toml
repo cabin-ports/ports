@@ -3,7 +3,13 @@ url = "https://github.com/boostorg/config/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:b4171037f13373203ba79cbc141d612982052283e696a315185ab5bea46102a0"
 format = "tar.gz"
 strip-prefix = "config-boost-1.92.0"
-patches = ["patches/0001-disable-msvc-auto-linking.patch"]
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = [
+  "patches/0001-disable-msvc-auto-linking.patch",
+  "patches/0002-add-the-boost-software-license-text.patch",
+]
 
 [package]
 name = "cabin-ports/boost-config"

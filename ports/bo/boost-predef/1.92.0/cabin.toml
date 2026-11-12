@@ -3,6 +3,10 @@ url = "https://github.com/boostorg/predef/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:4c870bcf7f547f3e3d1db26700b078a33f87c4c8232cd1c8d89ec82be6b54130"
 format = "tar.gz"
 strip-prefix = "predef-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-predef"
@@ -15,6 +19,7 @@ include = [
   ".gitattributes",
   ".gitignore",
   "CMakeLists.txt",
+  "LICENSE_1_0.txt",
   "appveyor.yml",
   "azure-pipelines.yml",
   "build.jam",
@@ -22,6 +27,7 @@ include = [
   "include",
   "index.html",
   "meta",
+  "patches",
   "test",
   "tools",
 ]

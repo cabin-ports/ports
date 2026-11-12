@@ -3,6 +3,10 @@ url = "https://github.com/boostorg/winapi/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:09993abc4ba7b8238e9068983cda9db12b0e3ee39c8aed8e21162e98d0a3ad4e"
 format = "tar.gz"
 strip-prefix = "winapi-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-winapi"

@@ -3,6 +3,10 @@ url = "https://github.com/boostorg/filesystem/archive/refs/tags/boost-1.92.0.tar
 checksum = "sha256:40789a21ec8105cfe788edd8eb90bf4be25ba300836b699e048d3c147e3b95dd"
 format = "tar.gz"
 strip-prefix = "filesystem-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-filesystem"
@@ -15,6 +19,7 @@ include = [
   ".github",
   ".gitignore",
   "CMakeLists.txt",
+  "LICENSE_1_0.txt",
   "README.md",
   "appveyor.yml",
   "bug",
@@ -44,6 +49,7 @@ include = [
   "include",
   "index.html",
   "meta",
+  "patches",
   "src",
   "test",
 ]

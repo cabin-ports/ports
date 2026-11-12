@@ -3,6 +3,10 @@ url = "https://github.com/boostorg/variant/archive/refs/tags/boost-1.92.0.tar.gz
 checksum = "sha256:09fb1f91da2214eac22ce4840c7fdef6404af2e481a9aa184d891d704c7318ae"
 format = "tar.gz"
 strip-prefix = "variant-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-variant"
