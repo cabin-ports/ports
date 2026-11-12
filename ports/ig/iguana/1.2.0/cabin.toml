@@ -1,0 +1,91 @@
+[package.upstream]
+# The 1.2.0 tag archive, the bytes vcpkg's iguana port pins (SHA-512,
+# REF ${VERSION}); the release has no assets.
+url = "https://github.com/qicosmos/iguana/archive/refs/tags/1.2.0.tar.gz"
+checksum = "sha256:29ad1ff853a278df0b1598db992e1507167bd4521b232a55e360928cf751a9af"
+format = "tar.gz"
+strip-prefix = "iguana-1.2.0"
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+# Apache-2.0: iguana's LICENSE.
+# MIT: detail/itoa.hpp, and code from RapidJSON, Bjoern Hoehrmann's UTF-8
+#   decoder, reflect-cpp and RapidXml (its MIT alternative).
+# MIT WITH fmt-exception: code from glaze.
+# Apache-2.0 WITH LLVM-exception OR BSL-1.0: detail/dragonbox.h and
+#   dragonbox_to_chars.h, used under the Apache alternative, whose base
+#   text is LICENSE.
+# BSD-3-Clause: code from Protocol Buffers and msp430-libc.
+# CC0-1.0: tl::expected in ylt/util/expected.hpp.
+# CC-BY-SA-3.0: a Stack Overflow answer (expected.hpp) and cppreference's
+#   std::unreachable (ylt/reflection/template_switch.hpp).
+# detail/fast_float.h is Apache-2.0 or MIT, both already terms.
+[package]
+name = "cabin-ports/iguana"
+version = "1.2.0"
+license = "Apache-2.0 AND MIT AND MIT WITH fmt-exception AND (Apache-2.0 WITH LLVM-exception OR BSL-1.0) AND BSD-3-Clause AND CC0-1.0 AND CC-BY-SA-3.0"
+include = ["LICENSE", "THIRD_PARTY_NOTICES", "iguana", "patches"]
+
+# The archive also vendors an older frozen (frozen/, reformatted, without
+# 1.2.0's bits/mpl.h) that the headers reach as "frozen/*.h" through the
+# include path (field_reflection.hpp:5-6).  As vcpkg's port does, the
+# package leaves it out and takes cabin-ports/frozen, found the same way.
+[dependencies]
+"cabin-ports/frozen" = "^1.2"
+
+# Upstream's CMakeLists.txt builds only tests, examples and benchmarks;
+# the library is the iguana/ headers, which include one another as
+# "iguana/..." from the archive root (iguana/ylt/reflection/
+# member_count.hpp:12), so the root is the include directory.  Consumers
+# need C++17 (CMakeLists.txt:27-28; README.md:3) and GCC 9, Clang 11 or
+# MSVC 2019 or later (the usage guide in lang/, :22): under GCC 8,
+# ylt/reflection/template_string.hpp:11-12 leaves out the type_string
+# that member_names.hpp:331 calls.  The protobuf reader and writer need
+# MSVC 19.21 or later: below it, detail/string_resize.hpp:16, :78 drop
+# the detail::resize they call (pb_writer.hpp:758, pb_reader.hpp:76).
+#
+# Like upstream, the headers keep their own fast_float 3.4.0
+# (detail/fast_float.h) and tl::expected 1.0.1 (ylt/util/expected.hpp,
+# used unless <ylt/util/expected.hpp> is on the include path) under the
+# original include guards and namespaces, fast_float and tl.  With
+# cabin-ports/fast_float or cabin-ports/tl-expected in the same program,
+# a translation unit gets whichever copy it includes first, and the
+# program has two definitions of the same entities, an ODR violation.
+#
+# MSVC reports __cplusplus as 199711L without /Zc:__cplusplus, which
+# upstream's CMakeLists.txt sets (with /bigobj) for its own targets.
+# Cabin passes neither, and a registry package cannot pass flags to its
+# consumers.  At C++20, headers that test __cplusplus (define.h:24-25,
+# detail/traits.hpp, util.hpp, json_reader.hpp,
+# ylt/reflection/member_names.hpp and member_value.hpp) then take their
+# C++17 branches, without the [[likely]] hints, std::span support or the
+# get<"name">() accessors.  A consumer that wants them, or whose
+# translation unit outgrows the default object format (C1128), adds the
+# flags to its own build.  Below C++20, MSVC's countr_zero (define.h:43-60)
+# has bodies only for x64 and x86, so ARM64 builds stop at C4716.  The
+# JSON and XML scanners load eight bytes at a time through a uint64_t
+# pointer at any offset and take the first match from the low byte
+# (json_util.hpp:108-111, xml_util.hpp:260-267), so they assume a
+# little-endian target that tolerates unaligned loads; an alignment
+# sanitizer reports those loads as undefined behavior.
+#
+# version.hpp still says 1.0.5 (IGUANA_VERSION 100005).  vcpkg rewrites
+# it to 100200; the package keeps upstream's header, as cabin-ports/frozen
+# keeps its own stale version.h.
+# Known upstream issue: the JSON and YAML readers decode each \u escape
+# on its own (json_reader.hpp:49-56, yaml_reader.hpp:49-50), so a
+# surrogate pair, which the JSON writer emits for a character above
+# U+FFFF, reads back as two three-byte sequences rather than UTF-8; raw
+# UTF-8 reads back intact.  Writing INT64_MIN negates it in a signed
+# long long (detail/itoa.hpp:284), which is undefined behavior.
+# Left to consumers, as upstream does: THROW_UNKNOWN_KEY (the readers
+# throw on a key the struct lacks instead of skipping it; upstream's
+# CMakeLists.txt sets it for its tests), SEQUENTIAL_PARSE,
+# IGUANA_ENABLE_PMR, XML_ESCAPE_UNICODE and XML_ATTR_USE_APOS.  Not
+# ported: the vendored frozen/ and rapidxml/, the tests, examples,
+# benchmarks, scripts and tools.
+[target.iguana]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++17"
+deps = [{ name = "cabin-ports/frozen", public = true }]
