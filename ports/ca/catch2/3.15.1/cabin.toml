@@ -6,6 +6,18 @@ strip-prefix = "Catch2-3.15.1"
 [package]
 name = "cabin-ports/catch2"
 version = "3.15.1"
+license = "BSL-1.0"
+# Ships only the amalgamation the target builds: tools/ (GPL-3.0), CMake/
+# (CMake-codecov) and extras/Catch.cmake and CatchAddTests.cmake (Kitware's
+# BSD-3-Clause) point to licence texts upstream does not ship.  Two credited
+# blocks in extras/catch_amalgamated.cpp ship as is, too slight or
+# functional to carry copyright: isDebuggerActive on macOS (:3941-3975),
+# "taken directly from" Apple's Technical Q&A QA1361, is the
+# sysctl(KERN_PROC_PID) query and P_TRACED test the API dictates, with the
+# note's short step comments; erf_inv (:248-322), from the code accompanying
+# Mike Giles's "Approximating the erfinv function" (GPU Computing Gems,
+# Volume 2), is a Horner evaluation of his fitted polynomial coefficients.
+include = ["LICENSE.txt", "README.md", "extras/catch_amalgamated.cpp", "extras/catch_amalgamated.hpp"]
 
 # Catch2 is consumed through its upstream-published amalgamation
 # (extras/catch_amalgamated.cpp + .hpp): the split src/catch2/ tree
