@@ -121,3 +121,35 @@ grant or the ruling in its restored `cabin.toml` and drops what that file says a
   Copyright Statement in `NOTICE.RFC`.
 - **Question.**  Whether the quoted grammar may be redistributed, or is not protected expression.
   The version returns when a grant is found or the maintainers rule the grammar unprotected.
+
+## Held before entering the catalog
+
+The version below was proposed and held before it merged, so no commit removed it: reinstating
+it starts from the pull request its section names.
+
+### fcl 0.7.0
+
+Proposed in #309 (head `5f9c47a`) and held awaiting confirmation of license and rights.
+
+- **Code.**  Two blocks of fcl 0.7.0 (the `0.7.0` tag archive, sha256
+  `90409e940b24045987506a6b239424a4222e2daf648c86dd146cbcb692ebdcbc`) correspond to PQP 1.3 by
+  Eric Larsen and Stefan Gottschalk (UNC Chapel Hill), compared at
+  GammaUNC/PQP@713de5b70dd1849b915f6412330078a9814e01ab.
+  `include/fcl/math/bv/RSS-inl.h:449-1935` (`clipToRange`, `segCoords`, `inVoronoi`, and two
+  `rectDistance` overloads) follows PQP's `src/RectDist.h:48-751`: the three helpers match
+  statement for statement, and the first `rectDistance` keeps PQP's local names, makes the same
+  32 `InVoronoi` and 16 `SegCoords` calls in the same order, and contains all 18 distinct comment
+  lines of PQP's `RectDist`.  `include/fcl/math/geometry-inl.h:475-562` (`eigen_old`) follows
+  PQP's `src/MatVec.h:788-871` (`Meigen`, which PQP labels "from Numerical Recipes in C") in
+  local names, loop bounds, tests, and the error message; fcl's bounding-volume fitting calls it.
+  Both fcl files carry only fcl's BSD-3-Clause header.  PQP's `LICENSE` permits use, copying,
+  modification, and distribution "for educational, research, and non-profit purposes" with its
+  notice kept.  fcl's sources, `README.md`, `CHANGELOG.md`, and `LICENSE` credit neither PQP nor
+  Numerical Recipes for this code and state no permission.  Not compared:
+  `triangle_distance-inl.h` with PQP's `src/TriDist.cpp`, `obbDisjoint` with PQP's
+  `src/OBB_Disjoint.h`, and `Meigen` with the Numerical Recipes text.
+- **Question.**  Under which terms the code of both blocks may be redistributed.  The version
+  enters the catalog on concrete evidence that explains those terms: a relicensing grant from the
+  right holder, another license that applies, or evidence that the code is not what this
+  comparison assumes.  Adding PQP's notice does not lift its purpose restriction, and upstream's
+  BSD-3-Clause declaration does not settle the question.
