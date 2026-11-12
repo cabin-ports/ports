@@ -18,7 +18,7 @@ native `cabin.toml` - to Cabin's build model.  The catalog is curated, and found
   source layout fits Cabin's existing target model (a list of sources plus include directories),
   optionally placing a prebuilt file with a static `[[package.upstream.copy]]` step or correcting
   one with a declared byte-exact patch.  Ports that need code generation or a configure run do
-  not belong here until the pinned Cabin runs the build script of a registry package.
+  not belong here.
 
 A foundation port should be **retired** once its upstream project ships and maintains a native
 `cabin.toml`.
