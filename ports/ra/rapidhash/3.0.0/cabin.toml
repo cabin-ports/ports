@@ -1,0 +1,29 @@
+[package.upstream]
+# The commit upstream's tag rapidhash_v3 names, the archive vcpkg pins.
+url = "https://github.com/Nicoshev/rapidhash/archive/bc4b4baa48a15ff52ff4725e1ccdcda62815221c.tar.gz"
+checksum = "sha256:b5cfa9d75466acae11704504852b752da2789732cdcfb0666999b2d1a53e97ff"
+format = "tar.gz"
+strip-prefix = "rapidhash-bc4b4baa48a15ff52ff4725e1ccdcda62815221c"
+
+[package]
+name = "cabin-ports/rapidhash"
+version = "3.0.0"
+# Unlicense: rapidhash.h is based on wyhash (rapidhash.h:4), which its
+# author released under the Unlicense.
+license = "MIT AND Unlicense"
+include = ["LICENSE", "rapidhash.h"]
+
+# rapidhash V3, the header vcpkg installs, so consumers include
+# <rapidhash.h>.  C needs C99 (<stdint.h>, inline); C++ needs C++11
+# (noexcept, constexpr).  Macros a consumer defines before the include
+# select its variants (rapidhash.h:57-123); RAPIDHASH_PROTECTED changes
+# the hashes.  The header has no include guard, so a translation unit
+# includes it once, and in C++ its functions are inline with external
+# linkage, so every translation unit of a program defines the same macros.
+# Not ported: secret.h, wyhash's secret generator, the benchmarks, the
+# collision study and rapidhash V1 under old_version/.
+[target.rapidhash]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
