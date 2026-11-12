@@ -35,6 +35,10 @@ name = "cabin-ports/ccd"
 # Upstream tags this release v2.1 (its build files still say 2.0); Cabin
 # versions have three components.
 version = "2.1.0"
+# BSD-3-Clause, from upstream's BSD-LICENSE.  src/list.h:35-82, five list
+# macros and their comments, follow the Linux kernel's list.h (GPL-2.0-only)
+# uncredited, of uncertain copyright significance; no term is declared.
+license = "BSD-3-Clause"
 include = [
   "BSD-LICENSE",
   "include",
