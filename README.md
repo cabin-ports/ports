@@ -55,12 +55,12 @@ Maintainers will find the CI and Cabin-revision procedures in
 ## Porting principles
 
 - **Stay faithful to upstream.**  A port preserves the library's functionality and intended build
-  semantics.  Patches are limited to what Cabin needs to build it and to license texts or notices
-  the package must carry, never feature changes.
+  semantics.  Patches are limited to what Cabin needs to build it and, where a required notice is
+  missing, one file of third-party notices, never feature changes.
 - **Pin every source.**  Each port names its upstream archive by URL and SHA-256 checksum; floating
   references such as branches or `latest` are rejected.
-- **Respect upstream licenses.**  A port keeps the license and attribution notices its upstream
-  requires, including those of third-party code upstream ships without them.
+- **Respect upstream licenses.**  A port keeps every license and attribution notice that
+  redistribution requires, and adds one only where the package would otherwise lack it.
 - **Prefer native support.**  A port is retired once its upstream project ships and maintains its
   own `cabin.toml`.
 
