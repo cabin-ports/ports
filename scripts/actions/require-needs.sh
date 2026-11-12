@@ -12,16 +12,17 @@ set -euo pipefail
 # job ever lists without its conclusion.
 jobs="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT/jobs?per_page=100")"
 
-# One line per needed job: its name, its `needs` result, then the
-# conclusion of each job of that name (`none` while it has none).
-report="$(jq -r --argjson run "$jobs" '
-  to_entries[] | .key as $job |
-  [$job, .value.result] + [$run.jobs[] | select(.name == $job) | .conclusion // "none"] |
-  join(" ")' <<<"$NEEDS")"
-echo "$report"
+# One row per needed job: its `needs` result and the conclusion of every
+# job of that name in the run.
+rows="$(jq -c --argjson run "$jobs" '
+  [to_entries[] | .key as $job |
+    {job: $job, needs: .value.result,
+      conclusions: [$run.jobs[] | select(.name == $job) | .conclusion]}]' <<<"$NEEDS")"
+jq -c '.[]' <<<"$rows"
 
-# An empty report is one empty line here, which fails too.
-if grep -qvxE '[^ ]+ success success' <<<"$report"; then
+# `jq -e` exits 0 only when this is `true`, so no row, a row that is not
+# all `success`, and a failed `jq` each fail the check.
+if ! jq -e 'length > 0 and all(.[]; .needs == "success" and .conclusions == ["success"])' <<<"$rows" >/dev/null; then
   echo "::error::not every needed job succeeded"
   exit 1
 fi

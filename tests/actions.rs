@@ -602,15 +602,16 @@ mod require_needs {
             }
             let unlisted = deviating(job, "success", &[]);
             assert_eq!(unlisted.status.code(), Some(1), "{job}: unlisted");
-            let twice = deviating(job, "success", &[Some("success"), Some("cancelled")]);
+            let twice = deviating(job, "success", &[Some("success"), Some("success")]);
             assert_eq!(twice.status.code(), Some(1), "{job}: listed twice");
         }
+        // One witness cannot speak for both.
+        let output = deviating("check-linux", "success success", &[]);
+        assert_eq!(output.status.code(), Some(1));
         let output = deviating("check-macos", "success", &[Some("cancelled")]);
         let printed = stdout(&output);
-        assert!(
-            printed.contains("check-macos success cancelled\n"),
-            "{printed}"
-        );
+        let row = r#"{"job":"check-macos","needs":"success","conclusions":["cancelled"]}"#;
+        assert!(printed.contains(row), "{printed}");
         assert!(
             printed.contains("::error::not every needed job succeeded"),
             "{printed}"
