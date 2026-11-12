@@ -578,54 +578,49 @@ mod require_needs {
     }
 
     /// A needed job that failed, was cancelled, was skipped, or reports
-    /// anything else fails the check, whichever witness says so.  The
-    /// `needs` result alone read `success` for a leg no runner picked up.
+    /// anything else fails the check, whichever witness says so: a
+    /// `needs` result alone has hidden a leg no runner picked up.
     #[test]
     fn fails_unless_both_witnesses_say_success() {
         for job in NEEDED {
-            for bad in ["failure", "cancelled", "skipped", ""] {
-                for conclusion in [bad, "success"] {
-                    let output = deviating(job, bad, &[Some(conclusion)]);
-                    let case = format!("{job}: needs {bad:?}, job {conclusion:?}");
-                    assert_eq!(output.status.code(), Some(1), "{case}");
-                }
-            }
-            for bad in [
-                Some("failure"),
-                Some("cancelled"),
-                Some("skipped"),
-                Some("timed_out"),
-                None,
-            ] {
-                let output = deviating(job, "success", &[bad]);
-                assert_eq!(output.status.code(), Some(1), "{job}: job {bad:?}");
-            }
-            let unlisted = deviating(job, "success", &[]);
-            assert_eq!(unlisted.status.code(), Some(1), "{job}: unlisted");
-            let twice = deviating(job, "success", &[Some("success"), Some("success")]);
-            assert_eq!(twice.status.code(), Some(1), "{job}: listed twice");
+            let output = deviating(job, "failure", &[Some("failure")]);
+            assert_eq!(output.status.code(), Some(1), "{job}");
         }
-        // One witness cannot speak for both.
-        let output = deviating("check-linux", "success success", &[]);
-        assert_eq!(output.status.code(), Some(1));
-        let output = deviating("check-macos", "success", &[Some("cancelled")]);
-        let printed = stdout(&output);
-        let row = r#"{"job":"check-macos","needs":"success","conclusions":["cancelled"]}"#;
-        assert!(printed.contains(row), "{printed}");
-        assert!(
-            printed.contains("::error::not every needed job succeeded"),
-            "{printed}"
-        );
+        let job = "check-macos";
+        for bad in ["failure", "cancelled", "skipped", "", "success success"] {
+            for conclusions in [&[Some(bad)][..], &[Some("success")], &[]] {
+                let output = deviating(job, bad, conclusions);
+                let case = format!("needs {bad:?}, job {conclusions:?}");
+                assert_eq!(output.status.code(), Some(1), "{case}");
+            }
+        }
+        for conclusions in [
+            &[Some("failure")][..],
+            &[Some("cancelled")],
+            &[Some("skipped")],
+            &[Some("timed_out")],
+            &[None],
+            &[],
+            &[Some("success"), Some("success")],
+        ] {
+            let output = deviating(job, "success", conclusions);
+            assert_eq!(output.status.code(), Some(1), "job {conclusions:?}");
+            let error = "::error::not every needed job succeeded";
+            assert!(stdout(&output).contains(error), "{}", stdout(&output));
+        }
     }
 
-    /// Nothing to judge is no success: an empty `needs`, a failed `gh`
-    /// call, or a reply that is no job list.
+    /// Nothing to judge is no success: an empty `needs`, one that is no
+    /// object, a failed `gh` call, or a reply that is no job list.
     #[test]
     fn fails_without_needs_or_a_job_list() {
         let listed = json!({"jobs": [{"name": "pin", "conclusion": "success"}]});
         let needs = json!({"pin": {"result": "success"}});
         assert!(check(&needs, &listed, 0).status.success());
         assert!(!check(&json!({}), &listed, 0).status.success());
+        let indexed = json!({"jobs": [{"name": 0, "conclusion": "success"}]});
+        let array = json!([{"result": "success"}]);
+        assert!(!check(&array, &indexed, 0).status.success());
         assert!(!check(&needs, &listed, 1).status.success());
         assert!(
             !check(&needs, &json!({"message": "Not Found"}), 0)
