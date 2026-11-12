@@ -1,0 +1,242 @@
+[package.upstream]
+# The v0.26.0 tag archive, the bytes vcpkg's ggml port pins.
+url = "https://github.com/ggml-org/ggml/archive/refs/tags/v0.26.0.tar.gz"
+checksum = "sha256:3db46896650440531f03fd5b6f29b4dbf4f5b0a4157e6f4be4786a12d8545971"
+format = "tar.gz"
+strip-prefix = "ggml-0.26.0"
+# src/ggml.c:4 includes ggml-version.h, which CMake configures from
+# src/ggml-version.h.in (src/CMakeLists.txt:216).  Patch 0001 adds it as
+# CMake writes it from this archive, which is no git checkout, so the
+# commit is "unknown" (CMakeLists.txt:13-35).
+# Upstream compiles gnu11 and gnu++17, CMake's default dialects for its
+# standards (CMakeLists.txt:289-293); Cabin compiles ISO c11 and c++17,
+# since MSVC has no GNU dialect.  In ISO C GCC rejects plain asm, and in
+# either ISO mode it does not take vector as an AltiVec keyword, while its
+# <altivec.h> redefines C's bool, so patch 0003 spells the RISC-V
+# kernels' compiler barriers __asm__ and the POWER9 vector types __vector,
+# and restores bool after <altivec.h>.  ISO C also turns off GCC's
+# floating-point contraction, so scalar results can differ from upstream's
+# in the last bits.
+patches = [
+  "patches/0001-add-the-generated-version-header.patch",
+  "patches/0002-add-third-party-notices.patch",
+  "patches/0003-use-the-iso-spellings-of-gnu-keywords.patch",
+]
+
+[package]
+name = "cabin-ports/ggml"
+version = "0.26.0"
+# LICENSE is MIT; the MIT code the sources credit to others, the YaRN rope
+# in src/ggml-cpu/ops.cpp and include/ggml-sycl.h, keeps its copyright line.
+# Apache-2.0 is OpenVINO's exp_ps_sve in src/ggml-cpu/vec.h.
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0002).
+license = "MIT AND Apache-2.0"
+include = [
+  "LICENSE",
+  "THIRD_PARTY_NOTICES",
+  "include",
+  "patches",
+  "src/ggml-alloc.c",
+  "src/ggml-backend-dl.cpp",
+  "src/ggml-backend-dl.h",
+  "src/ggml-backend-impl.h",
+  "src/ggml-backend-meta.cpp",
+  "src/ggml-backend-reg.cpp",
+  "src/ggml-backend.cpp",
+  "src/ggml-common.h",
+  "src/ggml-impl.h",
+  "src/ggml-opt.cpp",
+  "src/ggml-quants.c",
+  "src/ggml-quants.h",
+  "src/ggml-threading.cpp",
+  "src/ggml-threading.h",
+  "src/ggml-version.h",
+  "src/ggml.c",
+  "src/ggml.cpp",
+  "src/gguf.cpp",
+  "src/ggml-cpu/amx",
+  "src/ggml-cpu/arch-fallback.h",
+  "src/ggml-cpu/arch/arm",
+  "src/ggml-cpu/arch/loongarch",
+  "src/ggml-cpu/arch/powerpc",
+  "src/ggml-cpu/arch/riscv",
+  "src/ggml-cpu/arch/s390",
+  "src/ggml-cpu/arch/wasm",
+  "src/ggml-cpu/arch/x86",
+  "src/ggml-cpu/binary-ops.cpp",
+  "src/ggml-cpu/binary-ops.h",
+  "src/ggml-cpu/common.h",
+  "src/ggml-cpu/ggml-cpu-impl.h",
+  "src/ggml-cpu/ggml-cpu.c",
+  "src/ggml-cpu/ggml-cpu.cpp",
+  "src/ggml-cpu/hbm.cpp",
+  "src/ggml-cpu/hbm.h",
+  "src/ggml-cpu/ops.cpp",
+  "src/ggml-cpu/ops.h",
+  "src/ggml-cpu/quants.c",
+  "src/ggml-cpu/quants.h",
+  "src/ggml-cpu/repack.cpp",
+  "src/ggml-cpu/repack.h",
+  "src/ggml-cpu/simd-gemm.h",
+  "src/ggml-cpu/simd-mappings.h",
+  "src/ggml-cpu/tiled",
+  "src/ggml-cpu/traits.cpp",
+  "src/ggml-cpu/traits.h",
+  "src/ggml-cpu/unary-ops.cpp",
+  "src/ggml-cpu/unary-ops.h",
+  "src/ggml-cpu/vec.cpp",
+  "src/ggml-cpu/vec.h",
+]
+c-standard = "c11"
+cxx-standard = "c++17"
+
+# The static build vcpkg makes: GGML_NATIVE and every x86 instruction-set
+# option off, so the CPU backend compiles for the platform baseline with no
+# -m or /arch flag (src/ggml-cpu/CMakeLists.txt:288-410), and on Arm with
+# none either (:117-279).  Upstream's three libraries, ggml-base
+# (src/CMakeLists.txt:192-209), ggml-cpu (src/ggml-cpu/CMakeLists.txt:
+# 29-60) and ggml (src/CMakeLists.txt:358-360), are one library here: no
+# header name repeats across their include directories, and the defines
+# private to one of them do nothing in the others' files.  GGML_USE_CPU is
+# read only by ggml-backend-reg.cpp, GGML_USE_CPU_REPACK only by
+# ggml-cpu.cpp, GGML_CPU_GENERIC only by arch-fallback.h, and ggml-base
+# reads GGML_USE_ACCELERATE only around a commented-out define
+# (src/ggml.c:325-329).
+# Not ported: the GPU and accelerator backends (BLAS, CUDA, Metal, OpenCL,
+# Vulkan and the rest, src/CMakeLists.txt:589-605); OpenMP, which upstream
+# uses where it finds it (CMakeLists.txt:248) and vcpkg leaves off, so
+# ggml's own thread pool runs graphs; the llamafile sgemm, KleidiAI and HBM
+# kernels, off by default (CMakeLists.txt:151, 153, 197); GGML_BACKEND_DL
+# and GGML_CPU_ALL_VARIANTS, which need shared libraries; the shared
+# library; and the CMake and pkg-config files.  Not reproduced:
+# HAVE_BUGGY_APPLE_LINKER, which upstream sets only for Apple's ld64
+# 1015.7 (src/CMakeLists.txt:92-100).  Upstream stops for MSVC on Arm64
+# without GGML_NATIVE (src/ggml-cpu/CMakeLists.txt:117-118), and vcpkg
+# turns the CPU backend off there; that platform is not supported here.
+# 32-bit Arm with GCC needs -mfp16-format=ieee, which upstream adds when
+# the compiler takes it (:121-124) and Cabin cannot.
+[target.ggml]
+type = "library"
+sources = [
+  "src/ggml-alloc.c",
+  "src/ggml-backend-dl.cpp",
+  "src/ggml-backend-meta.cpp",
+  "src/ggml-backend-reg.cpp",
+  "src/ggml-backend.cpp",
+  "src/ggml-opt.cpp",
+  "src/ggml-quants.c",
+  "src/ggml-threading.cpp",
+  "src/ggml.c",
+  "src/ggml.cpp",
+  "src/gguf.cpp",
+  "src/ggml-cpu/amx/amx.cpp",
+  "src/ggml-cpu/amx/mmq.cpp",
+  "src/ggml-cpu/binary-ops.cpp",
+  "src/ggml-cpu/ggml-cpu.c",
+  "src/ggml-cpu/ggml-cpu.cpp",
+  "src/ggml-cpu/hbm.cpp",
+  "src/ggml-cpu/ops.cpp",
+  "src/ggml-cpu/quants.c",
+  "src/ggml-cpu/repack.cpp",
+  "src/ggml-cpu/tiled/tiled-kernel.cpp",
+  "src/ggml-cpu/tiled/tiled.cpp",
+  "src/ggml-cpu/traits.cpp",
+  "src/ggml-cpu/unary-ops.cpp",
+  "src/ggml-cpu/vec.cpp",
+]
+include-dirs = ["include"]
+# GGML_SCHED_MAX_COPIES is upstream's default (CMakeLists.txt:188, defined
+# at src/CMakeLists.txt:4); GGML_USE_CPU is public on ggml (:435-436);
+# GGML_USE_CPU_REPACK follows GGML_CPU_REPACK, on by default
+# (src/ggml-cpu/CMakeLists.txt:621-623).
+defines = ["GGML_SCHED_MAX_COPIES=4", "GGML_USE_CPU", "GGML_USE_CPU_REPACK"]
+interface-defines = ["GGML_USE_CPU"]
+# The C headers repeat typedefs and use _Noreturn, both C11; ggml-cpp.h
+# needs C++11.
+interface-c-standard = "c11"
+interface-cxx-standard = "c++11"
+links = "ggml"
+
+# src and src/ggml-cpu, private to the libraries' compiles as in CMake
+# (src/CMakeLists.txt:218, src/ggml-cpu/CMakeLists.txt:62).
+[profile]
+include-dirs = ["src", "src/ggml-cpu"]
+
+# Each architecture's own kernels (src/ggml-cpu/CMakeLists.txt:102-106,
+# 281-285, 419-421, 468-470, 479-484, 559-564, 613-615), which upstream
+# compiles with no flag when GGML_NATIVE is off (GGML_VXE follows it),
+# except three Cabin cannot pass: -msimd128 under Emscripten (:717-719),
+# LoongArch's -march=loongarch64 -mlasx -mlsx (:472-478), and RISC-V's
+# -march=rv64gcv_zfh_zvfh_zicbop_zihintpause (:508-546), from options on
+# by default.  Without them each kernel takes the vector path the
+# compiler's default target enables, or its scalar path.  Only an
+# architecture upstream does not know takes the generic C kernels
+# (:616-618).
+[target.'cfg(any(arch = "x86", arch = "x86_64"))'.sources]
+ggml = ["src/ggml-cpu/arch/x86/quants.c", "src/ggml-cpu/arch/x86/repack.cpp"]
+
+[target.'cfg(any(arch = "arm", arch = "aarch64"))'.sources]
+ggml = ["src/ggml-cpu/arch/arm/quants.c", "src/ggml-cpu/arch/arm/repack.cpp"]
+
+[target.'cfg(arch = "loongarch64")'.sources]
+ggml = ["src/ggml-cpu/arch/loongarch/quants.c"]
+
+[target.'cfg(any(arch = "powerpc", arch = "powerpc64"))'.sources]
+ggml = ["src/ggml-cpu/arch/powerpc/quants.c"]
+
+[target.'cfg(arch = "riscv64")'.sources]
+ggml = ["src/ggml-cpu/arch/riscv/quants.c", "src/ggml-cpu/arch/riscv/repack.cpp"]
+
+[target.'cfg(arch = "s390x")'.sources]
+ggml = ["src/ggml-cpu/arch/s390/quants.c", "src/ggml-cpu/arch/s390/repack.cpp"]
+
+[target.'cfg(any(arch = "wasm32", arch = "wasm64"))'.sources]
+ggml = ["src/ggml-cpu/arch/wasm/quants.c"]
+
+[target.'cfg(not(any(arch = "x86", arch = "x86_64", arch = "arm", arch = "aarch64", arch = "loongarch64", arch = "powerpc", arch = "powerpc64", arch = "riscv64", arch = "s390x", arch = "wasm32", arch = "wasm64")))'.profile]
+defines = ["GGML_CPU_GENERIC"]
+
+# The POSIX and platform feature macros (src/CMakeLists.txt:142-184), and
+# Threads, libm and dl (:378, 612-622); Android's libc provides pthread.
+[target.'cfg(not(any(os = "openbsd", os = "aix")))'.profile]
+defines = ["_XOPEN_SOURCE=600"]
+
+[target.'cfg(os = "linux")'.profile]
+defines = ["_GNU_SOURCE"]
+link-libs = ["m", "pthread", "dl"]
+
+[target.'cfg(os = "android")'.profile]
+defines = ["_GNU_SOURCE"]
+link-libs = ["m", "dl"]
+
+[target.'cfg(any(os = "macos", os = "ios", os = "tvos", os = "dragonfly"))'.profile]
+defines = ["_DARWIN_C_SOURCE"]
+
+[target.'cfg(os = "freebsd")'.profile]
+defines = ["__BSD_VISIBLE"]
+
+[target.'cfg(os = "netbsd")'.profile]
+defines = ["_NETBSD_SOURCE"]
+
+[target.'cfg(os = "openbsd")'.profile]
+defines = ["_XOPEN_SOURCE=700", "_BSD_SOURCE"]
+
+[target.'cfg(all(family = "unix", not(any(os = "linux", os = "android"))))'.profile]
+link-libs = ["m", "pthread"]
+
+# The CPU device reads its name from the registry (src/ggml-cpu/ggml-cpu.cpp:
+# 321-348); CMake links advapi32 by default on Windows, and MSVC does not.
+[target.'cfg(family = "windows")'.profile]
+defines = ["_CRT_SECURE_NO_WARNINGS"]
+link-libs = ["advapi32"]
+
+# Upstream's Debug builds on Linux (src/CMakeLists.txt:7-9).
+[target.'cfg(os = "linux")'.profile.dev]
+defines = ["_GLIBCXX_ASSERTIONS"]
+
+# GGML_ACCELERATE, on by default (CMakeLists.txt:193), has the CPU backend
+# use vDSP on Apple platforms (src/ggml-cpu/CMakeLists.txt:64-77): here on
+# macOS and iOS, the platforms Cabin links frameworks for.
+[target.'cfg(any(os = "macos", os = "ios"))'.profile]
+defines = ["GGML_USE_ACCELERATE", "ACCELERATE_NEW_LAPACK", "ACCELERATE_LAPACK_ILP64"]
+frameworks = ["Accelerate"]

@@ -1,0 +1,109 @@
+--- a/src/ggml-cpu/arch/riscv/quants.c
++++ b/src/ggml-cpu/arch/riscv/quants.c
+@@ -4309,12 +4309,12 @@
+             vint8m4_t q2u = __riscv_vreinterpret_v_u8m4_i8m4(__riscv_vreinterpret_v_u64m4_u8m4(vq2_64));
+             vint8m4_t q2s = __riscv_vreinterpret_v_u8m4_i8m4(__riscv_vreinterpret_v_u64m4_u8m4(vs2_64));
+             vint8m4_t q2_final = __riscv_vmul_vv_i8m4(q2u, q2s, 64);
+-            asm volatile("" ::: "memory");
++            __asm__ volatile("" ::: "memory");
+             vint8m4_t q8v = __riscv_vle8_v_i8m4(q8, 64);
+             q8 += 64;
+ 
+             vint16m8_t prod = __riscv_vwmul_vv_i16m8(q2_final, q8v, 64);
+-            asm volatile("" ::: "memory");
++            __asm__ volatile("" ::: "memory");
+             vint32m1_t zero_vec = __riscv_vmv_v_x_i32m1(0, 1);
+ 
+             int32_t sum0 = __riscv_vmv_x_s_i32m1_i32(__riscv_vwredsum_vs_i16m2_i32m1(
+@@ -4387,14 +4387,14 @@
+ 
+             // Apply signs to get dequantized IQ2 values
+             vint8m4_t q2_final = __riscv_vmul_vv_i8m4(q2u, q2s, 128);
+-            asm volatile("" ::: "memory");
++            __asm__ volatile("" ::: "memory");
+ 
+             // Load corresponding Q8 weights
+             vint8m4_t q8v = __riscv_vle8_v_i8m4(q8, 128);
+             q8 += 128;
+ 
+             vint16m8_t prod = __riscv_vwmul_vv_i16m8(q2_final, q8v, 128);
+-            asm volatile("" ::: "memory");
++            __asm__ volatile("" ::: "memory");
+ 
+             uint8_t sc0 = scales[0];
+             uint8_t sc1 = scales[1];
+@@ -5159,13 +5159,13 @@
+                                  __riscv_vreinterpret_v_u64m4_u8m4(v_s_vals_u64));
+ 
+             vint8m4_t v_q3_signed = __riscv_vmul_vv_i8m4(v_q3_magnitudes, v_s_vals, 64);
+-            asm volatile("" ::: "memory");
++            __asm__ volatile("" ::: "memory");
+             vint8m4_t v_q8 = __riscv_vle8_v_i8m4(q8, 64);
+             q8 += 64;
+ 
+             vint16m8_t v_dot = __riscv_vwmul_vv_i16m8(v_q8, v_q3_signed, 64);
+ 
+-            asm volatile("" ::: "memory");
++            __asm__ volatile("" ::: "memory");
+ 
+             vint16m4_t v_dot_1 = __riscv_vget_v_i16m8_i16m4(v_dot, 0);
+             vint16m4_t v_dot_2 = __riscv_vget_v_i16m8_i16m4(v_dot, 1);
+--- a/src/ggml-cpu/ggml-cpu-impl.h
++++ b/src/ggml-cpu/ggml-cpu-impl.h
+@@ -337,7 +337,11 @@
+ 
+ #ifdef __POWER9_VECTOR__
+ #include <altivec.h>
++#if !defined(__cplusplus) && !defined(__APPLE_ALTIVEC__)
++#undef bool
++#define bool _Bool
+ #endif
++#endif
+ 
+ #if defined(_MSC_VER) || defined(__MINGW32__)
+ #include <intrin.h>
+--- a/src/ggml-cpu/simd-mappings.h
++++ b/src/ggml-cpu/simd-mappings.h
+@@ -691,7 +691,7 @@
+ #define GGML_F32_STEP 32
+ #define GGML_F32_EPR  4
+ 
+-#define GGML_F32x4              vector float
++#define GGML_F32x4              __vector float
+ #define GGML_F32x4_ZERO         {0.0f}
+ #define GGML_F32x4_SET1         vec_splats
+ #define GGML_F32x4_LOAD(p)      vec_xl(0, p)
+@@ -720,7 +720,7 @@
+ }
+ #define GGML_F32x4_REDUCE_4(res, s0, s1, s2, s3)        \
+ {                                                       \
+-    vector float v = vec_add(vec_add(s0, s1),           \
++    __vector float v = vec_add(vec_add(s0, s1),           \
+                              vec_add(s2, s3));          \
+     v = vec_add(v, vec_sld(v, v, 8));                   \
+     v = vec_add(v, vec_sld(v, v, 4));                   \
+@@ -766,7 +766,7 @@
+ #define GGML_BF16_STEP 16
+ #define GGML_BF16_EPR  8
+ 
+-#define GGML_BF16x8         vector unsigned short
++#define GGML_BF16x8         __vector unsigned short
+ #define GGML_BF16x8_ZERO    vec_splats((unsigned short)0)
+ #define GGML_BF16x8_LOAD(p) vec_xl(0, (const unsigned short *)(p))
+ 
+@@ -774,11 +774,11 @@
+ #define GGML_BF16_VEC_ZERO     GGML_BF16x8_ZERO
+ #define GGML_BF16_VEC_LOAD     GGML_BF16x8_LOAD
+ #if defined(__LITTLE_ENDIAN__)
+-#define GGML_BF16_TO_F32_LO(v) ((vector float) vec_mergel(GGML_BF16_VEC_ZERO, (v)))
+-#define GGML_BF16_TO_F32_HI(v) ((vector float) vec_mergeh(GGML_BF16_VEC_ZERO, (v)))
++#define GGML_BF16_TO_F32_LO(v) ((__vector float) vec_mergel(GGML_BF16_VEC_ZERO, (v)))
++#define GGML_BF16_TO_F32_HI(v) ((__vector float) vec_mergeh(GGML_BF16_VEC_ZERO, (v)))
+ #else
+-#define GGML_BF16_TO_F32_LO(v) ((vector float) vec_mergel((v), GGML_BF16_VEC_ZERO))
+-#define GGML_BF16_TO_F32_HI(v) ((vector float) vec_mergeh((v), GGML_BF16_VEC_ZERO))
++#define GGML_BF16_TO_F32_LO(v) ((__vector float) vec_mergel((v), GGML_BF16_VEC_ZERO))
++#define GGML_BF16_TO_F32_HI(v) ((__vector float) vec_mergeh((v), GGML_BF16_VEC_ZERO))
+ #endif
+ #define GGML_BF16_FMA_LO(acc, x, y) \
+     (acc) = GGML_F32x4_FMA((acc), GGML_BF16_TO_F32_LO(x), GGML_BF16_TO_F32_LO(y))
