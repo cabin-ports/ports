@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/catchorg/Clara/archive/refs/tags/v1.1.5.tar.gz"
+checksum = "sha256:767dc1718e53678cbea00977adcd0a8a195802a505aec3c537664cf25a173142"
+format = "tar.gz"
+strip-prefix = "Clara-1.1.5"
+
+[package]
+name = "cabin-ports/clara"
+version = "1.1.5"
+license = "BSL-1.0"
+include = ["LICENSE.txt", "single_include"]
+
+# single_include/clara.hpp is upstream's amalgamation of include/clara.hpp
+# and include/clara_textflow.hpp, the one header its README has consumers
+# include; they write <clara.hpp>.  Upstream is archived; bfgroup/Lyra is
+# its maintained fork.  On Windows an argument starting with '/' is an
+# option too.  Limitations: a missing option or argument marked .required()
+# does not fail the parse (upstream left that check unwritten); and cl
+# reports C++17 in __cplusplus only under /Zc:__cplusplus, so without it
+# the std::optional binding stays off: such a consumer includes <optional>
+# and defines CLARA_CONFIG_OPTIONAL_TYPE as std::optional before clara.hpp.
+[target.clara]
+type = "header-only"
+include-dirs = ["single_include"]
+interface-cxx-standard = "c++11"
