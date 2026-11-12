@@ -214,6 +214,15 @@ jobs:
           path: ${{ runner.temp }}/prepared.json
           if-no-files-found: error
           retention-days: 1
+      # The archives it downloaded, so `publish` downloads none again.
+      - if: needs.gate.outputs.mode != 'plan'
+        uses: actions/upload-artifact@v7.0.2
+        with:
+          name: archives
+          path: ${{ runner.temp }}/cabin-cache/ports/archives
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 1
 
   # The pinned client can send metadata only a Worker built from a
   # Cabin commit containing it accepts, and cabinpkg/cabin deploys the
@@ -269,13 +278,18 @@ jobs:
           persist-credentials: false
 
       # Nothing `prepare` could have written runs here. No cache. Its
-      # record is only read, by its fixed name into a directory of its own:
-      # an id would be `prepare`'s to give. The tools come by id: another
-      # artifact can take a name, never an id.
+      # record and archives are only read, by fixed names into directories
+      # of their own: an id would be `prepare`'s to give, and the tool
+      # hashes each archive against its port's pin. The tools come by id:
+      # another artifact can take a name, never an id.
       - uses: actions/download-artifact@v8.0.2
         with:
           name: prepared
           path: ${{ runner.temp }}/prepared
+      - uses: actions/download-artifact@v8.0.2
+        with:
+          name: archives
+          path: ${{ runner.temp }}/cabin-cache/ports/archives
       - uses: actions/download-artifact@v8.0.2
         with:
           artifact-ids: ${{ needs.build.outputs.tools }}

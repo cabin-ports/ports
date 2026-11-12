@@ -29,16 +29,18 @@ same upstream version, which only an `all` dispatch publishes.
   uploads a version only when that record is its own run's, names the same commit, and lists the
   version with exactly the archive and metadata it has just staged.  Otherwise it uploads nothing
   and fails.  Nothing `prepare` writes is trusted.  Its record can stop an upload and cannot
-  change a byte of one.  `publish` restores no cache, extracts the record by its fixed name into
-  a directory of its own, and takes the two binaries by the id of the artifact `build` uploaded;
-  `record` takes the receipts by the id of the artifact `publish` uploaded.  Another artifact can
-  take a name, never an id.  The record keeps its name because its id would be `prepare`'s to
-  give: a list of ids selects several artifacts, each extracted under its own name.  Running the
-  consumer tests is the pull-request and merge-queue dry-run's job: no job of this workflow runs
-  one.  (The `exchange-check` probe below also requests the token, but runs
-  only `curl`.)  The `lock` and `record` jobs alone may push, only to the receipts branch, and run
-  only `scripts/actions/receipts.sh` (`git`, `gh`, and `jq`), checked out at the workflow's own
-  commit.
+  change a byte of one.  `publish` restores no cache.  It extracts the record, and the upstream
+  archives `prepare` downloaded, by their fixed names into directories of their own, and takes
+  the two binaries by the id of the artifact `build` uploaded; `record` takes the receipts by the
+  id of the artifact `publish` uploaded.  Another artifact can take a name, never an id.  The
+  record and the archives keep their names because their ids would be `prepare`'s to give: a
+  list of ids selects several artifacts, each extracted under its own name.  An archive is used
+  only when it hashes to the SHA-256 its port pins and is downloaded otherwise, so an upstream
+  host that fails after `prepare` cannot fail the upload.  Running the consumer tests is the
+  pull-request and merge-queue dry-run's job: no job of this workflow runs one.  (The
+  `exchange-check` probe below also requests the token, but runs only `curl`.)  The `lock` and
+  `record` jobs alone may push, only to the receipts branch, and run only
+  `scripts/actions/receipts.sh` (`git`, `gh`, and `jq`), checked out at the workflow's own commit.
 - **Registry readiness.**  The `await-deploy` job runs Cabin's own `cargo workflow-await-deploy`
   guard from the pinned commit and waits until the registry has deployed a Cabin commit that
   contains it, so the client never sends metadata the running registry does not accept.
