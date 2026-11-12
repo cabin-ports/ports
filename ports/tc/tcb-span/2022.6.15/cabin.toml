@@ -1,0 +1,29 @@
+[package.upstream]
+# tcbrindle/span has no tags or releases: this is the commit vcpkg and
+# ConanCenter pin, still master's head, versioned by its commit date.
+url = "https://github.com/tcbrindle/span/archive/836dc6a0efd9849cb194e88e4aa2387436bb079b.tar.gz"
+checksum = "sha256:66650479f85b92c6a6230706e4ac4a1bca18a7c7102fc7e02ad332f86548c9b6"
+format = "tar.gz"
+strip-prefix = "span-836dc6a0efd9849cb194e88e4aa2387436bb079b"
+# span.hpp calls std::terminate() on a contract violation, its default at
+# C++14 and later without NDEBUG, but gets <exception> only through
+# <stdexcept>: that is skipped with exceptions off, and LLVM 23's libc++
+# (Apple's from C++23) no longer includes <exception> there.  The patch
+# includes <exception>; upstream's issues #55 and #57 are open.
+patches = ["patches/0001-include-exception.patch"]
+
+[package]
+name = "cabin-ports/tcb-span"
+version = "2022.6.15"
+license = "BSL-1.0"
+include = ["LICENSE_1_0.txt", "include", "patches"]
+
+# Tristan Brindle's C++11 implementation of C++20's std::span, a different
+# project from cabin-ports/span-lite.  Header-only, as upstream's CMake
+# interface target span (CMakeLists.txt:7-10): include/ is the include root,
+# so consumers write `#include <tcb/span.hpp>`.  Every TCB_SPAN_* option
+# keeps upstream's default.
+[target.tcb-span]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
