@@ -12,6 +12,7 @@ strip-prefix = "libspng-0.7.4"
 [package]
 name = "cabin-ports/libspng"
 version = "0.7.4"
+license = "BSD-2-Clause AND libpng-2.0"
 include = ["LICENSE", "spng"]
 
 [dependencies]

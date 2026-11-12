@@ -7,6 +7,7 @@ strip-prefix = "hof-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-hof"
 version = "1.92.0"
+license = "BSL-1.0"
 
 [target.boost_hof]
 type = "header-only"

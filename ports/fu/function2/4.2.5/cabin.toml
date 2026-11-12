@@ -7,6 +7,7 @@ strip-prefix = "function2-4.2.5"
 [package]
 name = "cabin-ports/function2"
 version = "4.2.5"
+license = "BSL-1.0"
 include = ["LICENSE.txt", "include"]
 
 # Naios' function2, header-only, as upstream's CMake interface target

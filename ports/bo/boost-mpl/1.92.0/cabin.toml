@@ -7,6 +7,27 @@ strip-prefix = "mpl-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-mpl"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: doc/tutorial is an
+# excerpt from the book "C++ Template Metaprogramming", copyright Pearson
+# Education and reprinted with permission, with no grant to redistribute.
+include = [
+  ".appveyor.yml",
+  ".codecov.yml",
+  ".gitattributes",
+  ".github",
+  "CMakeLists.txt",
+  "LICENSE",
+  "README.md",
+  "book",
+  "build.jam",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "preprocessed",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-config" = "=1.92.0"

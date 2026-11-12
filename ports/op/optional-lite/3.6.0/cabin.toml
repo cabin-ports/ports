@@ -16,6 +16,7 @@ patches = ["patches/0001-include-new-and-algorithm.patch"]
 [package]
 name = "cabin-ports/optional-lite"
 version = "3.6.0"
+license = "BSL-1.0"
 include = ["LICENSE.txt", "include", "patches"]
 
 # Header-only, as upstream's CMake interface target nonstd::optional-lite

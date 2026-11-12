@@ -3,10 +3,42 @@ url = "https://gitlab.com/libeigen/eigen/-/archive/5.0.1/eigen-5.0.1.tar.gz"
 checksum = "sha256:e9c326dc8c05cd1e044c71f30f1b2e34a6161a3b6ecf445d56b53ff1669e3dec"
 format = "tar.gz"
 strip-prefix = "eigen-5.0.1"
+# Patch 0001 adds LICENSE.hackers-delight, fxdiv's copy of the Hacker's
+# Delight website's terms for its code (Wayback Machine snapshot
+# 20140313003119 of http://www.hackersdelight.org/permissions.htm, whose raw
+# page (id_) has sha256
+# 8104c8d6123735b33663df91dcb6a6eab5630b5ebf7ea874be342b11c3d07d8f):
+# unsupported/Eigen/CXX11/src/Tensor/TensorIntDiv.h:215-245 reproduces the
+# book's magic() routine, comments included.
+# Patch 0002 adds LICENSE.sse_mathfun, Julien Pommier's zlib notice,
+# sse_mathfun.h:11-30 verbatim (http://gruntthepeon.free.fr/ssemath/sse_mathfun.h,
+# Last-Modified 2013-03-17, sha256
+# 32b6e7ce6bb5e4dd7a5daa1a76a88b33bab17bfb4a4634ba987c9488f6183250): the
+# log, exp, sin and cos code in Eigen/src/Core/arch/ZVector/MathFunctions.h,
+# MSA/MathFunctions.h and Default/GenericPacketMathFunctions.h comes from it,
+# constants and comments included, and keeps only his copyright line.
+# Patch 0003 adds LICENSE.superlu, SuperLU's BSD notice from The Regents of
+# the University of California (Lawrence Berkeley National Laboratory),
+# README:4-32 verbatim of superlu_4.1.tar.gz
+# (https://portal.nersc.gov/project/sparse/superlu/superlu_4.1.tar.gz, sha256
+# db79b732c6defc1b8f9a48d202bd52bd2a506eb355333e2073c4949c0f48fcf1): the
+# files Eigen/src/SparseLU/ and Eigen/src/SparseCore/SparseColEtree.h modify
+# from SuperLU 3.0 to 4.1 keep only SuperLU's per-file Xerox notice.
+patches = [
+    "patches/0001-add-hackers-delight-terms-for-adapted-code.patch",
+    "patches/0002-add-the-sse-mathfun-zlib-license.patch",
+    "patches/0003-add-the-superlu-bsd-license.patch",
+]
 
 [package]
 name = "cabin-ports/eigen3"
 version = "5.0.1"
+# The LicenseRefs name in-file notices that match no SPDX licence:
+# COLAMD-2.3 Eigen/src/OrderingMethods/Eigen_Colamd.h:26-44, Fabian-Giesen-2016
+# Eigen/src/Core/arch/Default/Half.h:11-25, and Intel-Matrix-Library-2001
+# Eigen/src/LU/arch/InverseSize4.h:19-32.  Boehm-GC is the Xerox notice of
+# the SuperLU-derived files in SparseLU/ and SparseCore/SparseColEtree.h.
+license = "MPL-2.0 AND Apache-2.0 AND BSD-3-Clause AND Minpack AND Boehm-GC AND Zlib AND LicenseRef-COLAMD-2.3 AND LicenseRef-Fabian-Giesen-2016 AND LicenseRef-Intel-Matrix-Library-2001 AND LicenseRef-Hackers-Delight"
 # The header directories upstream's CMake installs into include/eigen3,
 # plus the license files; the rest of the archive (tests, benchmarks,
 # the BLAS/LAPACK sources, docs) would otherwise sit on consumers'
@@ -19,6 +51,10 @@ include = [
     "COPYING.README",
     "Eigen",
     "LICENSE",
+    "LICENSE.hackers-delight",
+    "LICENSE.sse_mathfun",
+    "LICENSE.superlu",
+    "patches",
     "signature_of_eigen3_matrix_library",
     "unsupported/Eigen",
 ]

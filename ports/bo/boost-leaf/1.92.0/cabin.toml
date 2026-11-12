@@ -7,6 +7,32 @@ strip-prefix = "leaf-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-leaf"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: its Asciidoctor
+# stylesheets (zajo-*.css) are labelled MIT but ship no licence text.
+include = [
+  ".drone",
+  ".drone.jsonnet",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  ".vscode",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "build.jam",
+  "conanfile.py",
+  "example",
+  "include",
+  "index.html",
+  "meson.build",
+  "meson_options.txt",
+  "meta",
+  "scripts",
+  "subprojects",
+  "test",
+  "wasm.txt",
+]
 
 [target.boost_leaf]
 type = "header-only"

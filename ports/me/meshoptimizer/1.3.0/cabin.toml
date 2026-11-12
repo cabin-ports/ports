@@ -9,6 +9,7 @@ strip-prefix = "meshoptimizer-1.3"
 [package]
 name = "cabin-ports/meshoptimizer"
 version = "1.3.0"
+license = "MIT"
 include = ["LICENSE.md", "src"]
 
 # Upstream's static library (CMakeLists.txt:28-51, :89-95): every

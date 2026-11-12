@@ -11,6 +11,7 @@ strip-prefix = "NekoSchema-1.1.6"
 [package]
 name = "cabin-ports/neko-schema"
 version = "1.1.6"
+license = "MIT OR Apache-2.0"
 # LICENSE carries both texts of the MIT OR Apache-2.0 choice.
 include = [
   "LICENSE",

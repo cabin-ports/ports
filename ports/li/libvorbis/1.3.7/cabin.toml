@@ -9,6 +9,7 @@ strip-prefix = "libvorbis-1.3.7"
 [package]
 name = "cabin-ports/libvorbis"
 version = "1.3.7"
+license = "BSD-3-Clause AND TU-Berlin-1.0 AND FSFULLRWD"
 # BSD-3-Clause (COPYING).
 include = ["COPYING", "include", "lib"]
 c-standard = "c11"

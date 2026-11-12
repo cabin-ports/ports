@@ -9,6 +9,7 @@ strip-prefix = "zfp-1.0.1"
 [package]
 name = "cabin-ports/zfp"
 version = "1.0.1"
+license = "BSD-3-Clause"
 # The headers CMake installs without BUILD_CFP: include/ less every
 # path named cfp (CMakeLists.txt:332-337).  zfp/array.h, cfp's header,
 # is installed there too, without the internal headers it includes.

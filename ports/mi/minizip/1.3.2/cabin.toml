@@ -42,6 +42,7 @@ to = "include/minizip/zip.h"
 [package]
 name = "cabin-ports/minizip"
 version = "1.3.2"
+license = "Zlib AND Info-ZIP AND Apache-2.0"
 # minizip is under the zlib license (contrib/minizip/MiniZip64_info.txt);
 # crypt.h derives from Info-ZIP code (contrib/minizip/LICENSE.Info-Zip),
 # and skipset.h's random-number generator is Apache-2.0 PCG32 code

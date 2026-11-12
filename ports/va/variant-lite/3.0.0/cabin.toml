@@ -17,6 +17,7 @@ patches = ["patches/0001-include-exception-and-algorithm.patch"]
 [package]
 name = "cabin-ports/variant-lite"
 version = "3.0.0"
+license = "BSL-1.0"
 include = ["LICENSE.txt", "include", "patches"]
 
 # Header-only, as upstream's CMake interface target nonstd::variant-lite

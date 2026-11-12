@@ -7,6 +7,25 @@ strip-prefix = "ptr_container-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-ptr-container"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: doc/ptr_container.xml
+# carries Thorsten Ottosen's older permission notice, which matches no SPDX
+# licence; dropping it avoids a one-off licence reference.
+include = [
+  ".appveyor.yml",
+  ".codecov.yml",
+  ".gitattributes",
+  ".github",
+  ".ubsan-ignorelist",
+  "CMakeLists.txt",
+  "LICENSE",
+  "README.md",
+  "build.jam",
+  "include",
+  "index.html",
+  "meta",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-array" = "=1.92.0"

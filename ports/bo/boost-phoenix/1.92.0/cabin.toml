@@ -3,10 +3,15 @@ url = "https://github.com/boostorg/phoenix/archive/refs/tags/boost-1.92.0.tar.gz
 checksum = "sha256:044539f1427414139ea8949976d4e45f6c339e3a4c2a8e5c92489bb811644156"
 format = "tar.gz"
 strip-prefix = "phoenix-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-phoenix"
 version = "1.92.0"
+license = "BSL-1.0"
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

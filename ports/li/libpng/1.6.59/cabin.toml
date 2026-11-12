@@ -10,6 +10,41 @@ to = "pnglibconf.h"
 [package]
 name = "cabin-ports/libpng"
 version = "1.6.59"
+license = "libpng-2.0 AND LicenseRef-libpng-1.6.35"
+# LICENSE holds the PNG Reference Library License version 2 and, for the
+# libpng 0.5 through 1.6.35 code the library still contains, the version 1
+# notice, whose wording matches no SPDX template (Libpng is an older one).
+# Only the library ships: LICENSE, AUTHORS (the Contributing Authors its
+# copyright notices name), and the sources and headers the target builds.
+# The rest of the release is not built: most of it (the SIMD units, tests,
+# scripts, projects and build files) is under the libpng license too, and
+# contrib/, ci/ and the Autotools-generated files carry other terms.
+include = [
+  "AUTHORS",
+  "LICENSE",
+  "png.c",
+  "png.h",
+  "pngconf.h",
+  "pngdebug.h",
+  "pngerror.c",
+  "pngget.c",
+  "pnginfo.h",
+  "pnglibconf.h",
+  "pngmem.c",
+  "pngpread.c",
+  "pngpriv.h",
+  "pngread.c",
+  "pngrio.c",
+  "pngrtran.c",
+  "pngrutil.c",
+  "pngset.c",
+  "pngstruct.h",
+  "pngtrans.c",
+  "pngwio.c",
+  "pngwrite.c",
+  "pngwtran.c",
+  "pngwutil.c",
+]
 
 # libpng's encoder/decoder call into zlib for the DEFLATE stream, so
 # libpng depends on the bundled zlib port. Only the internal

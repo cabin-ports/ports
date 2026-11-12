@@ -6,6 +6,12 @@ strip-prefix = "fmt-12.2.0"
 [package]
 name = "cabin-ports/fmt"
 version = "12.2.0"
+# The sources follow format.h's MIT notice with its optional exception;
+# LICENSE carries the MIT text without it.
+license = "MIT WITH fmt-exception AND MIT"
+# Leaves out support/: its Sublime syntax file carries no notice, and its
+# docopt and Rust-derived scripts point to MIT texts upstream does not ship.
+include = ["LICENSE", "README.md", "doc/LICENSE-exception", "include", "src"]
 
 # {fmt}'s compiled library is exactly two translation units:
 # format.cc (the non-inline formatting engine) and os.cc (the

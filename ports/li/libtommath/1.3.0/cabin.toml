@@ -27,6 +27,7 @@ to = "include/tommath.h"
 [package]
 name = "cabin-ports/libtommath"
 version = "1.3.0"
+license = "Unlicense"
 include = [
   "LICENSE",
   "include",

@@ -1,0 +1,73 @@
+[package.upstream]
+# Upstream has tagged no release since 2017; this is the commit vcpkg pins
+# (2020-03-04), whose CMakeLists.txt:17 declares 1.1.19.  master still
+# declares 1.1.19, so here 1.1.19 names this commit.
+url = "https://github.com/Azure/umock-c/archive/504193e65d1c2f6eb50c15357167600a296df7ff.tar.gz"
+checksum = "sha256:450097094c0c2e5adaddad86d8f71de583732bd8cbd23710591f68a760b5ff92"
+format = "tar.gz"
+strip-prefix = "umock-c-504193e65d1c2f6eb50c15357167600a296df7ff"
+# Patch 0001 keeps the `#if _MSC_VER` branch of REGISTER_UMOCK_VALUE_TYPE
+# (inc/umock_c/umock_c.h:125), written for cl's traditional preprocessor,
+# off its conforming one (_MSVC_TRADITIONAL == 0), as azure-macro-utils-c's
+# patch 0001 does for that package's dispatchers (upstream master instead
+# tests _MSC_VER < 1920).  cl's /std:c11, the lowest C standard Cabin
+# requests from it, enables the conforming preprocessor, under which the
+# branch's MU_LPAREN leaves the _ALL or _ONLY_TYPE form that MU_IF selects
+# unexpanded in consumers' C code.
+patches = ["patches/0001-select-register-macro-by-msvc-preprocessor-mode.patch"]
+
+[package]
+name = "cabin-ports/umock-c"
+version = "1.1.19"
+license = "MIT"
+# inc/ holds the headers upstream installs (CMakeLists.txt:96-116, :179) and
+# inc/umock_c/aux_inc, stand-ins for stdint.h, stdbool.h and inttypes.h (with
+# C++ wrappers) that upstream puts on the include path only for compilers
+# without stdint.h or stdbool.h (:150-155) and does not install; no target
+# here uses them.  Not ported: the tests, devdoc/ and the CMake package
+# files.
+include = ["LICENSE", "inc", "patches", "src"]
+# The sources are C99; C11 is the oldest C standard Cabin can request from
+# MSVC.
+c-standard = "c11"
+
+[dependencies]
+# umock-c's submodule deps/azure-macro-utils-c pins 5926caf, the commit
+# cabin-ports/azure-macro-utils-c 1.1.0 packages.
+"cabin-ports/azure-macro-utils-c" = "^1.1"
+
+# Upstream's umock_c library (CMakeLists.txt:77-94, :128-138).  Consumers
+# write <umock_c/umock_c.h>, and declare their mocks by including headers
+# built on <umock_c/umock_c_prod.h> with ENABLE_MOCKS defined.  The headers
+# include azure-macro-utils-c's and need C99 and C++11 (variadic macros,
+# <stdbool.h>, <cstdint>).
+[target.umock-c]
+type = "library"
+sources = [
+  "src/umock_c.c",
+  "src/umock_c_negative_tests.c",
+  "src/umock_log.c",
+  "src/umockalloc.c",
+  "src/umockautoignoreargs.c",
+  "src/umockcall.c",
+  "src/umockcallpairs.c",
+  "src/umockcallrecorder.c",
+  "src/umockstring.c",
+  "src/umocktypename.c",
+  "src/umocktypes.c",
+  "src/umocktypes_bool.c",
+  "src/umocktypes_c.c",
+  "src/umocktypes_charptr.c",
+  "src/umocktypes_stdint.c",
+  "src/umocktypes_wcharptr.c",
+]
+include-dirs = ["inc"]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+deps = [{ name = "cabin-ports/azure-macro-utils-c", public = true }]
+links = "umock_c"
+
+# Upstream's Windows define (CMakeLists.txt:118-123): src/umocktypes_c.c maps
+# snprintf to _snprintf on MSVC (:13-15), which the CRT deprecates.
+[target.'cfg(os = "windows")'.profile]
+defines = ["_CRT_SECURE_NO_WARNINGS"]

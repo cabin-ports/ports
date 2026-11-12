@@ -35,6 +35,7 @@ to = "capi/geos_c.h"
 [package]
 name = "cabin-ports/geos"
 version = "3.15.0"
+license = "LGPL-2.1-only AND (Apache-2.0 OR BSL-1.0) AND MIT AND Apache-2.0"
 # LGPL-2.1 (COPYING); distributing a binary that links geos statically
 # carries the obligations of LGPL-2.1 section 6.  Code from elsewhere:
 # - src/deps/ryu: Ulf Adams's Ryu, Apache-2.0 or BSL-1.0, both texts beside it.

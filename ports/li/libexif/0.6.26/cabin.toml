@@ -1,0 +1,98 @@
+[package.upstream]
+# The release asset, not the tag archive: it ships libexif/_stdint.h, which
+# configure generates and exif-utils.h includes (as <stdint.h> alone).
+url = "https://github.com/libexif/libexif/releases/download/v0.6.26/libexif-0.6.26.tar.gz"
+checksum = "sha256:985d04b8d361fe85acc9a95b949e0bfc4b8b979adace559a6fbdc528be7ec9e5"
+format = "tar.gz"
+strip-prefix = "libexif-0.6.26"
+# The sources include <config.h>, which configure generates.  Patch 0001
+# adds a config.h without definitions under cabin/, outside the public
+# include directory, and the target and profiles below define what configure
+# finds.
+# Patch 0002 casts to long instead of ssize_t in exif-loader.c, which MSVC
+# lacks (vcpkg's fix-ssize.patch defines ssize_t there instead).
+patches = [
+  "patches/0001-add-a-config-h-for-the-cabin-profiles.patch",
+  "patches/0002-use-long-for-the-signed-sizes-in-exif-loader.patch",
+]
+
+[package]
+name = "cabin-ports/libexif"
+version = "0.6.26"
+# COPYING is the LGPL 2.1.  Most source headers grant the LGPL version 2 or
+# later; exif-ifd.c, exif-ifd.h and exif-mnote-data.c grant 2.1 or later.
+# libexif/Makefile.in, which automake generated, carries the FSF's
+# permission notice.
+license = "LGPL-2.0-or-later AND LGPL-2.1-or-later AND FSFULLRWD"
+include = ["COPYING", "cabin/config.h", "libexif", "patches"]
+
+# libexif.la as libexif/Makefile.am builds it, with the canon, fuji, olympus
+# and pentax makernote libraries it links in (the apple one is disabled
+# upstream and not in the release).  Not ported: the gettext translations,
+# which configure enables wherever it finds gettext (always on glibc) and
+# vcpkg only with its nls feature, so tag names and messages are in English;
+# and the autotools build and docs.
+[target.exif]
+type = "library"
+sources = [
+  "libexif/canon/exif-mnote-data-canon.c",
+  "libexif/canon/mnote-canon-entry.c",
+  "libexif/canon/mnote-canon-tag.c",
+  "libexif/exif-byte-order.c",
+  "libexif/exif-content.c",
+  "libexif/exif-data.c",
+  "libexif/exif-entry.c",
+  "libexif/exif-format.c",
+  "libexif/exif-gps-ifd.c",
+  "libexif/exif-ifd.c",
+  "libexif/exif-loader.c",
+  "libexif/exif-log.c",
+  "libexif/exif-mem.c",
+  "libexif/exif-mnote-data.c",
+  "libexif/exif-tag.c",
+  "libexif/exif-utils.c",
+  "libexif/fuji/exif-mnote-data-fuji.c",
+  "libexif/fuji/mnote-fuji-entry.c",
+  "libexif/fuji/mnote-fuji-tag.c",
+  "libexif/olympus/exif-mnote-data-olympus.c",
+  "libexif/olympus/mnote-olympus-entry.c",
+  "libexif/olympus/mnote-olympus-tag.c",
+  "libexif/pentax/exif-mnote-data-pentax.c",
+  "libexif/pentax/mnote-pentax-entry.c",
+  "libexif/pentax/mnote-pentax-tag.c",
+]
+# For <libexif/...>, as upstream installs the headers.
+include-dirs = ["."]
+# configure always passes GETTEXT_PACKAGE, libexif-$(CURRENT - AGE)
+# (configure.ac:66-72, 252; m4m/gp-gettext-hack.m4:29-31).  Without NLS it
+# is only the domain argument of i18n.h's bindtextdomain stand-in, which
+# drops LOCALEDIR, configure's other define.  configure's AC_SYS_LARGEFILE
+# (configure.ac:110) gives 32-bit glibc a 64-bit off_t, so that
+# exif_loader_write_file opens files of 2 GiB or more; no public header
+# uses off_t.
+defines = ["GETTEXT_PACKAGE=\"libexif-12\"", "_FILE_OFFSET_BITS=64"]
+c-standard = "c11"
+# The public headers include <stdint.h>, which needs C99 / C++11.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "exif"
+
+[profile]
+include-dirs = ["cabin"]
+
+# configure finds localtime_r on every Unix system, and links libm for the
+# ceil, log, log10 and pow that exif-data.c, exif-entry.c and
+# canon/mnote-canon-entry.c call.
+[target.'cfg(family = "unix")'.profile]
+defines = ["HAVE_LOCALTIME_R"]
+link-libs = ["m"]
+
+# glibc and musl declare localtime_r in strict C11 only with a feature macro,
+# which they imply outside strict modes.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_DEFAULT_SOURCE"]
+
+# configure's link check finds the Microsoft localtime_s(struct tm *,
+# const time_t *) that exif-entry.c calls.
+[target.'cfg(os = "windows")'.profile]
+defines = ["HAVE_LOCALTIME_S"]

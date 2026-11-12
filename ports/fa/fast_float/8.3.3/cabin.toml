@@ -7,6 +7,14 @@ strip-prefix = "fast_float-8.3.3"
 [package]
 name = "cabin-ports/fast_float"
 version = "8.3.3"
+license = "Apache-2.0 OR MIT OR BSL-1.0"
+include = ["AUTHORS", "CONTRIBUTORS", "LICENSE-APACHE", "LICENSE-BOOST", "LICENSE-MIT", "README.md", "include"]
+
+# README.md still credits code adapted from Google Wuffs, but that code,
+# include/fast_float/simple_decimal_conversion.h, was removed upstream in
+# 11eeab5463, so no Apache-2.0-only term applies.  `include` leaves out
+# tests/: string_test.cpp carries test strings credited as MIT to StrTk,
+# whose licence text upstream does not ship.
 
 # fast_float is header-only; consumers include <fast_float/fast_float.h>
 # from upstream's include/ root.

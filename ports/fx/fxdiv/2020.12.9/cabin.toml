@@ -16,6 +16,7 @@ patches = ["patches/0001-add-hackers-delight-terms-for-adapted-code.patch"]
 [package]
 name = "cabin-ports/fxdiv"
 version = "2020.12.9"
+license = "MIT AND LicenseRef-Hackers-Delight"
 # Licence: MIT AND LicenseRef-Hackers-Delight.
 include = ["LICENSE", "LICENSE.hackers-delight", "include", "patches"]
 

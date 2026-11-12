@@ -7,6 +7,7 @@ strip-prefix = "lcms2-2.19.1"
 [package]
 name = "cabin-ports/lcms2"
 version = "2.19.1"
+license = "MIT AND softSurfer AND FSFULLRWD AND Graphics-Gems"
 include = ["LICENSE", "include", "src"]
 
 # The static library upstream's CMake and Meson builds compile:

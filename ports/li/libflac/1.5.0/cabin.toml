@@ -67,6 +67,7 @@ to = "public/FLAC++/metadata.h"
 [package]
 name = "cabin-ports/libflac"
 version = "1.5.0"
+license = "BSD-3-Clause AND CC0-1.0"
 # The libraries are BSD-3-Clause (COPYING.Xiph); the GPL, LGPL and FDL
 # texts cover the programs, their share/ headers and the documentation,
 # which are not packaged.  Of include/share, only the BSD headers the

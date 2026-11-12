@@ -11,6 +11,7 @@ strip-prefix = "Vulkan-Headers-vulkan-sdk-1.4.363.0"
 [package]
 name = "cabin-ports/vulkan-headers"
 version = "1.4.363"
+license = "Apache-2.0 OR MIT"
 # Every file is Apache-2.0, or Apache-2.0 OR MIT (LICENSE.md, LICENSES/).
 include = ["LICENSE.md", "LICENSES", "include/vk_video", "include/vulkan"]
 

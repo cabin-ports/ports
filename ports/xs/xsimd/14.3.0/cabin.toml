@@ -30,6 +30,7 @@ patches = [
 [package]
 name = "cabin-ports/xsimd"
 version = "14.3.0"
+license = "BSD-3-Clause AND BSL-1.0 AND CC-BY-SA-3.0 AND CC-BY-SA-4.0 AND MIT AND SunPro"
 # include/xsimd is what upstream's CMake installs; LICENSE is xsimd's
 # BSD-3-Clause license, and the other license files come from the patches
 # above.  Code in include/xsimd from other sources, the rest being xsimd's

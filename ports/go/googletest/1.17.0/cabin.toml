@@ -6,6 +6,7 @@ strip-prefix = "googletest-1.17.0"
 [package]
 name = "cabin-ports/googletest"
 version = "1.17.0"
+license = "BSD-3-Clause"
 
 # GoogleTest's portable build is the single umbrella translation
 # unit gtest-all.cc, which #includes every gtest-*.cc implementation

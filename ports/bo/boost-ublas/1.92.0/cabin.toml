@@ -3,10 +3,38 @@ url = "https://github.com/boostorg/ublas/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:dd48375d46196d37f61e64b20b3f66e50078baaed88cc091eafa8d657e138067"
 format = "tar.gz"
 strip-prefix = "ublas-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-ublas"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: doc/js bundles jQuery
+# 1.3.2 (MIT or GPL) and jquery.toc-gw.js (Apache-2.0) without their licence
+# texts.
+include = [
+  ".appveyor.yml",
+  ".ci",
+  ".gitattributes",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "Changelog",
+  "IDEs",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "benchmarks",
+  "clblas.jam",
+  "examples",
+  "include",
+  "index.html",
+  "meta",
+  "opencl.jam",
+  "patches",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-concept-check" = "=1.92.0"

@@ -7,6 +7,31 @@ strip-prefix = "histogram-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-histogram"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: its logo font
+# doc/logo/DENMARK.TTF (Altsys Fontographer, 1992) has no notice or stated
+# terms.
+include = [
+  ".appveyor.yml",
+  ".clang-format",
+  ".clang_complete",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  ".pre-commit-config.yaml",
+  "CMakeLists.txt",
+  "CONTRIBUTING.md",
+  "LICENSE",
+  "README.md",
+  "benchmark",
+  "build.jam",
+  "examples",
+  "include",
+  "index.html",
+  "meta",
+  "test",
+  "tools",
+]
 
 [dependencies]
 "cabin-ports/boost-config" = "=1.92.0"

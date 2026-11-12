@@ -1,0 +1,15 @@
+--- /dev/null
++++ b/cabin/event.c
+@@ -0,0 +1,12 @@
++/* event.c as configure builds it.  event.h declares struct timeval through
++   <sys/time.h> unless WIN32 is defined (event.h:63-67); MSVC predefines
++   only _WIN32 and has no such header, so there this defines WIN32 and
++   includes Winsock, as ev.c does (ev.c:242-243), to declare it first. */
++#ifdef _MSC_VER
++# ifndef WIN32
++#  define WIN32 1
++# endif
++# define WIN32_LEAN_AND_MEAN
++# include <winsock2.h>
++#endif
++#include "../event.c"

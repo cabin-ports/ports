@@ -1,0 +1,18 @@
+--- /dev/null
++++ b/wolfssl/options.h
+@@ -0,0 +1,15 @@
++/* Stands in for the options.h configure generates (configure.ac:14087-14171)
++   for applications that include it first: it loads the same configuration,
++   from wolfssl/wolfcrypt/user_settings.h, which settings.h also includes when
++   WOLFSSL_USER_SETTINGS is defined. */
++#ifdef WOLFSSL_NO_OPTIONS_H
++/* options.h inhibited by configuration */
++#elif !defined(WOLFSSL_OPTIONS_H)
++#define WOLFSSL_OPTIONS_H
++
++#ifndef WOLFSSL_USER_SETTINGS
++#define WOLFSSL_USER_SETTINGS
++#endif
++#include <wolfssl/wolfcrypt/user_settings.h>
++
++#endif /* WOLFSSL_OPTIONS_H */

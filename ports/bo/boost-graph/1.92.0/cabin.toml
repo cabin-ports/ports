@@ -3,10 +3,41 @@ url = "https://github.com/boostorg/graph/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:60372a4eb59dba735bf008d949443dc245b647b4335c6db9586523755c9b4e03"
 format = "tar.gz"
 strip-prefix = "graph-boost-1.92.0"
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = ["patches/0001-add-the-boost-software-license-text.patch"]
 
 [package]
 name = "cabin-ports/boost-graph"
 version = "1.92.0"
+license = "BSL-1.0 AND HPND-sell-variant AND (BSL-1.0 OR MIT)"
+# `include` leaves out example/ and CODE_OF_CONDUCT.md, which nothing here
+# builds: example/girth.cpp:11 adapts the Stanford GraphBase's GIRTH, whose
+# terms allow changes only in a renamed file marked as not part of the
+# GraphBase, and CODE_OF_CONDUCT.md:74 adapts the Contributor Covenant
+# (CC BY 4.0) without its licence.
+include = [
+  ".clang-format",
+  ".drone",
+  ".drone.star",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  "CMakeLists.txt",
+  "CONTRIBUTING.md",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "SECURITY.md",
+  "build.jam",
+  "doc",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+  "src",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-algorithm" = "=1.92.0"

@@ -1,0 +1,42 @@
+[package.upstream]
+# Upstream tags no releases.  This is the commit vcpkg pins (SHA-512,
+# version-date 2024-08-26), master's head; the version is its commit date.
+url = "https://github.com/gpakosz/whereami/archive/dcb52a058dc14530ba9ae05e4339bd3ddfae0e0e.tar.gz"
+checksum = "sha256:9eb20753b8994a51693373120a5deea502288954fa975704ba609b2c7a849615"
+format = "tar.gz"
+strip-prefix = "whereami-dcb52a058dc14530ba9ae05e4339bd3ddfae0e0e"
+
+# The sources are "dual licensed under the WTFPL v2 and MIT licenses"
+# (src/whereami.c:1, src/whereami.h:1), and both texts ship.
+# LICENSE.WTFPLv2 adds two joke clauses, "1. Bla bla bla" and
+# "2. Montesqieu et camembert, vive la France, zut alors!", to SPDX's WTFPL
+# text; they neither grant nor require anything.
+[package]
+name = "cabin-ports/whereami"
+version = "2024.8.26"
+license = "MIT OR WTFPL"
+include = ["LICENSE.MIT", "LICENSE.WTFPLv2", "src"]
+# Upstream builds C99 (_gnu-make/Makefile:52), and whereami.h's `//`
+# comments need it; C11 is the oldest standard Cabin can request from MSVC.
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+
+# The library is the two files under src/ that upstream says to drop into a
+# build (README.md:20), compiled as vcpkg does into a static library.
+# src/whereami.c:8 includes <whereami.h>, so src/ is the include root and
+# consumers write `#include <whereami.h>`.  Linux and Android read
+# /proc/self, the Apple, QNX and BSD branches call dladdr from the system C
+# library (libSystem on Apple), and Windows uses kernel32, so nothing extra
+# links; _gnu-make's -ldl (Makefile:64) serves example/executable.c's
+# dlopen.  The WAI_FUNCSPEC, WAI_PREFIX, WAI_MALLOC, WAI_REALLOC and
+# WAI_FREE switches (README.md:65-73) are read when whereami.c compiles
+# (WAI_FUNCSPEC and WAI_PREFIX by whereami.h too), so the library has their
+# defaults and its consumers leave them undefined; one that needs them
+# includes <whereami.c> (src/whereami.c:6) from one of its own C sources.
+# Not ported: the examples and the Make, Visual Studio and Xcode projects.
+[target.whereami]
+type = "library"
+sources = ["src/whereami.c"]
+include-dirs = ["src"]
+links = "whereami"

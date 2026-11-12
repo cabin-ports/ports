@@ -3,10 +3,48 @@ url = "https://github.com/boostorg/chrono/archive/refs/tags/boost-1.92.0.tar.gz"
 checksum = "sha256:d0a77a26df5edb589bd77fee7296555c34206fb6a07497896d7590fdf850fd92"
 format = "tar.gz"
 strip-prefix = "chrono-boost-1.92.0"
+# include/boost/chrono/detail/scan_keyword.hpp and io/time_point_io.hpp, and
+# 44 tests, adapt libc++ code under its MIT and University of Illinois/NCSA
+# dual licence, whose text the release does not ship.  Patch 0001 adds libc++'s
+# LICENSE.TXT, verbatim from llvm-project llvmorg-8.0.1 libcxx/LICENSE.TXT
+# (sha256:c3b21ee90de785b9e45590253fd08fb22b269abccaadb175c4d96d7f420340cd),
+# as LICENSE.libcxx.txt.
+# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
+# sources cite, from boostorg/boost at tag boost-1.92.0
+# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
+patches = [
+  "patches/0001-add-mit-and-ncsa-licenses-for-libcxx-code.patch",
+  "patches/0002-add-the-boost-software-license-text.patch",
+]
 
 [package]
 name = "cabin-ports/boost-chrono"
 version = "1.92.0"
+license = "BSL-1.0 AND (MIT OR NCSA)"
+# `include` lists the tree without doc/, the documentation nothing here
+# builds: chrono.qbk reproduces many paragraphs of WG21 N2661's rationale
+# prose, whose terms are not established.
+include = [
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "LICENSE.libcxx.txt",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "appveyor.yml",
+  "build.jam",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+  "perf",
+  "src",
+  "sublibs",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-assert" = "=1.92.0"

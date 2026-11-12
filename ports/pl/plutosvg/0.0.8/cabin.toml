@@ -7,6 +7,7 @@ strip-prefix = "plutosvg-0.0.8"
 [package]
 name = "cabin-ports/plutosvg"
 version = "0.0.8"
+license = "MIT"
 include = ["LICENSE", "source"]
 # Upstream's CMake and Meson builds use C99; C11 is the oldest standard
 # Cabin can lower for MSVC.  plutosvg.h needs C99 (<stdbool.h>), and C++

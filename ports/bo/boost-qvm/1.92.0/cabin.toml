@@ -7,6 +7,28 @@ strip-prefix = "qvm-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-qvm"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, which nothing here builds: its Asciidoctor and
+# Rouge stylesheets are MIT-licensed but ship no licence text.
+include = [
+  ".drone",
+  ".drone.jsonnet",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  ".vscode",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "build.jam",
+  "gen",
+  "include",
+  "index.html",
+  "meson.build",
+  "meson_options.txt",
+  "meta",
+  "test",
+]
 
 [target.boost_qvm]
 type = "header-only"

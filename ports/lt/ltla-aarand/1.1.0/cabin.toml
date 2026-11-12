@@ -13,6 +13,7 @@ strip-prefix = "aarand-1.1.0"
 [package]
 name = "cabin-ports/ltla-aarand"
 version = "1.1.0"
+license = "MIT"
 include = ["LICENSE", "include"]
 
 # Header-only, as upstream's CMake interface target ltla::aarand

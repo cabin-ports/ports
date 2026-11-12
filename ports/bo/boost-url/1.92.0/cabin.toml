@@ -7,6 +7,28 @@ strip-prefix = "url-boost-1.92.0"
 [package]
 name = "cabin-ports/boost-url"
 version = "1.92.0"
+license = "BSL-1.0"
+# `include` leaves out doc/, example/ and test/, which nothing here builds:
+# doc/lib/cpp-reference.js adapts node-lazystream (MIT), example/suffix_list
+# holds Mozilla's public suffix list (MPL-2.0), and test/unit/compat/ada.cpp
+# translates the Web Platform Tests URL data, none with its licence text.
+include = [
+  ".codecov.yml",
+  ".drone",
+  ".drone.star",
+  ".github",
+  ".gitignore",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "README.adoc",
+  "build.jam",
+  "cmake",
+  "extra",
+  "include",
+  "index.html",
+  "meta",
+  "src",
+]
 
 [dependencies]
 "cabin-ports/boost-align" = "=1.92.0"

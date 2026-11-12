@@ -7,6 +7,7 @@ strip-prefix = "expected-lite-0.10.0"
 [package]
 name = "cabin-ports/expected-lite"
 version = "0.10.0"
+license = "BSL-1.0"
 include = ["LICENSE.txt", "include"]
 
 # Header-only, as upstream's CMake interface target nonstd::expected-lite

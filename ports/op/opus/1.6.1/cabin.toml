@@ -30,6 +30,7 @@ to = "public/opus/opus_types.h"
 [package]
 name = "cabin-ports/opus"
 version = "1.6.1"
+license = "BSD-3-Clause AND BSD-2-Clause"
 # BSD-3-Clause (COPYING).
 include = ["COPYING", "celt", "include", "public", "silk", "src"]
 

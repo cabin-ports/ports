@@ -18,6 +18,7 @@ to = "public/md4c-html.h"
 [package]
 name = "cabin-ports/md4c"
 version = "0.6.0"
+license = "MIT"
 include = [
   "LICENSE.md",
   "public",
