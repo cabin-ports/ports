@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/dloebl/cgif/archive/refs/tags/v0.5.3.tar.gz"
+checksum = "sha256:dcc7731e974ee77db75df26c99aca4d95f11ca2d267d870d42bce1e0d1e1e75f"
+format = "tar.gz"
+strip-prefix = "cgif-0.5.3"
+
+[package]
+name = "cabin-ports/cgif"
+version = "0.5.3"
+license = "MIT"
+include = ["LICENSE", "inc", "src"]
+# Upstream builds C99 (meson.build:7); C11 is the oldest standard Cabin can
+# request from MSVC.  Upstream installs only cgif.h; inc/cgif_raw.h, the
+# low-level encoder API the library is built on, is on the include path too.
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+[target.cgif]
+type = "library"
+sources = ["src/cgif.c", "src/cgif_raw.c"]
+include-dirs = ["inc"]
+links = "cgif"
