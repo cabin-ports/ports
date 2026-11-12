@@ -1,0 +1,36 @@
+[package.upstream]
+url = "https://github.com/CoolProp/IF97/archive/refs/tags/v2.2.1.tar.gz"
+checksum = "sha256:6ea212c17773be24d198659494b8ac226f4ccd6bfbbc69092d9b2f01fe211bac"
+format = "tar.gz"
+strip-prefix = "IF97-2.2.1"
+
+[package]
+name = "cabin-ports/if97"
+version = "2.2.1"
+license = "MIT"
+include = ["LICENSE", "IF97.h"]
+
+# IF97.h, the single header upstream installs as its header-only module
+# (CMakeLists.txt:122-130).  Not ported: IF97.cpp, upstream's IAPWS
+# verification program, and the Mathcad wrappers.
+#
+# Every function is inline, and two macros a consumer defines before the
+# include change their results, so they must agree in every translation
+# unit: IAPWS_UNITS switches inputs and outputs from Pa and J to MPa and kJ
+# (IF97.h:68-74), and REGION3_ITERATE refines Region 3 densities from the
+# backward equations by Newton-Raphson (IF97.h:2564-2569).
+#
+# As upstream ships it, the coefficient tables those inline functions read
+# are namespace-scope static const std::vector objects, one copy per
+# translation unit (e.g. IF97.h:654, :2608), so a program that includes
+# IF97.h in several translation units breaks the one-definition rule.  The
+# copies hold the same values, except that a call from a namespace-scope
+# initializer can read one not yet initialized, and the function-local
+# region objects built then (e.g. IF97.h:4650-4653) keep that state.
+# Conforming use includes IF97.h in one translation unit and calls it only
+# after namespace-scope objects finish dynamic initialization, e.g. from
+# main.
+[target.if97]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
