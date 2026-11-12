@@ -1,0 +1,51 @@
+[package.upstream]
+url = "https://github.com/atomicobject/heatshrink/archive/refs/tags/v0.4.1.tar.gz"
+checksum = "sha256:7529a1c8ac501191ad470b166773364e66d9926aad632690c72c63a1dea7e9a6"
+format = "tar.gz"
+strip-prefix = "heatshrink-0.4.1"
+
+[package]
+name = "cabin-ports/heatshrink"
+version = "0.4.1"
+# LICENSE; the sources carry no notices of their own.
+license = "ISC"
+include = [
+  "LICENSE",
+  "heatshrink_common.h",
+  "heatshrink_config.h",
+  "heatshrink_decoder.c",
+  "heatshrink_decoder.h",
+  "heatshrink_encoder.c",
+  "heatshrink_encoder.h",
+]
+# Upstream builds with -std=c99 (Makefile:15), which MSVC does not offer.
+c-standard = "c11"
+
+# libheatshrink_dynamic, static, from the sources Makefile:86-112 lists:
+# upstream's default configuration, which heatshrink_config.h as shipped
+# selects (HEATSHRINK_DYNAMIC_ALLOC 1, HEATSHRINK_USE_INDEX 1, no debugging
+# logs) and the CLI uses.  Consumers include <heatshrink_encoder.h> and
+# <heatshrink_decoder.h>, which have no extern "C", so C++ consumers wrap them
+# in one; their structs end in flexible array members, which C++ compilers
+# accept as an extension.  A consumer must not define HEATSHRINK_DYNAMIC_ALLOC
+# to 0, for which the headers describe other structs than the library's.
+# Upstream's limitation: heatshrink_encoder_alloc accepts windows of 4 to 15
+# bits, but at 15 the encoder's 16-bit index arithmetic overflows
+# (heatshrink_encoder.c:421-434): positions past 32767 do not fit its int16_t
+# entries, and a full 32 KiB input block leaves the index unbuilt, so the
+# match search follows stale or uninitialized entries and can loop forever.
+# Encoders should use windows of at most 14 bits.
+# Not ported: libheatshrink_static (Makefile:96, :105-109), the same sources
+# built with HEATSHRINK_DYNAMIC_ALLOC 0 and heatshrink_config.h's fixed sizes,
+# whose consumers define HEATSHRINK_DYNAMIC_ALLOC 0 too and which defines the
+# same symbols; the heatshrink CLI, which includes <unistd.h> and <getopt.h>;
+# and the tests and benchmark.
+[target.heatshrink]
+type = "library"
+sources = ["heatshrink_decoder.c", "heatshrink_encoder.c"]
+include-dirs = ["."]
+# The headers use <stdint.h>, flexible array members, and enumerator lists
+# with a trailing comma.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "heatshrink"
