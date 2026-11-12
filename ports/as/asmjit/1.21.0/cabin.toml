@@ -1,0 +1,113 @@
+[package.upstream]
+# asmjit has no tags or releases.  This is the commit conan-center-index
+# pins (cci.20251209; committed 2025-12-13), newer than vcpkg's
+# 9eb6edbf711c.  Its asmjit/core/api-config.h:19 declares
+# ASMJIT_LIBRARY_VERSION 1.21.0, which is the version here.
+url = "https://github.com/asmjit/asmjit/archive/c87860217e43e2a06060fcaae5b468f6a55b9963.tar.gz"
+checksum = "sha256:e5a458aa98cdf94bbed94059491a9e0d2bae4a67b3a21d33470925c95dfa2f88"
+format = "tar.gz"
+strip-prefix = "asmjit-c87860217e43e2a06060fcaae5b468f6a55b9963"
+
+[package]
+name = "cabin-ports/asmjit"
+version = "1.21.0"
+license = "Zlib"
+# asmjit/support/support.h:1653-1714 adapts PDCLib's qsort (Raymond Gardner,
+# Paul Edwards, Martin Baute) and asmjit/support/arenatree.h:171-351 and
+# :377-397 Julienne Walker's jsw_rbtree.  Both are public domain (PDCLib's
+# repository is CC0-1.0), so they add no term.
+# Not ported: asmjit-testing/ (tests and benchmarks), db/ and tools/ (the
+# generators of the committed instruction tables) and the CMake package
+# files.
+include = ["LICENSE.md", "asmjit"]
+
+# Upstream's asmjit library (CMakeLists.txt:120-290, :558-567), static, with
+# the CMake defaults: every backend (x86, AArch64) and feature on.  The
+# private flags at :384-424 are warnings, optimisations and opt-outs of
+# thread-safe statics, noexcept enforcement and /GS.  No source needs them, so
+# they are not reproduced.  Consumers write <asmjit/x86.h>, <asmjit/a64.h>,
+# <asmjit/host.h>, <asmjit/ujit.h> or <asmjit/core.h>.
+[target.asmjit]
+type = "library"
+sources = [
+  "asmjit/core/archtraits.cpp",
+  "asmjit/core/assembler.cpp",
+  "asmjit/core/builder.cpp",
+  "asmjit/core/codeholder.cpp",
+  "asmjit/core/codewriter.cpp",
+  "asmjit/core/compiler.cpp",
+  "asmjit/core/constpool.cpp",
+  "asmjit/core/cpuinfo.cpp",
+  "asmjit/core/emithelper.cpp",
+  "asmjit/core/emitter.cpp",
+  "asmjit/core/emitterutils.cpp",
+  "asmjit/core/environment.cpp",
+  "asmjit/core/errorhandler.cpp",
+  "asmjit/core/formatter.cpp",
+  "asmjit/core/func.cpp",
+  "asmjit/core/funcargscontext.cpp",
+  "asmjit/core/globals.cpp",
+  "asmjit/core/inst.cpp",
+  "asmjit/core/instdb.cpp",
+  "asmjit/core/jitallocator.cpp",
+  "asmjit/core/jitruntime.cpp",
+  "asmjit/core/logger.cpp",
+  "asmjit/core/operand.cpp",
+  "asmjit/core/osutils.cpp",
+  "asmjit/core/ralocal.cpp",
+  "asmjit/core/rapass.cpp",
+  "asmjit/core/rastack.cpp",
+  "asmjit/core/string.cpp",
+  "asmjit/core/target.cpp",
+  "asmjit/core/type.cpp",
+  "asmjit/core/virtmem.cpp",
+  "asmjit/support/arena.cpp",
+  "asmjit/support/arenabitset.cpp",
+  "asmjit/support/arenahash.cpp",
+  "asmjit/support/arenalist.cpp",
+  "asmjit/support/arenatree.cpp",
+  "asmjit/support/arenavector.cpp",
+  "asmjit/support/support.cpp",
+  "asmjit/arm/armformatter.cpp",
+  "asmjit/arm/a64assembler.cpp",
+  "asmjit/arm/a64builder.cpp",
+  "asmjit/arm/a64compiler.cpp",
+  "asmjit/arm/a64emithelper.cpp",
+  "asmjit/arm/a64formatter.cpp",
+  "asmjit/arm/a64func.cpp",
+  "asmjit/arm/a64instapi.cpp",
+  "asmjit/arm/a64instdb.cpp",
+  "asmjit/arm/a64operand.cpp",
+  "asmjit/arm/a64rapass.cpp",
+  "asmjit/x86/x86assembler.cpp",
+  "asmjit/x86/x86builder.cpp",
+  "asmjit/x86/x86compiler.cpp",
+  "asmjit/x86/x86emithelper.cpp",
+  "asmjit/x86/x86formatter.cpp",
+  "asmjit/x86/x86func.cpp",
+  "asmjit/x86/x86instdb.cpp",
+  "asmjit/x86/x86instapi.cpp",
+  "asmjit/x86/x86operand.cpp",
+  "asmjit/x86/x86rapass.cpp",
+  "asmjit/ujit/unicompiler_a64.cpp",
+  "asmjit/ujit/unicompiler_x86.cpp",
+  "asmjit/ujit/vecconsttable.cpp",
+]
+include-dirs = ["."]
+cxx-standard = "c++17"
+# Upstream's static build defines ASMJIT_STATIC for the library and its
+# consumers (CMakeLists.txt:502-504, :565); without it,
+# asmjit/core/api-config.h:446-462 marks the API dllimport on Windows.
+defines = ["ASMJIT_STATIC"]
+interface-defines = ["ASMJIT_STATIC"]
+links = "asmjit"
+
+# asmjit/core/virtmem.cpp calls shm_open on Linux when memfd_create is
+# unavailable, and shm_open is in librt before glibc 2.34.  Upstream links rt
+# only where a test call to it fails without the library
+# (CMakeLists.txt:484-499).  Its pthread_mutex_* calls link from libc on glibc
+# and musl, so upstream's pthread check (:468-482) adds nothing on Linux.
+# NetBSD also keeps shm_open in librt, but virtmem.cpp:103-105 uses
+# MAP_REMAPDUP there instead.
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["rt"]
