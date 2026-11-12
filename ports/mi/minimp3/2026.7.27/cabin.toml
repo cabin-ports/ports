@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/lieff/minimp3/archive/ea99364f61c14656440e8d77e9c233ccf3124633.tar.gz"
+checksum = "sha256:5628166eb82a9bb581317918a334c317a2c0a30278bb14a20381307976768f34"
+format = "tar.gz"
+strip-prefix = "minimp3-ea99364f61c14656440e8d77e9c233ccf3124633"
+
+# Upstream has no tags or releases; this is the commit vcpkg pins, versioned
+# by its commit date (2026-07-27).
+[package]
+name = "cabin-ports/minimp3"
+version = "2026.7.27"
+license = "CC0-1.0"
+# The two headers vcpkg and conan-center-index install.  The test vectors,
+# player, fuzzing corpus and Huffman-table tools are left out.
+include = ["LICENSE", "minimp3.h", "minimp3_ex.h"]
+
+# Single-header library: one translation unit defines MINIMP3_IMPLEMENTATION
+# before including the headers.  Configuration macros are the consumer's
+# choice and must agree across its translation units (MINIMP3_FLOAT_OUTPUT
+# changes mp3d_sample_t), so the port exports no defines.  As in upstream's
+# README and conan-center-index, consumers include "minimp3.h" directly;
+# vcpkg installs it under minimp3/ instead.
+[target.minimp3]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
