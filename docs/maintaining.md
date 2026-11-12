@@ -58,7 +58,8 @@ succeeded.  `scripts/actions/require-needs.sh` judges each job twice, by its `ne
 the job's own conclusion in the run's job list, so a failed, cancelled, skipped, or missing job
 fails the check.  The platforms are separate jobs rather than one matrix because a matrix has a
 single `needs` result for all its legs, and that result has not shown a leg that was cancelled
-before any runner picked it up.
+before any runner picked it up.  Re-running only the failed jobs can still turn the check green:
+the new attempt's job list holds the jobs it kept, with their conclusions.
 
 Each `lint` step runs locally, from the repository root, exactly as `ci.yml` writes it, given
 `shellcheck` and Go: `go run` fetches the `shfmt` and `actionlint` versions the job pins, and the

@@ -9,6 +9,7 @@
 set -euo pipefail
 
 # Read once: a needed job listed without its conclusion fails the check.
+# An attempt also lists the jobs a re-run of the failed ones kept.
 jobs="$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/attempts/$GITHUB_RUN_ATTEMPT/jobs?per_page=100")"
 
 # One row per needed job: its `needs` result and the conclusion of every
