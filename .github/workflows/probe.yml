@@ -45,10 +45,11 @@ jobs:
           path: ${{ runner.temp }}/tools/bin/
           retention-days: 1
 
-  # Skipped, like publish.yml's `lock` in a `plan` run.
+  # Takes the lock, like publish.yml's `lock` in an uploading run. With
+  # it skipped, as in a `plan` run, `prepare` ran and `publish` was
+  # skipped (run 43165403343).
   lock:
     needs: build
-    if: github.event_name == 'never'
     runs-on: ubuntu-latest
     outputs:
       go: ${{ steps.lock.outputs.go }}
@@ -57,12 +58,10 @@ jobs:
         run: echo "go=true" >>"$GITHUB_OUTPUT"
 
   # publish.yml's `prepare`, with an empty receipts log: every version
-  # that is not held is new. Must run although `lock` was skipped.
+  # that is not held is new.
   prepare:
     needs: [build, lock]
-    if: >-
-      !failure() && !cancelled() && (needs.lock.outputs.go == 'true' ||
-      needs.build.result == 'success')
+    if: "!failure() && !cancelled() && needs.lock.outputs.go == 'true'"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
@@ -92,7 +91,7 @@ jobs:
   # publish.yml's `publish` downloads and its upload command, on another
   # machine than `prepare`.
   publish:
-    needs: [build, prepare]
+    needs: [build, lock, prepare]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7.0.1
