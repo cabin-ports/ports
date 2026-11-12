@@ -1,0 +1,82 @@
+[package.upstream]
+url = "https://github.com/bdwgc/libatomic_ops/releases/download/v7.10.0/libatomic_ops-7.10.0.tar.gz"
+checksum = "sha256:0db3ebff755db170f65e74a64ec4511812e9ee3185c232eeffeacd274190dfb0"
+format = "tar.gz"
+strip-prefix = "libatomic_ops-7.10.0"
+# Patch 0001 keeps cl on the sizeof form of atomic_ops.h's alignment
+# assertions, the one upstream's MSVC builds, which request no C standard,
+# compile.  cl's /std:c11, the lowest C standard Cabin requests from it,
+# defines __STDC_VERSION__ as 201112L, which selects GCC's __alignof__
+# (atomic_ops.h:262-264, 290-292); cl has no such operator, so a C consumer
+# compiled without NDEBUG fails to link.
+patches = ["patches/0001-keep-msvc-off-gnu-alignof-in-assertions.patch"]
+
+[package]
+name = "cabin-ports/libatomic_ops"
+version = "7.10.0"
+# LICENSE: the core library is MIT, except the sysdeps headers inherited
+# from the Boehm-Demers-Weiser collector, which keep its notice
+# (Boehm-GC); the gpl library's atomic_ops_stack.c and atomic_ops_malloc.c
+# are under the GPL version 2 or later, which COPYING carries.
+license = "MIT AND Boehm-GC AND GPL-2.0-or-later"
+include = ["COPYING", "LICENSE", "patches", "src"]
+
+# The two static libraries upstream's CMake build makes by default
+# (CMakeLists.txt:145-187, enable_gpl being ON): atomic_ops, the MIT core,
+# and atomic_ops_gpl, the almost lock-free stack and the malloc built on
+# it.  A consumer that wants only the core depends on
+# cabin-ports/libatomic_ops:atomic_ops.  Not ported: the SunPro assembly
+# (src/atomic_ops_sysdeps.S, CMakeLists.txt:147-151), the shared-library
+# option, the tests and the autotools build.
+[target.atomic_ops]
+type = "library"
+sources = ["src/atomic_ops.c"]
+include-dirs = ["src"]
+# CMake compiles with the compiler's default C dialect, a GNU one on GCC
+# and Clang; the build is strict C11, with the Unix profile's
+# _DEFAULT_SOURCE for what glibc hides otherwise (MAP_ANONYMOUS, without
+# which atomic_ops_malloc.c maps /dev/zero instead).
+c-standard = "c11"
+# Upstream keeps the headers valid C89 (ChangeLog: -std=c89 and pedantic
+# C90 fixes).
+interface-c-standard = "c89"
+links = "atomic_ops"
+
+# Upstream's AO_malloc cannot serve a request between 32 and 64 KiB (32761
+# to 65528 bytes on 64-bit hosts): no object of that size class fits a 64
+# KiB chunk (atomic_ops_malloc.c:308-320), so such a request uses up the
+# initial heap and returns NULL, or, with mmap enabled, maps chunks until
+# mmap fails.
+[target.atomic_ops_gpl]
+type = "library"
+sources = ["src/atomic_ops_malloc.c", "src/atomic_ops_stack.c"]
+include-dirs = ["src"]
+c-standard = "c11"
+interface-c-standard = "c89"
+links = "atomic_ops_gpl"
+deps = [{ name = "atomic_ops", public = true }]
+
+# CMake's default enable_assertions=OFF defines NDEBUG in every build type
+# (CMakeLists.txt:113-119).
+[profile]
+defines = ["NDEBUG"]
+
+# What CMake finds on Unix systems: POSIX threads (CMakeLists.txt:100-111)
+# and mmap, with which atomic_ops_gpl allocates large objects
+# (CMakeLists.txt:170-172; only atomic_ops_malloc.c reads HAVE_MMAP).
+[target.'cfg(family = "unix")'.profile]
+defines = ["_DEFAULT_SOURCE", "_REENTRANT", "HAVE_MMAP"]
+
+# CMake links the thread library to atomic_ops (CMakeLists.txt:158), whose
+# AO_pt_lock (atomic_ops.c:112-123) is the mutex of the pthread-based
+# emulation a consumer selects with AO_USE_PTHREAD_DEFS.
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["pthread"]
+
+# With MSVC, CMake finds no POSIX threads, so defines AO_NO_PTHREADS
+# (CMakeLists.txt:105-111), which atomic_ops.c reads only on POSIX systems;
+# with cl it takes its non-POSIX branch (:71-72, :250-259), which backs off
+# with Sleep() (:286-287).  Without mmap, AO_malloc returns NULL for an
+# object that does not fit a 64 KiB chunk.
+[target.'cfg(os = "windows")'.profile]
+defines = ["AO_NO_PTHREADS"]
