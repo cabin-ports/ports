@@ -1,0 +1,35 @@
+[package.upstream]
+# The release zip ConanCenter pins; it has no top directory.
+url = "https://github.com/modelica/fmi-ls-bus/releases/download/v1.0.0/FMI-LS-BUS-1.0.0.zip"
+checksum = "sha256:c2f40471a5fd4c48c0c7b66c5982ac2db837f73aeaa317e740a6f770ec570126"
+format = "zip"
+
+# The zip also holds the specification (HTML and images, CC-BY-SA-4.0), the
+# bus manifest's XML schema, and example XML files, which no C or C++ build
+# reads; only the C headers are packaged.
+[package]
+name = "cabin-ports/fmi-ls-bus"
+version = "1.0.0"
+license = "BSD-2-Clause"
+include = ["LICENSE.txt", "headers"]
+
+[dependencies]
+"cabin-ports/fmi3" = "^3.0"
+
+# Upstream limitations:
+# - The transmit and format-error operation structs end in flexible array
+#   members, which C++ compilers accept only as an extension (the headers
+#   silence MSVC's C4200).
+# - FMI3_LS_BUS_READ_NEXT_OPERATION and its _DIRECT form check only that an
+#   operation's length fits the remaining bytes: an operation of length 0 is
+#   returned again without advancing, and neither the length nor dataLength
+#   is checked against the operation's fields.
+# - The create macros copy the structs in host byte order, while the
+#   specification requires little-endian.
+[target.fmi-ls-bus]
+type = "header-only"
+include-dirs = ["headers"]
+# fmi3LsBusCan.h's configuration operation holds an anonymous union: C11.
+interface-c-standard = "c11"
+interface-cxx-standard = "c++11"
+deps = [{ name = "cabin-ports/fmi3", public = true }]
