@@ -8,11 +8,6 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-go@v7.0.0'
         - 'ilammy/msvc-dev-cmd@v1.13.0'
-    '.github/workflows/probe.yml':
-        - 'actions-rust-lang/setup-rust-toolchain@v2.0.0'
-        - 'actions/checkout@v7.0.1'
-        - 'actions/download-artifact@v8.0.2'
-        - 'actions/upload-artifact@v7.0.2'
     '.github/workflows/publish.yml':
         - 'actions-rust-lang/setup-rust-toolchain@v2.0.0'
         - 'actions/checkout@v7.0.1'
