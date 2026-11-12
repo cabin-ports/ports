@@ -1,0 +1,260 @@
+[package.upstream]
+# The v2.7.0 tag archive, the bytes vcpkg's openh264 port pins.
+url = "https://github.com/cisco/openh264/archive/refs/tags/v2.7.0.tar.gz"
+checksum = "sha256:5178775c8b440073e70920e97d195efff721c0e56d0a78cc82c919e95d54924d"
+format = "tar.gz"
+strip-prefix = "openh264-2.7.0"
+
+[package]
+name = "cabin-ports/openh264"
+version = "2.7.0"
+license = "BSD-2-Clause"
+# The MIPS and LoongArch kernels, which no build here compiles, stay out,
+# and with them msa_macros.h (MIT) and loongson_intrinsics.h (no license
+# grant).
+include = [
+  "LICENSE",
+  "codec/api/wels/codec_api.h",
+  "codec/api/wels/codec_app_def.h",
+  "codec/api/wels/codec_def.h",
+  "codec/api/wels/codec_ver.h",
+  "codec/common/arm64",
+  "codec/common/inc/asmdefs_mmi.h",
+  "codec/common/inc/copy_mb.h",
+  "codec/common/inc/cpu.h",
+  "codec/common/inc/cpu_core.h",
+  "codec/common/inc/crt_util_safe_x.h",
+  "codec/common/inc/deblocking_common.h",
+  "codec/common/inc/expand_pic.h",
+  "codec/common/inc/golomb_common.h",
+  "codec/common/inc/intra_pred_common.h",
+  "codec/common/inc/ls_defines.h",
+  "codec/common/inc/macros.h",
+  "codec/common/inc/mc.h",
+  "codec/common/inc/measure_time.h",
+  "codec/common/inc/memory_align.h",
+  "codec/common/inc/sad_common.h",
+  "codec/common/inc/typedefs.h",
+  "codec/common/inc/utils.h",
+  "codec/common/inc/version.h",
+  "codec/common/inc/wels_common_defs.h",
+  "codec/common/inc/wels_const_common.h",
+  "codec/common/inc/welsCodecTrace.h",
+  "codec/common/inc/WelsList.h",
+  "codec/common/inc/WelsLock.h",
+  "codec/common/inc/WelsTask.h",
+  "codec/common/inc/WelsTaskThread.h",
+  "codec/common/inc/WelsThread.h",
+  "codec/common/inc/WelsThreadLib.h",
+  "codec/common/inc/WelsThreadPool.h",
+  "codec/common/src",
+  "codec/decoder/core/arm64",
+  "codec/decoder/core/inc",
+  "codec/decoder/core/src",
+  "codec/decoder/plus/inc",
+  "codec/decoder/plus/src/welsDecoderExt.cpp",
+  "codec/encoder/core/arm64",
+  "codec/encoder/core/inc",
+  "codec/encoder/core/src",
+  "codec/encoder/plus/inc",
+  "codec/encoder/plus/src/welsEncoderExt.cpp",
+  "codec/processing/interface",
+  "codec/processing/src/adaptivequantization",
+  "codec/processing/src/arm64",
+  "codec/processing/src/backgrounddetection",
+  "codec/processing/src/common",
+  "codec/processing/src/complexityanalysis",
+  "codec/processing/src/denoise",
+  "codec/processing/src/downsample",
+  "codec/processing/src/imagerotate",
+  "codec/processing/src/scenechangedetection",
+  "codec/processing/src/scrolldetection",
+  "codec/processing/src/vaacalc",
+]
+# Upstream's Makefile compiles C++17 on Darwin (build/platform-darwin.mk:14);
+# its Meson build takes the compiler's default.
+cxx-standard = "c++17"
+# codec_api.h includes <stdbool.h> in C.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# Upstream's Meson build compiles four static libraries, common,
+# processing, decoder and encoder (codec/*/meson.build), and joins them
+# into libopenh264 (meson.build:204-210).  The decoder and the encoder
+# have private headers of the same names (deblocking.h, slice.h, ...), so
+# each is a target with its own include dirs; common and processing share
+# one, and the header-only openh264 is the target consumers link.  As in
+# the Meson build, version.h reports "openh264 default: 1.4": only the
+# Makefile generates version_gen.h.  Not ported: the console programs and
+# tests, the shared library's .def and .rc files, and Meson's warning
+# flags.
+#
+# The x86 SIMD is NASM-only, so x86 and x86_64 build upstream's USE_ASM=No
+# configuration in C++.  So do 32-bit ARM, where Meson defines HAVE_NEON
+# for C only (meson.build:79-83), so its C++ never calls the NEON assembly;
+# LoongArch, whose kernels need -mlsx and -mlasx; Windows on ARM64, where
+# Meson assembles the code but leaves HAVE_NEON_AARCH64 undefined in C++;
+# and RISC-V and POWER, which have no kernels.
+[target.openh264]
+type = "header-only"
+include-dirs = ["codec/api"]
+deps = ["openh264_decoder", "openh264_encoder"]
+
+[target.openh264_common]
+type = "library"
+sources = [
+  "codec/common/src/common_tables.cpp",
+  "codec/common/src/copy_mb.cpp",
+  "codec/common/src/cpu.cpp",
+  "codec/common/src/crt_util_safe_x.cpp",
+  "codec/common/src/deblocking_common.cpp",
+  "codec/common/src/expand_pic.cpp",
+  "codec/common/src/intra_pred_common.cpp",
+  "codec/common/src/mc.cpp",
+  "codec/common/src/memory_align.cpp",
+  "codec/common/src/sad_common.cpp",
+  "codec/common/src/utils.cpp",
+  "codec/common/src/welsCodecTrace.cpp",
+  "codec/common/src/WelsTaskThread.cpp",
+  "codec/common/src/WelsThread.cpp",
+  "codec/common/src/WelsThreadLib.cpp",
+  "codec/common/src/WelsThreadPool.cpp",
+  "codec/processing/src/adaptivequantization/AdaptiveQuantization.cpp",
+  "codec/processing/src/backgrounddetection/BackgroundDetection.cpp",
+  "codec/processing/src/common/memory.cpp",
+  "codec/processing/src/common/WelsFrameWork.cpp",
+  "codec/processing/src/common/WelsFrameWorkEx.cpp",
+  "codec/processing/src/complexityanalysis/ComplexityAnalysis.cpp",
+  "codec/processing/src/denoise/denoise.cpp",
+  "codec/processing/src/denoise/denoise_filter.cpp",
+  "codec/processing/src/downsample/downsample.cpp",
+  "codec/processing/src/downsample/downsamplefuncs.cpp",
+  "codec/processing/src/imagerotate/imagerotate.cpp",
+  "codec/processing/src/imagerotate/imagerotatefuncs.cpp",
+  "codec/processing/src/scenechangedetection/SceneChangeDetection.cpp",
+  "codec/processing/src/scrolldetection/ScrollDetection.cpp",
+  "codec/processing/src/scrolldetection/ScrollDetectionFuncs.cpp",
+  "codec/processing/src/vaacalc/vaacalcfuncs.cpp",
+  "codec/processing/src/vaacalc/vaacalculation.cpp",
+]
+# The three archives together are upstream's libopenh264; every link
+# reaches this one.
+links = "openh264"
+
+[target.openh264_decoder]
+type = "library"
+sources = [
+  "codec/decoder/core/src/au_parser.cpp",
+  "codec/decoder/core/src/bit_stream.cpp",
+  "codec/decoder/core/src/cabac_decoder.cpp",
+  "codec/decoder/core/src/deblocking.cpp",
+  "codec/decoder/core/src/decode_mb_aux.cpp",
+  "codec/decoder/core/src/decode_slice.cpp",
+  "codec/decoder/core/src/decoder.cpp",
+  "codec/decoder/core/src/decoder_core.cpp",
+  "codec/decoder/core/src/decoder_data_tables.cpp",
+  "codec/decoder/core/src/error_concealment.cpp",
+  "codec/decoder/core/src/fmo.cpp",
+  "codec/decoder/core/src/get_intra_predictor.cpp",
+  "codec/decoder/core/src/manage_dec_ref.cpp",
+  "codec/decoder/core/src/memmgr_nal_unit.cpp",
+  "codec/decoder/core/src/mv_pred.cpp",
+  "codec/decoder/core/src/parse_mb_syn_cabac.cpp",
+  "codec/decoder/core/src/parse_mb_syn_cavlc.cpp",
+  "codec/decoder/core/src/pic_queue.cpp",
+  "codec/decoder/core/src/rec_mb.cpp",
+  "codec/decoder/core/src/wels_decoder_thread.cpp",
+  "codec/decoder/plus/src/welsDecoderExt.cpp",
+]
+include-dirs = ["codec/decoder/core/inc", "codec/decoder/plus/inc"]
+deps = ["openh264_common"]
+
+[target.openh264_encoder]
+type = "library"
+sources = [
+  "codec/encoder/core/src/au_set.cpp",
+  "codec/encoder/core/src/deblocking.cpp",
+  "codec/encoder/core/src/decode_mb_aux.cpp",
+  "codec/encoder/core/src/encode_mb_aux.cpp",
+  "codec/encoder/core/src/encoder.cpp",
+  "codec/encoder/core/src/encoder_data_tables.cpp",
+  "codec/encoder/core/src/encoder_ext.cpp",
+  "codec/encoder/core/src/get_intra_predictor.cpp",
+  "codec/encoder/core/src/md.cpp",
+  "codec/encoder/core/src/mv_pred.cpp",
+  "codec/encoder/core/src/nal_encap.cpp",
+  "codec/encoder/core/src/paraset_strategy.cpp",
+  "codec/encoder/core/src/picture_handle.cpp",
+  "codec/encoder/core/src/ratectl.cpp",
+  "codec/encoder/core/src/ref_list_mgr_svc.cpp",
+  "codec/encoder/core/src/sample.cpp",
+  "codec/encoder/core/src/set_mb_syn_cabac.cpp",
+  "codec/encoder/core/src/set_mb_syn_cavlc.cpp",
+  "codec/encoder/core/src/slice_multi_threading.cpp",
+  "codec/encoder/core/src/svc_base_layer_md.cpp",
+  "codec/encoder/core/src/svc_enc_slice_segment.cpp",
+  "codec/encoder/core/src/svc_encode_mb.cpp",
+  "codec/encoder/core/src/svc_encode_slice.cpp",
+  "codec/encoder/core/src/svc_mode_decision.cpp",
+  "codec/encoder/core/src/svc_motion_estimate.cpp",
+  "codec/encoder/core/src/svc_set_mb_syn_cabac.cpp",
+  "codec/encoder/core/src/svc_set_mb_syn_cavlc.cpp",
+  "codec/encoder/core/src/wels_preprocess.cpp",
+  "codec/encoder/core/src/wels_task_base.cpp",
+  "codec/encoder/core/src/wels_task_encoder.cpp",
+  "codec/encoder/core/src/wels_task_management.cpp",
+  "codec/encoder/plus/src/welsEncoderExt.cpp",
+]
+include-dirs = ["codec/encoder/core/inc", "codec/encoder/plus/inc"]
+deps = ["openh264_common"]
+
+# Meson's inc and processing_inc (meson.build:11-23).  Only processing and
+# the encoder use the latter; its header names occur nowhere else.
+[profile]
+include-dirs = [
+  "codec/api/wels",
+  "codec/common/inc",
+  "codec/processing/interface",
+  "codec/processing/src/common",
+  "codec/processing/src/adaptivequantization",
+  "codec/processing/src/downsample",
+  "codec/processing/src/scrolldetection",
+  "codec/processing/src/vaacalc",
+]
+
+# meson.build:84-88 and the libraries' aarch64 lists.
+[target.'cfg(all(arch = "aarch64", not(family = "windows")))'.sources]
+openh264_common = [
+  "codec/common/arm64/copy_mb_aarch64_neon.S",
+  "codec/common/arm64/deblocking_aarch64_neon.S",
+  "codec/common/arm64/expand_picture_aarch64_neon.S",
+  "codec/common/arm64/intra_pred_common_aarch64_neon.S",
+  "codec/common/arm64/mc_aarch64_neon.S",
+  "codec/processing/src/arm64/adaptive_quantization_aarch64_neon.S",
+  "codec/processing/src/arm64/down_sample_aarch64_neon.S",
+  "codec/processing/src/arm64/pixel_sad_aarch64_neon.S",
+  "codec/processing/src/arm64/vaa_calc_aarch64_neon.S",
+]
+openh264_decoder = [
+  "codec/decoder/core/arm64/block_add_aarch64_neon.S",
+  "codec/decoder/core/arm64/intra_pred_aarch64_neon.S",
+]
+openh264_encoder = [
+  "codec/encoder/core/arm64/intra_pred_aarch64_neon.S",
+  "codec/encoder/core/arm64/intra_pred_sad_3_opt_aarch64_neon.S",
+  "codec/encoder/core/arm64/memory_aarch64_neon.S",
+  "codec/encoder/core/arm64/pixel_aarch64_neon.S",
+  "codec/encoder/core/arm64/reconstruct_aarch64_neon.S",
+  "codec/encoder/core/arm64/svc_motion_estimation_aarch64_neon.S",
+]
+
+[target.'cfg(all(arch = "aarch64", not(family = "windows")))'.profile]
+defines = ["HAVE_NEON_AARCH64"]
+include-dirs = ["codec/common/arm64"]
+
+# Meson's threads and libm dependencies (meson.build:49-58).
+[target.'cfg(all(family = "unix", not(os = "android")))'.profile]
+link-libs = ["pthread", "m"]
+
+[target.'cfg(os = "android")'.profile]
+link-libs = ["m"]
