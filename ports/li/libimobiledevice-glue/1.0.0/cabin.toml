@@ -1,0 +1,108 @@
+[package.upstream]
+# The 1.0.0 tag archive; the release itself is a .tar.bz2 only.  vcpkg pins
+# 214bafd, three commits later, which change only CI, Makefile.am and
+# git-version-gen, so its src/ and include/ equal these.
+url = "https://github.com/libimobiledevice/libimobiledevice-glue/archive/refs/tags/1.0.0.tar.gz"
+checksum = "sha256:6be77b9b51a07fc89d41b29e2e65ada1bab72a7c9a0bebeb279030167decef4e"
+format = "tar.gz"
+strip-prefix = "libimobiledevice-glue-1.0.0"
+# Patch 0001 makes the sources build with MSVC and as a static library, after
+# vcpkg's patches 001, 002 and 004: the public headers test _WIN32, not WIN32;
+# socket.c, termcolors.c and utils.c skip the POSIX headers MSVC lacks, with
+# termcolors.c taking isatty from <io.h> there; and common.h drops
+# __declspec(dllexport).  It also writes the escape character in
+# termcolors.h and termcolors.c as \033, not GNU's \e, which MSVC reads as a
+# plain e.
+patches = ["patches/0001-port-to-msvc-and-static-linking.patch"]
+
+[package]
+name = "cabin-ports/libimobiledevice-glue"
+version = "1.0.0"
+# COPYING is the LGPL 2.1; every file under src/ and include/ but
+# include/endianness.h offers it "or (at your option) any later version".
+# endianness.h has no header, so README.md:96's "LGPL v2.1" governs it.
+license = "LGPL-2.1-or-later AND LGPL-2.1-only"
+include = ["COPYING", "README.md", "include", "patches", "src"]
+# Upstream sets no standard, so it builds in the compilers' default GNU
+# dialects.  Cabin rejects gnu-extensions on MSVC, so this port builds in
+# strict C11, and the Linux profile below defines _DEFAULT_SOURCE for the
+# declarations glibc's GNU mode exposes.
+c-standard = "c11"
+
+[dependencies]
+# opack.h includes <plist/plist.h>; configure.ac:26 asks for libplist 2.3.0
+# or later.
+"cabin-ports/libplist" = "^2.8.1"
+
+# libimobiledevice-glue-1.0, static, from the sources src/Makefile.am lists.
+# configure's config.h is replaced by the defines below, and HAVE_CONFIG_H
+# stays undefined.  Consumers write <libimobiledevice-glue/socket.h> and so
+# on; the headers have no extern "C", so C++ consumers wrap them in one, and
+# on Windows socket.h must come before thread.h and utils.h, since
+# <winsock2.h> must precede <windows.h>.  include/endianness.h, which
+# upstream does not install, is on consumers' include path too.
+# Upstream's limitations:
+# - term_colors_init runs from glue.c's constructor (DllMain under MSVC),
+#   which a static link never pulls in, as with upstream's own static
+#   library, so colors stay off until the consumer calls it.
+# - thread.h declares thread_cleanup_push and thread_cleanup_pop only to
+#   consumers that define HAVE_PTHREAD_CANCEL themselves.
+# - opack_decode_to_plist does not step past a 32- or 64-bit integer
+#   (src/opack.c:307, :311), so what follows one in an array or dictionary
+#   decodes from its bytes, and the call returns 0 even when decoding fails.
+# Not reproduced: -fsigned-char (the sources do not depend on the
+# signedness of char), -fvisibility=hidden, which matters only to a shared
+# object linking the library, MinGW's WINVER=0x0501, and the warning
+# options.  Not ported: the shared library and the pkg-config file.
+[target.imobiledevice-glue]
+type = "library"
+sources = [
+  "src/cbuf.c",
+  "src/collection.c",
+  "src/glue.c",
+  "src/opack.c",
+  "src/socket.c",
+  "src/termcolors.c",
+  "src/thread.c",
+  "src/tlv.c",
+  "src/utils.c",
+]
+include-dirs = ["include"]
+# The headers use <stdint.h>.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "imobiledevice-glue-1.0"
+deps = [{ name = "cabin-ports/libplist:plist", public = true }]
+
+# configure's results on Linux, macOS and FreeBSD (socket.c:752 stops the
+# build on other Unixes): getifaddrs, for which socket.c has a fallback only
+# on Windows (:396-700; Android has it from API level 24), and stpcpy
+# (utils.c:41).
+[target.'cfg(family = "unix")'.profile]
+defines = ["HAVE_GETIFADDRS", "HAVE_STPCPY"]
+
+# pthread_cancel (thread.c:85) and libpthread; Android's libc has neither.
+[target.'cfg(all(family = "unix", not(os = "android")))'.profile]
+defines = ["HAVE_PTHREAD_CANCEL"]
+link-libs = ["pthread"]
+
+# glibc declares stpcpy, getaddrinfo and the IFF_ flags, and <endian.h>
+# gives the __BYTE_ORDER that include/endianness.h reads, only with
+# _DEFAULT_SOURCE, which upstream's GNU dialect implies.  configure's
+# AC_SYS_LARGEFILE (configure.ac:121) gives 32-bit glibc a 64-bit off_t, for
+# socket.c's stat and utils.c's file buffers; no public header uses off_t.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_DEFAULT_SOURCE", "_FILE_OFFSET_BITS=64"]
+
+# Where there is no <endian.h>, configure.ac:54-64 defines __BYTE_ORDER in
+# config.h.  Without it, include/endianness.h falls back to Clang's
+# __LITTLE_ENDIAN__, and under GCC or MSVC it byte-swaps 64-bit values on
+# these little-endian targets.
+[target.'cfg(any(os = "macos", os = "ios"))'.profile]
+defines = ["__BYTE_ORDER=1234"]
+
+# WIN32 selects the sources' Windows code, which only non-strict MinGW
+# predefines, and src/Makefile.am:22-25 links Winsock and the IP helper.
+[target.'cfg(os = "windows")'.profile]
+defines = ["WIN32", "__BYTE_ORDER=1234"]
+link-libs = ["ws2_32", "iphlpapi"]
