@@ -75,7 +75,8 @@ rejected upload is never revived and a correction ships only as an `all` dispatc
 answers identical bytes as a no-op, but once every revision of a version is rejected it revives
 identical bytes and accepts different ones.  So a version whose upload may have landed without its
 receipt is never resubmitted unattended ([Failures](#failures) and [The lock](#the-lock)).  Holds
-bind `new` only.
+bind `new` only; a version that no mode may upload is removed from the catalog instead
+([Held ports](held-ports.md)).
 
 ### What it builds
 
