@@ -1,0 +1,14 @@
+--- /dev/null
++++ b/THIRD_PARTY_NOTICES
+@@ -0,0 +1,11 @@
++include/tl/expected.hpp, lines 330-391 (namespace swap_adl_tests and the
++is_swappable and is_nothrow_swappable traits), is adapted from:
++
++  "What is a proper way to implement is_swappable to test for the Swappable
++  concept?", answer by orlp (https://stackoverflow.com/users/565635),
++  https://stackoverflow.com/a/26852703
++
++Licensed under CC BY-SA 3.0 (SPDX: CC-BY-SA-3.0):
++https://creativecommons.org/licenses/by-sa/3.0/
++
++Changed: reformatted and relocated into namespace tl::detail.
