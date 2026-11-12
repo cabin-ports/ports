@@ -1,0 +1,7 @@
+--- /dev/null
++++ b/src/ggml-version.h
+@@ -0,0 +1,4 @@
++#pragma once
++
++#define GGML_VERSION "0.26.0"
++#define GGML_COMMIT  "unknown"
