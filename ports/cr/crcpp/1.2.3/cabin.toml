@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/d-bahr/CRCpp/archive/refs/tags/release-1.2.3.0.tar.gz"
+checksum = "sha256:67889781c0137d52b571e083030a3d79bb2ac2ce8c6964ecb1e5bc58d72e2d72"
+format = "tar.gz"
+strip-prefix = "CRCpp-release-1.2.3.0"
+
+[package]
+name = "cabin-ports/crcpp"
+# Upstream's four-part version is 1.2.3.0 (CMakeLists.txt:3, CRC.h:152-155).
+version = "1.2.3"
+license = "BSD-3-Clause"
+include = ["LICENSE", "inc"]
+
+# CRC++, upstream's header-only CRCpp target (CMakeLists.txt:12-26): inc/
+# is public, so consumers include <CRC.h>, and C++11 is required.  Macros
+# a consumer defines before the include configure it (CRC.h:38-56).  cl.exe
+# reports __cplusplus as 199711L without /Zc:__cplusplus, which neither
+# Cabin nor upstream's CMake package passes, so its consumers get CRC.h's
+# C++03 path (:61-63) unless they define CRCPP_USE_CPP11.  Upstream
+# limitation, not patched: CalculateBits without a previous CRC leaves the
+# initial value unreflected (:573, :644), so reflected parameters whose
+# initial value is not a bit palindrome, as no built-in one is, get a wrong
+# CRC; passing Calculate over no bytes as the previous CRC gives the right
+# one.  Not ported: the CMake and pkg-config package files, the
+# documentation and the unit tests.
+[target.crcpp]
+type = "header-only"
+include-dirs = ["inc"]
+interface-cxx-standard = "c++11"
