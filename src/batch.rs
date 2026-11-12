@@ -8,9 +8,11 @@
 //! resubmitting it.  A `failed` line's upload may have landed, so that
 //! version waits for `--retry-failed`.  A version without a line is a
 //! candidate unless [`HOLDS_FILE`] names it or something it requires is
-//! blocked.  No probe runs, and an uploaded requirement must stage the
-//! bytes of its last receipt, or its dependents wait for its packaging
-//! revision.
+//! blocked.  No probe runs: `--plan-new` builds them and records what
+//! it built, and `--publish-new` builds nothing and uploads only what
+//! that record lists ([`crate::prepared`]).  An uploaded requirement
+//! must stage the bytes of its last receipt, or its dependents wait for
+//! its packaging revision.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
@@ -22,7 +24,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::Options;
 use crate::plan::PortConversion;
-use crate::{preflight, remote, select};
+use crate::{preflight, prepared, remote, select};
 
 /// The reviewed hold list, beside the ports directory: one
 /// `<name> <version> <reason>` line per version `--publish-new` must
@@ -395,19 +397,28 @@ pub fn defer_stale(
 /// When Git cannot resolve either: an unresolvable main never reads as
 /// unchanged.
 pub fn head_and_main(dir: &Path, main: &str) -> Result<(String, String)> {
-    let rev = |rev: &str| {
-        select::git(
-            dir,
-            &[
-                "rev-parse",
-                "--verify",
-                "--end-of-options",
-                &format!("{rev}^{{commit}}"),
-            ],
-        )
-        .map(|out| out.trim().to_owned())
-    };
-    Ok((rev("HEAD")?, rev(main).context("resolving main")?))
+    Ok((head(dir)?, commit(dir, main).context("resolving main")?))
+}
+
+/// The commit checked out in the repository holding `dir`.
+///
+/// # Errors
+/// When Git cannot resolve it.
+pub fn head(dir: &Path) -> Result<String> {
+    commit(dir, "HEAD")
+}
+
+fn commit(dir: &Path, rev: &str) -> Result<String> {
+    select::git(
+        dir,
+        &[
+            "rev-parse",
+            "--verify",
+            "--end-of-options",
+            &format!("{rev}^{{commit}}"),
+        ],
+    )
+    .map(|out| out.trim().to_owned())
 }
 
 /// Run `--list-new`, `--plan-new`, or `--publish-new` over the loaded
@@ -461,9 +472,13 @@ pub fn run(
             cache_dir: &options.cache_dir,
             work_dir: &options.work_dir,
             cabin: &options.cabin,
-            // Never on main, where the upload runs (lib.rs): the merge
-            // queue already ran every consumer test.
-            run_probes: false,
+            // The merge queue already ran every consumer test, and an
+            // upload builds nothing (lib.rs).
+            probes: if new.main.is_none() {
+                preflight::Probes::Build
+            } else {
+                preflight::Probes::Skip
+            },
         })?;
         let before = status.clone();
         check_staged_bytes(
@@ -485,11 +500,7 @@ pub fn run(
     }
 
     let order = upload_order(&status);
-    if new.main.is_none() {
-        println!("plan complete: {} versions to upload", order.len());
-        return Ok(());
-    }
-    if order.is_empty() {
+    if new.main.is_some() && order.is_empty() {
         println!("new: nothing to upload");
         return Ok(());
     }
@@ -505,6 +516,12 @@ pub fn run(
             }
         })
         .collect();
+    if new.main.is_none() {
+        prepared::write(options, &uploads)?;
+        println!("plan complete: {} versions to upload", order.len());
+        return Ok(());
+    }
+    prepared::require(options, &uploads)?;
     remote::publish_all(
         &uploads,
         &new.index_url,

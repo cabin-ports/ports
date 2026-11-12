@@ -79,11 +79,15 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
 
 - In `publish.yml`, only the `publish` job and the curl-only `exchange-check` probe request
   `id-token: write`.  The `publish` job runs only the binaries the credential-free `build` job
-  produced and `scripts/actions/` from its own checkout: it compiles each port's probe but never
-  runs a port's code, and no other job of the workflow runs one either.  Only the `lock` and
-  `record` jobs request `contents: write`; they run only `scripts/actions/receipts.sh` (`git`,
-  `gh`, and `jq`), checked out sparsely at the workflow's own commit, and push only the receipts
-  branch.
+  produced and `scripts/actions/` from its own checkout.  It neither builds nor runs anything of a
+  port: it uploads only what the `prepare` job built in the same run from the same commit, which
+  `--prepared` checks against what it stages.  Only `prepare` builds, with no OIDC token and no
+  permission to push, because a build is where a port's build script runs; no job of the workflow
+  runs a consumer test.  Treat everything `prepare` could have written as untrusted in the jobs
+  after it: no cache, the artifacts of `build` and `publish` only by the id each job output, and
+  nothing of it executed.  Only the `lock` and `record` jobs request `contents: write`; they run
+  only `scripts/actions/receipts.sh` (`git`, `gh`, and `jq`), checked out sparsely at the
+  workflow's own commit, and push only the receipts branch.
 - The schedule uploads only while the `PORTS_AUTO_PUBLISH` variable is exactly `true`.  Setting
   it, initializing or editing the receipts log, and dispatching an upload are operator decisions,
   never part of routine work, and so are deleting the receipts log's lock and retrying a failed

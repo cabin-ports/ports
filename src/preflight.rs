@@ -4,9 +4,9 @@
 //! registry* through a generated probe package, so the build consumes
 //! the registry artifact rather than the scratch tree it was packaged
 //! from.  A probe's source is the port's committed consumer test, or an
-//! empty `main`.  A dry-run also runs every probe; `--publish` only
-//! builds them, keeping upstream code from running beside the job's
-//! OIDC token.
+//! empty `main`.  A dry-run builds and runs every probe and a plan only
+//! builds them.  An upload builds none: a build can run a port's build
+//! script, which must not happen beside the upload job's OIDC token.
 
 use std::fmt;
 use std::fs;
@@ -36,8 +36,17 @@ pub struct PreflightRequest<'a> {
     pub work_dir: &'a Path,
     /// `cabin` binary used for the preflight builds.
     pub cabin: &'a Path,
-    /// Whether to run each built probe as well.
-    pub run_probes: bool,
+    pub probes: Probes,
+}
+
+/// What the preflight does with each staged port's probe.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Probes {
+    /// Nothing: the port is only staged, and no `cabin` process starts.
+    Skip,
+    Build,
+    /// Build, then run.
+    Run,
 }
 
 /// Where the preflight left its outputs.
@@ -56,10 +65,11 @@ pub struct PreflightReport {
 
 /// Run the full local preflight.  This thread stages each conversion
 /// in publication order and hands it to a pool of one probe worker per
-/// CPU, which builds (and, with `run_probes`, runs) its probe as soon as
-/// the port is staged: its dependencies are staged before it.  A newer
-/// version staged meanwhile may also satisfy one; the probe then
-/// resolves it, as a consumer of the published registry would.
+/// CPU, which builds (and, with [`Probes::Run`], runs) its probe as soon
+/// as the port is staged: its dependencies are staged before it.  A
+/// newer version staged meanwhile may also satisfy one; the probe then
+/// resolves it, as a consumer of the published registry would.  With
+/// [`Probes::Skip`] the pool is empty.
 ///
 /// # Errors
 /// Returns the failure of the earliest failing port in publication
@@ -77,7 +87,10 @@ pub fn preflight(request: &PreflightRequest<'_>) -> Result<PreflightReport> {
     let sources_dir = run_dir.join("src");
     let ports_cache = request.cache_dir.join("ports");
     let started = Instant::now();
-    let workers = thread::available_parallelism().map_or(1, NonZeroUsize::get);
+    let workers = match request.probes {
+        Probes::Skip => 0,
+        Probes::Build | Probes::Run => thread::available_parallelism().map_or(1, NonZeroUsize::get),
+    };
     println!(
         "preflight: staging into {} with {workers} probe workers",
         registry_dir.display()
@@ -405,7 +418,7 @@ fn build_probe_against_registry(
             );
         }
         let built = started.elapsed();
-        if !request.run_probes {
+        if request.probes != Probes::Run {
             return Ok((built, Duration::ZERO));
         }
         for consumer in probe_consumers(conversion) {
