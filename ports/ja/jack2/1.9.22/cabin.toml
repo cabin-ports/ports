@@ -1,0 +1,71 @@
+[package.upstream]
+url = "https://github.com/jackaudio/jack2/archive/refs/tags/v1.9.22.tar.gz"
+checksum = "sha256:1e42b9fc4ad7db7befd414d45ab2f8a159c0b30fcd6eee452be662298766a849"
+format = "tar.gz"
+strip-prefix = "jack2-1.9.22"
+
+# JACK client API headers and upstream's weak-linking shim; a JACK
+# installation is needed at run time.
+[package]
+name = "cabin-ports/jack2"
+version = "1.9.22"
+# JackWeakAPI.c and the shipped headers are LGPL 2.1 or later.  control.h,
+# the GPL-2.0-only server-control API the shim does not use, is left out.
+# COPYING is the GPL 2; upstream's LGPL 2.1 text is in android/NOTICE.
+license = "LGPL-2.1-or-later"
+include = [
+  "COPYING",
+  "android/NOTICE",
+  "common/JackWeakAPI.c",
+  "common/jack/intclient.h",
+  "common/jack/jack.h",
+  "common/jack/jslist.h",
+  "common/jack/metadata.h",
+  "common/jack/midiport.h",
+  "common/jack/net.h",
+  "common/jack/ringbuffer.h",
+  "common/jack/session.h",
+  "common/jack/statistics.h",
+  "common/jack/systemdeps.h",
+  "common/jack/thread.h",
+  "common/jack/transport.h",
+  "common/jack/types.h",
+  "common/jack/uuid.h",
+  "common/jack/weakjack.h",
+  "common/jack/weakmacros.h",
+]
+
+# Not libjack or the JACK server, whose waf build generates config.h
+# (wscript:433, :461), but upstream's client shim common/JackWeakAPI.c,
+# which that build does not compile.  It loads the installed libjack at run
+# time and forwards the calls it defines.  Upstream's limitations:
+# - Without libjack a call returns (T)-1, also for some pointer results
+#   (:294, :308, :311-313), or NULL, or does nothing, and jack_client_open
+#   leaves *status unset.
+# - jack_client_open forwards no optional argument (:137-138), so
+#   JackServerName and JackSessionID break it.
+# - On macOS only /usr/local/lib/libjack.0.dylib is used (:55-59).
+# - Functions the headers declare but the shim lacks, among them the
+#   ringbuffer, metadata, UUID and netjack APIs, fail to link.
+# - On ELF platforms, including jack/weakjack.h before the other JACK
+#   headers makes the declarations carrying upstream's weak macros weak
+#   under GCC and Clang, so the link leaves the shim out unless a strong
+#   reference pulls it in, and those calls are null.
+[target.jack]
+type = "library"
+sources = ["common/JackWeakAPI.c"]
+include-dirs = ["common"]
+# Upstream sets no standard; C11 is the oldest Cabin can lower for MSVC.
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "jack"
+
+# dlopen, in libdl on Android and before glibc 2.34.
+[target.'cfg(any(os = "linux", os = "android"))'.profile]
+link-libs = ["dl"]
+
+# JackWeakAPI.c tests WIN32, not _WIN32, for dlfcn.h, HMODULE and
+# LoadLibraryA (:27, :42, :63); only non-strict MinGW predefines it.
+[target.'cfg(os = "windows")'.profile]
+defines = ["WIN32"]
