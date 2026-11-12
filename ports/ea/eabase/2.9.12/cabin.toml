@@ -1,0 +1,39 @@
+[package.upstream]
+url = "https://github.com/electronicarts/EABase/archive/0699a15efdfd20b6cecf02153bfa5663decb653c.tar.gz"
+checksum = "sha256:d33041d12765412080473568fec1e7cc17cde7255b6eb914085ccdf3c00911ad"
+format = "tar.gz"
+strip-prefix = "EABase-0699a15efdfd20b6cecf02153bfa5663decb653c"
+
+# Upstream's last tag is 2.09.06.  version.h was last bumped to 2.09.12 by
+# d1be0a1 (2020-02-24), the commit Conan Center packages as 2.09.12; this is
+# master at 0699a15 (2025-07-31), 14 commits later and still declaring
+# 2.09.12, which vcpkg pins and EASTL 3.27.01 needs (EA_GET_INSTRUCTION_POINTER).
+[package]
+name = "cabin-ports/eabase"
+version = "2.9.12"
+license = "BSD-3-Clause"
+include = ["LICENSE", "include"]
+
+# The INTERFACE library of upstream's CMake; consumers write
+# <EABase/eabase.h>.  Its directory-scoped add_definitions(-D_CHAR16T)
+# reaches no consumer.
+#
+# Upstream limitations:
+# - config/eaplatform.h defines no byte order for Linux on ARM, and stops
+#   with #error on Linux CPUs other than x86, ARM, and PowerPC and on
+#   FreeBSD other than x86 and PowerPC.
+# - earesult.h, int128.h, and nullptr.h, and the eaunits.h scaling,
+#   EA_OFFSETOF (GCC and Clang), and EA_GET_INSTRUCTION_POINTER macros are
+#   C++ only.
+# - uint128_t and int128_t division and remainder set each bit of a quotient
+#   that int128.h never initializes, an indeterminate read.
+# - Under C23, eabase.h's char8_t (char) conflicts with <uchar.h>'s.
+# - With GCC and Clang on Linux and Apple, EA_THROW_SPEC_NEW(x) and the two
+#   *_NONE() macros expand to throw(x) and throw(), which C++17 and C++20
+#   removed.
+[target.eabase]
+type = "header-only"
+include-dirs = ["include/Common"]
+interface-c-standard = "c99"
+# eabase.h includes int128.h in C++, which needs C++11.
+interface-cxx-standard = "c++11"
