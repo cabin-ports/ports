@@ -1,0 +1,48 @@
+[package.upstream]
+# The release zip vcpkg pins (SHA-512) and ConanCenter pins (SHA-256),
+# through SourceForge's download redirector.  It has no top-level
+# directory.
+url = "https://downloads.sourceforge.net/project/polyclipping/clipper_ver6.4.2.zip"
+checksum = "sha256:a14320d82194807c4480ce59c98aa71cd4175a5156645c4e2b3edd330b930627"
+format = "zip"
+
+# Upstream installs its header as include/polyclipping/clipper.hpp
+# (cpp/CMakeLists.txt:5-6, 17).
+[[package.upstream.copy]]
+from = "cpp/clipper.hpp"
+to = "include/polyclipping/clipper.hpp"
+
+[package]
+name = "cabin-ports/polyclipping"
+version = "6.4.2"
+license = "BSL-1.0"
+# License.txt is the Boost Software License 1.0 both sources name.  Their
+# attributions cite papers and a book for the algorithms (clipper.hpp:13-30)
+# and a paper and Wikipedia for two formulas (clipper.cpp:438-439, 4336).
+# PointInPolygon follows that paper's pseudocode, which the published
+# algorithm dictates and which is too slight to carry copyright; the others
+# supply no code.  Left out: the C#, Delphi and demo code, the
+# documentation, the prebuilt demo programs, and "Third Party", other
+# authors' translations.
+include = ["License.txt", "cpp/clipper.cpp", "cpp/clipper.hpp", "include"]
+
+# Clipper 6, the polygon clipping and offsetting library, as upstream's
+# CMake builds it (cpp/CMakeLists.txt:13), with the header's configuration
+# as shipped: use_lines on, use_int32, use_xyz and use_deprecated off
+# (clipper.hpp:39-50).  These are edits to the header, which the library
+# and its consumers share: a consumer defining use_int32 or use_xyz
+# changes IntPoint from under the compiled library.  Consumers write
+# <polyclipping/clipper.hpp>, as upstream's install layout gives, or
+# <clipper.hpp>, as its pkg-config file's include directory gives
+# (polyclipping.pc.cmakein:5, 13).  Not ported: the shared library
+# upstream builds by default (cpp/CMakeLists.txt:11-12), the pkg-config
+# file and the demos.
+[target.polyclipping]
+type = "library"
+sources = ["cpp/clipper.cpp"]
+include-dirs = ["include", "include/polyclipping"]
+# Upstream sets no standard and compiles with the compiler's default.
+cxx-standard = "c++17"
+# clipper.hpp is C++98 apart from long long, which C++11 standardized.
+interface-cxx-standard = "c++11"
+links = "polyclipping"
