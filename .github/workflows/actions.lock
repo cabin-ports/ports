@@ -4,10 +4,26 @@
 version: 'v0.0.3'
 workflows:
     '.github/workflows/ci.yml':
-        - 'actions-rust-lang/setup-rust-toolchain@v2.0.0'
         - 'actions/checkout@v7.0.1'
-        - 'actions/setup-go@v7.0.0'
-        - 'ilammy/msvc-dev-cmd@v1.13.0'
+    '.github/workflows/probe-lint-fails.yml':
+        - 'actions/checkout@v7.0.1'
+    '.github/workflows/probe-linux-fails.yml':
+        - 'actions/checkout@v7.0.1'
+    '.github/workflows/probe-macos-fails.yml':
+        - 'actions/checkout@v7.0.1'
+    '.github/workflows/probe-macos-skipped.yml':
+        - 'actions/checkout@v7.0.1'
+    '.github/workflows/probe-old-matrix.yml': []
+    '.github/workflows/probe-pass.yml':
+        - 'actions/checkout@v7.0.1'
+    '.github/workflows/probe-pin-fails.yml':
+        - 'actions/checkout@v7.0.1'
+    '.github/workflows/probe-run-cancelled.yml':
+        - 'actions/checkout@v7.0.1'
+    '.github/workflows/probe-windows-fails.yml':
+        - 'actions/checkout@v7.0.1'
+    '.github/workflows/probe-windows-timeout.yml':
+        - 'actions/checkout@v7.0.1'
     '.github/workflows/publish.yml':
         - 'actions-rust-lang/setup-rust-toolchain@v2.0.0'
         - 'actions/checkout@v7.0.1'
@@ -31,21 +47,11 @@ dependencies:
         commit: 'sha1-9000827ccba6bdab643e8b6fd33ac0654aef8333'
         owner_id: 44036562
         repo_id: 192626254
-    'actions/setup-go@v7.0.0':
-        ref: 'v7.0.0'
-        commit: 'sha1-b7ad1dad31e06c5925ef5d2fc7ad053ef454303e'
-        owner_id: 44036562
-        repo_id: 192624594
     'actions/upload-artifact@v7.0.2':
         ref: 'v7.0.2'
         commit: 'sha1-cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         owner_id: 44036562
         repo_id: 192625955
-    'ilammy/msvc-dev-cmd@v1.13.0':
-        ref: 'v1.13.0'
-        commit: 'sha1-0b201ec74fa43914dc39ae48a89fd1d8cb592756'
-        owner_id: 1256587
-        repo_id: 212181767
     'swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6':
         ref: 'v2.9.2'
         commit: 'sha1-6323deb102c322ba6fcbdcafc7e3dddab59af2b6'

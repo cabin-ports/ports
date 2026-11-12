@@ -1,0 +1,58 @@
+name: probe-macos-skipped
+
+# Temporary probe of the `required` gate. Never merge.
+on:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pin:
+    runs-on: ubuntu-slim
+    steps:
+      - run: echo ok
+  lint:
+    runs-on: ubuntu-slim
+    steps:
+      - run: echo ok
+  check-linux:
+    needs: pin
+    runs-on: ubuntu-slim
+    steps:
+      - run: echo ok
+  check-macos:
+    needs: pin
+    runs-on: ubuntu-slim
+    if: github.event_name == 'never'
+    steps:
+      - run: echo ok
+  check-windows:
+    needs: pin
+    runs-on: ubuntu-slim
+    steps:
+      - run: echo ok
+  # The required check: green only when every job it needs succeeded.
+  # Its steps carry no `if:`; a skipped step would read as green.
+  required:
+    needs: [pin, lint, check-linux, check-macos, check-windows]
+    if: always()
+    runs-on: ubuntu-slim
+    permissions:
+      actions: read # the run's job list
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/actions/
+          sparse-checkout-cone-mode: false
+      - name: Fail unless every job succeeded
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEEDS: ${{ toJSON(needs) }}
+        run: scripts/actions/require-needs.sh

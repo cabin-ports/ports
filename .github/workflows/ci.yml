@@ -1,146 +1,77 @@
 name: CI
 
-# The merge queue's run is the authoritative pre-merge validation;
-# `required` is the only required check.
+# Temporary probe of the `required` gate. Never merge.
 on:
   pull_request:
-  merge_group:
 
 permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
-
-env:
-  CARGO_TERM_COLOR: always
-  RUSTFLAGS: "-D warnings"
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
 
 jobs:
-  # The Cabin commit Cargo.lock pins; every job installs the `cabin`
-  # binary from it (docs/maintaining.md, "Cabin revision").
   pin:
     runs-on: ubuntu-slim
-    outputs:
-      cabin-rev: ${{ steps.rev.outputs.cabin-rev }}
     steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          persist-credentials: false
-          sparse-checkout: |
-            Cargo.lock
-            scripts/actions/
-          sparse-checkout-cone-mode: false
-      # Every cabinpkg-* package and every git source must be one full
-      # commit on cabinpkg/cabin's main. A fork-only commit resolves
-      # through the parent URL too, and publish.yml runs the pinned
-      # cabin beside the OIDC token.
-      - id: rev
-        name: Check the pinned Cabin commit
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: scripts/actions/cabin-rev.sh --on-main
-
+      - run: echo ok
   lint:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          persist-credentials: false
-      - uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
-        with:
-          cache: false
-          rustflags: ""
-      - run: cargo fmt --check
-      - run: cargo clippy --locked --all-targets -- -D warnings
-      - run: shellcheck scripts/actions/*.sh
-      - uses: actions/setup-go@v7.0.0
-        with:
-          go-version: "1.27.3"
-          cache: false
-      - run: go run mvdan.cc/sh/v3/cmd/shfmt@v3.14.1 -d -i 2 scripts/actions
-      # actionlint does not know publish.yml's `concurrency.queue`.
-      - run: go run github.com/rhysd/actionlint/cmd/actionlint@v1.7.12 -ignore 'unexpected key "queue" for "concurrency" section'
-      - run: scripts/actions/check-inline-runs.sh
-      # .github/workflows/actions.lock is generated; see AGENTS.md.
-      - name: Verify the actions lockfile
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          gh extension install github/gh-actions-lock --pin v0.4.1
-          gh actions-lock --verify
-
-  # The publisher's tests, then the `--dry-run` preflight: every port
-  # the change needs is staged, built, and its consumer test run, on
-  # each platform the ports must support (docs/maintaining.md, "CI").
-  check:
-    needs: pin
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-26
-          - windows-2025-vs2026
-    steps:
-      - uses: actions/checkout@v7.0.1
-        with:
-          persist-credentials: false
-          # The dry-run compares the tested commit with its base.
-          fetch-depth: 0
-      # No caches: a pull request's saves are restorable only by that
-      # pull request, so they almost never hit and only evict others.
-      - uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
-        with:
-          cache: false
-          rustflags: ""
-
-      # Before the MSVC environment: with it, Git Bash's `link.exe`
-      # would shadow MSVC's.
-      - name: Install the pinned cabin
-        shell: bash
-        env:
-          CABIN_REV: ${{ needs.pin.outputs.cabin-rev }}
-        run: cargo install --locked --debug --git https://github.com/cabinpkg/cabin --rev "$CABIN_REV" cabinpkg --root "$RUNNER_TEMP/cabin"
-
-      - name: Set up MSVC environment
-        if: runner.os == 'Windows'
-        uses: ilammy/msvc-dev-cmd@v1.13.0
-
-      - name: Test the publisher
-        run: cargo test --locked
-        env:
-          PORT_PUBLISH_CABIN: ${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}
-          RUST_BACKTRACE: "1"
-
-      # The test merge's first parent, or the merge group's base.
-      # Unverified, the variable stays unset and every port is checked.
-      - name: Find the dry-run's comparison base
-        shell: bash
-        env:
-          PR_HEAD: ${{ github.event.pull_request.head.sha }}
-          GROUP_BASE: ${{ github.event.merge_group.base_sha }}
-          GROUP_HEAD: ${{ github.event.merge_group.head_sha }}
-        run: scripts/actions/dry-run-base.sh
-
-      - name: Run the publisher dry-run
-        env:
-          CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache
-          # Windows' default %TEMP% sits on C:, slower than RUNNER_TEMP's
-          # D:; the publisher's scratch tree and MSVC's temporaries follow TMP.
-          TMP: ${{ runner.temp }}
-          TEMP: ${{ runner.temp }}
-        run: cargo run --locked -- --dry-run --cabin "${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}"
-
-  # The required check: fails unless every job above succeeded, so a
-  # failed, cancelled, or skipped job never reads as green.
-  required:
-    needs: [pin, lint, check]
-    if: always()
     runs-on: ubuntu-slim
     steps:
+      - run: echo ok
+  check-linux:
+    needs: pin
+    runs-on: ubuntu-slim
+    steps:
+      - run: echo ok
+  check-macos:
+    needs: pin
+    runs-on: macos-26
+    concurrency:
+      group: probe-ci-${{ github.run_id }}
+    steps:
+      - run: echo ok
+  check-windows:
+    needs: pin
+    runs-on: ubuntu-slim
+    steps:
+      - run: echo ok
+  hold:
+    runs-on: ubuntu-slim
+    concurrency:
+      group: probe-ci-${{ github.run_id }}
+    steps:
+      - run: sleep 240
+  kick-delay:
+    needs: pin
+    runs-on: ubuntu-slim
+    steps:
+      - run: sleep 30
+  kick:
+    needs: kick-delay
+    runs-on: ubuntu-slim
+    concurrency:
+      group: probe-ci-${{ github.run_id }}
+    steps:
+      - run: echo kicked
+  # The required check: green only when every job it needs succeeded.
+  # Its steps carry no `if:`; a skipped step would read as green.
+  required:
+    needs: [pin, lint, check-linux, check-macos, check-windows]
+    if: always()
+    runs-on: ubuntu-slim
+    permissions:
+      actions: read # the run's job list
+      contents: read
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/actions/
+          sparse-checkout-cone-mode: false
       - name: Fail unless every job succeeded
-        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
-        run: exit 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEEDS: ${{ toJSON(needs) }}
+        run: scripts/actions/require-needs.sh
