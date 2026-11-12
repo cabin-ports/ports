@@ -13,9 +13,9 @@ strip-prefix = "nanopb-0.4.92"
 [package]
 name = "cabin-ports/nanopb"
 version = "0.4.92"
-# pb_common.c's UTF-8 check adapts Markus Kuhn's utf8_check.c, whose short
-# code licence offers CC0 among its choices.
-license = "Zlib"
+# CC0-1.0: pb_common.c's UTF-8 check adapts Markus Kuhn's utf8_check.c, whose
+# short code licence offers CC0 among its choices.
+license = "Zlib AND CC0-1.0"
 include = [
     "LICENSE.txt",
     "pb.h",
