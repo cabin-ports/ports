@@ -1,0 +1,10 @@
+--- a/include/tcb/span.hpp
++++ b/include/tcb/span.hpp
+@@ -15,6 +15,7 @@
+ #include <array>
+ #include <cstddef>
+ #include <cstdint>
++#include <exception> // std::terminate
+ #include <type_traits>
+ 
+ #ifndef TCB_SPAN_NO_EXCEPTIONS
