@@ -3,20 +3,29 @@ url = "https://download.savannah.gnu.org/releases/freetype/freetype-2.15.0.tar.g
 checksum = "sha256:9186627467a616d9a9e3e574748ac0c45fa77398e6364edef3041a8ba8d92f64"
 format = "tar.gz"
 strip-prefix = "freetype-2.15.0"
+# The patch adds LICENSE.dlg, the BSL-1.0 text the dlg headers and source
+# refer to ("See accompanying file LICENSE"): LICENSE at nyorain/dlg
+# 395ccad2c1e0daae535c4d20bb0a3f2424648e17, upstream's dlg submodule
+# commit, sha256
+# c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566.
+patches = ["patches/0001-add-the-dlg-boost-license.patch"]
 
 [package]
 name = "cabin-ports/freetype"
 version = "2.15.0"
+license = "(FTL OR GPL-2.0-or-later) AND BSD-3-Clause AND BSL-1.0 AND MIT AND MIT-Modern-Variant AND MIT-open-group AND Zlib AND bcrypt-Solar-Designer"
 # LICENSE.TXT offers the FreeType License (docs/FTL.TXT) or the GPLv2
 # (docs/GPLv2.TXT).
 include = [
   "LICENSE.TXT",
+  "LICENSE.dlg",
   "builds/unix/ftsystem.c",
   "builds/windows/ftdebug.c",
   "builds/windows/ftsystem.c",
   "docs/FTL.TXT",
   "docs/GPLv2.TXT",
   "include",
+  "patches",
   "src",
 ]
 
