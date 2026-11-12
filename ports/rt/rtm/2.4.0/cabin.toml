@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/nfrechette/rtm/archive/v2.4.0.tar.gz"
+checksum = "sha256:f3fe8bfe4457db9f55605921919f7c8f5d90674ed9b9b42a8c3bf02123d4d7d8"
+format = "tar.gz"
+strip-prefix = "rtm-2.4.0"
+
+[package]
+name = "cabin-ports/rtm"
+version = "2.4.0"
+license = "MIT"
+include = ["LICENSE", "includes"]
+# impl/exp_log_common.h credits its exp and log approximations to the
+# Cephes Math Library (:45) and uses Cephes's range reduction and
+# coefficients; their copyright significance is uncertain.
+
+# Realtime Math is header-only: upstream's CMake builds only its tests and
+# tools, and conan-center-index installs includes/ as the include root, so
+# consumers write `#include <rtm/vector4f.h>`.  The SIMD path follows the
+# consumer's compiler flags (math.h): SSE2 on x86-64 and NEON on arm64 by
+# default, SSSE3, SSE4.1, AVX and AVX2 when the compiler enables them.  Those
+# flags and the macros config.h documents (RTM_NO_INTRINSICS,
+# RTM_ON_ASSERT_*, ...) are the consumer's to set and must match in every
+# translation unit.
+[target.rtm]
+type = "header-only"
+include-dirs = ["includes"]
+interface-cxx-standard = "c++11"
