@@ -19,9 +19,12 @@ rows="$(jq -cn --argjson needs "$NEEDS" --argjson run "$jobs" '
       conclusions: [$run.jobs[] | select(.name == $job) | .conclusion]}]')"
 jq -cn --argjson rows "$rows" '$rows[]'
 
-# `jq -e` exits 0 only when this is `true`, so no row, a row that is not
-# all `success`, and a failed `jq` each fail the check.
-if ! jq -en --argjson rows "$rows" '$rows | length > 0 and all(.[]; .needs == "success" and .conclusions == ["success"])' >/dev/null; then
+# `jq -e` exits 0 only when this is `true`, so a job list cut short by
+# paging, no row, a row that is not all `success`, and a failed `jq` each
+# fail the check.
+if ! jq -en --argjson rows "$rows" --argjson run "$jobs" '
+  ($run.jobs | length) == $run.total_count and ($rows | length) > 0 and
+  all($rows[]; .needs == "success" and .conclusions == ["success"])' >/dev/null; then
   echo "::error::not every needed job succeeded"
   exit 1
 fi
