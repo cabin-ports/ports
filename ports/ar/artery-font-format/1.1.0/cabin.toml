@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/Chlumsky/artery-font-format/archive/refs/tags/v1.1.tar.gz"
+checksum = "sha256:cd8eb58590d85069312b831ce5bc6eba21778ef2fa8ca8ac06e1ecf8eca53a7c"
+format = "tar.gz"
+strip-prefix = "artery-font-format-1.1"
+
+# Upstream tags this release v1.1.
+[package]
+name = "cabin-ports/artery-font-format"
+version = "1.1.0"
+license = "MIT"
+include = ["LICENSE.txt", "artery-font"]
+
+# Consumers include <artery-font/artery-font.h> (or std-artery-font.h for the
+# std::vector and std::string bindings) and stdio-serialization.h for FILE I/O.
+# Upstream's limitations: encode and decode copy native structs byte for byte,
+# so they are correct only on little-endian hosts, and where __BIG_ENDIAN__ is
+# defined they are left undefined and calls fail to link (serialization.hpp:106).
+# decode trusts a file's counts and lengths and checks
+# its CRC only at the end: a corrupt or hostile file can make it allocate
+# gigabytes or throw, and a string length of 0xFFFFFFFF causes an out-of-bounds
+# write (serialization.hpp:127-133).  Decode only trusted files.
+[target.artery-font-format]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
