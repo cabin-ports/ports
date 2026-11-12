@@ -1,0 +1,381 @@
+[package.upstream]
+# The tag's GitHub archive; the release assets are only its signature and
+# SBOM.  Patch 0001 adds wolfssl/wolfcrypt/user_settings.h, the macros a
+# default ./configure writes to options.h and config.h (package below), and
+# patch 0002 adds a wolfssl/options.h that selects it.
+url = "https://github.com/wolfssl/wolfssl/archive/refs/tags/v5.9.4-stable.tar.gz"
+checksum = "sha256:7256bfc89b183a75183806c7debfa203443873b0b4a562e1b80d68e01b45ac57"
+format = "tar.gz"
+strip-prefix = "wolfssl-5.9.4-stable"
+patches = [
+  "patches/0001-add-a-user-settings-h-with-the-configure-defaults.patch",
+  "patches/0002-add-an-options-h-that-selects-the-user-settings.patch",
+]
+
+[package]
+name = "cabin-ports/wolfssl"
+version = "5.9.4"
+# LICENSING:1-6 grants the GPL version 3, which COPYING carries, and the
+# source headers say "or any later version".  Its exception, declared as
+# AdditionRef-wolfSSL-GPL-2.0-election, lets a licensee combining wolfSSL
+# with the software LICENSING:8-26 lists (MariaDB, OpenVPN, U-Boot and
+# others) elect version 2 instead.  Of the headers `make install` installs,
+# wolfcrypt/wc_she.h is under the GPL version 2 or later,
+# wolfcrypt/camellia.h keeps NTT's BSD-2-Clause-first-lines notice, and
+# wolfcrypt/blake2-int.h and blake2-impl.h the BLAKE2 authors' CC0
+# dedication; none is compiled by default.  The public-domain code wolfSSL
+# credits (Bernstein's ChaCha and ref10, Andrew Moon's Poly1305, Daniel
+# Beer's curve code, TomsFastMath, LibTomMath) adds no term.  certs_test.h
+# and certs_test_sm.h, generated from wolfSSL's test certificates, and four
+# OpenSSL shim headers of at most nine lines carry no notice.
+# src/pk_rsa.c:2683-2707 quotes RFC 3447's EMSA-PSS figure and
+# wolfcrypt/src/pwdbased.c:856-898 takes the Salsa20/8 core from RFC 7914;
+# each is short, attributed and shaped by the algorithm, too slight to add a
+# term.  wolfcrypt/src/aes.c:2996-3149 and 4072-4243, compiled only under
+# WC_AES_BITSLICED (off by default), transcribe the AES S-box circuits
+# SLP_AES_113.txt ("an improvement, by Cagdas Calik") and Sinv.txt from
+# https://www.cs.yale.edu/homes/peralta/CircuitStuff/CMT.html, gate lists
+# published without a notice; a minimized circuit is a computational result
+# and adds no term.
+license = "GPL-3.0-or-later WITH AdditionRef-wolfSSL-GPL-2.0-election AND GPL-2.0-or-later AND BSD-2-Clause-first-lines AND CC0-1.0"
+# The 36 sources a default configure compiles (src/include.am), the files
+# they #include, and the headers its `make install` installs
+# (wolfssl/include.am, wolfssl/wolfcrypt/include.am and, as
+# BUILD_OPENSSL_COMPAT is on by default, wolfssl/openssl/include.am).
+include = [
+  "COPYING",
+  "LICENSING",
+  "patches",
+  "src/bio.c",
+  "src/conf.c",
+  "src/internal.c",
+  "src/keys.c",
+  "src/pk.c",
+  "src/pk_ec.c",
+  "src/pk_rsa.c",
+  "src/ssl.c",
+  "src/ssl_api_cert.c",
+  "src/ssl_api_crl_ocsp.c",
+  "src/ssl_api_dtls.c",
+  "src/ssl_api_ext.c",
+  "src/ssl_api_hs.c",
+  "src/ssl_api_pk.c",
+  "src/ssl_api_rw.c",
+  "src/ssl_asn1.c",
+  "src/ssl_bn.c",
+  "src/ssl_certman.c",
+  "src/ssl_crypto.c",
+  "src/ssl_ech.c",
+  "src/ssl_err.c",
+  "src/ssl_load.c",
+  "src/ssl_misc.c",
+  "src/ssl_p7p12.c",
+  "src/ssl_sess.c",
+  "src/ssl_sk.c",
+  "src/ssl_tsp.c",
+  "src/tls.c",
+  "src/tls13.c",
+  "src/wolfio.c",
+  "src/x509.c",
+  "src/x509_str.c",
+  "wolfcrypt/src/aes.c",
+  "wolfcrypt/src/asn.c",
+  "wolfcrypt/src/asn_tsp.c",
+  "wolfcrypt/src/chacha.c",
+  "wolfcrypt/src/chacha20_poly1305.c",
+  "wolfcrypt/src/coding.c",
+  "wolfcrypt/src/cpuid.c",
+  "wolfcrypt/src/dh.c",
+  "wolfcrypt/src/ecc.c",
+  "wolfcrypt/src/error.c",
+  "wolfcrypt/src/evp.c",
+  "wolfcrypt/src/evp_pk.c",
+  "wolfcrypt/src/hash.c",
+  "wolfcrypt/src/hmac.c",
+  "wolfcrypt/src/kdf.c",
+  "wolfcrypt/src/logging.c",
+  "wolfcrypt/src/memory.c",
+  "wolfcrypt/src/misc.c",
+  "wolfcrypt/src/pkcs12.c",
+  "wolfcrypt/src/poly1305.c",
+  "wolfcrypt/src/pwdbased.c",
+  "wolfcrypt/src/random.c",
+  "wolfcrypt/src/rsa.c",
+  "wolfcrypt/src/sha.c",
+  "wolfcrypt/src/sha256.c",
+  "wolfcrypt/src/sha3.c",
+  "wolfcrypt/src/sha512.c",
+  "wolfcrypt/src/signature.c",
+  "wolfcrypt/src/sp_int.c",
+  "wolfcrypt/src/wc_encrypt.c",
+  "wolfcrypt/src/wc_mlkem.c",
+  "wolfcrypt/src/wc_mlkem_poly.c",
+  "wolfcrypt/src/wc_port.c",
+  "wolfcrypt/src/wolfmath.c",
+  "wolfssl/callbacks.h",
+  "wolfssl/certs_test.h",
+  "wolfssl/certs_test_sm.h",
+  "wolfssl/crl.h",
+  "wolfssl/error-ssl.h",
+  "wolfssl/internal.h",
+  "wolfssl/ocsp.h",
+  "wolfssl/openssl/aes.h",
+  "wolfssl/openssl/asn1.h",
+  "wolfssl/openssl/asn1t.h",
+  "wolfssl/openssl/bio.h",
+  "wolfssl/openssl/bn.h",
+  "wolfssl/openssl/buffer.h",
+  "wolfssl/openssl/camellia.h",
+  "wolfssl/openssl/cmac.h",
+  "wolfssl/openssl/cms.h",
+  "wolfssl/openssl/compat_types.h",
+  "wolfssl/openssl/conf.h",
+  "wolfssl/openssl/crypto.h",
+  "wolfssl/openssl/des.h",
+  "wolfssl/openssl/dh.h",
+  "wolfssl/openssl/dsa.h",
+  "wolfssl/openssl/ec.h",
+  "wolfssl/openssl/ec25519.h",
+  "wolfssl/openssl/ec448.h",
+  "wolfssl/openssl/ecdh.h",
+  "wolfssl/openssl/ecdsa.h",
+  "wolfssl/openssl/ed25519.h",
+  "wolfssl/openssl/ed448.h",
+  "wolfssl/openssl/engine.h",
+  "wolfssl/openssl/err.h",
+  "wolfssl/openssl/evp.h",
+  "wolfssl/openssl/fips_rand.h",
+  "wolfssl/openssl/hmac.h",
+  "wolfssl/openssl/kdf.h",
+  "wolfssl/openssl/lhash.h",
+  "wolfssl/openssl/md4.h",
+  "wolfssl/openssl/md5.h",
+  "wolfssl/openssl/modes.h",
+  "wolfssl/openssl/obj_mac.h",
+  "wolfssl/openssl/objects.h",
+  "wolfssl/openssl/ocsp.h",
+  "wolfssl/openssl/opensslconf.h",
+  "wolfssl/openssl/opensslv.h",
+  "wolfssl/openssl/ossl_typ.h",
+  "wolfssl/openssl/pem.h",
+  "wolfssl/openssl/pkcs12.h",
+  "wolfssl/openssl/pkcs7.h",
+  "wolfssl/openssl/rand.h",
+  "wolfssl/openssl/rc4.h",
+  "wolfssl/openssl/ripemd.h",
+  "wolfssl/openssl/rsa.h",
+  "wolfssl/openssl/safestack.h",
+  "wolfssl/openssl/sha.h",
+  "wolfssl/openssl/sha3.h",
+  "wolfssl/openssl/srp.h",
+  "wolfssl/openssl/ssl.h",
+  "wolfssl/openssl/ssl23.h",
+  "wolfssl/openssl/stack.h",
+  "wolfssl/openssl/tls1.h",
+  "wolfssl/openssl/ts.h",
+  "wolfssl/openssl/txt_db.h",
+  "wolfssl/openssl/ui.h",
+  "wolfssl/openssl/x509.h",
+  "wolfssl/openssl/x509_vfy.h",
+  "wolfssl/openssl/x509v3.h",
+  "wolfssl/options.h",
+  "wolfssl/quic.h",
+  "wolfssl/sniffer.h",
+  "wolfssl/sniffer_error.h",
+  "wolfssl/ssl.h",
+  "wolfssl/ssl_sess.h",
+  "wolfssl/test.h",
+  "wolfssl/version.h",
+  "wolfssl/wolfcrypt/aes.h",
+  "wolfssl/wolfcrypt/arc4.h",
+  "wolfssl/wolfcrypt/argon2.h",
+  "wolfssl/wolfcrypt/ascon.h",
+  "wolfssl/wolfcrypt/asn.h",
+  "wolfssl/wolfcrypt/asn_public.h",
+  "wolfssl/wolfcrypt/blake2-impl.h",
+  "wolfssl/wolfcrypt/blake2-int.h",
+  "wolfssl/wolfcrypt/blake2.h",
+  "wolfssl/wolfcrypt/camellia.h",
+  "wolfssl/wolfcrypt/chacha.h",
+  "wolfssl/wolfcrypt/chacha20_poly1305.h",
+  "wolfssl/wolfcrypt/cmac.h",
+  "wolfssl/wolfcrypt/coding.h",
+  "wolfssl/wolfcrypt/compress.h",
+  "wolfssl/wolfcrypt/cpuid.h",
+  "wolfssl/wolfcrypt/cryptocb.h",
+  "wolfssl/wolfcrypt/curve25519.h",
+  "wolfssl/wolfcrypt/curve448.h",
+  "wolfssl/wolfcrypt/des3.h",
+  "wolfssl/wolfcrypt/dh.h",
+  "wolfssl/wolfcrypt/dilithium.h",
+  "wolfssl/wolfcrypt/dsa.h",
+  "wolfssl/wolfcrypt/ecc.h",
+  "wolfssl/wolfcrypt/eccsi.h",
+  "wolfssl/wolfcrypt/ed25519.h",
+  "wolfssl/wolfcrypt/ed448.h",
+  "wolfssl/wolfcrypt/error-crypt.h",
+  "wolfssl/wolfcrypt/falcon.h",
+  "wolfssl/wolfcrypt/fe_448.h",
+  "wolfssl/wolfcrypt/fe_operations.h",
+  "wolfssl/wolfcrypt/fips_test.h",
+  "wolfssl/wolfcrypt/ge_448.h",
+  "wolfssl/wolfcrypt/ge_operations.h",
+  "wolfssl/wolfcrypt/hash.h",
+  "wolfssl/wolfcrypt/hmac.h",
+  "wolfssl/wolfcrypt/hpke.h",
+  "wolfssl/wolfcrypt/integer.h",
+  "wolfssl/wolfcrypt/kdf.h",
+  "wolfssl/wolfcrypt/libwolfssl_sources.h",
+  "wolfssl/wolfcrypt/logging.h",
+  "wolfssl/wolfcrypt/md2.h",
+  "wolfssl/wolfcrypt/md4.h",
+  "wolfssl/wolfcrypt/md5.h",
+  "wolfssl/wolfcrypt/mem_track.h",
+  "wolfssl/wolfcrypt/memory.h",
+  "wolfssl/wolfcrypt/misc.h",
+  "wolfssl/wolfcrypt/mpi_class.h",
+  "wolfssl/wolfcrypt/mpi_superclass.h",
+  "wolfssl/wolfcrypt/oid_sum.h",
+  "wolfssl/wolfcrypt/pkcs12.h",
+  "wolfssl/wolfcrypt/pkcs7.h",
+  "wolfssl/wolfcrypt/poly1305.h",
+  "wolfssl/wolfcrypt/puf.h",
+  "wolfssl/wolfcrypt/pwdbased.h",
+  "wolfssl/wolfcrypt/random.h",
+  "wolfssl/wolfcrypt/rc2.h",
+  "wolfssl/wolfcrypt/ripemd.h",
+  "wolfssl/wolfcrypt/rng_bank.h",
+  "wolfssl/wolfcrypt/rsa.h",
+  "wolfssl/wolfcrypt/sakke.h",
+  "wolfssl/wolfcrypt/settings.h",
+  "wolfssl/wolfcrypt/sha.h",
+  "wolfssl/wolfcrypt/sha256.h",
+  "wolfssl/wolfcrypt/sha3.h",
+  "wolfssl/wolfcrypt/sha512.h",
+  "wolfssl/wolfcrypt/signature.h",
+  "wolfssl/wolfcrypt/siphash.h",
+  "wolfssl/wolfcrypt/sm2.h",
+  "wolfssl/wolfcrypt/sm3.h",
+  "wolfssl/wolfcrypt/sm4.h",
+  "wolfssl/wolfcrypt/sp_int.h",
+  "wolfssl/wolfcrypt/srp.h",
+  "wolfssl/wolfcrypt/tfm.h",
+  "wolfssl/wolfcrypt/tsp.h",
+  "wolfssl/wolfcrypt/types.h",
+  "wolfssl/wolfcrypt/user_settings.h",
+  "wolfssl/wolfcrypt/visibility.h",
+  "wolfssl/wolfcrypt/wc_compat.h",
+  "wolfssl/wolfcrypt/wc_encrypt.h",
+  "wolfssl/wolfcrypt/wc_frodokem.h",
+  "wolfssl/wolfcrypt/wc_frodokem_mat.h",
+  "wolfssl/wolfcrypt/wc_keystore.h",
+  "wolfssl/wolfcrypt/wc_lms.h",
+  "wolfssl/wolfcrypt/wc_mldsa.h",
+  "wolfssl/wolfcrypt/wc_mlkem.h",
+  "wolfssl/wolfcrypt/wc_port.h",
+  "wolfssl/wolfcrypt/wc_she.h",
+  "wolfssl/wolfcrypt/wc_slhdsa.h",
+  "wolfssl/wolfcrypt/wc_xmss.h",
+  "wolfssl/wolfcrypt/wolfentropy.h",
+  "wolfssl/wolfcrypt/wolfevent.h",
+  "wolfssl/wolfcrypt/wolfmath.h",
+  "wolfssl/wolfio.h",
+]
+
+# libwolfssl as a default ./configure builds it, with the configuration it
+# generates in user_settings.h; settings.h includes that file, beside it, for
+# the library and for consumers, which interface-defines below reach.  The
+# defaults leave off DTLS, QUIC, ASIO, X25519 and Ed25519, session tickets,
+# the TLS secret callback, OCSP, CRL, ALPN, PSK, MD5, DES3, TLS 1.0 and 1.1,
+# and the OpenSSL compatibility layer, whose headers install nonetheless;
+# they turn on TLS 1.2 and 1.3, ECC, RSA and DH, AES-GCM, ChaCha20-Poly1305,
+# SHA-3, ML-KEM key shares, and loading the system's CA certificates.  No
+# assembly source is compiled by default; the SP math code uses GCC-style
+# inline assembly on x86_64 and aarch64.  MSVC, which has no 128-bit
+# integer, takes its 32-bit C path on x64 (sp_int.h:217-219) and builds it in
+# C on Arm64.
+#
+# Not reproduced: the shared library and its hidden visibility, which a static
+# library does not need; -fwrapv, which configure's hardening adds but a
+# registry package's cflags cannot carry, as upstream's CMake build also
+# omits it; and the configure arguments and flags wolfSSL_configure_args()
+# and wolfSSL_global_cflags() report, which return NULL here.  Not ported:
+# the examples, tests, benchmark and sniffer.
+[target.wolfssl]
+type = "library"
+sources = [
+  "src/internal.c",
+  "src/keys.c",
+  "src/ssl.c",
+  "src/tls.c",
+  "src/tls13.c",
+  "src/wolfio.c",
+  "wolfcrypt/src/aes.c",
+  "wolfcrypt/src/asn.c",
+  "wolfcrypt/src/chacha.c",
+  "wolfcrypt/src/chacha20_poly1305.c",
+  "wolfcrypt/src/coding.c",
+  "wolfcrypt/src/cpuid.c",
+  "wolfcrypt/src/dh.c",
+  "wolfcrypt/src/ecc.c",
+  "wolfcrypt/src/error.c",
+  "wolfcrypt/src/hash.c",
+  "wolfcrypt/src/hmac.c",
+  "wolfcrypt/src/kdf.c",
+  "wolfcrypt/src/logging.c",
+  "wolfcrypt/src/memory.c",
+  "wolfcrypt/src/pkcs12.c",
+  "wolfcrypt/src/poly1305.c",
+  "wolfcrypt/src/pwdbased.c",
+  "wolfcrypt/src/random.c",
+  "wolfcrypt/src/rsa.c",
+  "wolfcrypt/src/sha.c",
+  "wolfcrypt/src/sha256.c",
+  "wolfcrypt/src/sha3.c",
+  "wolfcrypt/src/sha512.c",
+  "wolfcrypt/src/signature.c",
+  "wolfcrypt/src/sp_int.c",
+  "wolfcrypt/src/wc_encrypt.c",
+  "wolfcrypt/src/wc_mlkem.c",
+  "wolfcrypt/src/wc_mlkem_poly.c",
+  "wolfcrypt/src/wc_port.c",
+  "wolfcrypt/src/wolfmath.c",
+]
+include-dirs = ["."]
+defines = ["WOLFSSL_USER_SETTINGS"]
+interface-defines = ["WOLFSSL_USER_SETTINGS"]
+# configure compiles with the compiler's default C dialect, a GNU one on GCC
+# and Clang.  Cabin's gnu-extensions cannot be limited to those compilers,
+# so the build is strict C11, and the Unix profile below defines
+# _DEFAULT_SOURCE, which glibc implies outside strict modes.
+c-standard = "c11"
+# The headers declare anonymous unions and structs, which change the layout
+# of structures such as WC_RNG, only from C11 and C++11 (types.h:128-132), so
+# a C99 consumer would disagree with the C11 library.  C++ also needs C++11
+# for long long and trailing enum commas (types.h:212-221 and 384-389).
+interface-c-standard = "c11"
+interface-cxx-standard = "c++11"
+links = "wolfssl"
+
+# configure links libm and pthreads; on Linux the RNG's fork handlers also
+# need dladdr, from libdl before glibc 2.34.
+[target.'cfg(family = "unix")'.profile]
+defines = ["_DEFAULT_SOURCE"]
+link-libs = ["m"]
+
+[target.'cfg(all(family = "unix", not(os = "android")))'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["dl"]
+
+# The Security framework API that loads the system's CA certificates.
+[target.'cfg(any(os = "macos", os = "ios"))'.profile]
+frameworks = ["CoreFoundation", "Security"]
+
+# configure targets MinGW, not MSVC: user_settings.h follows its MinGW
+# results, except that SP math avoids the variable-length arrays MSVC lacks.
+# Winsock for wolfio.c, CryptAcquireContext in random.c, and
+# CertOpenSystemStore in ssl_load.c.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32", "advapi32", "crypt32"]

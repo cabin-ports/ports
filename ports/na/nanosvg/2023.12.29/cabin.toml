@@ -1,0 +1,59 @@
+[package.upstream]
+# nanosvg has no tags or releases.  CMakeLists.txt's
+# write_basic_package_version_file(VERSION 1.0) is a constant placeholder,
+# added in b21ebe01b8 (2022-05-04) and never bumped, so it identifies no
+# release.  This is the commit vcpkg pins (committed 2023-12-29), so the
+# version is its date.
+# vcpkg also applies FLTK's fork patch (nsvgRasterizeXY); this port packages
+# upstream unpatched.
+#
+# Patch 0001 adds the terms nanosvg omits for code it adapts:
+# LICENSE-AGG.txt, lines 1-10 of agg-src/examples/svg_viewer/agg_svg_parser.cpp
+# in ghaerr/agg-2.6 at commit 0a000a962a7e2ea0e5b1441424196adfa4250b35, and
+# LICENSE-bbox.txt, the MIT terms NISHIO Hirokazu published calc_box under
+# (archived at web.archive.org/web/20090618041529/http://blog.hackers-cafe.net
+# /2009/06/how-to-calculate-bezier-curves-bounding.html).
+patches = ["patches/0001-add-third-party-license-texts.patch"]
+url = "https://github.com/memononen/nanosvg/archive/93ce879dc4c04a3ef1758428ec80083c38610b1f.tar.gz"
+checksum = "sha256:259f5236843a2245fdfd92fddffcaf292ac1f46d24f94f38fa3a9b690501e7d2"
+format = "tar.gz"
+strip-prefix = "nanosvg-93ce879dc4c04a3ef1758428ec80083c38610b1f"
+
+[package]
+name = "cabin-ports/nanosvg"
+version = "2023.12.29"
+license = "Zlib AND LicenseRef-Boost-pre-BSL AND MIT"
+# LICENSE.txt is Zlib.  nanosvg.h's parser (nsvg__parseColor, :1459-1469;
+# nsvg__parseTransformArgs through nsvg__parseTransform, :1539-1686;
+# nsvg__parseLineCap through nsvg__parseFillRule, :1701-1733; nsvg__parseAttr
+# through nsvg__parseAttribs, :1779-1915; nsvg__parsePath through
+# nsvg__parsePoly, :2255-2582; nsvg__startElement and nsvg__endElement,
+# :2751-2824) ports Maxim Shemanarev's Anti-Grain Geometry svg_viewer example,
+# and nanosvgrast.h's nsvg__flattenCubicBez (:336-372) is a simplified form of
+# AGG's curve4_div subdivision; their old Boost permission grant is
+# LicenseRef-Boost-pre-BSL.  nsvg__evalBezier and nsvg__curveBounds
+# (:560-615) translate MIT code.  nanosvgrast.h:847-956 and :1118-1204 adapt
+# stb_truetype v0.7's rasterizer, which is public domain and adds no term.
+# The arc conversion nanosvg credits to canvg (nanosvg.h:23, :2136) shares
+# only the SVG 1.1 F.6.5 algorithm with canvg v1.0 and carries no term.
+# Not ported: example/ (its stb_image_write.h serves only the examples) and
+# the CMake and premake files.
+include = ["LICENSE-AGG.txt", "LICENSE-bbox.txt", "LICENSE.txt", "patches", "src"]
+
+# Header-only, as README.md describes: one translation unit defines
+# NANOSVG_IMPLEMENTATION before including <nanosvg.h>, and
+# NANOSVGRAST_IMPLEMENTATION before <nanosvgrast.h>.  Upstream's
+# CMakeLists.txt instead copies each header to a .c file and compiles it into
+# a static library (nanosvg, nanosvgrast), which Cabin cannot express without
+# adding sources.  The headers need C11 (the anonymous union in NSVGpaint)
+# and C++11 (long long, strtoll).
+[target.nanosvg]
+type = "header-only"
+include-dirs = ["src"]
+interface-c-standard = "c11"
+interface-cxx-standard = "c++11"
+
+# The implementations call <math.h> functions.  Upstream links libm wherever
+# find_library finds it (CMakeLists.txt:11-14).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]

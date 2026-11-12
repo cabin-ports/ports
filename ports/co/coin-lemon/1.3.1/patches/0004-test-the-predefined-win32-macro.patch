@@ -1,0 +1,160 @@
+--- a/lemon/bits/windows.cc
++++ b/lemon/bits/windows.cc
+@@ -21,7 +21,7 @@
+ 
+ #include<lemon/bits/windows.h>
+ 
+-#ifdef WIN32
++#ifdef _WIN32
+ #ifndef WIN32_LEAN_AND_MEAN
+ #define WIN32_LEAN_AND_MEAN
+ #endif
+@@ -40,7 +40,7 @@
+ #else
+ #include <unistd.h>
+ #include <ctime>
+-#ifndef WIN32
++#ifndef _WIN32
+ #include <sys/times.h>
+ #endif
+ #include <sys/time.h>
+@@ -55,7 +55,7 @@
+                          double &utime, double &stime,
+                          double &cutime, double &cstime)
+     {
+-#ifdef WIN32
++#ifdef _WIN32
+       static const double ch = 4294967296.0e-7;
+       static const double cl = 1.0e-7;
+ 
+@@ -94,7 +94,7 @@
+     std::string getWinFormattedDate()
+     {
+       std::ostringstream os;
+-#ifdef WIN32
++#ifdef _WIN32
+       SYSTEMTIME time;
+       GetSystemTime(&time);
+       char buf1[11], buf2[9], buf3[5];
+@@ -120,7 +120,7 @@
+ 
+     int getWinRndSeed()
+     {
+-#ifdef WIN32
++#ifdef _WIN32
+       FILETIME time;
+       GetSystemTimeAsFileTime(&time);
+       return GetCurrentProcessId() + time.dwHighDateTime + time.dwLowDateTime;
+@@ -132,7 +132,7 @@
+     }
+ 
+     WinLock::WinLock() {
+-#ifdef WIN32
++#ifdef _WIN32
+       CRITICAL_SECTION *lock = new CRITICAL_SECTION;
+       InitializeCriticalSection(lock);
+       _repr = lock;
+@@ -142,7 +142,7 @@
+     }
+ 
+     WinLock::~WinLock() {
+-#ifdef WIN32
++#ifdef _WIN32
+       CRITICAL_SECTION *lock = static_cast<CRITICAL_SECTION*>(_repr);
+       DeleteCriticalSection(lock);
+       delete lock;
+@@ -150,14 +150,14 @@
+     }
+ 
+     void WinLock::lock() {
+-#ifdef WIN32
++#ifdef _WIN32
+       CRITICAL_SECTION *lock = static_cast<CRITICAL_SECTION*>(_repr);
+       EnterCriticalSection(lock);
+ #endif
+     }
+ 
+     void WinLock::unlock() {
+-#ifdef WIN32
++#ifdef _WIN32
+       CRITICAL_SECTION *lock = static_cast<CRITICAL_SECTION*>(_repr);
+       LeaveCriticalSection(lock);
+ #endif
+--- a/lemon/graph_to_eps.h
++++ b/lemon/graph_to_eps.h
+@@ -25,7 +25,7 @@
+ #include<algorithm>
+ #include<vector>
+ 
+-#ifndef WIN32
++#ifndef _WIN32
+ #include<sys/time.h>
+ #include<ctime>
+ #else
+@@ -674,7 +674,7 @@
+ 
+     {
+       os << "%%CreationDate: ";
+-#ifndef WIN32
++#ifndef _WIN32
+       timeval tv;
+       gettimeofday(&tv, 0);
+ 
+--- a/lemon/random.h
++++ b/lemon/random.h
+@@ -71,7 +71,7 @@
+ #include <lemon/math.h>
+ #include <lemon/dim2.h>
+ 
+-#ifndef WIN32
++#ifndef _WIN32
+ #include <sys/time.h>
+ #include <ctime>
+ #include <sys/types.h>
+@@ -605,7 +605,7 @@
+     /// it uses the \c seedFromTime().
+     /// \return Currently always \c true.
+     bool seed() {
+-#ifndef WIN32
++#ifndef _WIN32
+       if (seedFromFile("/dev/urandom", 0)) return true;
+ #endif
+       if (seedFromTime()) return true;
+@@ -625,7 +625,7 @@
+     /// \param file The source file
+     /// \param offset The offset, from the file read.
+     /// \return \c true when the seeding successes.
+-#ifndef WIN32
++#ifndef _WIN32
+     bool seedFromFile(const std::string& file = "/dev/urandom", int offset = 0)
+ #else
+     bool seedFromFile(const std::string& file = "", int offset = 0)
+@@ -647,7 +647,7 @@
+     /// random sequence.
+     /// \return Currently always \c true.
+     bool seedFromTime() {
+-#ifndef WIN32
++#ifndef _WIN32
+       timeval tv;
+       gettimeofday(&tv, 0);
+       seed(getpid() + tv.tv_sec + tv.tv_usec);
+--- a/lemon/time_measure.h
++++ b/lemon/time_measure.h
+@@ -23,7 +23,7 @@
+ ///\file
+ ///\brief Tools for measuring cpu usage
+ 
+-#ifdef WIN32
++#ifdef _WIN32
+ #include <lemon/bits/windows.h>
+ #else
+ #include <unistd.h>
+@@ -102,7 +102,7 @@
+     ///Read the current time values of the process
+     void stamp()
+     {
+-#ifndef WIN32
++#ifndef _WIN32
+       timeval tv;
+       gettimeofday(&tv, 0);
+       rtime=tv.tv_sec+double(tv.tv_usec)/1e6;

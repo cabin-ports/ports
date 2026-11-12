@@ -1,0 +1,55 @@
+[package.upstream]
+url = "https://github.com/protocolbuffers/protobuf/archive/refs/tags/v36.2.tar.gz"
+checksum = "sha256:7e7eaf580ec77f1a392ff1ab1013c13d3b04a6716f002f697f67f3c1113f0530"
+format = "tar.gz"
+strip-prefix = "protobuf-36.2"
+
+# utf8_range lives in protobuf's third_party/utf8_range and versions with
+# protobuf's C++ library: tag v36.2 is C++ 7.36.2, the version vcpkg's
+# utf8-range uses.
+[package]
+name = "cabin-ports/utf8-range"
+version = "7.36.2"
+license = "MIT"
+# Ships only the library and its LICENSE.  The rest of third_party/utf8_range
+# is benchmarks, sample texts, tests and a fuzzer; of those, lemire-*.c and
+# lookup.c adapt third-party code whose terms upstream does not ship.
+include = [
+  "third_party/utf8_range/LICENSE",
+  "third_party/utf8_range/utf8_range.c",
+  "third_party/utf8_range/utf8_range.h",
+  "third_party/utf8_range/utf8_range_neon.inc",
+  "third_party/utf8_range/utf8_range_sse.inc",
+  "third_party/utf8_range/utf8_validity.h",
+]
+
+[dependencies]
+"cabin-ports/abseil" = "^20260817.0"
+
+# The C library.  utf8_range.c takes its SSE4.1 or NEON path only where the
+# compiler already predefines __SSE4_1__ or AArch64 NEON, as upstream's CMake
+# build does; elsewhere it validates in scalar code.
+[target.utf8_range]
+type = "library"
+sources = ["third_party/utf8_range/utf8_range.c"]
+include-dirs = ["third_party/utf8_range"]
+c-standard = "c11"
+# utf8_range.h includes <stdbool.h>.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "utf8_range"
+
+# The C++ API in utf8_validity.h, inline wrappers taking absl::string_view.
+# As in upstream's Bazel build, it is header-only over the utf8_range library.
+# Upstream's CMake instead compiles utf8_range.c a second time into
+# libutf8_validity, which would give a consumer of both targets two
+# definitions of each function.
+[target.utf8_validity]
+type = "header-only"
+include-dirs = ["third_party/utf8_range"]
+interface-c-standard = "none"
+interface-cxx-standard = "c++17"
+deps = [
+  { name = "utf8_range", public = true },
+  { name = "cabin-ports/abseil", public = true },
+]

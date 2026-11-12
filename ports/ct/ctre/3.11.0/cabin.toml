@@ -9,6 +9,7 @@ strip-prefix = "compile-time-regular-expressions-3.11.0"
 [package]
 name = "cabin-ports/ctre"
 version = "3.11.0"
+license = "Apache-2.0 WITH LLVM-exception"
 include = ["LICENSE", "include"]
 
 # C++20 is upstream's default interface standard, which the documented
