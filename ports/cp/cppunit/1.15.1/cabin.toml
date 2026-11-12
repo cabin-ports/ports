@@ -1,0 +1,93 @@
+[package.upstream]
+url = "https://dev-www.libreoffice.org/src/cppunit-1.15.1.tar.gz"
+checksum = "sha256:89c5c6665337f56fd2db36bc3805a5619709d51fb136e51937072f63fcc717a7"
+format = "tar.gz"
+strip-prefix = "cppunit-1.15.1"
+# Portability.h includes <cppunit/config-auto.h>, which configure generates,
+# with every compiler but MSVC and Borland (:8-19).  Patch 0001 adds it as
+# configure writes it on macOS; the macros any header or source reads come
+# out the same with GCC and Clang on Linux.  MSVC reads the shipped
+# config/config-msvc6.h instead, which has no CPPUNIT_VERSION, so there
+# Portability.h's fallback reports "1.15.0" (:22-24), as upstream's Visual
+# Studio build does.
+patches = ["patches/0001-add-the-generated-config-auto-h.patch"]
+
+[package]
+name = "cabin-ports/cppunit"
+version = "1.15.1"
+# COPYING is the LGPL 2.1, and no file offers a later version.  Conveying
+# a binary statically linked with it carries the obligations of LGPL-2.1
+# section 6.
+license = "LGPL-2.1-only"
+include = ["COPYING", "include", "patches", "src/cppunit"]
+
+# libcppunit as src/cppunit/Makefile.am and cppunit.vcxproj build it, from
+# the same sources, static.  Not ported: the shared library (libtool's on
+# Unix, cppunit_dll.vcxproj with DllMain.cpp on Windows), the
+# DllPlugInTester runner, and the examples.  A test plug-in built with
+# CPPUNIT_PLUGIN_IMPLEMENT therefore registers its tests in its own copy of
+# the registry, which the host does not see (plugin/TestPlugIn.h:185-187).
+[target.cppunit]
+type = "library"
+sources = [
+  "src/cppunit/AdditionalMessage.cpp",
+  "src/cppunit/Asserter.cpp",
+  "src/cppunit/BriefTestProgressListener.cpp",
+  "src/cppunit/CompilerOutputter.cpp",
+  "src/cppunit/DefaultProtector.cpp",
+  "src/cppunit/DynamicLibraryManager.cpp",
+  "src/cppunit/DynamicLibraryManagerException.cpp",
+  "src/cppunit/Exception.cpp",
+  "src/cppunit/Message.cpp",
+  "src/cppunit/PlugInManager.cpp",
+  "src/cppunit/PlugInParameters.cpp",
+  "src/cppunit/Protector.cpp",
+  "src/cppunit/ProtectorChain.cpp",
+  "src/cppunit/RepeatedTest.cpp",
+  "src/cppunit/ShlDynamicLibraryManager.cpp",
+  "src/cppunit/SourceLine.cpp",
+  "src/cppunit/StringTools.cpp",
+  "src/cppunit/SynchronizedObject.cpp",
+  "src/cppunit/Test.cpp",
+  "src/cppunit/TestAssert.cpp",
+  "src/cppunit/TestCase.cpp",
+  "src/cppunit/TestCaseDecorator.cpp",
+  "src/cppunit/TestComposite.cpp",
+  "src/cppunit/TestDecorator.cpp",
+  "src/cppunit/TestFactoryRegistry.cpp",
+  "src/cppunit/TestFailure.cpp",
+  "src/cppunit/TestLeaf.cpp",
+  "src/cppunit/TestNamer.cpp",
+  "src/cppunit/TestPath.cpp",
+  "src/cppunit/TestPlugInDefaultImpl.cpp",
+  "src/cppunit/TestResult.cpp",
+  "src/cppunit/TestResultCollector.cpp",
+  "src/cppunit/TestRunner.cpp",
+  "src/cppunit/TestSetUp.cpp",
+  "src/cppunit/TestSuccessListener.cpp",
+  "src/cppunit/TestSuite.cpp",
+  "src/cppunit/TestSuiteBuilderContext.cpp",
+  "src/cppunit/TextOutputter.cpp",
+  "src/cppunit/TextTestProgressListener.cpp",
+  "src/cppunit/TextTestResult.cpp",
+  "src/cppunit/TextTestRunner.cpp",
+  "src/cppunit/TypeInfoHelper.cpp",
+  "src/cppunit/UnixDynamicLibraryManager.cpp",
+  "src/cppunit/Win32DynamicLibraryManager.cpp",
+  "src/cppunit/XmlDocument.cpp",
+  "src/cppunit/XmlElement.cpp",
+  "src/cppunit/XmlOutputter.cpp",
+  "src/cppunit/XmlOutputterHook.cpp",
+]
+include-dirs = ["include"]
+# configure requires C++11 (configure.ac:50); c++14 is the lowest
+# standard Cabin accepts on MSVC.  The headers use std::function and
+# std::unique_ptr.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "cppunit"
+
+# The plug-in loader's dlopen (UnixDynamicLibraryManager.cpp), which
+# lives in libdl on Android and before glibc 2.34.
+[target.'cfg(any(os = "linux", os = "android"))'.profile]
+link-libs = ["dl"]
