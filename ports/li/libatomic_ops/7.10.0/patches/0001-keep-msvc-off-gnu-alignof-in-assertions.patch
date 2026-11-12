@@ -1,0 +1,12 @@
+--- a/src/atomic_ops.h
++++ b/src/atomic_ops.h
+@@ -259,7 +259,8 @@
+ # endif
+ #endif /* !AO_ATTR_NO_SANITIZE_THREAD */
+ 
+-#if (AO_GNUC_PREREQ(7, 5) || __STDC_VERSION__ >= 201112L) && !defined(LINT2)
++#if (AO_GNUC_PREREQ(7, 5) || __STDC_VERSION__ >= 201112L) && !defined(LINT2) \
++    && !defined(_MSC_VER)
+ # define AO_ALIGNOF_SUPPORTED 1
+ #endif
+ 
