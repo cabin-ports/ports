@@ -1,0 +1,43 @@
+[package.upstream]
+# Upstream tags no releases and declares no version; this is the commit vcpkg
+# pins (its version-date 2023-12-27), versioned YYYY.M.D by its commit date.
+# master has moved on since (4732e46, 2026-10-20).
+url = "https://github.com/jhasse/poly2tri/archive/0171f030bd3d5c6747c29d93403546eed668a1b6.tar.gz"
+checksum = "sha256:e34dbfee8f6e64dc0aff61c845f637df179f0a7a72ce43dafbf2965ee732237e"
+format = "tar.gz"
+strip-prefix = "poly2tri-0171f030bd3d5c6747c29d93403546eed668a1b6"
+
+[package]
+# jhasse's maintained fork of poly2tri, named as vcpkg names it; the original
+# repository (greenm01/poly2tri) is a separate project.
+name = "cabin-ports/jhasse-poly2tri"
+version = "2023.12.27"
+license = "BSD-3-Clause"
+include = ["AUTHORS", "LICENSE", "poly2tri"]
+
+# The static library CMakeLists.txt builds: every .cc under poly2tri/common
+# and poly2tri/sweep (:9-11), compiled as C++14 (:4), with the repository
+# root as the include directory (:12), so consumers include
+# <poly2tri/poly2tri.h>.  As there, the static build defines
+# P2T_STATIC_EXPORTS for the library and its consumers (:14-19); without it,
+# poly2tri/common/dll_symbol.h marks the API dllimport on Windows.
+# shapes.h:122 names std::ostream without including <iosfwd>, which
+# upstream added later (464b81c); with a standard library that drops
+# transitive includes, a consumer includes <iosfwd> first.  Not ported:
+# the shared-library build, the unit tests and the testbed.
+[target.poly2tri]
+type = "library"
+sources = [
+  "poly2tri/common/shapes.cc",
+  "poly2tri/sweep/advancing_front.cc",
+  "poly2tri/sweep/cdt.cc",
+  "poly2tri/sweep/sweep.cc",
+  "poly2tri/sweep/sweep_context.cc",
+]
+include-dirs = ["."]
+cxx-standard = "c++14"
+# The public headers use nullptr (poly2tri/sweep/sweep_context.h:106-114).
+interface-cxx-standard = "c++11"
+defines = ["P2T_STATIC_EXPORTS"]
+interface-defines = ["P2T_STATIC_EXPORTS"]
+links = "poly2tri"
