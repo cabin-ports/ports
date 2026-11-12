@@ -3,13 +3,24 @@ url = "https://www.sqlite.org/2026/sqlite-autoconf-3530200.tar.gz"
 checksum = "sha256:588ad51949419a56ebe81fe56193d510c559eb94c9a57748387860b5d3069316"
 format = "tar.gz"
 strip-prefix = "sqlite-autoconf-3530200"
+# sqlite3.c's decimal-to-binary conversion, sqlite3Fp10Convert2
+# (:37152-37200), is "adapted from the work of Ross Cox at
+# https://github.com/rsc/fpfmt" (BSD-3-Clause, Copyright (c) 2009 The Go
+# Authors), and its twin sqlite3Fp2Convert10 (:37134-37150) and the
+# pwr10to2/pwr2to10 constants (:37104-37105) follow the same code.  That
+# license requires its notice with every source copy, and the release ships
+# none.  The patch adds it, verbatim from rsc/fpfmt's LICENSE at b6f0da9
+# (SHA-256 2d36597f...c067), as LICENSE.fpfmt.
+patches = ["patches/0001-add-bsd-3-clause-license-for-fpfmt-code.patch"]
 [package]
 name = "cabin-ports/sqlite3"
 version = "3.53.2"
-# Only the amalgamation: the include root is the upstream tree root,
-# whose `VERSION` file a case-insensitive file system would open for
-# every consumer's `#include <version>`.
-include = ["sqlite3.c", "sqlite3.h", "sqlite3ext.h"]
+# The SQLite blessing, and BSD-3-Clause for the fpfmt-derived code above.
+license = "blessing AND BSD-3-Clause"
+# Only the amalgamation, the patch and the license it adds: the include
+# root is the upstream tree root, whose `VERSION` file a case-insensitive
+# file system would open for every consumer's `#include <version>`.
+include = ["LICENSE.fpfmt", "patches", "sqlite3.c", "sqlite3.h", "sqlite3ext.h"]
 
 # SQLite ships as a single-file "amalgamation": sqlite3.c plus the
 # sqlite3.h / sqlite3ext.h headers. The CLI shell (shell.c) is not
