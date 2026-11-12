@@ -1,0 +1,39 @@
+[package.upstream]
+url = "https://github.com/nonstd-lite/any-lite/archive/refs/tags/v0.4.0.tar.gz"
+checksum = "sha256:889549098291a1313d2fc8cd12dcdab13214d05cdce7ed5fe2dc724cdd7b3125"
+format = "tar.gz"
+strip-prefix = "any-lite-0.4.0"
+# Where nonstd::any is any lite's own, the header uses std::swap (any.hpp:535)
+# without including <algorithm>, where C++98 declares it, and typeid
+# (:545, 593, 703, 709) without <typeinfo> when exceptions are off
+# (-fno-exceptions or any_CONFIG_NO_EXCEPTIONS, :317-321), which makes the
+# header ill-formed.  The patch includes both; the <algorithm> hunk is
+# upstream's 9406d1d, after 0.4.0, and master still lacks <typeinfo>.
+patches = ["patches/0001-include-algorithm-and-typeinfo.patch"]
+
+[package]
+name = "cabin-ports/any-lite"
+version = "0.4.0"
+license = "BSL-1.0"
+include = ["LICENSE.txt", "include", "patches"]
+
+# Header-only, as upstream's CMake interface target nonstd::any-lite
+# (CMakeLists.txt:66-76): include/ is the include root, so consumers write
+# `#include <nonstd/any.hpp>`.  The header supports C++98 and later and
+# takes the standard from _MSVC_LANG on cl.exe (any.hpp:63-69).  Where
+# C++17's <any> exists, nonstd::any is std::any unless a consumer defines
+# any_CONFIG_SELECT_ANY=any_ANY_NONSTD (:43-45, 79-89); every any_CONFIG_*
+# option keeps upstream's default.  Upstream limitations of any lite's own
+# any: any_cast to a reference type does not compile (:637, 660, 684 form a
+# pointer to a reference), so code reaches the held value in place through
+# any_cast<T>(&a); any_cast<T> by value from a const any reads a holder<T>
+# as a holder<const T> (:637, 703, 555), which is undefined behaviour, so
+# a const any is read through any_cast<T>(&a) too; emplace returns void, not
+# the new value; and from C++11 on the converting constructor is noexcept
+# (:444, dropped after 0.4.0), so an exception from allocating the holder
+# or copying or moving the value into it calls std::terminate, also where
+# assignment or emplace goes through that constructor.
+[target.any-lite]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++98"

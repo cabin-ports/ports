@@ -1,0 +1,14 @@
+--- a/include/nonstd/any.hpp
++++ b/include/nonstd/any.hpp
+@@ -196,6 +196,11 @@
+ 
+ #else // any_USES_STD_ANY
+ 
++#if !any_CPP11_OR_GREATER
++#include <algorithm>    // std::swap()
++#endif
++
++#include <typeinfo>     // typeid, also with exceptions off
+ #include <utility>
+ 
+ // Compiler versions:
