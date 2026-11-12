@@ -3,6 +3,12 @@ url = "https://github.com/drobilla/zix/archive/refs/tags/v0.8.2.tar.gz"
 checksum = "sha256:9b92244d475cf695d19b643d509791288ba826734202ca53bbe6aa457810cee5"
 format = "tar.gz"
 strip-prefix = "zix-0.8.2"
+patches = [
+  # Cabin compiles C as C11, so ZIX_STATIC_STRING expands to a compound
+  # literal, which MSVC rejects as a static initializer (C2099).  Upstream's
+  # Meson build requests C99, under which the macro takes its brace form.
+  "patches/0001-initialize-the-static-dot-view-without-a-compound-literal.patch",
+]
 
 [package]
 name = "cabin-ports/zix"
@@ -12,7 +18,7 @@ license = "ISC"
 # LICENSES/ also holds the other texts REUSE cites.  src/digest.c's hashes
 # are upstream's rewrites of FastHash64 (MIT) and MurmurHash3 (public
 # domain), as its comments say, so they add no term.
-include = ["COPYING", "LICENSES", "include", "src"]
+include = ["COPYING", "LICENSES", "include", "patches", "src"]
 # Upstream builds C99; C11 is the oldest standard Cabin can request from
 # MSVC.
 c-standard = "c11"
