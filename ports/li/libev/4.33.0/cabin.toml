@@ -1,0 +1,138 @@
+[package.upstream]
+url = "https://dist.schmorp.de/libev/Attic/libev-4.33.tar.gz"
+checksum = "sha256:507eb7b8d1015fbec5b935f34ebed15bf346bed04a11ab82b8eee848c4205aea"
+format = "tar.gz"
+strip-prefix = "libev-4.33"
+# ev.c includes "config.h" (:41-46), which configure generates from the
+# libev.m4 checks.  Patch 0001 adds a config.h without definitions under
+# cabin/, outside the public include directory, and the profiles below
+# define the HAVE_* macros those checks find.  Patch 0002 adds cabin/event.c,
+# which compiles event.c, first declaring struct timeval for it on MSVC
+# (target below).  Patch 0003 adds LICENSE.io_uring (package below).
+patches = [
+  "patches/0001-add-a-config-h-for-the-cabin-profiles.patch",
+  "patches/0002-compile-event-c-with-winsock-on-msvc.patch",
+  "patches/0003-add-the-mit-license-of-the-io-uring-declarations.patch",
+]
+
+[package]
+name = "cabin-ports/libev"
+version = "4.33.0"
+# LICENSE offers every file under the BSD-2-Clause terms or the GPL version
+# 2 or later, which the source headers repeat, as does the libecb copy
+# embedded in ev.c (:604-1751).  ev_iouring.c:98-199 copies the io_uring
+# declarations of Linux's include/uapi/linux/io_uring.h (Copyright (C) 2019
+# Jens Axboe and Christoph Hellwig), which Jens Axboe dual-licensed
+# "(GPL-2.0 WITH Linux-syscall-note) OR MIT" for Linux 5.7 (commit
+# bbbdeb4720a0); LICENSE.io_uring carries the MIT terms.  Not shipped:
+# ev_linuxaio.c, which ev.c compiles only for the linuxaio backend
+# (:3092-3094), off in this build (:121-122), and whose struct aio_ring
+# comes from Linux's GPL-2.0 fs/aio.c (ev_linuxaio.c:99-118).
+license = "(BSD-2-Clause OR GPL-2.0-or-later) AND MIT"
+include = [
+  "LICENSE",
+  "LICENSE.io_uring",
+  "cabin/config.h",
+  "cabin/event.c",
+  "ev++.h",
+  "ev.c",
+  "ev.h",
+  "ev_epoll.c",
+  "ev_iouring.c",
+  "ev_kqueue.c",
+  "ev_poll.c",
+  "ev_port.c",
+  "ev_select.c",
+  "ev_vars.h",
+  "ev_win32.c",
+  "ev_wrap.h",
+  "event.c",
+  "event.h",
+  "patches",
+]
+
+# libev.la as Makefile.am builds it: ev.c, which includes the backend
+# sources it enables, and event.c, the libevent 1.4 emulation, with the
+# headers upstream installs (ev.h, ev++.h and event.h).  As upstream's
+# install does, event.c exports libevent's function names and the include
+# directory carries an event.h, so a consumer cannot also use libevent.
+# event.h includes <sys/time.h> for struct timeval unless WIN32 is defined
+# (event.h:63-67), and MSVC, which has no such header, predefines only
+# _WIN32: cabin/event.c includes event.c after defining WIN32 and including
+# <winsock2.h> there (a registry package's cflags cannot force-include
+# it), and an MSVC consumer of event.h does the same before including it.
+# Not ported: the autotools build, libev.m4 for embedding, and the manual.
+[target.ev]
+type = "library"
+sources = ["ev.c", "cabin/event.c"]
+include-dirs = ["."]
+# configure compiles with the compiler's default C dialect, a GNU one on
+# GCC and Clang.  Cabin's gnu-extensions cannot be limited to those
+# compilers, so the build is strict C11, and the Unix profile below defines
+# _DEFAULT_SOURCE, which glibc and musl imply outside strict modes.
+c-standard = "c11"
+# ev.h's EV_INLINE is "static inline" whenever __GNUC__ >= 3 (:198-202),
+# which strict C89 rejects.
+interface-c-standard = "c99"
+# ev++.h's bad_loop overrides std::exception::what() with EV_NOEXCEPT
+# (ev++.h:114-125), which is empty before C++11 (ev.h:43-53) and so
+# looser than the throw() C++98 standard libraries declare.
+interface-cxx-standard = "c++11"
+links = "ev"
+
+[profile]
+include-dirs = ["cabin"]
+
+# What configure finds on every current Unix system (with glibc 2.19 or
+# later, which has _DEFAULT_SOURCE and clock_gettime in libc).  floor is in
+# libm.
+[target.'cfg(family = "unix")'.profile]
+defines = [
+  "_DEFAULT_SOURCE",
+  "HAVE_CLOCK_GETTIME",
+  "HAVE_FLOOR",
+  "HAVE_NANOSLEEP",
+  "HAVE_POLL",
+  "HAVE_POLL_H",
+  "HAVE_SELECT",
+  "HAVE_SYS_SELECT_H",
+]
+link-libs = ["m"]
+
+# The rest of what configure finds on Linux: the epoll and io_uring
+# backends (ev.c drops io_uring with headers older than Linux 4.14,
+# :469-475) and the inotify, eventfd, signalfd and timerfd interfaces.  On
+# the BSDs, macOS and iOS this adds only kqueue, though recent FreeBSD and
+# NetBSD releases also have eventfd and timerfd; Android, whose select ev.c
+# disables (:421-424), gets only the poll backend.
+[target.'cfg(os = "linux")'.profile]
+defines = [
+  "HAVE_EPOLL_CTL",
+  "HAVE_EVENTFD",
+  "HAVE_INOTIFY_INIT",
+  "HAVE_KERNEL_RWF_T",
+  "HAVE_LINUX_FS_H",
+  "HAVE_SIGNALFD",
+  "HAVE_SYS_EPOLL_H",
+  "HAVE_SYS_EVENTFD_H",
+  "HAVE_SYS_INOTIFY_H",
+  "HAVE_SYS_SIGNALFD_H",
+  "HAVE_SYS_TIMERFD_H",
+]
+
+[target.'cfg(any(os = "macos", os = "ios", os = "freebsd", os = "netbsd", os = "openbsd", os = "dragonfly"))'.profile]
+defines = ["HAVE_KQUEUE", "HAVE_SYS_EVENT_H"]
+
+# Upstream supports native Windows only through the select backend over
+# Winsock, for sockets alone, and only by embedding (ev.pod:5363-5415);
+# these are the two macros conan-center-index's MSVC config.h sets to
+# enable that backend (ev_select.c includes no <sys/select.h> on Windows).
+# As there: libev does not call WSAStartup, and select fails without it,
+# aborting the loop (ev_select.c:174-213), so an application starts
+# Winsock before running one; ev_io watches C runtime descriptors, which
+# _open_osfhandle makes from SOCKETs (ev.c:1871-1875); the sets hold
+# Winsock's default FD_SETSIZE of 64 sockets (ev.pod:5436-5459); and
+# signals mostly do not work (ev.pod:5384-5385).
+[target.'cfg(os = "windows")'.profile]
+defines = ["HAVE_SELECT", "HAVE_SYS_SELECT_H"]
+link-libs = ["ws2_32"]

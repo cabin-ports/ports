@@ -1,0 +1,5 @@
+--- /dev/null
++++ b/cabin/config.h
+@@ -0,0 +1,2 @@
++/* Stands in for the config.h configure generates: cabin.toml defines the
++   HAVE_* macros that libev.m4 checks for. */
