@@ -1,0 +1,74 @@
+[package.upstream]
+url = "https://github.com/imageworks/pystring/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:020a603a757ba1e429f4b1ea6feb3afbe0fb34bcafa355032e1f1b8a0019d198"
+format = "tar.gz"
+strip-prefix = "pystring-1.2.0"
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+# The two headers upstream installs, in the pystring/ directory it installs
+# them in (CMakeLists.txt, meson.build).  Upstream's targets put the source
+# root on the include path in the build tree, for "pystring.h", and include/
+# once installed, for <pystring/pystring.h>; both spellings work here.
+[[package.upstream.copy]]
+from = "pystring.h"
+to = "include/pystring/pystring.h"
+
+[[package.upstream.copy]]
+from = "pystring_impl.h"
+to = "include/pystring/pystring_impl.h"
+
+[package]
+name = "cabin-ports/pystring"
+version = "1.2.0"
+# BSD-3-Clause: LICENSE.  Python-2.0.1: pystring_impl.h's os.path and
+# string helpers, translated from Python 2.6 code older than the PSF, so
+# under Python's whole licence stack.
+license = "BSD-3-Clause AND Python-2.0.1"
+include = [
+  "LICENSE",
+  "THIRD_PARTY_NOTICES",
+  "include",
+  "patches",
+  "pystring.cpp",
+  "pystring.h",
+  "pystring_impl.h",
+]
+
+# The pystring_header_only target needs the non-default `header-only`
+# feature, so the dry-run probe, which links every target the default
+# features enable, runs the compiled library; the port's CI test does not
+# exercise the header-only target.  A consumer enables the feature on its
+# dependency edge and names cabin-ports/pystring:pystring_header_only in
+# deps (the library is cabin-ports/pystring:pystring), never both in one
+# program: the two modes define the same functions.
+[features]
+default = []
+header-only = []
+
+# Upstream's pystring::pystring, built static.  Not ported: the shared
+# library that CMake's BUILD_SHARED_LIBS default builds.  pystring has no
+# C API.
+[target.pystring]
+type = "library"
+sources = ["pystring.cpp"]
+include-dirs = ["include", "include/pystring"]
+# Upstream compiles C++11 (CMakeLists.txt); C++14 is the oldest standard
+# Cabin can request from MSVC.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "pystring"
+
+# Upstream's pystring::pystring_header_only: with PYSTRING_HEADER_ONLY,
+# pystring.h declares its functions inline and includes pystring_impl.h.
+# Limitation: pystring_impl.h defines do_strip and splitext_generic without
+# inline (:228, :1630), so only one translation unit per program can
+# include pystring.h in this mode (a second fails to link with duplicate
+# symbols), and on Windows it leaves pystring_impl.h's WINDOWS macro
+# defined there; a program with more uses the library target.
+[target.pystring_header_only]
+type = "header-only"
+include-dirs = ["include", "include/pystring"]
+interface-cxx-standard = "c++11"
+interface-defines = ["PYSTRING_HEADER_ONLY"]
+required-features = ["header-only"]
