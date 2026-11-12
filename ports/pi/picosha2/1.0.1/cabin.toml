@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/okdshin/PicoSHA2/archive/refs/tags/v1.0.1.tar.gz"
+checksum = "sha256:9983136544234e573fe07cc1a22fdf978ad7979043e7be2e9082f6d4991ff8a8"
+format = "tar.gz"
+strip-prefix = "PicoSHA2-1.0.1"
+
+[package]
+name = "cabin-ports/picosha2"
+version = "1.0.1"
+license = "MIT"
+include = ["LICENSE", "picosha2.h"]
+
+# Upstream's INTERFACE target puts the source root on the include path, so
+# consumers write `#include <picosha2.h>`.  Upstream sets no language
+# standard and the header is C++98.  PICOSHA2_BUFFER_SIZE_FOR_INPUT_ITERATOR
+# is the consumer's to define, alike in every translation unit.  Upstream
+# limitation: lengths are counted in unsigned long, so on Windows (32-bit
+# long) a single hash256_one_by_one::process() call, or a random-access
+# hash256/hash256_hex_string, of about 4 GiB or more yields a wrong digest;
+# feed such input in smaller chunks or through input iterators.
+[target.picosha2]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++98"
