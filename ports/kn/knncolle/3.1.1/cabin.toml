@@ -1,0 +1,61 @@
+[package.upstream]
+# The v3.1.1 tag archive, the bytes vcpkg's knncolle port pins (SHA-512,
+# REF v${VERSION}); the release has no assets.
+url = "https://github.com/knncolle/knncolle/archive/refs/tags/v3.1.1.tar.gz"
+checksum = "sha256:d6dddf79bbb8b569e361d7752fb69282ef3e9a2fc6d9892a6cfc2ba5f2934226"
+format = "tar.gz"
+strip-prefix = "knncolle-3.1.1"
+# L2Normalized.hpp calls std::copy_n without including <algorithm>, and the
+# umbrella header reaches it before any header that does, so with
+# libstdc++ 14 and later, whose <functional> no longer pulls it in,
+# "knncolle/knncolle.hpp" does not compile.  The patch adds the
+# `#include <algorithm>` lines of upstream commit bb070f4, released as
+# 3.1.2, and nothing else.
+patches = ["patches/0001-include-algorithm.patch"]
+
+# Named after vcpkg's port; upstream's CMake package is knncolle_knncolle
+# (CMakeLists.txt:54-69).  Vptree.hpp:159 adapts Steve Hanov's VP-tree
+# post, whose code he released to the public domain, and README.md:24 says
+# most of the code derives from BiocNeighbors (GPL-3), whose sole author
+# and copyright holder, Aaron Lun, holds knncolle's: neither adds a term to
+# LICENSE's MIT.
+[package]
+name = "cabin-ports/knncolle"
+version = "3.1.1"
+license = "MIT"
+include = ["LICENSE", "include", "patches"]
+
+# The headers include "sanisizer/sanisizer.hpp" and "subpar/subpar.hpp"
+# (find_nearest_neighbors.hpp:10-13), and upstream's target links
+# ltla::subpar 0.5.0 and ltla::sanisizer 0.2.0 or later
+# (CMakeLists.txt:27-31; cmake/Config.cmake.in:4-5), which its fetched
+# copies annotate as ^0.5.0 and ^0.2.0 (extern/CMakeLists.txt:6, :12).
+[dependencies]
+"cabin-ports/ltla-sanisizer" = "^0.2"
+"cabin-ports/ltla-subpar" = "^0.5"
+
+# Header-only, as upstream's CMake interface target knncolle::knncolle
+# (CMakeLists.txt:14-20): include/ is the include root in the build tree
+# (:18) and the installed headers keep their knncolle/ directory (:19,
+# :48-49), so consumers write `#include "knncolle/knncolle.hpp"`, as
+# upstream's README does (README.md:31).  C++17 is upstream's interface
+# requirement (target_compile_features cxx_std_17, :20): the headers use
+# std::optional and std::filesystem.  knncolle has no C API.
+#
+# Consumers include the umbrella header: on its own, L2Normalized.hpp
+# lacks <functional> and find_nearest_neighbors.hpp lacks utils.hpp's I<>.
+# Like upstream, the package links no stdc++fs or c++fs, which
+# std::filesystem needs before GCC 9 and LLVM 9.
+#
+# find_nearest_neighbors() runs its threads through subpar unless the
+# consumer defines KNNCOLLE_CUSTOM_PARALLEL (find_nearest_neighbors.hpp:36-44);
+# that switch and subpar's stay the consumer's to define.  Not ported: the
+# tests, the docs, and the CMake package files.
+[target.knncolle]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+deps = [
+  { name = "cabin-ports/ltla-sanisizer", public = true },
+  { name = "cabin-ports/ltla-subpar", public = true },
+]

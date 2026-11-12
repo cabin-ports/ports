@@ -1,0 +1,30 @@
+--- a/include/knncolle/Bruteforce.hpp
++++ b/include/knncolle/Bruteforce.hpp
+@@ -17,6 +17,7 @@
+ #include <string>
+ #include <cstring>
+ #include <filesystem>
++#include <algorithm>
+ 
+ #include "sanisizer/sanisizer.hpp"
+ 
+--- a/include/knncolle/L2Normalized.hpp
++++ b/include/knncolle/L2Normalized.hpp
+@@ -10,6 +10,7 @@
+ #include <cstring>
+ #include <string>
+ #include <filesystem>
++#include <algorithm>
+ 
+ #include "Searcher.hpp"
+ #include "Prebuilt.hpp"
+--- a/include/knncolle/Vptree.hpp
++++ b/include/knncolle/Vptree.hpp
+@@ -20,6 +20,7 @@
+ #include <filesystem>
+ #include <cassert>
+ #include <optional>
++#include <algorithm>
+ 
+ #include "sanisizer/sanisizer.hpp"
+ 
