@@ -1,0 +1,51 @@
+[package.upstream]
+# Upstream tags no releases.  This is the commit ConanCenter pins as
+# cci.20260102 (committed 2026-01-19); the version is the one lodepng.cpp:2
+# and lodepng.h:2 declare, "LodePNG version 20260119", as YYYY.M.D.
+url = "https://github.com/lvandeve/lodepng/archive/865adac2b8149774401626101ec618e3de45e1d8.tar.gz"
+checksum = "sha256:480265dbc4c46a4258a776abbb9a66addc8adeaea085bb9f540b7d5292b1f534"
+format = "tar.gz"
+strip-prefix = "lodepng-865adac2b8149774401626101ec618e3de45e1d8"
+
+# The C build: lodepng.cpp compiled as C under the name lodepng.c, as
+# README.md ("Compiling in C") prescribes and vcpkg's lodepng-c does.
+[[package.upstream.copy]]
+from = "lodepng.cpp"
+to = "lodepng.c"
+
+[package]
+name = "cabin-ports/lodepng"
+version = "2026.1.19"
+license = "Zlib"
+# lodepng.h and lodepng.cpp are the library (README.md, "Building").  Not
+# ported: lodepng_util.cpp and lodepng_util.h, an optional add-on that
+# neither ConanCenter nor vcpkg builds, and pngdetail, the benchmark, fuzzer,
+# unit test and examples.
+include = ["LICENSE", "lodepng.c", "lodepng.cpp", "lodepng.h"]
+# The code is C90 and C++03 (lodepng.h:1862); C11 and C++14 are the oldest
+# standards Cabin can request from MSVC.
+c-standard = "c11"
+cxx-standard = "c++14"
+
+# The C++ library ConanCenter and vcpkg build: lodepng.h's C API plus its
+# std::vector and std::string API for C++ (LODEPNG_COMPILE_CPP).  lodepng.h
+# declares the C API without extern "C", so C consumers link lodepng-c.
+[target.lodepng]
+type = "library"
+sources = ["lodepng.cpp"]
+include-dirs = ["."]
+interface-cxx-standard = "c++98"
+links = "lodepng"
+
+# vcpkg's lodepng-c: the same code compiled as C, with C linkage, for C
+# consumers; C++ consumers, which would declare its API with C++ linkage,
+# link lodepng.  Under the Itanium C++ ABI (GCC, Clang) both define the same
+# unmangled globals, LODEPNG_VERSION_STRING and the default settings, so a
+# program links only one of them.
+[target.lodepng-c]
+type = "library"
+sources = ["lodepng.c"]
+include-dirs = ["."]
+interface-c-standard = "c89"
+interface-cxx-standard = "none"
+links = "lodepng-c"
