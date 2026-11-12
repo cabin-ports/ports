@@ -1,0 +1,158 @@
+[package.upstream]
+url = "https://github.com/drobilla/zix/archive/refs/tags/v0.8.2.tar.gz"
+checksum = "sha256:9b92244d475cf695d19b643d509791288ba826734202ca53bbe6aa457810cee5"
+format = "tar.gz"
+strip-prefix = "zix-0.8.2"
+
+[package]
+name = "cabin-ports/zix"
+version = "0.8.2"
+license = "ISC"
+# Licence: ISC (COPYING), under which every published file is available;
+# LICENSES/ also holds the other texts REUSE cites.  src/digest.c's hashes
+# are upstream's rewrites of FastHash64 (MIT) and MurmurHash3 (public
+# domain), as its comments say, so they add no term.
+include = ["COPYING", "LICENSES", "include", "src"]
+# Upstream builds C99; C11 is the oldest standard Cabin can request from
+# MSVC.
+c-standard = "c11"
+interface-c-standard = "c99"
+# filesystem.h's and status.h's enums end in trailing commas, which C++
+# allows from C++11.
+interface-cxx-standard = "c++11"
+
+# Meson's default checks=enabled sets each HAVE_* from a link check and
+# defines ZIX_NO_DEFAULT_CONFIG.  This port uses upstream's checks=auto
+# instead: src/zix_config.h derives the features at compile time from
+# _POSIX_VERSION, _WIN32_WINNT and the platform macros.  It assumes
+# copy_file_range on every Linux, so the port needs glibc 2.27 or later.
+[profile]
+defines = ["ZIX_INTERNAL", "ZIX_STATIC"]
+
+# meson.build's system_c_args, per host system.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_GNU_SOURCE", "_POSIX_C_SOURCE=200809L", "_XOPEN_SOURCE=600"]
+
+[target.'cfg(any(os = "macos", os = "ios"))'.profile]
+defines = ["_DARWIN_C_SOURCE"]
+
+[target.'cfg(any(os = "dragonfly", os = "freebsd", os = "netbsd", os = "openbsd"))'.profile]
+defines = ["_BSD_SOURCE"]
+
+[target.'cfg(all(family = "unix", not(any(os = "linux", os = "macos", os = "ios", os = "dragonfly", os = "freebsd", os = "netbsd", os = "openbsd"))))'.profile]
+defines = ["_POSIX_C_SOURCE=200809L", "_XOPEN_SOURCE=600"]
+
+# The win_ver (win8) and win_wchar defaults, and the windows.h trimming.
+[target.'cfg(family = "windows")'.profile]
+defines = [
+  "UNICODE",
+  "_UNICODE",
+  "WINVER=0x0602",
+  "_WIN32_WINNT=0x0602",
+  "WIN32_LEAN_AND_MEAN",
+  "NOGDICAPMASKS",
+  "NOVIRTUALKEYCODES",
+  "NOWINMESSAGES",
+  "NOWINSTYLES",
+  "NOSYSMETRICS",
+  "NOMENUS",
+  "NOICONS",
+  "NOKEYSTATES",
+  "NOSYSCOMMANDS",
+  "NORASTEROPS",
+  "NOSHOWWINDOW",
+  "OEMRESOURCE",
+  "NOATOM",
+  "NOCLIPBOARD",
+  "NOCOLOR",
+  "NOCTLMGR",
+  "NODRAWTEXT",
+  "NOGDI",
+  "NOKERNEL",
+  "NOUSER",
+  "NOMB",
+  "NOMEMMGR",
+  "NOMETAFILE",
+  "NOMINMAX",
+  "NOMSG",
+  "NOOPENFILE",
+  "NOSCROLL",
+  "NOSERVICE",
+  "NOSOUND",
+  "NOTEXTMETRIC",
+  "NOWH",
+  "NOWINOFFSETS",
+  "NOCOMM",
+  "NOKANJI",
+  "NOHELP",
+  "NOPROFILER",
+  "NODEFERWINDOWPOS",
+  "NOMCX",
+]
+
+# zix_config.h assumes posix_fadvise from _POSIX_VERSION alone, but Apple's
+# SDKs and OpenBSD have none; the link check leaves it off there too.
+[target.'cfg(any(os = "macos", os = "ios", os = "openbsd"))'.profile]
+defines = ["HAVE_POSIX_FADVISE=0"]
+
+# Meson's threads dependency.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# Meson's default_library=static build; ZIX_STATIC keeps attributes.h from
+# declaring the API dllimport on Windows.  Not ported: the shared library.
+# Not reproduced: hidden symbol visibility (meson.build:486), since Cabin
+# drops a dependency's raw compiler flags.  Not reproduced: Meson's implicit
+# _FILE_OFFSET_BITS=64 (everywhere but MSVC and Apple), because filesystem.h
+# picks ZixFileOffset by it and Cabin cannot give consumers a
+# platform-conditional define; on 32-bit Unix and MinGW, where off_t then
+# stays 32 bits, zix's stat-based calls cannot handle files of 2 GiB or
+# more, and a 32-bit consumer that defines it reads ZixFileOffset as 64
+# bits while the library returns 32.  Limitation: unlike the other
+# headers, include/zix/bump_allocator.h has no extern "C" block (upstream
+# main too), so C++ code cannot link zix_bump_allocator().  With MSVC, the
+# ring buffer supports only x86 and x64 (src/ring.c:19).
+[target.zix]
+type = "library"
+sources = [
+  "src/allocator.c",
+  "src/btree.c",
+  "src/bump_allocator.c",
+  "src/digest.c",
+  "src/errno_status.c",
+  "src/filesystem.c",
+  "src/hash.c",
+  "src/path.c",
+  "src/ring.c",
+  "src/status.c",
+  "src/string_view.c",
+  "src/system.c",
+  "src/tree.c",
+]
+include-dirs = ["include"]
+interface-defines = ["ZIX_STATIC"]
+links = "zix"
+
+[target.'cfg(family = "windows")'.sources]
+zix = [
+  "src/win32/environment_win32.c",
+  "src/win32/filesystem_win32.c",
+  "src/win32/system_win32.c",
+  "src/win32/win32_util.c",
+  "src/win32/sem_win32.c",
+  "src/win32/thread_win32.c",
+]
+
+[target.'cfg(family = "unix")'.sources]
+zix = [
+  "src/posix/environment_posix.c",
+  "src/posix/filesystem_posix.c",
+  "src/posix/system_posix.c",
+  "src/posix/thread_posix.c",
+]
+
+[target.'cfg(any(os = "macos", os = "ios"))'.sources]
+zix = ["src/darwin/sem_darwin.c"]
+
+[target.'cfg(all(family = "unix", not(any(os = "macos", os = "ios"))))'.sources]
+zix = ["src/posix/sem_posix.c"]
