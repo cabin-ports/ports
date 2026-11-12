@@ -1,0 +1,83 @@
+[package.upstream]
+# The release-1.4.7 tag archive, the bytes vcpkg's ebml port pins; the
+# release has no assets.
+url = "https://github.com/Matroska-Org/libebml/archive/refs/tags/release-1.4.7.tar.gz"
+checksum = "sha256:c55c5528e7510bc41b574dcac47bc6e3503fb3b9e78ad8c42541bf07d5ed71a9"
+format = "tar.gz"
+strip-prefix = "libebml-release-1.4.7"
+# ebml/EbmlConfig.h:18 includes ebml_export.h, which CMake's
+# generate_export_header writes (CMakeLists.txt:167-172).  The patch adds
+# it as CMake 4.4.5 writes it for the static library, with EBML_DLL_API
+# and EBML_NO_EXPORT empty under EBML_STATIC_DEFINE, and the value it
+# writes for Windows (EBML_DEPRECATED, which nothing uses) left to the
+# preprocessor.
+patches = ["patches/0001-add-the-generated-export-header.patch"]
+
+[package]
+name = "cabin-ports/libebml"
+version = "1.4.7"
+# Every upstream source and header carries "SPDX-License-Identifier:
+# LGPL-2.1-or-later"; LICENSE.LGPL is the license text.
+license = "LGPL-2.1-or-later"
+include = ["LICENSE.LGPL", "ebml", "patches", "src"]
+cxx-standard = "c++14"
+
+[dependencies]
+"cabin-ports/utfcpp" = "^4.2"
+
+# The static library CMake builds by default, and the only one it builds on
+# Windows (CMakeLists.txt:17): src/*.cpp (:80-103).  Consumers include
+# <ebml/...> from the archive root (:155-160).  utfcpp stays private as
+# upstream links it (:165): only EbmlUnicodeString.cpp includes it.
+# Upstream fetches utfcpp v3.2.5 when find_package finds none (:51-63);
+# the package takes cabin-ports/utfcpp, whose checked.h keeps the
+# utf8to16/utf8to32 and utf16to8/utf32to8 that EbmlUnicodeString.cpp
+# calls.  Not ported: src/platform/win32's WinIOCallback, which upstream
+# builds only with ENABLE_WIN32_IO (:26, :105-108, default off); the
+# shared library; DEV_MODE's warning flags; and the CMake and pkg-config
+# files.  Not reproduced: HAVE_WINAPIFAMILY_H, which upstream defines on
+# Windows when <winapifamily.h> exists (:142-148) and which only drops
+# LIBEBML_DEBUG outside the desktop API partition (EbmlConfig.h:57-62);
+# and the hidden visibility preset (:149-154), which a static library
+# keeps only if it is linked into a shared one.
+[target.ebml]
+type = "library"
+sources = [
+  "src/Debug.cpp",
+  "src/EbmlBinary.cpp",
+  "src/EbmlContexts.cpp",
+  "src/EbmlCrc32.cpp",
+  "src/EbmlDate.cpp",
+  "src/EbmlDummy.cpp",
+  "src/EbmlElement.cpp",
+  "src/EbmlFloat.cpp",
+  "src/EbmlHead.cpp",
+  "src/EbmlMaster.cpp",
+  "src/EbmlSInteger.cpp",
+  "src/EbmlStream.cpp",
+  "src/EbmlString.cpp",
+  "src/EbmlSubHead.cpp",
+  "src/EbmlUInteger.cpp",
+  "src/EbmlUnicodeString.cpp",
+  "src/EbmlVersion.cpp",
+  "src/EbmlVoid.cpp",
+  "src/IOCallback.cpp",
+  "src/MemIOCallback.cpp",
+  "src/MemReadIOCallback.cpp",
+  "src/SafeReadIOCallback.cpp",
+  "src/StdIOCallback.cpp",
+]
+include-dirs = ["."]
+# Upstream makes it public for its static build (:174-176).
+defines = ["EBML_STATIC_DEFINE"]
+interface-defines = ["EBML_STATIC_DEFINE"]
+# The headers use C++11; ebml/c/libebml_t.h uses // comments and
+# <inttypes.h>.
+interface-cxx-standard = "c++11"
+interface-c-standard = "c99"
+links = "ebml"
+deps = [{ name = "cabin-ports/utfcpp" }]
+
+# Upstream's if(MSVC) (:161-163), which clang-cl also meets.
+[target.'cfg(any(cxx = "msvc", cxx = "clang-cl"))'.profile]
+defines = ["_CRT_SECURE_NO_WARNINGS"]
