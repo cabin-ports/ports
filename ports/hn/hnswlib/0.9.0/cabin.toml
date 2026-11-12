@@ -1,0 +1,28 @@
+[package.upstream]
+url = "https://github.com/nmslib/hnswlib/archive/refs/tags/v0.9.0.tar.gz"
+checksum = "sha256:65dfb6639cb7d1acbdaeec1429b978fb657a9bf368ebb8353109167394537823"
+format = "tar.gz"
+strip-prefix = "hnswlib-0.9.0"
+
+[package]
+name = "cabin-ports/hnswlib"
+version = "0.9.0"
+# CC0-1.0: hnswlib.h's AVX and AVX-512 checks adapt Mysticial's FeatureDetector.
+license = "Apache-2.0 AND CC0-1.0"
+include = ["LICENSE", "hnswlib"]
+
+# Upstream's hnswlib::hnswlib target and the hnswlib/ directory it installs,
+# so consumers write <hnswlib/hnswlib.h>.  The distance kernels follow the
+# consumer's own target flags, as upstream's target sets none: SSE on x86-64,
+# AVX or AVX-512 (with a runtime CPU check) only in code compiled with them,
+# and scalar code elsewhere, arm64 included.  HNSWLIB_ERR_OVERRIDE and
+# NO_MANUAL_VECTORIZATION are consumer configuration macros.  Not ported: the
+# Python bindings.  Limitation: BruteforceSearch::removePoint reads the map
+# entry it has just erased (bruteforce.h:94-96; upstream issue #626, PR #696),
+# so it can move the wrong element and leave the removed label searchable;
+# rebuild a BruteforceSearch instead.  HierarchicalNSW's markDelete is
+# unaffected.
+[target.hnswlib]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
