@@ -269,8 +269,9 @@ jobs:
           persist-credentials: false
 
       # Nothing `prepare` could have written runs here. No cache. Its
-      # record is only read, from a directory of its own. The tools come
-      # by id: another artifact can take a name, never an id.
+      # record is only read, by its fixed name into a directory of its own:
+      # an id would be `prepare`'s to give. The tools come by id: another
+      # artifact can take a name, never an id.
       - uses: actions/download-artifact@v8.0.2
         with:
           name: prepared
