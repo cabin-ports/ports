@@ -1,0 +1,45 @@
+[package.upstream]
+url = "https://github.com/spotify/annoy/archive/refs/tags/v1.17.3.tar.gz"
+checksum = "sha256:c121d38cacd98f5103b24ca4e94ca097f18179eed3037e9eb93ad70ec1e6356e"
+format = "tar.gz"
+strip-prefix = "annoy-1.17.3"
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+# The three headers upstream's CMake build copies to include/annoy/ and
+# installs from there (CMakeLists.txt:11-13), so consumers write
+# <annoy/annoylib.h>; on Windows annoylib.h includes "mman.h" beside it.
+[[package.upstream.copy]]
+from = "src/annoylib.h"
+to = "include/annoy/annoylib.h"
+
+[[package.upstream.copy]]
+from = "src/kissrandom.h"
+to = "include/annoy/kissrandom.h"
+
+[[package.upstream.copy]]
+from = "src/mman.h"
+to = "include/annoy/mman.h"
+
+[package]
+name = "cabin-ports/annoy"
+version = "1.17.3"
+# MIT: include/annoy/mman.h, from mman-win32.
+license = "Apache-2.0 AND MIT"
+include = ["LICENSE", "THIRD_PARTY_NOTICES", "include", "patches"]
+
+# Header-only, as upstream's Annoy::Annoy target is; the headers keep
+# fallbacks for compilers before C++11.  Consumer configuration macros:
+# ANNOYLIB_MULTITHREADED_BUILD (a threaded build(), which needs C++14),
+# NO_MANUAL_VECTORIZATION and __ERROR_PRINTER_OVERRIDE__.  The AVX and
+# AVX-512 distance kernels are compiled only into code built with those
+# instruction sets.  On Windows annoylib.h includes <windows.h>, setting
+# _WIN32_WINNT to 0x0501 (XP) when it is unset, defines NOMINMAX and off_t
+# (as int64_t) as macros, declares global mmap, munmap and ftruncate with
+# PROT_* and MAP_* macros, and with MSVC turns off stack runtime checks for
+# the rest of the translation unit.  Not ported: the Python, Lua and Go
+# bindings.
+[target.annoy]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++98"
