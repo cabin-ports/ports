@@ -1,0 +1,36 @@
+[package.upstream]
+url = "https://github.com/SlickQuant/slick-queue/archive/refs/tags/v2.3.0.tar.gz"
+checksum = "sha256:0f6fdae2caabc95288e726aa49c8be945e62e0cb75c6bdddba17293b7fcf6db1"
+format = "tar.gz"
+strip-prefix = "slick-queue-2.3.0"
+
+[package]
+name = "cabin-ports/slick-queue"
+version = "2.3.0"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# Upstream's CMake uses an installed slick-shm or fetches its v0.1.6 tag at
+# configure time (CMakeLists.txt:22-38); the package takes the port instead
+# and fetches nothing.
+[dependencies]
+"cabin-ports/slick-shm" = "^0.1.6"
+
+# include/, which upstream installs; <slick/queue.h> is a deprecated shim
+# that warns and includes <slick/queue.hpp>.  Not ported: the tests and the
+# CMake package files.
+[target.slick-queue]
+type = "header-only"
+include-dirs = ["include"]
+# queue.hpp needs C++20 (<concepts>, queue.hpp:141-147), as upstream builds
+# it (CMakeLists.txt:8).
+interface-cxx-standard = "c++20"
+deps = [{ name = "cabin-ports/slick-shm", public = true }]
+
+# Upstream supports Windows, Linux and macOS (README.md:21) and links rt and
+# atomic on every Unix but Apple (CMakeLists.txt:53-55), which README.md:59-60
+# asks of Linux consumers.  slick-shm links pthread on every Unix and rt on
+# Linux and NetBSD; this adds libatomic on Linux only, as oatpp does, since
+# FreeBSD's base system ships none.
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["atomic"]
