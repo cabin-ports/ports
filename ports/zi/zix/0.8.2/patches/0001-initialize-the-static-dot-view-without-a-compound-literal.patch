@@ -1,0 +1,11 @@
+--- a/src/path.c
++++ b/src/path.c
+@@ -505,7 +505,7 @@
+                             const char* const   path,
+                             const char* const   base)
+ {
+-  static const ZixStringView dot = ZIX_STATIC_STRING(".");
++  static const ZixStringView dot = {".", 1U};
+ 
+   // Mismatched roots can't be expressed in relative form
+   const ZixRootSlices path_root         = zix_path_root_slices(path);
