@@ -1,0 +1,41 @@
+[package.upstream]
+url = "https://github.com/BLAKE2/libb2/archive/refs/tags/v0.98.1.tar.gz"
+checksum = "sha256:10053dbc2fa342516b780a6bbf6e7b2a2360b8d49c5ac426936bf3df82526732"
+format = "tar.gz"
+strip-prefix = "libb2-0.98.1"
+# blake2-impl.h includes "config.h", which configure generates; patch 0001
+# adds one under cabin/, outside the public include directory.
+patches = ["patches/0001-add-a-config-h-for-the-reference-build.patch"]
+
+[package]
+name = "cabin-ports/libb2"
+version = "0.98.1"
+# COPYING is CC0 1.0, and every file under src/ carries the CC0 dedication.
+license = "CC0-1.0"
+include = ["COPYING", "cabin/config.h", "patches", "src"]
+
+# libb2.la as src/Makefile.am builds it without USE_FAT and USE_SSE: the
+# reference BLAKE2b and BLAKE2s with the parallel BLAKE2bp and BLAKE2sp, and
+# SUFFIX empty so the functions keep their public names.  That is
+# upstream's build on non-x86 CPUs, and the sources vcpkg's
+# --disable-native build compiles everywhere.  Not reproduced: the default
+# x86 build with SSSE3 or newer, which compiles blake2b.c and blake2s.c with
+# -march=native; the --enable-fat build, which compiles them once per
+# instruction set behind blake2-dispatch.c; and the OpenMP parallelism
+# blake2bp.c and blake2sp.c use when configure finds OpenMP.  Digests are
+# the same; only speed differs.
+[target.b2]
+type = "library"
+sources = ["src/blake2b-ref.c", "src/blake2bp.c", "src/blake2s-ref.c", "src/blake2sp.c"]
+# For <blake2.h>, which upstream installs; the directory also holds the
+# internal headers.
+include-dirs = ["src"]
+defines = ["SUFFIX="]
+c-standard = "c11"
+# blake2.h includes <stdint.h>, which needs C99 / C++11.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "b2"
+
+[profile]
+include-dirs = ["cabin"]
