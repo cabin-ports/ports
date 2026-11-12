@@ -1,0 +1,44 @@
+[package.upstream]
+# Upstream's 0.4.9.2: its three-component tag 0.4.92 names the same commit.
+url = "https://github.com/nanopb/nanopb/archive/refs/tags/0.4.92.tar.gz"
+checksum = "sha256:a99b8b74f44803a4b13a5f0d946463d830b440fe1469b6459b8ce49fb8035f6f"
+format = "tar.gz"
+strip-prefix = "nanopb-0.4.92"
+
+# The runtime only.  Not ported: the generator (generator/), a Python protoc
+# plugin that needs protobuf, which turns .proto files into the .pb.c and
+# .pb.h files a consumer compiles.  Generate them elsewhere with nanopb
+# 0.4.9.2's generator, or write the field lists by hand and bind them with
+# PB_BIND.
+[package]
+name = "cabin-ports/nanopb"
+version = "0.4.92"
+# CC0-1.0: pb_common.c's UTF-8 check adapts Markus Kuhn's utf8_check.c, whose
+# short code licence offers CC0 among its choices.
+license = "Zlib AND CC0-1.0"
+include = [
+    "LICENSE.txt",
+    "pb.h",
+    "pb_common.c",
+    "pb_common.h",
+    "pb_decode.c",
+    "pb_decode.h",
+    "pb_encode.c",
+    "pb_encode.h",
+]
+
+# Upstream's protobuf-nanopb with none of pb.h's compile-time options
+# (PB_ENABLE_MALLOC, PB_FIELD_32BIT, PB_NO_ERRMSG, PB_BUFFER_ONLY,
+# PB_WITHOUT_64BIT, PB_VALIDATE_UTF8, ...).  They change the runtime's
+# structures or behaviour, so code including pb.h must not set them either,
+# and this port offers no way to turn them on: pointer fields, which need
+# PB_ENABLE_MALLOC, fail to decode.
+[target.protobuf-nanopb]
+type = "library"
+sources = ["pb_common.c", "pb_decode.c", "pb_encode.c"]
+include-dirs = ["."]
+c-standard = "c11"
+# pb.h's static assertions use _Static_assert in C and static_assert in C++.
+interface-c-standard = "c11"
+interface-cxx-standard = "c++11"
+links = "protobuf-nanopb"
