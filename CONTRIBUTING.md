@@ -267,3 +267,9 @@ merging it publishes nothing by itself, since only a full `all` publish uploads 
 
 Retiring a specific *version* of a foundation port removes `ports/<prefix>/<name>/<version>/`;
 retiring an entire port removes the whole `ports/<prefix>/<name>/` directory.
+
+A version that the maintainers hold until a redistribution question is settled, and whose license
+therefore cannot be declared, leaves the catalog the same way, together with the versions that
+require it.  [Held ports](docs/held-ports.md) records each one, its open question, and how it
+returns.  Only the maintainers decide such a removal; a pull request that finds a restriction adds
+a `publish-holds.txt` line instead ([Pull requests](#pull-requests)).
