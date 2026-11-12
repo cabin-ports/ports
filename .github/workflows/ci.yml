@@ -74,17 +74,11 @@ jobs:
   # The publisher's tests, then the `--dry-run` preflight: every port
   # the change needs is staged, built, and its consumer test run, on
   # each platform the ports must support (docs/maintaining.md, "CI").
-  check:
+  # One job per platform, never a matrix: `required` judges each by name.
+  check-linux:
     needs: pin
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-26
-          - windows-2025-vs2026
-    steps:
+    runs-on: ubuntu-latest
+    steps: &check
       - uses: actions/checkout@v7.0.1
         with:
           persist-credentials: false
@@ -134,13 +128,33 @@ jobs:
           TEMP: ${{ runner.temp }}
         run: cargo run --locked -- --dry-run --cabin "${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}"
 
-  # The required check: fails unless every job above succeeded, so a
-  # failed, cancelled, or skipped job never reads as green.
+  check-macos:
+    needs: pin
+    runs-on: macos-26
+    steps: *check
+
+  check-windows:
+    needs: pin
+    runs-on: windows-2025-vs2026
+    steps: *check
+
+  # The required check: green only when every job it needs succeeded.
+  # Its steps carry no `if:`; a skipped step would read as green.
   required:
-    needs: [pin, lint, check]
+    needs: [pin, lint, check-linux, check-macos, check-windows]
     if: always()
     runs-on: ubuntu-slim
+    permissions:
+      actions: read # the run's job list
+      contents: read
     steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+          sparse-checkout: scripts/actions/
+          sparse-checkout-cone-mode: false
       - name: Fail unless every job succeeded
-        if: contains(needs.*.result, 'failure') || contains(needs.*.result, 'cancelled') || contains(needs.*.result, 'skipped')
-        run: exit 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          NEEDS: ${{ toJSON(needs) }}
+        run: scripts/actions/require-needs.sh
