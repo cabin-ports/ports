@@ -95,9 +95,11 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   ships only through an `all` dispatch.  While the variable is `true`, a merged port publishes
   on the next run, so a hold lands in its pull request.
 - `ci.yml` runs on `pull_request` and `merge_group`.  Its `required` job is the only required
-  check and must fail unless every job it gates succeeded; its `pin` job keeps the Cabin pin a
-  single commit on `cabinpkg/cabin`'s `main`.  Its dry-run narrows only through `--changed-since`
-  from a verified event base; anything unverified checks every port, never none.
+  check and must fail unless every job it gates succeeded: every gated job is a job of its own,
+  never a matrix leg, and no step of `required` carries an `if:` (docs/maintaining.md, "CI").  Its
+  `pin` job keeps the Cabin pin a single commit on `cabinpkg/cabin`'s `main`.  Its dry-run narrows
+  only through `--changed-since` from a verified event base; anything unverified checks every port,
+  never none.
 - `.github/workflows/actions.lock` is generated: after adding or editing a workflow or `uses:`
   line, run `gh actions-lock --no-narrow` with the extension version `ci.yml` pins and commit the
   result; never edit it by hand.  `uses:` lines name an exact release tag.

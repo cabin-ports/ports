@@ -508,6 +508,133 @@ fn require_ci_needs_a_successful_required_run() {
     }
 }
 
+/// `require-needs.sh`, the `required` job's check.  The CI workflow runs
+/// it on Linux only.
+#[cfg(unix)]
+mod require_needs {
+    use serde_json::json;
+
+    use super::*;
+
+    const NEEDED: [&str; 5] = ["pin", "lint", "check-linux", "check-macos", "check-windows"];
+
+    /// Runs the script with `needs` as the `needs` context and a `gh`
+    /// that answers the run attempt's job list with `reply` and `status`.
+    fn check(needs: &serde_json::Value, reply: &serde_json::Value, status: u8) -> Output {
+        let dir = TempDir::new().unwrap();
+        fake_gh(
+            &dir,
+            "api repos/o/r/actions/runs/7/attempts/2/jobs?per_page=100",
+            &reply.to_string(),
+            status,
+        );
+        run(
+            "require-needs.sh",
+            &[],
+            dir.path(),
+            &dir,
+            &[
+                ("GITHUB_REPOSITORY", "o/r"),
+                ("GITHUB_RUN_ID", "7"),
+                ("GITHUB_RUN_ATTEMPT", "2"),
+                ("NEEDS", &needs.to_string()),
+            ],
+        )
+    }
+
+    /// A run green but for `job`, whose `needs` result is `result` and
+    /// which the job list holds once per entry of `conclusions` (`None`
+    /// for a job without a conclusion yet).  The list also holds the
+    /// unfinished `required` job, as it does when the script runs.
+    fn deviating(job: &str, result: &str, conclusions: &[Option<&str>]) -> Output {
+        let needs: serde_json::Map<_, _> = NEEDED
+            .iter()
+            .map(|&needed| {
+                let result = if needed == job { result } else { "success" };
+                (needed.to_owned(), json!({"result": result, "outputs": {}}))
+            })
+            .collect();
+        let mut jobs = vec![json!({"name": "required", "conclusion": null})];
+        for needed in NEEDED {
+            let listed: &[Option<&str>] = if needed == job {
+                conclusions
+            } else {
+                &[Some("success")]
+            };
+            jobs.extend(
+                listed
+                    .iter()
+                    .map(|conclusion| json!({"name": needed, "conclusion": conclusion})),
+            );
+        }
+        let reply = json!({"total_count": jobs.len(), "jobs": jobs});
+        check(&needs.into(), &reply, 0)
+    }
+
+    /// Every needed job succeeded by both witnesses: the only green.
+    #[test]
+    fn passes_when_every_needed_job_succeeded() {
+        let output = deviating("pin", "success", &[Some("success")]);
+        assert!(output.status.success(), "{}", stderr(&output));
+    }
+
+    /// A needed job that failed, was cancelled, was skipped, or reports
+    /// anything else fails the check, whichever witness says so: a
+    /// `needs` result alone has hidden a leg no runner picked up.
+    #[test]
+    fn fails_unless_both_witnesses_say_success() {
+        for job in NEEDED {
+            let output = deviating(job, "failure", &[Some("failure")]);
+            assert_eq!(output.status.code(), Some(1), "{job}");
+        }
+        let job = "check-macos";
+        for bad in ["failure", "cancelled", "skipped", "", "success success"] {
+            for conclusions in [&[Some(bad)][..], &[Some("success")], &[]] {
+                let output = deviating(job, bad, conclusions);
+                let case = format!("needs {bad:?}, job {conclusions:?}");
+                assert_eq!(output.status.code(), Some(1), "{case}");
+            }
+        }
+        for conclusions in [
+            &[Some("failure")][..],
+            &[Some("cancelled")],
+            &[Some("skipped")],
+            &[Some("timed_out")],
+            &[None],
+            &[],
+            &[Some("success"), Some("success")],
+        ] {
+            let output = deviating(job, "success", conclusions);
+            assert_eq!(output.status.code(), Some(1), "job {conclusions:?}");
+            let error = "::error::not every needed job succeeded";
+            assert!(stdout(&output).contains(error), "{}", stdout(&output));
+        }
+    }
+
+    /// Nothing to judge is no success: an empty `needs`, one that is no
+    /// object, a failed `gh` call, a reply that is no job list, or a list
+    /// cut short by paging, whose other pages may repeat a job's name.
+    #[test]
+    fn fails_without_needs_or_the_whole_job_list() {
+        let pin = json!({"name": "pin", "conclusion": "success"});
+        let listed = json!({"total_count": 1, "jobs": [pin]});
+        let needs = json!({"pin": {"result": "success"}});
+        assert!(check(&needs, &listed, 0).status.success());
+        assert!(!check(&json!({}), &listed, 0).status.success());
+        let indexed = json!({"total_count": 1, "jobs": [{"name": 0, "conclusion": "success"}]});
+        let array = json!([{"result": "success"}]);
+        assert!(!check(&array, &indexed, 0).status.success());
+        assert!(!check(&needs, &listed, 1).status.success());
+        let paged = json!({"total_count": 2, "jobs": [pin]});
+        assert!(!check(&needs, &paged, 0).status.success());
+        assert!(
+            !check(&needs, &json!({"message": "Not Found"}), 0)
+                .status
+                .success()
+        );
+    }
+}
+
 /// `receipts.sh` against a bare `origin.git` reached through a `file://`
 /// URL.  The publish workflow runs it on Linux only.
 #[cfg(unix)]

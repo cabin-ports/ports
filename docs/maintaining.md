@@ -45,14 +45,20 @@ does not yet serve cannot publish.
 ## CI
 
 `ci.yml` runs on pull requests and in the merge queue.  Its `pin` job checks the Cabin pin; its
-`check` job installs the pinned `cabin` and runs the publisher's tests and the dry-run (the
-[checks](../CONTRIBUTING.md#checks)) on Linux, macOS, and Windows; and its `lint` job runs
-`cargo fmt --check`, `cargo clippy --locked --all-targets -- -D warnings`, `shellcheck` and
-`shfmt -d -i 2` over `scripts/actions/`, `actionlint` over the workflows,
+`check-linux`, `check-macos`, and `check-windows` jobs each install the pinned `cabin` and run the
+publisher's tests and the dry-run (the [checks](../CONTRIBUTING.md#checks)) on their platform; and
+its `lint` job runs `cargo fmt --check`, `cargo clippy --locked --all-targets -- -D warnings`,
+`shellcheck` and `shfmt -d -i 2` over `scripts/actions/`, `actionlint` over the workflows,
 `scripts/actions/check-inline-runs.sh`, which flags inline control flow in the workflows' `run:`
-steps (AGENTS.md, "GitHub Actions maintainability"), and `gh actions-lock --verify`.  Its
-`required` job is the only required check and fails unless every job it gates succeeded.  CI's
-dry-run is selective (below).
+steps (AGENTS.md, "GitHub Actions maintainability"), and `gh actions-lock --verify`.  CI's dry-run
+is selective (below).
+
+Its `required` job is the only required check and is green only when every one of those jobs
+succeeded.  `scripts/actions/require-needs.sh` judges each job twice, by its `needs` result and by
+the job's own conclusion in the run's job list, so a failed, cancelled, skipped, or missing job
+fails the check.  The platforms are separate jobs rather than one matrix because a matrix has a
+single `needs` result for all its legs, and that result has not shown a leg that was cancelled
+before any runner picked it up.
 
 Each `lint` step runs locally, from the repository root, exactly as `ci.yml` writes it, given
 `shellcheck` and Go: `go run` fetches the `shfmt` and `actionlint` versions the job pins, and the
