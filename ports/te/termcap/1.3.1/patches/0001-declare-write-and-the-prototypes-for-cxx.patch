@@ -1,0 +1,26 @@
+--- a/termcap.h
++++ b/termcap.h
+@@ -18,7 +18,8 @@
+ #ifndef _TERMCAP_H
+ #define _TERMCAP_H 1
+ 
+-#if __STDC__
++/* Changed for cabin-ports on 2026-11-12: prototypes for C++ too, where MSVC lacks __STDC__.  */
++#if __STDC__ || defined (__cplusplus)
+ 
+ extern int tgetent (char *buffer, const char *termtype);
+ 
+--- a/tparam.c
++++ b/tparam.c
+@@ -38,6 +38,11 @@
+ #define bcopy(s, d, n) memcpy ((d), (s), (n))
+ #endif
+ 
++/* Changed for cabin-ports on 2026-11-12: include <unistd.h> for write.  */
++#ifdef HAVE_UNISTD_H
++#include <unistd.h>
++#endif
++
+ #endif /* not emacs */
+ 
+ #ifndef NULL

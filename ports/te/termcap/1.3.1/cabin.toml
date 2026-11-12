@@ -1,0 +1,67 @@
+[package.upstream]
+url = "https://ftp.gnu.org/gnu/termcap/termcap-1.3.1.tar.gz"
+checksum = "sha256:91a0e22e5387ca4467b5bcb18edf1c51b930262fd466d5fda396dd9d26719100"
+format = "tar.gz"
+strip-prefix = "termcap-1.3.1"
+# Patch 0001 has tparam.c include <unistd.h> for write, whose implicit
+# declaration GCC 14 and Clang reject, as ConanCenter's patch does.  It also
+# has termcap.h declare its prototypes to C++: MSVC leaves __STDC__
+# undefined, and the K&R declarations the header gives without it take no
+# arguments in C++.
+patches = ["patches/0001-declare-write-and-the-prototypes-for-cxx.patch"]
+
+[package]
+name = "cabin-ports/termcap"
+version = "1.3.1"
+# termcap.c, tparam.c and termcap.h offer the GPL 2 "or (at your option) any
+# later version"; COPYING is the GPL 2.
+license = "GPL-2.0-or-later"
+include = ["COPYING", "patches", "termcap.c", "termcap.h", "tparam.c", "version.c"]
+# The sources define their functions K&R style, which C23 removes.
+c-standard = "c11"
+
+# libtermcap, static, from the sources Makefile.in:62-64 lists.  configure
+# writes no config.h: its results reach the compiler as -D flags (DEFS,
+# Makefile.in:32), which the profiles below give.  Consumers include
+# <termcap.h>, which has no extern "C", so C++ consumers wrap it in one;
+# MSVC's C, without __STDC__, gets its declarations without prototypes.
+# Upstream's limitations:
+# - tgetent takes $TERMCAP as the entry itself when it does not start with
+#   "/" and $TERM names the requested type, crashing if TERM is unset
+#   (termcap.c:503), and resolves a tc= in it from /etc/termcap.  Otherwise
+#   it reads the file $TERMCAP names or /etc/termcap (termcap.c:485-522),
+#   which current systems do not ship.  Only a path starting with "/" names
+#   a file, on Windows too, where it is relative to the current drive.
+# - tparam has a K&R definition with four int parameters (tparam.c:94-99)
+#   behind termcap.h's variadic prototype, and Apple's arm64 ABI passes
+#   variadic arguments on the stack, so there tparam misreads its
+#   arguments.  tgoto is not affected.
+# - tputs indexes its 19-entry speed table with ospeed unchecked
+#   (termcap.c:303-336), so ospeed must be a speed code the table covers;
+#   macOS's speed codes are baud rates, and Linux's from B57600 on exceed
+#   it.  The table has 28800 baud at 15, Linux's B38400, so padding at
+#   38400 baud on Linux is computed for 28800.
+# Not ported: termcap.src, the terminal database configure can install
+# (--enable-install-termcap), configure's --with-termcap=FILE, the Info
+# manual, and the Emacs build (emacs, HAVE_CONFIG_H).  Not reproduced:
+# upstream's unoptimized -g build, which keeps version.c's otherwise unused
+# ident string.
+[target.termcap]
+type = "library"
+sources = ["termcap.c", "tparam.c", "version.c"]
+include-dirs = ["."]
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
+links = "termcap"
+
+# configure's AC_STDC_HEADERS and AC_HAVE_HEADERS(string.h unistd.h)
+# (configure.in:20-21).  TERMCAP_FILE keeps termcap.c's default,
+# /etc/termcap, which is configure's too (configure.in:14).
+[profile]
+defines = ["HAVE_STRING_H", "STDC_HEADERS"]
+
+# MSVC has no <unistd.h>, which MinGW has: nothing declares open, read,
+# write, close and lseek there, and MSVC assumes they return int (warning
+# C4013), as in ConanCenter's build.
+[target.'cfg(not(env = "msvc"))'.profile]
+defines = ["HAVE_UNISTD_H"]
