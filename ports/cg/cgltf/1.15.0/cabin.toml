@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/jkuhlmann/cgltf/archive/refs/tags/v1.15.tar.gz"
+checksum = "sha256:84e352092e5cd6aab7f66de62ddb66beb5e6f18d412ca9d12950d7a55bfef25a"
+format = "tar.gz"
+strip-prefix = "cgltf-1.15"
+
+[package]
+name = "cabin-ports/cgltf"
+# Upstream's version is two-part (1.15); Cabin versions are SemVer.
+version = "1.15.0"
+# cgltf.h (LICENSE), cgltf_write.h (its own notice) and the jsmn JSON parser
+# embedded in cgltf.h, whose notice is at cgltf.h:6812-6834, are all MIT.
+license = "MIT"
+include = ["LICENSE", "cgltf.h", "cgltf_write.h"]
+
+# Header-only, as README.md describes: one translation unit defines
+# CGLTF_IMPLEMENTATION before including <cgltf.h>, and the writer's
+# CGLTF_WRITE_IMPLEMENTATION before <cgltf_write.h>, which includes
+# "cgltf.h" itself.  The headers are C99, and C++11 for long long and atoll;
+# upstream's tests build as C99 and C++11 (test/CMakeLists.txt).
+# Not ported: test/ and fuzz/, upstream's test and fuzzing programs.
+[target.cgltf]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
