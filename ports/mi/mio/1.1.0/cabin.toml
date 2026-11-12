@@ -1,0 +1,40 @@
+[package.upstream]
+# mio has no tags or releases.  This is master's head (2023-03-03), the
+# commit vcpkg and conan-center-index package; its CMakeLists.txt declares
+# project(mio VERSION 1.1.0).
+url = "https://github.com/mandreyel/mio/archive/8b6b7d878c89e81614d05edca7936de41ccdd2da.tar.gz"
+checksum = "sha256:86248113bb2f1484f9cd44a260fe09beaa911307073c6f21fa9e765588d54b4b"
+format = "tar.gz"
+strip-prefix = "mio-8b6b7d878c89e81614d05edca7936de41ccdd2da"
+
+[package]
+name = "cabin-ports/mio"
+version = "1.1.0"
+license = "MIT"
+# The headers upstream installs (its *.*pp pattern); single_include/ is a
+# generated amalgamation of the same code.
+include = [
+  "LICENSE",
+  "include/mio/detail/mmap.ipp",
+  "include/mio/detail/string_util.hpp",
+  "include/mio/mmap.hpp",
+  "include/mio/page.hpp",
+  "include/mio/shared_mmap.hpp",
+]
+
+# Upstream's mio::mio target, which on Windows exports WIN32_LEAN_AND_MEAN
+# and NOMINMAX to consumers (README.md, "WINDOWS USERS").  Cabin cannot make
+# interface defines platform-conditional, so they reach consumers everywhere;
+# outside Windows they matter only to code that tests or redefines them.  Not
+# ported: mio_full_winapi, the same headers without the two defines.
+# Limitations: a map() by path that fails after opening the file never
+# closes the handle it opened (detail/mmap.ipp).  basic_mmap leaves
+# is_handle_internal_ uninitialized until a map() succeeds (mmap.hpp:100), so
+# moving or swapping one that never mapped, as a make_mmap factory may do
+# when mapping fails, reads an indeterminate value; value-initialize it
+# (mio::mmap_source m{}) and call map() instead.
+[target.mio]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+interface-defines = ["NOMINMAX", "WIN32_LEAN_AND_MEAN"]
