@@ -325,6 +325,8 @@ fn scrubbed(mut command: Command) -> Command {
         "CLICOLOR_FORCE",
         "PORT_PUBLISH_CHANGED_SINCE",
         "PORT_PUBLISH_RETRY_FAILED",
+        // Ambient in CI, where it would stand in for --run-id.
+        "GITHUB_RUN_ID",
     ] {
         command.env_remove(key);
     }
@@ -389,9 +391,9 @@ fn dry_run_preflights_against_a_temporary_file_registry() {
 }
 
 /// A committed consumer test runs in the dry run, where its failure
-/// fails the preflight, and is only built in the publish run, where
-/// executing it beside the trusted-publishing token would hand that
-/// token to upstream code.
+/// fails the preflight.  The plan only builds it, and the publish run
+/// does not even do that: executing it beside the trusted-publishing
+/// token would hand that token to upstream code.
 #[test]
 fn consumer_tests_run_in_the_dry_run_and_never_in_the_publish_run() {
     require_build_tools();
@@ -406,6 +408,7 @@ fn consumer_tests_run_in_the_dry_run_and_never_in_the_publish_run() {
              if (f) std::fclose(f);\n    return 3;\n}\n",
         )
         .unwrap();
+    commit_ports(dir.path());
     let run = |mode: &str, work: &str, index_url: Option<&str>| {
         let mut command = scrubbed(tool());
         command
@@ -419,6 +422,12 @@ fn consumer_tests_run_in_the_dry_run_and_never_in_the_publish_run() {
             .arg(dir.child(work).path())
             .arg("--cabin")
             .arg(cabin_binary());
+        if mode != "--dry-run" {
+            command
+                .arg("--prepared")
+                .arg(dir.child("prepared.json").path())
+                .args(["--run-id", RUN]);
+        }
         if let Some(url) = index_url {
             command
                 .arg("--index-url")
@@ -429,15 +438,26 @@ fn consumer_tests_run_in_the_dry_run_and_never_in_the_publish_run() {
     };
 
     let registry = FakeRegistry::start();
-    let published = run("--publish", "publish-work", Some(&registry.url));
-    assert!(
-        published.status.success(),
-        "stderr:\n{}",
-        String::from_utf8_lossy(&published.stderr)
-    );
-    assert!(!marker.path().exists(), "the publish run executed a probe");
-    let stdout = String::from_utf8_lossy(&published.stdout);
-    assert!(!stdout.contains(", run "), "{stdout}");
+    for (mode, work, index_url, built) in [
+        ("--plan", "plan-work", None, true),
+        (
+            "--publish",
+            "publish-work",
+            Some(registry.url.as_str()),
+            false,
+        ),
+    ] {
+        let output = run(mode, work, index_url);
+        assert!(
+            output.status.success(),
+            "{mode} stderr:\n{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        assert!(!marker.path().exists(), "{mode} executed a probe");
+        let stdout = String::from_utf8_lossy(&output.stdout);
+        assert!(!stdout.contains(", run "), "{stdout}");
+        assert_eq!(stdout.contains("preflight: built "), built, "{stdout}");
+    }
 
     let dry = run("--dry-run", "dry-work", None);
     let stderr = String::from_utf8_lossy(&dry.stderr);
@@ -622,22 +642,21 @@ fn publish_refuses_a_selection() {
         ("--publish-new", &["--port", "zlib"][..], None),
         ("--publish-new", &[][..], Some("HEAD")),
         ("--plan-new", &["--port", "zlib"][..], None),
+        ("--plan", &["--port", "zlib"][..], None),
     ] {
         let mut command = scrubbed(tool());
-        command
-            .args([
-                mode,
-                "--index-url",
-                "http://127.0.0.1:9/",
-                "--cabin",
-                "cabin",
-            ])
-            .args(args);
+        command.args([mode, "--cabin", "cabin"]).args(args);
+        if mode != "--plan" {
+            command.args(["--index-url", "http://127.0.0.1:9/"]);
+        }
         match mode {
             "--publish-new" => command.args(new),
             "--plan-new" => command.args(&new[..2]),
             _ => &mut command,
         };
+        if !mode.starts_with("--plan") {
+            command.args(["--prepared", "p", "--run-id", RUN]);
+        }
         if let Some(base) = changed_since {
             command.env("PORT_PUBLISH_CHANGED_SINCE", base);
         }
@@ -650,14 +669,21 @@ fn publish_refuses_a_selection() {
 
 /// Each new mode demands its whole contract: a missing receipts log,
 /// output log, or `main` is a usage error, and the previews, which
-/// never upload, take neither `--main` nor an output log.
+/// never upload, take neither `--main` nor an output log.  An upload
+/// of either kind also demands the record of what a plan built, and
+/// the record its run.
 #[test]
 fn the_new_modes_require_their_state() {
     let base = ["--index-url", "http://127.0.0.1:9/", "--cabin", "cabin"];
+    let new = ["--receipts", "r", "--receipts-out", "o", "--main", "HEAD"];
+    let prepared = ["--prepared", "p", "--run-id", RUN];
     for args in [
-        &["--publish-new", "--receipts-out", "o", "--main", "HEAD"][..],
-        &["--publish-new", "--receipts", "r", "--main", "HEAD"],
-        &["--publish-new", "--receipts", "r", "--receipts-out", "o"],
+        &["--publish"][..],
+        &["--publish", "--prepared", "p"],
+        &[&["--publish-new"], &new[..]].concat(),
+        &[&["--publish-new"], &new[2..], &prepared[..]].concat(),
+        &[&["--publish-new"], &new[..2], &new[4..], &prepared[..]].concat(),
+        &[&["--publish-new"], &new[..4], &prepared[..]].concat(),
         &["--plan-new"],
         &["--plan-new", "--receipts", "r", "--main", "HEAD"],
         &["--plan-new", "--receipts", "r", "--receipts-out", "o"],
@@ -935,13 +961,16 @@ impl Drop for FakeRegistry {
 fn publish_uploads_every_package_in_dependency_order() {
     require_build_tools();
     let dir = TempDir::new().unwrap();
-    let (ports, cache) = fake_ports(&dir);
+    let (ports, cache, _) = committed_fake_ports(&dir);
     let work = dir.child("work").to_path_buf();
     let registry = FakeRegistry::start();
     let receipts = dir.child("receipts.jsonl");
 
     let output = scrubbed(tool())
         .arg("--publish")
+        .arg("--prepared")
+        .arg(plan(&dir, &ports, &cache))
+        .args(["--run-id", RUN])
         .arg("--index-url")
         .arg(&registry.url)
         .arg("--receipts-out")
@@ -1001,13 +1030,16 @@ fn publish_uploads_every_package_in_dependency_order() {
     );
 
     // The preflight's own products, asserted here where the three-port
-    // build cost is already paid.
+    // build cost is already paid: by the plan, since the upload stages
+    // without building.
     assert_publication_order(&stdout);
-    assert_preflight_products(&work);
+    assert_preflight_products(dir.child("plan-work").path());
+    assert!(work.join("run/registry/config.json").is_file());
+    assert!(!work.join("run/probes").exists());
 }
 
-/// The registry and probe trees the preflight leaves under
-/// `work/run/`, shared by both modes and asserted once.
+/// The registry and probe trees a building preflight leaves under
+/// `work/run/`, asserted once.
 fn assert_preflight_products(work: &Path) {
     let registry_dir = work.join("run").join("registry");
     assert!(registry_dir.join("config.json").is_file());
@@ -1093,6 +1125,7 @@ fn publish_retries_a_rate_limited_package() {
     require_build_tools();
     let dir = TempDir::new().unwrap();
     let (ports, cache) = zlib_only(&dir);
+    commit_ports(dir.path());
     let work = dir.child("work").to_path_buf();
     let registry = FakeRegistry::start_with(Behavior {
         limited_puts: 1,
@@ -1101,6 +1134,9 @@ fn publish_retries_a_rate_limited_package() {
 
     let output = scrubbed(tool())
         .arg("--publish")
+        .arg("--prepared")
+        .arg(plan(&dir, &ports, &cache))
+        .args(["--run-id", RUN])
         .arg("--index-url")
         .arg(&registry.url)
         .arg("--ports-dir")
@@ -1144,11 +1180,12 @@ fn publish_retries_a_rate_limited_package() {
     );
 }
 
-/// A failing preflight must leave the remote registry untouched:
-/// zlib preflights clean, libpng's sources do not compile, so the
-/// run aborts before any upload - including zlib's.
+/// A port that does not build must leave the remote registry
+/// untouched: zlib builds, libpng's sources do not compile, so the plan
+/// fails without a record, and the upload, which would stage both
+/// cleanly, uploads neither.
 #[test]
-fn a_failed_preflight_makes_no_remote_mutation() {
+fn a_port_that_does_not_build_is_never_uploaded() {
     require_build_tools();
     let dir = TempDir::new().unwrap();
     let ports = dir.child("ports");
@@ -1187,28 +1224,243 @@ fn a_failed_preflight_makes_no_remote_mutation() {
          \"c11\"\ndeps = [\"cabin-ports/zlib\"]\n",
     );
 
+    commit_ports(dir.path());
     let registry = FakeRegistry::start();
+    let prepared = dir.child("prepared.json");
+    let log = dir.child("receipts.jsonl");
+    log.write_str("").unwrap();
+    for mode in ["--plan", "--plan-new", "--publish"] {
+        let mut command = scrubbed(tool());
+        command
+            .arg(mode)
+            .arg("--prepared")
+            .arg(prepared.path())
+            .args(["--run-id", RUN])
+            .arg("--ports-dir")
+            .arg(ports.path())
+            .arg("--cache-dir")
+            .arg(cache.path())
+            .arg("--work-dir")
+            .arg(dir.child("work").path())
+            .arg("--cabin")
+            .arg(cabin_binary());
+        if mode != "--plan" {
+            command
+                .arg("--index-url")
+                .arg(&registry.url)
+                .env("CABIN_REGISTRY_TOKEN", "cabin_testtoken1234");
+        }
+        if mode == "--plan-new" {
+            command.arg("--receipts").arg(log.path());
+        }
+        let output = command.output().unwrap();
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert!(!output.status.success(), "{mode} must fail: {stderr}");
+        // A plan stops at the build, and the upload at the record no
+        // plan left.
+        let stopped_at = if mode == "--publish" {
+            format!("reading {}", prepared.path().display())
+        } else {
+            "preflight build of".to_owned()
+        };
+        assert!(stderr.contains(&stopped_at), "{mode}: {stderr}");
+        assert!(!prepared.path().exists(), "{mode} left a record");
+    }
+    assert!(
+        registry.requests().is_empty(),
+        "no request may reach the registry for a port that was not built: {:?}",
+        registry.requests()
+    );
+}
+
+/// One `--publish` of the committed `ports` under `record` and
+/// `run_id`, driving `cabin`: `(succeeded, stderr)`.
+fn publish_under(
+    dir: &TempDir,
+    (ports, cache): (&Path, &Path),
+    registry: &FakeRegistry,
+    (record, run_id): (&Path, &str),
+    cabin: &Path,
+) -> (bool, String) {
     let output = scrubbed(tool())
         .arg("--publish")
+        .arg("--prepared")
+        .arg(record)
+        .args(["--run-id", run_id])
         .arg("--index-url")
         .arg(&registry.url)
         .arg("--ports-dir")
-        .arg(ports.path())
+        .arg(ports)
         .arg("--cache-dir")
-        .arg(cache.path())
+        .arg(cache)
         .arg("--work-dir")
         .arg(dir.child("work").path())
         .arg("--cabin")
-        .arg(cabin_binary())
+        .arg(cabin)
         .env("CABIN_REGISTRY_TOKEN", "cabin_testtoken1234")
         .output()
         .unwrap();
-    assert!(!output.status.success(), "the preflight failure must abort");
-    assert!(
-        registry.requests().is_empty(),
-        "no request may reach the registry after a failed preflight: {:?}",
-        registry.requests()
+    (
+        output.status.success(),
+        String::from_utf8_lossy(&output.stderr).into_owned(),
+    )
+}
+
+/// An upload goes by the record of its own run's plan of the same
+/// commit: another archive, other metadata, another commit, another
+/// run, a version the plan did not build, or a checkout that no longer
+/// stages what the plan built each stop it before the first request.
+#[test]
+fn an_upload_refuses_what_its_plan_did_not_build() {
+    require_build_tools();
+    let dir = TempDir::new().unwrap();
+    let (ports, cache, head) = committed_fake_ports(&dir);
+    let built = plan(&dir, &ports, &cache);
+    let written = fs::read_to_string(&built).unwrap();
+    let record: serde_json::Value = serde_json::from_str(&written).unwrap();
+    let registry = FakeRegistry::start();
+    let other = format!("sha256:{}", "0".repeat(64));
+    // The last of the record's three versions: every one is checked.
+    let zlib = "cabin-ports/zlib 1.3.1";
+    let refused = |what: &str, record: &Path, run_id: &str, message: &str| {
+        let (ok, stderr) = publish_under(
+            &dir,
+            (&ports, &cache),
+            &registry,
+            (record, run_id),
+            &cabin_binary(),
+        );
+        assert!(!ok, "another {what} uploaded");
+        assert!(stderr.contains(message), "{what}: {stderr}");
+        assert!(stderr.contains("uploaded nothing"), "{what}: {stderr}");
+        assert!(registry.requests().is_empty(), "{:?}", registry.requests());
+    };
+
+    for (what, message) in [
+        ("archive", "cabin-ports/zlib 1.3.1 stages archive"),
+        ("metadata", "cabin-ports/zlib 1.3.1 stages archive"),
+        ("commit", "was built from commit"),
+        ("run", "was built by run"),
+        ("version", "does not list cabin-ports/zlib 1.3.1"),
+    ] {
+        let mut changed = record.clone();
+        match what {
+            "archive" | "metadata" => changed["packages"][zlib][what] = other.as_str().into(),
+            "commit" => changed["commit"] = "0".repeat(40).into(),
+            "version" => {
+                changed["packages"].as_object_mut().unwrap().remove(zlib);
+            }
+            // The record stays; the upload is another run's.
+            _ => {}
+        }
+        let path = dir.child(format!("{what}.json"));
+        path.write_str(&changed.to_string()).unwrap();
+        refused(
+            what,
+            path.path(),
+            if what == "run" { "8" } else { RUN },
+            message,
+        );
+    }
+
+    // The same commit, staging other bytes than the plan built.
+    let patch = ports.join("fa/fastlz/0.5.0/patches/0001-define-answer.patch");
+    let committed = fs::read_to_string(&patch).unwrap();
+    fs::write(
+        &patch,
+        committed.replace("FASTLZ_ANSWER 7", "FASTLZ_ANSWER 8"),
+    )
+    .unwrap();
+    refused(
+        "checkout",
+        &built,
+        RUN,
+        "cabin-ports/fastlz 0.5.0 stages archive",
     );
+    fs::write(&patch, committed).unwrap();
+
+    // The upload of new versions refuses the same way.
+    let log = dir.child("receipts.jsonl");
+    let state = (ports.as_path(), cache.as_path(), head.as_str());
+    let (ok, stdout, stderr) = new_run("--plan-new", &dir, state, &registry, log.path(), &[]);
+    assert!(ok, "stdout:\n{stdout}\nstderr:\n{stderr}");
+    let mut changed: serde_json::Value =
+        serde_json::from_str(&fs::read_to_string(&built).unwrap()).unwrap();
+    changed["packages"][zlib]["archive"] = other.as_str().into();
+    fs::write(&built, changed.to_string()).unwrap();
+    let (ok, _, stderr) = new_only(
+        &cabin_binary(),
+        "--publish-new",
+        &dir,
+        state,
+        &registry,
+        log.path(),
+        &[],
+    );
+    assert!(!ok, "a version the plan did not build uploaded");
+    assert!(stderr.contains("uploaded nothing"), "{stderr}");
+    assert!(registry.requests().is_empty(), "{:?}", registry.requests());
+
+    // The record as the plan wrote it uploads.
+    fs::write(&built, written).unwrap();
+    let (ok, stderr) = publish_under(
+        &dir,
+        (&ports, &cache),
+        &registry,
+        (&built, RUN),
+        &cabin_binary(),
+    );
+    assert!(ok, "{stderr}");
+    assert_eq!(puts(&registry).len(), 3);
+}
+
+/// An upload of either mode starts `cabin` for nothing but the upload
+/// itself: a `cabin` that refuses every other command still publishes,
+/// so no build, and with it no port's build script, runs beside the
+/// token.
+#[cfg(unix)]
+#[test]
+fn an_upload_starts_cabin_only_to_publish() {
+    use std::os::unix::fs::PermissionsExt as _;
+
+    require_build_tools();
+    let dir = TempDir::new().unwrap();
+    let (ports, cache) = zlib_only(&dir);
+    commit_ports(dir.path());
+    let built = plan(&dir, &ports, &cache);
+    let only_publish = dir.child("only-publish");
+    only_publish
+        .write_str(&format!(
+            "#!/bin/sh\nif [ \"$1 $2 $3\" = '-Z remote-registry publish' ]; then exec '{}' \"$@\"; \
+             fi\necho \"refused: cabin $*\" >&2\nexit 97\n",
+            cabin_binary().display()
+        ))
+        .unwrap();
+    fs::set_permissions(only_publish.path(), fs::Permissions::from_mode(0o755)).unwrap();
+
+    let registry = FakeRegistry::start();
+    let (ok, stderr) = publish_under(
+        &dir,
+        (&ports, &cache),
+        &registry,
+        (&built, RUN),
+        only_publish.path(),
+    );
+    assert!(ok, "{stderr}");
+    assert_eq!(puts(&registry).len(), 1);
+
+    let registry = FakeRegistry::start();
+    let (ok, stdout, stderr) = new_run_with(
+        only_publish.path(),
+        "--publish-new",
+        &dir,
+        (&ports, &cache, &head(dir.path())),
+        &registry,
+        dir.child("receipts.jsonl").path(),
+        &[],
+    );
+    assert!(ok, "stdout:\n{stdout}\nstderr:\n{stderr}");
+    assert_eq!(puts(&registry).len(), 1);
 }
 
 /// `<name> <version> <outcome>` per receipts-log line, after checking
@@ -1239,15 +1491,52 @@ fn receipt_lines(log: &Path) -> Vec<String> {
     lines
 }
 
-/// The `fake_ports` catalog committed in a Git repository (the
-/// `--publish-new` freshness check compares commits), returning the
-/// ports dir, the seeded cache, and the commit.
+/// The `fake_ports` catalog committed in a Git repository (an upload
+/// goes by the checked-out commit), returning the ports dir, the seeded
+/// cache, and the commit.
 fn committed_fake_ports(dir: &TempDir) -> (PathBuf, PathBuf, String) {
     let (ports, cache) = fake_ports(dir);
-    git(dir.path(), &["init", "-q"]);
-    git(dir.path(), &["add", "ports"]);
-    git(dir.path(), &["commit", "-q", "-m", "ports"]);
-    (ports, cache, head(dir.path()))
+    (ports, cache, commit_ports(dir.path()))
+}
+
+/// Commit `repo`'s `ports/` in a new Git repository there, returning
+/// the commit.
+fn commit_ports(repo: &Path) -> String {
+    git(repo, &["init", "-q"]);
+    git(repo, &["add", "ports"]);
+    git(repo, &["commit", "-q", "-m", "ports"]);
+    head(repo)
+}
+
+/// The workflow run a test's plan and upload share.
+const RUN: &str = "7";
+
+/// `--plan` the committed `ports`: stage and build every port in
+/// `dir`'s `plan-work`, leaving the record an upload requires.
+fn plan(dir: &TempDir, ports: &Path, cache: &Path) -> PathBuf {
+    let prepared = dir.child("prepared.json").to_path_buf();
+    let output = scrubbed(tool())
+        .arg("--plan")
+        .arg("--prepared")
+        .arg(&prepared)
+        .args(["--run-id", RUN])
+        .arg("--ports-dir")
+        .arg(ports)
+        .arg("--cache-dir")
+        .arg(cache)
+        .arg("--work-dir")
+        .arg(dir.child("plan-work").path())
+        .arg("--cabin")
+        .arg(cabin_binary())
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "stdout:\n{}\nstderr:\n{}",
+        String::from_utf8_lossy(&output.stdout),
+        String::from_utf8_lossy(&output.stderr)
+    );
+    prepared
 }
 
 /// The commit `HEAD` names in `repo`.
@@ -1266,6 +1555,39 @@ fn head(repo: &Path) -> String {
 fn new_run(
     mode: &str,
     dir: &TempDir,
+    state: (&Path, &Path, &str),
+    registry: &FakeRegistry,
+    log: &Path,
+    extra: &[&str],
+) -> (bool, String, String) {
+    new_run_with(&cabin_binary(), mode, dir, state, registry, log, extra)
+}
+
+/// `new_run` whose `--publish-new` starts `cabin` instead of the pinned
+/// binary; the plan before it always builds with the pinned one.
+fn new_run_with(
+    cabin: &Path,
+    mode: &str,
+    dir: &TempDir,
+    state: (&Path, &Path, &str),
+    registry: &FakeRegistry,
+    log: &Path,
+    extra: &[&str],
+) -> (bool, String, String) {
+    // An upload goes by the record of a plan over the same state.
+    if mode == "--publish-new" {
+        let (ok, stdout, stderr) = new_run("--plan-new", dir, state, registry, log, extra);
+        assert!(ok, "stdout:\n{stdout}\nstderr:\n{stderr}");
+    }
+    new_only(cabin, mode, dir, state, registry, log, extra)
+}
+
+/// `new_run_with` without the plan before an upload, which then goes by
+/// whatever record `dir` holds.
+fn new_only(
+    cabin: &Path,
+    mode: &str,
+    dir: &TempDir,
     (ports, cache, head): (&Path, &Path, &str),
     registry: &FakeRegistry,
     log: &Path,
@@ -1275,6 +1597,12 @@ fn new_run(
         fs::write(log, "").unwrap();
     }
     let mut command = scrubbed(tool());
+    if !mode.starts_with("--list-new") {
+        command
+            .arg("--prepared")
+            .arg(dir.child("prepared.json").path())
+            .args(["--run-id", RUN]);
+    }
     command
         .arg(mode)
         .arg("--index-url")
@@ -1288,7 +1616,7 @@ fn new_run(
         .arg("--work-dir")
         .arg(dir.child("work").path())
         .arg("--cabin")
-        .arg(cabin_binary())
+        .arg(cabin)
         .args(extra)
         .env("CABIN_REGISTRY_TOKEN", "cabin_testtoken1234");
     if mode == "--publish-new" {
@@ -1628,10 +1956,7 @@ fn retry_failed_reads_its_variable() {
 fn publish_skips_a_superseded_commit() {
     let dir = TempDir::new().unwrap();
     let (ports, cache) = zlib_only(&dir);
-    git(dir.path(), &["init", "-q"]);
-    git(dir.path(), &["add", "ports"]);
-    git(dir.path(), &["commit", "-q", "-m", "ports"]);
-    let snapshot = head(dir.path());
+    let snapshot = commit_ports(dir.path());
     git(
         dir.path(),
         &["commit", "-q", "--allow-empty", "-m", "main moves"],
@@ -1646,6 +1971,10 @@ fn publish_skips_a_superseded_commit() {
                 "http://127.0.0.1:9/",
                 "--main",
                 main,
+                "--prepared",
+                "no-such-record",
+                "--run-id",
+                RUN,
             ])
             .arg("--ports-dir")
             .arg(&ports)
@@ -1653,7 +1982,8 @@ fn publish_skips_a_superseded_commit() {
             .arg(&cache)
             .arg("--work-dir")
             .arg(dir.child("work").path())
-            // A stub: the preflight fails as soon as it runs `cabin`.
+            // A stub: an upload stages without `cabin`, and this one
+            // stops at its missing record.
             .arg("--cabin")
             .arg(env!("CARGO_BIN_EXE_port-publish"))
             .output()

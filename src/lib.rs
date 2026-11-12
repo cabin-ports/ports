@@ -12,6 +12,10 @@
 //!   `main`'s, when given;
 //! - `--publish-new` uploads only the versions the receipts log records
 //!   no upload of, never as a packaging revision ([`batch`]).
+//!
+//! An upload builds nothing.  `--plan` and `--plan-new` build what
+//! `--publish` and `--publish-new` would upload, and record it for the
+//! upload to check its own staging against ([`prepared`]).
 
 use std::path::PathBuf;
 
@@ -20,6 +24,7 @@ use anyhow::{Context, Result, bail};
 pub mod batch;
 pub mod plan;
 pub mod preflight;
+pub mod prepared;
 pub mod remote;
 pub mod select;
 
@@ -28,6 +33,8 @@ pub mod select;
 pub enum Mode {
     /// Stop after the local preflight of the selected ports.
     DryRun(select::Selection),
+    /// Stage and build every port, as `Publish` would upload them.
+    Plan,
     /// Preflight, then upload every package to the registry whose
     /// sparse index lives at this URL.
     Publish {
@@ -58,6 +65,9 @@ pub struct Options {
     pub cabin: PathBuf,
     /// Receipts log each upload appends to.
     pub receipts_out: Option<PathBuf>,
+    /// What a plan staged and built: a plan writes it, and an upload
+    /// requires it.
+    pub prepared: Option<prepared::PreparedFile>,
 }
 
 /// Run the tool.
@@ -99,6 +109,7 @@ pub fn run(options: &Options) -> Result<()> {
     let total = conversions.len();
     let conversions = match &options.mode {
         Mode::DryRun(selection) => select::select(conversions, selection, &options.ports_dir)?,
+        Mode::Plan => conversions,
         Mode::Publish { main, .. } => {
             if let Some(main) = main {
                 let (head, main) = batch::head_and_main(&options.ports_dir, main)?;
@@ -120,10 +131,25 @@ pub fn run(options: &Options) -> Result<()> {
         cache_dir: &options.cache_dir,
         work_dir: &options.work_dir,
         cabin: &options.cabin,
-        // Probes run upstream code, so they never run beside the
+        // Building a probe can run a port's build script and running
+        // one runs upstream code, so neither happens beside the
         // publish job's OIDC token; the PR dry-run runs them.
-        run_probes: matches!(options.mode, Mode::DryRun(_)),
+        probes: match options.mode {
+            Mode::DryRun(_) => preflight::Probes::Run,
+            Mode::Plan => preflight::Probes::Build,
+            Mode::Publish { .. } | Mode::New(_) => preflight::Probes::Skip,
+        },
     })?;
+    let uploads: Vec<remote::Upload<'_>> = conversions
+        .iter()
+        .zip(report.package_dirs.iter().zip(&report.checksums))
+        .map(|(conversion, (package_dir, checksum))| remote::Upload {
+            package_dir,
+            name: conversion.scoped_name.as_str(),
+            version: conversion.published_version.to_string(),
+            checksum,
+        })
+        .collect();
 
     match &options.mode {
         Mode::DryRun(_) => {
@@ -133,17 +159,12 @@ pub fn run(options: &Options) -> Result<()> {
                 report.registry_dir.display()
             );
         }
+        Mode::Plan => {
+            prepared::write(options, &uploads)?;
+            println!("plan complete: {} packages to upload", uploads.len());
+        }
         Mode::Publish { index_url, .. } => {
-            let uploads: Vec<remote::Upload<'_>> = conversions
-                .iter()
-                .zip(report.package_dirs.iter().zip(&report.checksums))
-                .map(|(conversion, (package_dir, checksum))| remote::Upload {
-                    package_dir,
-                    name: conversion.scoped_name.as_str(),
-                    version: conversion.published_version.to_string(),
-                    checksum,
-                })
-                .collect();
+            prepared::require(options, &uploads)?;
             remote::publish_all(
                 &uploads,
                 index_url,

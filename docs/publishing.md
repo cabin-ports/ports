@@ -19,15 +19,24 @@ same upstream version, which only an `all` dispatch publishes.
 ## Execution boundaries
 
 - **Credential boundary.**  The `build` job installs the pinned `cabin` and builds `port-publish`
-  without any credential.  Only the `publish` job may request the run's OIDC token for a publish,
-  and it runs just those two prebuilt binaries and the workflow scripts under `scripts/actions/`:
-  it builds the probes of the ports it stages but never runs one, because running upstream code
-  next to the token would hand that code the token.
-  Running the consumer tests is the pull-request and merge-queue dry-run's job: no job of this
-  workflow runs port code, the `plan` preview included.  (The `exchange-check` probe below also
-  requests the token, but runs only `curl`.)  The `lock` and `record` jobs alone may push, only to
-  the receipts branch, and run only `scripts/actions/receipts.sh` (`git`, `gh`, and `jq`), checked
-  out at the workflow's own commit.
+  without any credential.  Only the `prepare` job builds ports: it stages what the run would
+  upload and builds the probe of each port it stages, with no OIDC token and no permission to
+  push.  A build is where a port's build script runs once the pinned Cabin has build scripts, so
+  no other job builds.  `prepare` records the commit it staged, the run, and the checksums of each
+  version's archive and metadata document.  Only the `publish` job may request the run's OIDC
+  token for a publish.  It runs just the two prebuilt binaries and the workflow scripts under
+  `scripts/actions/`, builds nothing, and runs no port code: it stages its own commit again and
+  uploads a version only when that record is its own run's, names the same commit, and lists the
+  version with exactly the archive and metadata it has just staged.  Otherwise it uploads nothing
+  and fails.  Nothing `prepare` writes is trusted.  Its record can stop an upload and cannot
+  change a byte of one.  `publish` restores no cache, reads the record from a directory of its
+  own, and takes the two binaries by the id of the artifact `build` uploaded; `record` takes the
+  receipts by the id of the artifact `publish` uploaded.  Another artifact can take a name, never
+  an id.  Running the consumer tests is the pull-request and merge-queue dry-run's job: no job of
+  this workflow runs one.  (The `exchange-check` probe below also requests the token, but runs
+  only `curl`.)  The `lock` and `record` jobs alone may push, only to the receipts branch, and run
+  only `scripts/actions/receipts.sh` (`git`, `gh`, and `jq`), checked out at the workflow's own
+  commit.
 - **Registry readiness.**  The `await-deploy` job runs Cabin's own `cargo workflow-await-deploy`
   guard from the pinned commit and waits until the registry has deployed a Cabin commit that
   contains it, so the client never sends metadata the running registry does not accept.
@@ -79,12 +88,15 @@ bind `new` only.
 
 ### What it builds
 
-Only the candidates and the versions their requirements match stage, and build without running a
-probe.  An uploaded requirement must stage exactly the bytes of its last receipt; otherwise the
-candidates that need it wait for its packaging revision.  A run in which every version has an
-upload receipt, a `failed` line, or a hold, or requires a version with a `failed` line or a hold,
-stops after the `build` job, before taking the lock; a `new` run whose candidates all wait on a
-requirement's packaging revision still takes the lock and stages them to find that out.
+Only the candidates and the versions their requirements match stage.  The `prepare` job builds
+them without running a probe, and the `publish` job stages them again and builds nothing
+([Execution boundaries](#execution-boundaries)); both run under the lock, so they read the same
+log.  An uploaded requirement must stage exactly the
+bytes of its last receipt; otherwise the candidates that need it wait for its packaging revision.
+A run in which every version has an upload receipt, a `failed` line, or a hold, or requires a
+version with a `failed` line or a hold, stops after the `build` job, before taking the lock; a
+`new` run whose candidates all wait on a requirement's packaging revision still takes the lock and
+stages them to find that out.
 
 ### Failures
 
@@ -94,6 +106,10 @@ what requires it, waits for a dispatch with `retry-failed`, which an operator st
 checking the registry's admin listings: a version with a rejected revision gets a hold instead,
 since resubmitting would revive it, and a `409` means the registry has other bytes for it, which
 need a packaging revision.
+
+A port that does not build fails the `prepare` job.  Nothing was uploaded, so the `publish` job is
+skipped and the `record` job releases the lock; every later run fails the same way, uploading
+nothing, until the port is fixed or held.
 
 ### The lock
 
@@ -169,6 +185,7 @@ After a run that kept the lock (its `record` job says why): if only its push fai
 alone.  Otherwise compare the run's `receipts-*` artifacts (kept 30 days) and its log with the admin
 listings, append an `uploaded` line for each upload that landed without one, add a hold for any
 version with a rejected revision, and delete `lock` in the same commit; then dispatch again.
-Rerunning the run's other jobs uploads nothing.  A `plan` dispatch, or
+Rerunning the run's other jobs uploads nothing, and a rerun `publish` job leaves the `record` job
+nothing to record: it takes the receipts of the latest `publish` job only.  A `plan` dispatch, or
 `port-publish --plan-new --index-url https://registry.cabinpkg.com --receipts receipts.jsonl --cabin <cabin>`
 locally, shows what the next run would upload.

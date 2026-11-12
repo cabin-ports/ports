@@ -20,14 +20,20 @@ use clap::{ArgGroup, Parser};
 /// --publish-new uploads only the versions the registry's receipts log
 /// records no upload of, never as a packaging revision, staging only
 /// those and what they require; --plan-new previews it, and --list-new
-/// lists what it would upload.
+/// lists what it would upload.  An upload builds nothing: --plan and
+/// --plan-new build first and record it in --prepared, which the
+/// upload requires.
 #[derive(Parser)]
 #[command(group(ArgGroup::new("mode").required(true)))]
 #[allow(clippy::struct_excessive_bools)] // the mode flags form one required group
 struct Cli {
     #[arg(long, group = "mode")]
     dry_run: bool,
-    #[arg(long, group = "mode", requires = "index_url")]
+    /// Preview --publish: stage and build every port, running no
+    /// consumer test and uploading nothing.
+    #[arg(long, group = "mode")]
+    plan: bool,
+    #[arg(long, group = "mode", requires_all = ["index_url", "prepared"])]
     publish: bool,
     /// Preview --publish-new: stage and build what it would upload,
     /// running no consumer test, uploading nothing, and contacting no
@@ -40,7 +46,7 @@ struct Cli {
     #[arg(
         long,
         group = "mode",
-        requires_all = ["index_url", "receipts", "receipts_out", "main"]
+        requires_all = ["index_url", "receipts", "receipts_out", "main", "prepared"]
     )]
     publish_new: bool,
     /// Write the versions --publish-new would upload before staging,
@@ -62,29 +68,49 @@ struct Cli {
     // `--dry-run --index-url` would pass. The pairing still holds:
     // the URL forbids --dry-run, the required group then forces
     // --publish, and --publish requires the URL back.
-    #[arg(long, conflicts_with = "dry_run")]
+    #[arg(long, conflicts_with_all = ["dry_run", "plan"])]
     index_url: Option<String>,
     /// The registry's receipts log (--list-new, --plan-new,
     /// --publish-new): one JSON receipt per line, for that registry only.
     // `conflicts_with`, not `requires`, for the reason above.
-    #[arg(long, value_name = "FILE", conflicts_with_all = ["dry_run", "publish"])]
+    #[arg(long, value_name = "FILE", conflicts_with_all = ["dry_run", "plan", "publish"])]
     receipts: Option<PathBuf>,
     /// Append each upload's receipt to this file (--publish,
     /// --publish-new).
-    #[arg(long, value_name = "FILE", conflicts_with_all = ["dry_run", "plan_new", "list_new"])]
+    #[arg(long, value_name = "FILE", conflicts_with_all = ["dry_run", "plan", "plan_new", "list_new"])]
     receipts_out: Option<PathBuf>,
+    /// The record of what a plan staged and built.  --plan and
+    /// --plan-new write it.  --publish and --publish-new build nothing
+    /// and upload only when it is this run's, of the checked-out
+    /// commit, and lists every version they upload with the archive
+    /// and metadata they stage.
+    #[arg(
+        long,
+        value_name = "FILE",
+        requires = "run_id",
+        conflicts_with_all = ["dry_run", "list_new"]
+    )]
+    prepared: Option<PathBuf>,
+    /// The workflow run that --prepared belongs to.
+    #[arg(
+        long,
+        value_name = "ID",
+        env = "GITHUB_RUN_ID",
+        value_parser = clap::builder::NonEmptyStringValueParser::new()
+    )]
+    run_id: Option<String>,
     /// main's current commit (--publish, --publish-new): --publish
     /// uploads nothing unless the checked-out commit is main's;
     /// --publish-new defers the candidates whose ports, requirements,
     /// or hold main changed since the checked-out commit, and all of
     /// them when main changed anything else outside the ports
     /// directory but the files --changed-since names.
-    #[arg(long, value_name = "REV", conflicts_with_all = ["dry_run", "plan_new", "list_new"])]
+    #[arg(long, value_name = "REV", conflicts_with_all = ["dry_run", "plan", "plan_new", "list_new"])]
     main: Option<String>,
     /// Also retry versions whose upload failed, which may have landed:
     /// check the registry first (--list-new, --plan-new, --publish-new).
-    /// The variable is `true`, or `false` or empty for false; --dry-run
-    /// and --publish refuse it whatever its value.
+    /// The variable is `true`, or `false` or empty for false; --dry-run,
+    /// --plan, and --publish refuse it whatever its value.
     // Only an exact `true` retries, like the workflow's `== true`
     // tests: a typo must not resubmit an upload that may have landed.
     #[arg(
@@ -94,7 +120,7 @@ struct Cli {
             clap::builder::PossibleValuesParser::new(["", "true", "false"]),
             |value| value == "true",
         ),
-        conflicts_with_all = ["dry_run", "publish"]
+        conflicts_with_all = ["dry_run", "plan", "publish"]
     )]
     retry_failed: bool,
     /// Dry-run only what the change since this Git revision needs:
@@ -110,7 +136,7 @@ struct Cli {
         long,
         value_name = "REV",
         env = "PORT_PUBLISH_CHANGED_SINCE",
-        conflicts_with_all = ["publish", "plan_new", "publish_new", "list_new"]
+        conflicts_with_all = ["plan", "publish", "plan_new", "publish_new", "list_new"]
     )]
     changed_since: Option<String>,
     /// Dry-run only this port (every committed version) and its
@@ -119,7 +145,7 @@ struct Cli {
     #[arg(
         long = "port",
         value_name = "NAME",
-        conflicts_with_all = ["publish", "plan_new", "publish_new", "list_new", "changed_since"]
+        conflicts_with_all = ["plan", "publish", "plan_new", "publish_new", "list_new", "changed_since"]
     )]
     ports: Vec<String>,
     /// Ports directory (default: the repository's ports).
@@ -171,9 +197,10 @@ fn run_with_workdir_notice(options: &Options, scratch: Option<tempfile::TempDir>
 
 fn options(cli: Cli) -> Result<(Options, Option<tempfile::TempDir>)> {
     // Clap enforces the pairings: `--index-url` is present exactly when
-    // an uploading or planning mode is, `--receipts` with the new ones,
+    // an uploading mode or a new one is, `--receipts` with the new ones,
     // and `--main` only with an uploading one.
     let mode = match (cli.index_url, cli.receipts) {
+        _ if cli.plan => Mode::Plan,
         (Some(index_url), Some(receipts)) => Mode::New(cabin_ports::batch::New {
             index_url,
             receipts,
@@ -209,6 +236,11 @@ fn options(cli: Cli) -> Result<(Options, Option<tempfile::TempDir>)> {
         work_dir,
         cabin: cli.cabin,
         receipts_out: cli.receipts_out,
+        // Clap requires --run-id with --prepared.
+        prepared: cli
+            .prepared
+            .zip(cli.run_id)
+            .map(|(path, run)| cabin_ports::prepared::PreparedFile { path, run }),
     };
     Ok((options, scratch))
 }
