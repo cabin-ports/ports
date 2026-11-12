@@ -6,6 +6,18 @@ strip-prefix = "xxHash-0.8.3"
 [package]
 name = "cabin-ports/xxhash"
 version = "0.8.3"
+license = "BSD-2-Clause"
+# Only the BSD-2-Clause library ships: cli/ and most of tests/ are under
+# the GPL (version 2 or later, or 2 only), and .github/ holds a GitHub
+# starter workflow without its MIT notice.
+include = [
+  "LICENSE",
+  "xxh3.h",
+  "xxh_x86dispatch.c",
+  "xxh_x86dispatch.h",
+  "xxhash.c",
+  "xxhash.h",
+]
 
 # xxHash's whole implementation lives in `xxhash.c` (it pulls in
 # `xxhash.h` and `xxh3.h` as headers). The optional
