@@ -1,0 +1,15 @@
+--- a/src/bplist.c
++++ b/src/bplist.c
+@@ -108,10 +108,11 @@
+ 	return temp;
+ }
+ #else
++/* Changed for cabin-ports on 2026-11-11: __typeof__ for typeof, which ISO C modes lack. */
+ #define get_unaligned(ptr)			  \
+   ({                                              \
+     struct __attribute__((packed)) {		  \
+-      typeof(*(ptr)) __v;			  \
++      __typeof__(*(ptr)) __v;			  \
+     } *__p = (void *) (ptr);			  \
+     __p->__v;					  \
+   })

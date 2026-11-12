@@ -1,0 +1,14 @@
+--- a/src/plist.h
++++ b/src/plist.h
+@@ -26,6 +26,11 @@
+ #include <config.h>
+ #endif
+ 
++/* Changed for cabin-ports on 2026-11-11: __BIG_ENDIAN__ from the compiler's byte order without config.h. */
++#if !defined(__BIG_ENDIAN__) && defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
++#define __BIG_ENDIAN__ 1
++#endif
++
+ #include <sys/types.h>
+ #include <sys/stat.h>
+ 
