@@ -5,105 +5,26 @@ url = "https://github.com/qicosmos/iguana/archive/refs/tags/1.2.0.tar.gz"
 checksum = "sha256:29ad1ff853a278df0b1598db992e1507167bd4521b232a55e360928cf751a9af"
 format = "tar.gz"
 strip-prefix = "iguana-1.2.0"
-# The patches add, as new files, the terms of code that the headers take
-# from other projects without carrying them:
-# - 0001, LICENSE.glaze: glaze's LICENSE.txt (MIT with its optional
-#   exception, fmt's; Anyar Inc.) as of 9a901a6 (2022-11-11).
-#   json_util.hpp's skip_* scanners (:39-194) are glaze's util/parse.hpp
-#   of that time and still open with glaze's pointer to its license
-#   (:1-2), as are util.hpp's match and has_zero (:227-254) and
-#   xml_util.hpp's masks and scanners built on them (:183-224, :252-353);
-#   json_reader.hpp's readers and skip_object_value follow glaze's
-#   json/read.hpp; prettify.hpp is glaze's json/prettify.hpp, which it
-#   cites (:3).
-# - 0002, LICENSE.rapidjson: RapidJSON's license.txt (MIT, THL A29
-#   Limited and Milo Yip) as of v1.1.0, unchanged on master through 2024,
-#   for detail/utf.hpp and util.hpp's write_unicode_to_string and
-#   write_string_with_escape (:255-350), which follow and cite reader.h,
-#   encodings.h and writer.h.  Its BSD and JSON License sections cover
-#   parts of RapidJSON that iguana does not take.
-# - 0003, LICENSE.utf8-dfa: Bjoern Hoehrmann's UTF-8 decoder license, the
-#   text cabin-ports/rapidjson ships, for detail/utf.hpp's GetRange and
-#   decode_utf8 (:58-152), RapidJSON's copy of his decoder.
-# - 0004, LICENSE.reflect-cpp: reflect-cpp's LICENSE (MIT, Code17 GmbH)
-#   as of d9387e2 (2024-07), the last revision with the
-#   rfl/internal/bind_fake_object_to_tuple.hpp that
-#   ylt/reflection/member_ptr.hpp names (:8-9) and follows, error text
-#   included, with internal/generate/member_macro.hpp its generated macro
-#   list; member_names.hpp's get_member_name (:21-58) is
-#   rfl/internal/get_field_names.hpp's.
-# - 0005, LICENSE-Boost: the Boost Software License 1.0, from
-#   https://www.boost.org/LICENSE_1_0.txt, under the name that
-#   detail/dragonbox.h and dragonbox_to_chars.h give it (:9-12).
-# - 0006, LICENSE.CC-BY-SA-3.0: the license text, verbatim from
-#   https://creativecommons.org/licenses/by-sa/3.0/legalcode.txt (SHA-256
-#   3f941b3b...f72f), for the Stack Overflow and cppreference code named
-#   under [package].
-# - 0007, LICENSE.protobuf: Protocol Buffers' LICENSE (BSD-3-Clause,
-#   Google Inc.) as of v21.12, for pb_util.hpp's log2_floor_* and
-#   variant_uint*_size (:262-342), protobuf's stubs/port.h Bits and
-#   io/coded_stream.h VarintSize32/64 of that time, comments included.
-# - 0008, LICENSE.rapidxml: RapidXml 1.13's license.txt (the Boost license
-#   or MIT, Marcin Kalicinski), the text cabin-ports/rapidxml ships, for
-#   xml_util.hpp's parse_escape_xml (:374-461), RapidXml's entity
-#   translation (rapidxml.hpp's skip_and_expand_character_refs) with its
-#   digit table.  The archive's rapidxml/ copy, which the package leaves
-#   out, carries no license file; its rapidxml.hpp gives the notice
-#   "Copyright (C) 2006, 2009 Marcin Kalicinski" (:4).
-# - 0009, LICENSE.msp430-libc: Peter A. Bigot's BSD-3-Clause notice,
-#   verbatim from the header comment of msp430-libc's src/stdlib/xtoa.inc
-#   at f4fa0ee (2012-07-03; :1-29, without the comment markers), for
-#   detail/itoa.hpp's xtoa (:274-314), adapted from that file's function
-#   with two of its comments verbatim, which writes 64-bit integers
-#   (detail/charconv.h:64-69).
-patches = [
-  "patches/0001-add-mit-license-for-glaze-code.patch",
-  "patches/0002-add-mit-license-for-rapidjson-code.patch",
-  "patches/0003-add-mit-license-for-utf-8-decoder-code.patch",
-  "patches/0004-add-mit-license-for-reflect-cpp-code.patch",
-  "patches/0005-add-boost-software-license-for-dragonbox-code.patch",
-  "patches/0006-add-cc-by-sa-3.0-license-for-swappable-code.patch",
-  "patches/0007-add-bsd-3-clause-license-for-protobuf-code.patch",
-  "patches/0008-add-boost-or-mit-license-for-rapidxml-code.patch",
-  "patches/0009-add-bsd-3-clause-license-for-xtoa-code.patch",
-]
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
 
-# iguana's LICENSE is Apache-2.0, as is ylt/util/expected.hpp's Alibaba
-# notice (:1-15) over tl::expected, whose CC0 dedication it keeps
-# (:16-28).  The other vendored code carries its terms inline:
-# detail/fast_float.h (fast_float 3.4.0) Apache-2.0 or MIT,
-# detail/itoa.hpp MIT (but for xtoa, under 0009), and detail/dragonbox.h
-# and dragonbox_to_chars.h Apache-2.0 with LLVM exceptions or the Boost
-# license.  The code the patches above name is under the terms each adds.
-# Distributed under CC BY-SA 3.0 (LICENSE.CC-BY-SA-3.0), both with
-# comments included:
-# - tl::expected's swap_adl_tests, is_swappable and is_nothrow_swappable
-#   (ylt/util/expected.hpp:331-397), copied from the answer to "What is a
-#   proper way to implement is_swappable to test for the Swappable
-#   concept?", https://stackoverflow.com/a/26852703 (2014), by orlp
-#   (https://stackoverflow.com/users/565635), CC BY-SA 3.0.
-# - ylt/reflection/template_switch.hpp's unreachable (:4-13), the possible
-#   implementation on "std::unreachable",
-#   https://en.cppreference.com/w/cpp/utility/unreachable, by
-#   cppreference.com contributors, CC BY-SA 3.0 (and the GNU FDL).
+# Apache-2.0: iguana's LICENSE.
+# MIT: detail/itoa.hpp, and code from RapidJSON, Bjoern Hoehrmann's UTF-8
+#   decoder, reflect-cpp and RapidXml (its MIT alternative).
+# MIT WITH fmt-exception: code from glaze.
+# Apache-2.0 WITH LLVM-exception OR BSL-1.0: detail/dragonbox.h and
+#   dragonbox_to_chars.h, used under the Apache alternative, whose base
+#   text is LICENSE.
+# BSD-3-Clause: code from Protocol Buffers and msp430-libc.
+# CC0-1.0: tl::expected in ylt/util/expected.hpp.
+# CC-BY-SA-3.0: a Stack Overflow answer (expected.hpp) and cppreference's
+#   std::unreachable (ylt/reflection/template_switch.hpp).
+# detail/fast_float.h is Apache-2.0 or MIT, both already terms.
 [package]
 name = "cabin-ports/iguana"
 version = "1.2.0"
-license = "Apache-2.0 AND CC0-1.0 AND (Apache-2.0 OR MIT) AND MIT AND MIT WITH fmt-exception AND (Apache-2.0 WITH LLVM-exception OR BSL-1.0) AND BSD-3-Clause AND (BSL-1.0 OR MIT) AND CC-BY-SA-3.0"
-include = [
-  "LICENSE",
-  "LICENSE-Boost",
-  "LICENSE.CC-BY-SA-3.0",
-  "LICENSE.glaze",
-  "LICENSE.msp430-libc",
-  "LICENSE.protobuf",
-  "LICENSE.rapidjson",
-  "LICENSE.rapidxml",
-  "LICENSE.reflect-cpp",
-  "LICENSE.utf8-dfa",
-  "iguana",
-  "patches",
-]
+license = "Apache-2.0 AND MIT AND MIT WITH fmt-exception AND (Apache-2.0 WITH LLVM-exception OR BSL-1.0) AND BSD-3-Clause AND CC0-1.0 AND CC-BY-SA-3.0"
+include = ["LICENSE", "THIRD_PARTY_NOTICES", "iguana", "patches"]
 
 # The archive also vendors an older frozen (frozen/, reformatted, without
 # 1.2.0's bits/mpl.h) that the headers reach as "frozen/*.h" through the
