@@ -85,3 +85,39 @@ order listed, which is an order of investigation, not of risk.
 - **Question.**  The provenance of both blocks and the permission to redistribute them.  The
   version returns on sufficient evidence of lawful redistribution or of independent
   implementation, or on another legitimate resolution.
+
+## Moved from `publish-holds.txt` on 2026-11-12
+
+The versions below declared a `license` and were held by a `publish-holds.txt` line.  A hold binds
+only the `new` mode, so an `all` dispatch could still have uploaded them; they left the catalog so
+that no mode can.  No version in the catalog required either.  A version that returns records the
+grant or the ruling in its restored `cabin.toml` and drops what that file says about the hold.
+
+### async-simple 1.4.0
+
+- **Code.**  `async_simple/coro/PromiseAllocator.h:40-51` and `77-359` copy the allocator support
+  of the reference implementation of P2502R2 (Casey Carter, Lewis Baker, and Corentin Jabot,
+  <https://godbolt.org/z/5hcaPcfvP>): with comments dropped and the case and underscores of
+  identifiers ignored, 64% of the file's 10-token sequences occur in it, and two of its
+  identifiers and eight of its nine comments survive verbatim.  `coro/Generator.h:93-112` and
+  `327-619` follow its generator, promise base, nesting state, awaiters, and iterator.
+  `Generator.h:131-323` and `PromiseAllocator.h:60-65` reproduce P2502R2's prose and examples,
+  and `PromiseAllocator.h:67-73` the reference's allocator example.  Neither the reference
+  implementation nor the paper grants any rights.  Microsoft's later version under Apache-2.0
+  WITH LLVM-exception (`stl/inc/generator` at CaseyCarter/STL@ad0d033) covers only part of the
+  code (52% by the same measure) and none of the prose.  The material cannot be left out: every
+  `Lazy` promise derives from `PromiseAllocator<void, true>` (`coro/Lazy.h:93`).
+- **Question.**  Whether the authors of the reference implementation grant the right to
+  redistribute the code and the prose.  The version returns when such a grant is found or the
+  maintainers rule on it.
+
+### json-schema-validator 2.4.1
+
+- **Code.**  `src/string-format-check.cpp:209-288` quotes all of RFC 3986 Appendix A's ABNF (60
+  non-blank lines) in comments.  RFC 3986 (2005) is subject to BCP 78 (RFC 3667, then RFC 3978),
+  whose section 3.3 grants rights only to the ISOC and the IETF.  The IETF Trust Legal Provisions
+  license only documents published after they took effect (section 2.b-c); other rights come, in
+  most cases, only from the authors (section 2.d).  The removed port shipped RFC 3986's Full
+  Copyright Statement in `NOTICE.RFC`.
+- **Question.**  Whether the quoted grammar may be redistributed, or is not protected expression.
+  The version returns when a grant is found or the maintainers rule the grammar unprotected.

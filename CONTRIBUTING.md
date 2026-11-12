@@ -252,10 +252,11 @@ and [CI](docs/maintaining.md#ci) what pull-request CI runs.
   vulnerabilities short of a concrete critical security risk, quality concerns, and open
   questions are not holds: investigate, decide, and fix packaging gaps as above.  Add a
   `publish-holds.txt` line, in the same pull request, only for a blocker packaging cannot
-  resolve: a legal restriction on redistribution, a concrete critical security risk, or a failure
-  to produce a valid package.  The line states the evidence, the remediation attempted, and the
-  exact blocking condition.  The operator's hold for a version with a rejected revision
-  ([Failures](docs/publishing.md#failures)) is separate.
+  resolve: a concrete critical security risk or a failure to produce a valid package.  The line
+  states the evidence, the remediation attempted, and the exact blocking condition.  A legal
+  restriction on redistribution takes no such line, which binds only the `new` mode: the version
+  stays out of the catalog ([Published versions](#published-versions)).  The operator's hold for
+  a version with a rejected revision ([Failures](docs/publishing.md#failures)) is separate.
 
 ## Published versions
 
@@ -268,8 +269,7 @@ merging it publishes nothing by itself, since only a full `all` publish uploads 
 Retiring a specific *version* of a foundation port removes `ports/<prefix>/<name>/<version>/`;
 retiring an entire port removes the whole `ports/<prefix>/<name>/` directory.
 
-A version that the maintainers hold until a redistribution question is settled, and whose license
-therefore cannot be declared, leaves the catalog the same way, together with the versions that
-require it.  [Held ports](docs/held-ports.md) records each one, its open question, and how it
-returns.  Only the maintainers decide such a removal; a pull request that finds a restriction adds
-a `publish-holds.txt` line instead ([Pull requests](#pull-requests)).
+A version that the maintainers hold until a redistribution question is settled leaves the catalog
+the same way, together with the versions that require it.  [Held ports](docs/held-ports.md)
+records each one, its open question, and how it returns.  Only the maintainers decide such a
+removal; a pull request that finds a restriction states the evidence and waits for their decision.
