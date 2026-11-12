@@ -1,0 +1,31 @@
+[package.upstream]
+# picojson's latest release, 1.3.0 (2015), predates the depth limit for
+# CVE-2018-11793 (PR #135, 2020; it bounds arrays only, see below).  This
+# is master's head 111c9be (2021-01-17), conan-center-index's newest pin;
+# Changes declares no version after 1.3.0, so the version is the commit
+# date.
+url = "https://github.com/kazuho/picojson/archive/111c9be5188f7350c2eac9ddaedd8cca3d7bf394.tar.gz"
+checksum = "sha256:671f89832a17e9e71398f80c0a326afa2ebe81f4c26d5a9992e1fcd0888ae151"
+format = "tar.gz"
+strip-prefix = "picojson-111c9be5188f7350c2eac9ddaedd8cca3d7bf394"
+
+[package]
+name = "cabin-ports/picojson"
+version = "2021.1.17"
+license = "BSD-2-Clause"
+include = ["LICENSE", "picojson.h"]
+
+# The header upstream's `make install` puts in the include directory, so
+# consumers write <picojson.h>.  It keeps fallbacks for compilers before
+# C++11.  PICOJSON_USE_INT64 (README.mkdn) and PICOJSON_USE_LOCALE
+# (picojson.h:89) are consumer configuration macros.  Limitation: the
+# parse depth limit (DEFAULT_MAX_DEPTHS, 100) does not bound objects:
+# default_parse_context's parse_object_start (picojson.h:1013) never
+# decrements it, and null_parse_context's parse_object_item (:1085) adds
+# one back for every member, which there also raises the array limit.
+# Deeply nested input can still exhaust the stack; bound the nesting of
+# untrusted input before parsing it.
+[target.picojson]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++98"
