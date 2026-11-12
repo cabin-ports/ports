@@ -1,0 +1,53 @@
+[package.upstream]
+url = "https://github.com/strasdat/Sophus/archive/refs/tags/1.24.6.tar.gz"
+checksum = "sha256:3f3098bdac2c74d42a921dbfb0e5e4b23601739e35a1c1236c2807c399da960c"
+format = "tar.gz"
+strip-prefix = "Sophus-1.24.6"
+
+[package]
+name = "cabin-ports/sophus"
+version = "1.24.6"
+license = "MIT"
+# The headers upstream installs; sophus/test_macros.hpp, which it does not,
+# is left out with the tests, examples, sympy generators and Python bindings
+# (the only users of fmt).  ceres_manifold.hpp ships, as upstream installs
+# it, but includes <ceres/manifold.h>, and Ceres is not a port.
+include = [
+  "LICENSE.txt",
+  "sophus/average.hpp",
+  "sophus/cartesian.hpp",
+  "sophus/ceres_manifold.hpp",
+  "sophus/ceres_typetraits.hpp",
+  "sophus/common.hpp",
+  "sophus/geometry.hpp",
+  "sophus/interpolate.hpp",
+  "sophus/interpolate_details.hpp",
+  "sophus/num_diff.hpp",
+  "sophus/rotation_matrix.hpp",
+  "sophus/rxso2.hpp",
+  "sophus/rxso3.hpp",
+  "sophus/se2.hpp",
+  "sophus/se3.hpp",
+  "sophus/sim2.hpp",
+  "sophus/sim3.hpp",
+  "sophus/sim_details.hpp",
+  "sophus/so2.hpp",
+  "sophus/so3.hpp",
+  "sophus/spline.hpp",
+  "sophus/types.hpp",
+]
+
+# Upstream asks for Eigen 3.4 (find_package(Eigen3 3.4.0)); like vcpkg,
+# which relaxes that check, this port builds on Eigen 5.
+[dependencies]
+"cabin-ports/eigen3" = "^5.0.1"
+
+# Upstream's INTERFACE target links Eigen.  Its MSVC-only export of
+# _USE_MATH_DEFINES is not reproduced, since no Sophus header uses the M_*
+# constants: a consumer that wants M_PI defines it itself.  C++17 is the
+# README's floor (so3.hpp and average.hpp use std::optional).
+[target.sophus]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++17"
+deps = [{ name = "cabin-ports/eigen3", public = true }]
