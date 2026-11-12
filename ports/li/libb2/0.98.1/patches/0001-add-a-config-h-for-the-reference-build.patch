@@ -1,0 +1,12 @@
+--- /dev/null
++++ b/cabin/config.h
+@@ -0,0 +1,9 @@
++/* Stands in for the src/config.h configure generates.  blake2-impl.h reads
++   NATIVE_LITTLE_ENDIAN, which configure's AC_C_BIGENDIAN defines on
++   little-endian targets, and the HAVE_* results of its explicit_bzero,
++   explicit_memset and memset_s checks; without those, secure_zero_memory
++   clears with memset behind a compiler barrier (SecureZeroMemory on
++   Windows). */
++#if (defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__) || defined(_WIN32)
++#define NATIVE_LITTLE_ENDIAN 1
++#endif
