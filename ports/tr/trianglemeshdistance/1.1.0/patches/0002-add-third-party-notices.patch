@@ -1,0 +1,20 @@
+--- /dev/null
++++ b/THIRD_PARTY_NOTICES
+@@ -0,0 +1,17 @@
++Third-party notices for cabin-ports/trianglemeshdistance
++
++TriangleMeshDistance's own license is in LICENSE.  The function named below
++is credited to a book whose required credit line the header does not carry.
++
++========================================================================
++Real-Time Collision Detection by Christer Ericson
++https://realtimecollisiondetection.net/books/rtcd/
++TriangleMeshDistance/include/tmd/TriangleMeshDistance.h:564-645,
++tmd::point_triangle_sq_unsigned(), with upstream's credit "This function is
++a modified version of the one found in the Real-Time Collision Detection
++book by Ericson."
++
++The book's software license asks for the following credit, and upstream
++modified the function:
++
++from Real-Time Collision Detection by Christer Ericson, published by Morgan Kaufmann Publishers, © 2005 Elsevier Inc
