@@ -1,0 +1,42 @@
+[package.upstream]
+url = "https://github.com/mackron/miniaudio/archive/refs/tags/0.11.26.tar.gz"
+checksum = "sha256:838ba55a21c9142adf7b76bdc4351e5cd8b7ae128f46b25ec25f94ae9969c600"
+format = "tar.gz"
+strip-prefix = "miniaudio-0.11.26"
+
+[package]
+name = "cabin-ports/miniaudio"
+version = "0.11.26"
+license = "Unlicense OR MIT-0"
+include = ["LICENSE", "miniaudio.c", "miniaudio.h"]
+
+# Upstream's default build of miniaudio.c: every backend, loading the audio
+# libraries, frameworks and DLLs at run time (so for Apple notarization macOS
+# apps take the entitlements route miniaudio.h documents, not
+# MA_NO_RUNTIME_LINKING).  The MA_* options configure miniaudio.c when it is
+# built, so consumers should not define them.  Not packaged: extras/, whose
+# extra nodes and libvorbis and libopus decoders upstream builds as separate
+# libraries.  iOS and tvOS are not supported: upstream compiles miniaudio.c as
+# Objective-C there.
+[target.miniaudio]
+type = "library"
+sources = ["miniaudio.c"]
+include-dirs = ["."]
+# Upstream's CI builds strict C89; C11 is the oldest standard Cabin can lower
+# for MSVC.
+c-standard = "c11"
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
+links = "miniaudio"
+
+# CMakeLists.txt links pthread, m and, where it finds one, dl on Unix, plus
+# atomic on 32-bit ARM; this port links dl and atomic on Linux only, since
+# OpenBSD and NetBSD have no libdl and FreeBSD's base system no libatomic.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread", "m"]
+
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["dl"]
+
+[target.'cfg(all(os = "linux", arch = "arm"))'.profile]
+link-libs = ["atomic"]
