@@ -1,0 +1,45 @@
+[package.upstream]
+# The release asset; its files are byte-identical to the v0.1.1 tag archive's.
+url = "https://github.com/kulp/naive-tsearch/releases/download/v0.1.1/naive-tsearch-0.1.1.tar.gz"
+checksum = "sha256:03cf76fefb6412f865c837009df2f08b6a7b0e7432d9c41aa85ce139386d31ef"
+format = "tar.gz"
+strip-prefix = "naive-tsearch-0.1.1"
+
+[package]
+name = "cabin-ports/naive-tsearch"
+version = "0.1.1"
+license = "MIT"
+include = [
+  "LICENSE",
+  "search.h",
+  "tsearch.c",
+  "tsearch.c.inc",
+  "tsearch.h",
+  "tsearch.h.inc",
+  "tsearch_hdronly.h",
+]
+# Upstream builds C99 (CMakeLists.txt); C11 is the oldest standard Cabin can
+# request from MSVC.  The headers' // comments and empty macro arguments need
+# C99 or C++11.
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# Upstream's static library; consumers include <search.h> or tsearch.h.  For
+# upstream's header-only form (its naive-tsearch-hdronly target) they include
+# tsearch_hdronly.h, or define NAIVE_TSEARCH_HDRONLY before <search.h>.
+# Not ported: the Boost.Test tests and the CMake, Conan and pkg-config files.
+# Limitations:
+# - Consumers' <search.h> is this package's, which declares only tsearch,
+#   tfind, tdelete, twalk and tdestroy, not the C library's hsearch, lsearch
+#   or insque, as with upstream's CMake targets.
+# - In a program that links it these replace the C library's functions.  The
+#   tree is never rebalanced and the functions recurse once per level, so a
+#   deep tree, such as one built from sorted keys, can exhaust the stack.
+# - tdelete returns the node it has just freed instead of its parent, so do
+#   not use its result after a deletion.
+[target.naive-tsearch]
+type = "library"
+sources = ["tsearch.c"]
+include-dirs = ["."]
+links = "naive-tsearch"
