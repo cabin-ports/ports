@@ -1,0 +1,24 @@
+[package.upstream]
+# Upstream has no tags or releases and csv.h declares no version.  This is
+# master's head, committed 2025-02-02, which gives the version.
+url = "https://github.com/ben-strasser/fast-cpp-csv-parser/archive/574a9fe4d323ba63416877a4a5fe59088d37aa34.tar.gz"
+checksum = "sha256:b43696c26ff9fe02629109daa9059dd208fdff1002fa2b2e5860a31570c35ca1"
+format = "tar.gz"
+strip-prefix = "fast-cpp-csv-parser-574a9fe4d323ba63416877a4a5fe59088d37aa34"
+
+[package]
+name = "cabin-ports/fast-cpp-csv-parser"
+version = "2025.2.2"
+license = "BSD-3-Clause"
+include = ["LICENSE", "csv.h"]
+
+# Consumers write <csv.h>, as README.md documents.  C++11 is README.md's
+# stated floor.
+[target.fast-cpp-csv-parser]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
+
+# README.md asks for -lpthread.  Folded into libc since glibc 2.34.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
