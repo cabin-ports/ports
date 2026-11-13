@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/nonstd-lite/byte-lite/archive/refs/tags/v0.3.0.tar.gz"
+checksum = "sha256:1a19e237b12bb098297232b0a74ec08c18ac07ac5ac6e659c1d5d8a4ed0e4813"
+format = "tar.gz"
+strip-prefix = "byte-lite-0.3.0"
+
+[package]
+name = "cabin-ports/byte-lite"
+version = "0.3.0"
+license = "BSL-1.0"
+include = ["LICENSE.txt", "include"]
+
+# Header-only, as upstream's CMake interface target nonstd::byte-lite
+# (CMakeLists.txt:66-76): include/ is the include root, so consumers write
+# `#include <nonstd/byte.hpp>`.  The header supports C++98 and later and
+# takes the standard from _MSVC_LANG on cl.exe (byte.hpp:37-43).  From C++17
+# on, nonstd::byte is std::byte unless a consumer defines
+# byte_CONFIG_SELECT_BYTE=byte_BYTE_NONSTD (:30-32, 54-60); every
+# byte_CONFIG_* option keeps upstream's default.  Only byte lite's own byte
+# has to_uchar(int) (:304-307) and a to_integer(b) that needs no type
+# argument (:260-297); the std::byte path (:66-93) has neither, so code
+# using them does not compile from C++17 on by default.
+[target.byte-lite]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++98"
