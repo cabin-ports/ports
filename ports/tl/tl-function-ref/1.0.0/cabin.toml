@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/TartanLlama/function_ref/archive/refs/tags/v1.0.0.tar.gz"
+checksum = "sha256:6e374c40c40d3978cfcdd4ef9ed1417627898f37ffb306970f86e339644ed3ca"
+format = "tar.gz"
+strip-prefix = "function_ref-1.0.0"
+
+[package]
+name = "cabin-ports/tl-function-ref"
+version = "1.0.0"
+license = "CC0-1.0"
+include = ["COPYING", "include"]
+
+# TartanLlama's function_ref, header-only, as upstream's CMake target
+# function-ref; consumers write `#include <tl/function_ref.hpp>`.  It needs
+# C++14: at C++11 the header does not compile with GCC or Clang.  The C++17
+# deduction guide keys on __cplusplus, so without /Zc:__cplusplus MSVC has no
+# class template argument deduction from a function pointer.
+# Limitation: assigning from a non-const or temporary function_ref makes the
+# target refer to that function_ref object instead of its callable, so it
+# dangles once that object is gone, as with std::swap or erasing from a
+# vector; use copy construction, assignment from a const function_ref, or
+# tl::swap.
+# Not ported: upstream's tests and docs, and its CMake packaging files.
+[target.tl-function-ref]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
