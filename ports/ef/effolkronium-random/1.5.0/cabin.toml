@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/effolkronium/random/archive/refs/tags/v1.5.0.tar.gz"
+checksum = "sha256:c05a042f8daf54913e3a836e10a213bbbeaf09a89630649bd0011fe65eff50d9"
+format = "tar.gz"
+strip-prefix = "random-1.5.0"
+
+# Named after the include directory and namespace, as vcpkg and ConanCenter do;
+# the repository name alone, random, is too generic.
+[package]
+name = "cabin-ports/effolkronium-random"
+version = "1.5.0"
+license = "MIT"
+include = ["LICENSE.MIT", "include"]
+
+# get(first, last) walks the range twice, so it needs forward iterators,
+# although README.md allows input iterators.
+[target.effolkronium-random]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
