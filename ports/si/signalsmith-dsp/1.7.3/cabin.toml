@@ -1,0 +1,40 @@
+[package.upstream]
+url = "https://github.com/Signalsmith-Audio/dsp/archive/refs/tags/v1.7.3.tar.gz"
+checksum = "sha256:3dcb3d2de2b3fb5bc9ed55ecef4011902c1b9133e48a91ddb8613aa0eb23b14f"
+format = "tar.gz"
+strip-prefix = "dsp-1.7.3"
+# mix.h uses <cmath> functions without including it; libstdc++ rejects that.
+patches = ["patches/0001-include-cmath-in-mix-h.patch"]
+
+[package]
+name = "cabin-ports/signalsmith-dsp"
+version = "1.7.3"
+license = "MIT"
+# The forwarders in include/signalsmith-dsp/ include the root headers by
+# relative path.
+include = [
+  "LICENSE.txt",
+  "common.h",
+  "curves.h",
+  "delay.h",
+  "envelopes.h",
+  "fft.h",
+  "filters.h",
+  "include",
+  "mix.h",
+  "patches",
+  "perf.h",
+  "rates.h",
+  "spectral.h",
+  "windows.h",
+]
+
+# Header-only; C++11 is upstream's stated and measured floor.  Consumers write
+# <signalsmith-dsp/fft.h>, as with upstream's CMake target.  The v1.7.3
+# headers still report version 1.7.0, so SIGNALSMITH_DSP_VERSION_CHECK accepts
+# at most (1, 7, 0).  On AArch64, StopDenormals' destructor writes back the
+# flush-to-zero FPCR rather than the previous one, so flushing stays on.
+[target.signalsmith-dsp]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
