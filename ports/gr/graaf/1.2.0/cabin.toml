@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/bobluppes/graaf/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:1131d2a99e070d7604adfc48cf7c7316a1bbf221af3106953c9b39afe87dbdc8"
+format = "tar.gz"
+strip-prefix = "graaf-1.2.0"
+
+# The "VERSION 0.1.0" in CMakeLists.txt is a stale placeholder.
+[package]
+name = "cabin-ports/graaf"
+version = "1.2.0"
+# BSL-1.0 is for types.h's hash_combine, based on Boost's, with its licence.
+license = "MIT AND BSL-1.0"
+# Not ported: the tests, examples, benchmarks, docs, tools and packaging.
+include = ["LICENSE.md", "README.md", "include"]
+
+# kruskal.h and bron_kerbosch.h define non-inline functions, so a program
+# that includes either in two translation units fails to link (duplicate
+# symbols).  welsh_powell_coloring can colour neighbours alike: on libc++ it
+# gave the complete graph K6 six such edges.
+[target.graaf]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
