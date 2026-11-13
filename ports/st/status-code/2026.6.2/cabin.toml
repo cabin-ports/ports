@@ -1,0 +1,33 @@
+[package.upstream]
+url = "https://github.com/ned14/status-code/archive/0487928a24321dd78af740a0fbf5ca509f216889.tar.gz"
+checksum = "sha256:3c22a7560ad6fce698cc8f0e5f83b44fd4a6c6728ac8f249ca68517006da6922"
+format = "tar.gz"
+strip-prefix = "status-code-0487928a24321dd78af740a0fbf5ca509f216889"
+
+# Upstream has no tags or releases, and CMakeLists.txt's VERSION 1.0 is a
+# constant.  This is master's head when packaged, versioned by its commit
+# date (2026-06-02); vcpkg and conan-center-index pin 937b0fc7 (2026-01-18),
+# which lacks only SYSTEM_ERROR2_AVOID_STDIO_INCLUDE and its MSVC fix.
+[package]
+name = "cabin-ports/status-code"
+version = "2026.6.2"
+license = "Apache-2.0 OR BSL-1.0"
+# status_code.hpp:171 credits its void_t detection helpers to WG21 paper
+# N4436; they share only a standard idiom, too slight to carry a term.
+# Not ported: single-header/ (amalgamations of a subset of the headers that
+# predate SYSTEM_ERROR2_AVOID_STDIO_INCLUDE), the tests and examples
+# (wg21/ holds one more), docs, utils/'s generator of the .ipp tables and the
+# CMake files.
+include = ["Licence.txt", "include"]
+
+# Header-only, as upstream's INTERFACE target with include/ as its root, so
+# consumers write `#include <status-code/system_code.hpp>`.  The library
+# needs C++11, but result.hpp defines result<T> only from C++17, as it
+# wraps std::variant.  win32_code.hpp, nt_code.hpp and com_code.hpp are
+# Windows-only and getaddrinfo_code.hpp POSIX-only, each refusing to compile
+# elsewhere.  boost_error_code.hpp needs Boost.System, which the port does
+# not depend on.
+[target.status-code]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
