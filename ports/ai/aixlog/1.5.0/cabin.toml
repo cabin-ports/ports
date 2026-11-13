@@ -1,0 +1,36 @@
+[package.upstream]
+url = "https://github.com/badaix/aixlog/archive/refs/tags/v1.5.0.tar.gz"
+checksum = "sha256:c32b2b2e7ed2632fab53aba01f731fce1e7b150fe7d08bccdafc250e5cb836a8"
+format = "tar.gz"
+strip-prefix = "aixlog-1.5.0"
+
+[package]
+name = "cabin-ports/aixlog"
+version = "1.5.0"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# Header-only, as upstream installs it; consumers write `#include <aixlog.hpp>`.
+# Not ported: the example program and its build and CI scripts.
+# Limitations:
+# - On Windows aixlog.hpp includes <Windows.h> and restores its ERROR macro
+#   (0) afterwards, so LOG(ERROR) logs at trace severity there;
+#   LOG(AixLog::Severity::error) is unaffected.
+# - Creating the logger, as Log::init does, redirects std::clog to it and
+#   nothing restores it, so std::clog's flush at program exit reaches the
+#   destroyed logger (a crash with libstdc++ under AddressSanitizer); a
+#   program can save std::clog.rdbuf() before Log::init and restore it before
+#   exit.
+[target.aixlog]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+
+# SinkEventLog, SinkNative's Windows sink, calls the event log API in
+# advapi32, which upstream's CMake build gets from MSVC's default libraries.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["advapi32"]
+
+# SinkAndroid, SinkNative's Android sink, writes through liblog.
+[target.'cfg(os = "android")'.profile]
+link-libs = ["log"]
