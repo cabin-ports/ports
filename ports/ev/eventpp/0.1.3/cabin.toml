@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/wqking/eventpp/archive/refs/tags/v0.1.3.tar.gz"
+checksum = "sha256:d87aba67223fd9aced2ba55eb82bd534007e43e1b919106a53fcd3070fa125ea"
+format = "tar.gz"
+strip-prefix = "eventpp-0.1.3"
+# THIRD_PARTY_NOTICES supplies the Apache-2.0 text missing from license.
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+[package]
+name = "cabin-ports/eventpp"
+version = "0.1.3"
+license = "Apache-2.0"
+include = ["THIRD_PARTY_NOTICES", "include", "license", "patches"]
+
+# Header-only, as upstream's INTERFACE target; C++11 is upstream's stated floor
+# (readme.md, CMakeLists.txt).
+[target.eventpp]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+
+# The queues' waitFor uses std::condition_variable, which can need libpthread
+# before glibc 2.34; a no-op since.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
