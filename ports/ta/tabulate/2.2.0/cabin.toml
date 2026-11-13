@@ -1,0 +1,32 @@
+[package.upstream]
+url = "https://github.com/p-ranav/tabulate/archive/refs/tags/v2.2.tar.gz"
+checksum = "sha256:3c12853cbf103adf659c4821351a302351d139513f1c43528095da41e8a37044"
+format = "tar.gz"
+strip-prefix = "tabulate-2.2"
+
+# MIT: tabulate's LICENSE.
+# BSD-3-Clause: the bundled termcolor (termcolor.hpp, LICENSE.termcolor).
+# BSL-1.0: the bundled optional-lite, variant-lite and string-view-lite.
+# HPND-Markus-Kuhn: utf8.hpp's Windows mk_wcwidth(), from Kuhn's wcwidth.c.
+[package]
+name = "cabin-ports/tabulate"
+version = "2.2.0"
+license = "MIT AND BSD-3-Clause AND BSL-1.0 AND HPND-Markus-Kuhn"
+include = ["LICENSE", "LICENSE.optional-lite", "LICENSE.termcolor", "LICENSE.variant-lite", "include"]
+
+# The include/tabulate headers, as upstream's CMake installs them.  Below
+# C++17, and on MSVC at every standard because Cabin does not pass
+# /Zc:__cplusplus, they use their bundled optional-lite, variant-lite and
+# string-view-lite, which keep the include guards and namespace nonstd of
+# cabin-ports/optional-lite, variant-lite and string-view-lite, so such a
+# program must not mix them.
+#
+# Trimming passes each char to std::isspace, which is undefined for the
+# negative values UTF-8 bytes take where char is signed;
+# trim_mode(TrimMode::kNone) avoids that only in cells that do not wrap.
+# Without multi_byte_characters, a word wider than a one-column content
+# width never shrinks in word_wrap, so printing that cell never ends.
+[target.tabulate]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
