@@ -1,0 +1,19 @@
+--- /dev/null
++++ b/THIRD_PARTY_NOTICES
+@@ -0,0 +1,16 @@
++Third-party notices for cabin-ports/etl
++
++ETL's own license is in LICENSE.  The header named below contains code from
++another project whose notice that header does not carry.
++
++========================================================================
++cppreference.com: std::common_type, possible implementation
++Title: "std::common_type"
++Author: cppreference.com contributors
++https://en.cppreference.com/w/cpp/types/common_type
++include/etl/type_traits.h:4642-4715
++Licensed under CC BY-SA 3.0, https://creativecommons.org/licenses/by-sa/3.0/
++Changed: ETL's own traits replace the std:: ones, the helpers are in
++namespace private_common_type, R is renamed TRest, the commented C++11
++alternative is left out, and the code is reformatted.
++SPDX-License-Identifier: CC-BY-SA-3.0
