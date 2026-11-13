@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/mariusbancila/croncpp/archive/refs/tags/v2026.08.12.tar.gz"
+checksum = "sha256:14441a5f46607e5fce97558cf12505087a1e052d5f5b9a4474ee118fe3303ba2"
+format = "tar.gz"
+strip-prefix = "croncpp-2026.08.12"
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+[package]
+name = "cabin-ports/croncpp"
+# Upstream tags this release v2026.08.12; a version component cannot have a
+# leading zero.
+version = "2026.8.12"
+# Apache-2.0: include/croncpp.h translates ccronexpr, which README.md credits.
+license = "MIT AND Apache-2.0"
+include = ["LICENSE", "README.md", "THIRD_PARTY_NOTICES", "include", "patches"]
+
+# Upstream supports C++11 and newer.  Without /Zc:__cplusplus, which Cabin
+# does not pass, cl reports __cplusplus as 199711L and so takes croncpp.h's
+# C++11 branches at any standard.
+[target.croncpp]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
