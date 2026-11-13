@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/Tessil/sparse-map/archive/refs/tags/v0.7.0.tar.gz"
+checksum = "sha256:b603a24f596f95a06ec1d437f4cb928c2647cf9bc73b751ac6fb82deb7863d98"
+format = "tar.gz"
+strip-prefix = "sparse-map-0.7.0"
+
+[package]
+name = "cabin-ports/tsl-sparse-map"
+version = "0.7.0"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# Tessil's sparse hash map and set, header-only, as upstream's CMake interface
+# target tsl::sparse_map: consumers write `#include <tsl/sparse_map.h>`.
+# C++17 is upstream's floor since 0.7.0.
+# Not ported: tsl-sparse-map.natvis, a Visual Studio debugger visualizer that
+# upstream attaches on MSVC; it is not a build input.
+# Limitations of upstream 0.7.0: max_size() does not compile, and a
+# hash-compatible deserialize can lose keys that probed past an erased bucket;
+# deserialize with hash_compatible false.
+[target.tsl-sparse-map]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
