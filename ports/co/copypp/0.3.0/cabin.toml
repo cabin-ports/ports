@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/i-curve/copypp/archive/refs/tags/v0.3.0.tar.gz"
+checksum = "sha256:390dc010597f372015a708d7d37e3d06fdf6a4fe90fb1c0077b45b6da5cb38a2"
+format = "tar.gz"
+strip-prefix = "copypp-0.3.0"
+# COPYPP_FIELDS_INTRUSIVE applies typeid without including <typeinfo>, which
+# LLVM 23's libc++ rejects; patch 0001 includes it in copypp.hh and
+# copypp_only.hh.
+patches = ["patches/0001-include-typeinfo.patch"]
+
+[package]
+name = "cabin-ports/copypp"
+version = "0.3.0"
+license = "MIT"
+include = ["LICENSE", "include", "patches"]
+
+# The include/icurve headers, as upstream's CMake installs them.  The JSON
+# copies exist only when nlohmann/json.hpp is included first, so the port
+# takes no dependency.  Without it, the field macros take at most 64 fields.
+# An intrusive object that has taken part in icurve::copy keeps pointers to
+# its own fields, and copies of it share them, so copying from such a copy
+# reads the original, or a dead temporary for elements icurve::copy appended
+# to a container.
+[target.copypp]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
