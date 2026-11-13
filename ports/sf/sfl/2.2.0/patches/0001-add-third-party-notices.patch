@@ -1,0 +1,17 @@
+--- /dev/null
++++ b/THIRD_PARTY_NOTICES
+@@ -0,0 +1,14 @@
++Third-party notices for cabin-ports/sfl
++
++sfl's own license is in LICENSE.txt.  include/sfl/detail/math/is_prime.hpp
++names the Stack Overflow answer below as its source (line 36).
++
++========================================================================
++Stack Overflow: mid, ceilsqrt, find_factor and is_prime
++Title: "Compile time prime checking"
++Author: Casey (https://stackoverflow.com/users/923854)
++https://stackoverflow.com/a/18306693
++include/sfl/detail/math/is_prime.hpp:38-79
++Licensed under CC BY-SA 3.0, https://creativecommons.org/licenses/by-sa/3.0/
++Changed: reformatted, namespaced, and is_prime renamed to calculate.
++SPDX-License-Identifier: CC-BY-SA-3.0

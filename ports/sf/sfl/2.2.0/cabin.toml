@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/slavenf/sfl-library/archive/refs/tags/2.2.0.tar.gz"
+checksum = "sha256:9d7d10c8fd9062db092ca487516f9deaf7e60201345a8a1deae4b29b4529c284"
+format = "tar.gz"
+strip-prefix = "sfl-library-2.2.0"
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+[package]
+name = "cabin-ports/sfl"
+version = "2.2.0"
+# CC-BY-SA-3.0: code from a Stack Overflow answer; see THIRD_PARTY_NOTICES.
+license = "Zlib AND CC-BY-SA-3.0"
+include = ["LICENSE.txt", "THIRD_PARTY_NOTICES", "include", "patches"]
+
+# Upstream's INTERFACE target sfl; consumers write <sfl/...>.  It needs C++11
+# and uses newer standard features when the consumer's standard has them.
+# Not ported: the tests, benchmarks and docs, and sfl.natvis, the debugger
+# visualiser upstream's CMake passes to MSVC's linker.
+[target.sfl]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
