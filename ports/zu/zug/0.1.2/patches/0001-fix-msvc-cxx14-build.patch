@@ -1,0 +1,11 @@
+--- a/zug/detail/inline_constexpr.hpp
++++ b/zug/detail/inline_constexpr.hpp
+@@ -12,7 +12,7 @@
+ #define ZUG_INLINE_CONSTEXPR inline constexpr
+ #else
+ #if defined(_MSC_VER)
+-#define ZUG_INLINE_CONSTEXPR extern constexpr __declspec(selectany)
++#define ZUG_INLINE_CONSTEXPR extern const __declspec(selectany)
+ #elif defined(__GNUC__)
+ #define ZUG_INLINE_CONSTEXPR extern constexpr __attribute__((weak))
+ #else
