@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/sharkdp/dbg-macro/archive/refs/tags/v0.5.1.tar.gz"
+checksum = "sha256:fffea75f067c69995853dc790626887788e2c4c9eb0a5a0014a4501d2b6b9909"
+format = "tar.gz"
+strip-prefix = "dbg-macro-0.5.1"
+
+[package]
+name = "cabin-ports/dbg-macro"
+version = "0.5.1"
+license = "MIT"
+# Not ported: the tests, demo and CMake file.
+include = ["LICENSE", "README.md", "dbg.h"]
+
+# Consumers write `#include <dbg.h>`, as upstream's README and install do.
+# dbg.h picks its standard from __cplusplus alone (dbg.h:61-67), which cl
+# leaves at 199711L without /Zc:__cplusplus, a flag a port cannot pass to
+# its consumers; by default cl therefore takes its C++11 path, which has no
+# std::optional, std::variant or std::string_view printers.
+[target.dbg-macro]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
