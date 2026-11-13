@@ -75,11 +75,14 @@ void test_static_producer_consumer() {
   check(ordered && next == 101, "static channel blocks writes and keeps order");
 }
 
+// Namespace scope, so the writer lambdas need not capture them (cl without
+// /Zc:lambda rejects using an uncaptured local constant).
+const int producers = 4;
+const int per_producer = 1000;
+
 // Several producers and consumers share an unbuffered channel, where only
 // readers wait; a bounded one can deadlock with them (see cabin.toml).
 void test_many_threads() {
-  const int producers = 4;
-  const int per_producer = 1000;
   msd::channel<int> ch;
 
   std::vector<std::thread> writers;
