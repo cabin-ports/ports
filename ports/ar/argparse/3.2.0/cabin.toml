@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/p-ranav/argparse/archive/refs/tags/v3.2.tar.gz"
+checksum = "sha256:9dcb3d8ce0a41b2a48ac8baa54b51a9f1b6a2c52dd374e28cc713bab0568ec98"
+format = "tar.gz"
+strip-prefix = "argparse-3.2"
+
+# Upstream's tag v3.2 is 3.2.0, the version its CMake project declares.
+[package]
+name = "cabin-ports/argparse"
+version = "3.2.0"
+license = "MIT"
+# Not ported: module/argparse.cppm, upstream's C++20 named-module wrapper of
+# the same header, as Cabin builds no modules; the tests, samples and build
+# files.
+include = ["LICENSE", "include"]
+
+[target.argparse]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
