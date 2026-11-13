@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/andrew-gresyk/HFSM2/archive/refs/tags/2.12.1.tar.gz"
+checksum = "sha256:655176e7ad376ef9ee88f758ec1384463264f48e3798e981de965a76895799ab"
+format = "tar.gz"
+strip-prefix = "HFSM2-2.12.1"
+
+# The version is the tag's, which machine.hpp's HFSM2_VERSION macros match;
+# CMakeLists.txt still declares a stale VERSION 2.8.0.
+[package]
+name = "cabin-ports/hfsm2"
+version = "2.12.1"
+# 0BSD: machine.hpp's SplitMix64 and xoshiro generators copy Blackman and
+# Vigna's reference code, which is public domain under that permission text.
+license = "MIT AND 0BSD"
+include = ["LICENSE", "include"]
+
+# The HFSM2_ENABLE_* and HFSM2_DISABLE_TYPEINDEX switches are macros a consumer
+# defines before including machine.hpp, so the header ships as is with no Cabin
+# features for them.  Plan steps added with restart(), resume() or select() still
+# run as changeTo(): machine.hpp's plan update ignores a step's transition type.
+[target.hfsm2]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
