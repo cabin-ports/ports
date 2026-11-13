@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/zserge/jsmn/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:5f0913a10657fe7ec8d5794ccf00a01000e3e1f2f1e1f143c34a0f7b47edcb38"
+format = "tar.gz"
+strip-prefix = "jsmn-1.1.0"
+
+[package]
+name = "cabin-ports/jsmn"
+version = "1.1.0"
+license = "MIT"
+include = ["LICENSE", "jsmn.h"]
+
+# jsmn.h is the whole library; C89 is upstream's floor.  A program that
+# includes it from several translation units defines JSMN_HEADER in all but
+# one, or JSMN_STATIC in each (README.md); all must agree on
+# JSMN_PARENT_LINKS, and JSMN_STRICT applies where the parser is compiled.
+# Without JSMN_STRICT, resuming after JSMN_ERROR_PART splits a primitive cut
+# at the end of the input into two tokens.  Not ported: upstream's examples
+# and tests.
+[target.jsmn]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
