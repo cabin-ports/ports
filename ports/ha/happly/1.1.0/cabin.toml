@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/nmwsharp/happly/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:424987cdc6d24be4674c09efeed455a91a377d88400a65e5d4e68c368f4c49b9"
+format = "tar.gz"
+strip-prefix = "happly-1.1.0"
+
+[package]
+name = "cabin-ports/happly"
+version = "1.1.0"
+license = "MIT"
+include = ["LICENSE", "happly.h"]
+
+# Consumers write #include "happly.h".  Not ported: the tests and their
+# sample files.  Binary PLY reading and writing throw on big-endian hosts.
+# Windows consumers that include <windows.h> before happly.h need NOMINMAX,
+# as upstream's own test build defines.  The reader trusts its input: a
+# truncated ASCII file never returns, and short lines or truncated binary
+# data are read out of bounds or as zeros.  Little-endian binary writing
+# indexes one past the end of a list property whose last list is empty,
+# which checked standard-library builds reject.
+[target.happly]
+type = "header-only"
+include-dirs = ["."]
+# happly.h uses only C++11; upstream's tests build as C++14.
+interface-cxx-standard = "c++11"
