@@ -1,0 +1,30 @@
+[package.upstream]
+url = "https://github.com/nonstd-lite/jthread-lite/archive/refs/tags/v0.1.0.tar.gz"
+checksum = "sha256:05d8f591a83b5c3ea7361c178ddad6cb91ab7ab4c07a792c273667a004843ecd"
+format = "tar.gz"
+strip-prefix = "jthread-lite-0.1.0"
+
+[package]
+name = "cabin-ports/jthread-lite"
+version = "0.1.0"
+license = "BSL-1.0"
+include = ["LICENSE.txt", "include"]
+
+# nonstd::jthread is jthread lite's own by default, even where std::jthread
+# exists.  It joins on destruction and on move assignment, self-assignment
+# included, but cannot stop its thread: upstream declares stop_token's
+# members and stop_source's stop handling without defining them (its README
+# and issue #2), so calling them, or jthread's get_stop_token or
+# request_stop, fails to link, and the callable is never passed a
+# stop_token.  Before C++17 nostopstate is a macro for nostopstate_t{}.
+[target.jthread-lite]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+
+# nonstd::jthread wraps std::thread, which needs pthreads on Unix, as
+# upstream's test build links (test/CMakeLists.txt) and ConanCenter's
+# recipe does; folded into libc since glibc 2.34.  Android's libc holds
+# pthreads and the NDK has no libpthread.
+[target.'cfg(all(family = "unix", not(os = "android")))'.profile]
+link-libs = ["pthread"]
