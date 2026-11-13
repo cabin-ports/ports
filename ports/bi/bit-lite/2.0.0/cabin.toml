@@ -4,16 +4,13 @@ checksum = "sha256:9078970f60ff39ca2b46015ec9ee122ee238119157ec4b9098850ed10ef1a
 format = "tar.gz"
 strip-prefix = "bit-lite-2.0.0"
 # Where nonstd's bit functions are std <bit>'s, the header's extensions use
-# std::uint8_t and friends (bit.hpp:143-146), type traits (:148-157, 179)
-# and the global size_t (:166) but include only <bit>, <version> and
-# <climits> (:73, 76, 117; also <cstdlib> on MSVC, :123-124).  A consumer
-# including the header first failed to compile with GCC 16's libstdc++ at
-# C++20 and C++23 (std::uint8_t, size_t) and with Apple clang 21's libc++
-# at C++23 (std::is_trivial and its kin, size_t).  Each include the patch
-# adds is needed by one of those, and with all three both compile at both
-# standards.  The <cstdint> line is upstream's 66204eb after 2.0.0 (its
-# issue #9); master still lacks the other two.  Cabin's check compiles the
-# header below C++20, so it never reaches these lines.
+# std::uint8_t, type traits and the global size_t without including what
+# declares them.  A consumer including the header first failed to compile
+# with GCC 16's libstdc++ at C++20 and C++23 and with Apple clang 21's
+# libc++ at C++23; each include the patch adds is needed by one of those.
+# The <cstdint> line is upstream's 66204eb after 2.0.0 (its issue #9).
+# Cabin's check compiles the header below C++20, so it never reaches these
+# lines.
 patches = ["patches/0001-include-cstdint-type-traits-and-stddef-h.patch"]
 
 [package]
@@ -22,21 +19,14 @@ version = "2.0.0"
 license = "BSL-1.0"
 include = ["LICENSE.txt", "include", "patches"]
 
-# Header-only, as upstream's CMake interface target nonstd::bit-lite
-# (CMakeLists.txt:66-76): include/ is the include root, so consumers write
-# `#include <nonstd/bit.hpp>`.  The header supports C++98 and later and
-# takes the standard from _MSVC_LANG on cl.exe (bit.hpp:38-44).  Where
-# C++20's <bit> exists, nonstd's bit functions and endian are std's unless
-# a consumer defines bit_CONFIG_SELECT_BIT=bit_BIT_NONSTD (:27-29, 55-65,
-# 84-107); bit_CONFIG_SELECT_BIT and bit_CONFIG_STRICT keep upstream's
-# defaults, so the endian conversion extensions (:904-1078) are present.
-# There nonstd::byteswap exists only where the library defines
-# __cpp_lib_byteswap, or from C++23 on (:75-80, 102-104).  bit lite's own
-# functions differ from std's: bit_width returns T, not int (:760);
-# bit_cast and byteswap are not constexpr (:537-586), and the counting and
-# rotation functions are constexpr only from C++14 on (:317-321, 593-740);
-# and before C++11 nothing rejects signed arguments (:372-381), and 64-bit
-# types have no byteswap or endian conversion (:480-482, 932-939).
+# Header-only, as upstream's CMake interface target nonstd::bit-lite:
+# include/ is the include root, so consumers write `#include <nonstd/bit.hpp>`.
+# Where C++20's <bit> exists, nonstd's bit functions are std's unless a
+# consumer defines bit_CONFIG_SELECT_BIT=bit_BIT_NONSTD, and there
+# nonstd::byteswap needs __cpp_lib_byteswap or C++23; every bit_CONFIG_*
+# option keeps upstream's default.  bit lite's own implementation returns
+# T, not int, from bit_width, has no constexpr bit_cast or byteswap, and
+# before C++11 has no 64-bit byteswap or endian conversion.
 [target.bit-lite]
 type = "header-only"
 include-dirs = ["include"]
