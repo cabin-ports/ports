@@ -1,0 +1,11 @@
+--- a/TriangleMeshDistance/include/tmd/TriangleMeshDistance.h
++++ b/TriangleMeshDistance/include/tmd/TriangleMeshDistance.h
+@@ -28,6 +28,8 @@
+ #include <algorithm>
+ #include <unordered_map>
+ #include <cmath>
++#include <cstdint>
++#include <limits> 
+ 
+ namespace tmd
+ {

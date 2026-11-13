@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/InteractiveComputerGraphics/TriangleMeshDistance/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:1f3e8f99a924d49ca292b9ced30cd2466a9345e7be91cd60226f094f21dc6960"
+format = "tar.gz"
+strip-prefix = "TriangleMeshDistance-1.1.0"
+# The header uses std::numeric_limits without including <limits>, which
+# GCC 16.2's libstdc++ rejects; patch 0001 is upstream's 9c00f34, after
+# 1.1.0, which includes <cstdint> and <limits>.
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0002).
+patches = [
+  "patches/0001-include-cstdint-and-limits.patch",
+  "patches/0002-add-third-party-notices.patch",
+]
+
+[package]
+name = "cabin-ports/trianglemeshdistance"
+version = "1.1.0"
+license = "MIT"
+include = ["LICENSE", "THIRD_PARTY_NOTICES", "TriangleMeshDistance", "patches"]
+
+# One header, laid out as upstream's CMake installs it, so consumers include
+# <tmd/TriangleMeshDistance.h>.  construct() on an object that already holds
+# a mesh can give wrong signs; use a new object per mesh.
+[target.trianglemeshdistance]
+type = "header-only"
+include-dirs = ["TriangleMeshDistance/include"]
+interface-cxx-standard = "c++11"
