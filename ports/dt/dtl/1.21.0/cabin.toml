@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/cubicdaiya/dtl/archive/refs/tags/v1.21.tar.gz"
+checksum = "sha256:90ed2dbf4e6d687737fe25f118bbcb6aed778cecc3f2115d191a032bf8643dbd"
+format = "tar.gz"
+strip-prefix = "dtl-1.21"
+
+# Upstream's tag v1.21 is 1.21.0.
+[package]
+name = "cabin-ports/dtl"
+version = "1.21.0"
+license = "BSD-3-Clause"
+include = ["COPYING", "dtl"]
+
+# The headers under dtl/, included as "dtl/dtl.hpp" as upstream's README and
+# tests do.
+[target.dtl]
+type = "header-only"
+include-dirs = ["."]
+# Upstream states no standard; C++11 is the measured floor, as C++98 with
+# -pedantic-errors rejects long long at dtl/variables.hpp:87.
+interface-cxx-standard = "c++11"
