@@ -1,0 +1,189 @@
+--- /dev/null
++++ b/THIRD_PARTY_NOTICES
+@@ -0,0 +1,186 @@
++Unicode Common Locale Data Repository (CLDR) 32
++https://unicode.org/cldr/charts/32/supplemental/zone_tzid.html
++groups/bal/baltzo/baltzo_windowstimezoneutil.cpp, lines 51-264: the tables
++mapping Windows time-zone identifiers to Zoneinfo identifiers and back
++Copyright © 1991-2017 Unicode, Inc. All rights reserved.
++Distributed under the Terms of Use in http://www.unicode.org/copyright.html.
++SPDX-License-Identifier: Unicode-DFS-2016
++
++Permission notice: thirdparty/Microsoft-STL-NOTICE.txt, lines 191-218 (from
++"Permission is hereby granted" to the end of the UNICODE, INC. LICENSE
++AGREEMENT - DATA FILES AND SOFTWARE), which is CLDR 32's word for word.
++
++------------------------------------------------------------------------------
++
++RFC 3629: UTF-8, a transformation format of ISO 10646
++https://www.rfc-editor.org/rfc/rfc3629
++groups/bdl/bdlde/bdlde_charconvertucs2.cpp, lines 18-87,
++bdlde_charconvertutf16.cpp, lines 26-97, bdlde_charconvertutf32.cpp, lines
++28-102, and bdlde_utf8util.cpp, lines 124-134: comments quoting the RFC
++Copyright (C) The Internet Society (2003).  All Rights Reserved.
++
++Full Copyright Statement:
++
++Copyright (C) The Internet Society (2003).  All Rights Reserved.
++
++This document and translations of it may be copied and furnished to
++others, and derivative works that comment on or otherwise explain it
++or assist in its implementation may be prepared, copied, published
++and distributed, in whole or in part, without restriction of any
++kind, provided that the above copyright notice and this paragraph are
++included on all such copies and derivative works.  However, this
++document itself may not be modified in any way, such as by removing
++the copyright notice or references to the Internet Society or other
++Internet organizations, except as needed for the purpose of
++developing Internet standards in which case the procedures for
++copyrights defined in the Internet Standards process must be
++followed, or as required to translate it into languages other than
++English.
++
++The limited permissions granted above are perpetual and will not be
++revoked by the Internet Society or its successors or assignees.
++
++This document and the information contained herein is provided on an
++"AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
++TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
++BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
++HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
++MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
++
++------------------------------------------------------------------------------
++
++RFC 2781: UTF-16, an encoding of ISO 10646
++https://www.rfc-editor.org/rfc/rfc2781
++groups/bdl/bdlde/bdlde_charconvertutf16.cpp, lines 103-190: a comment quoting
++the RFC
++Copyright (C) The Internet Society (2000).  All Rights Reserved.
++
++Full Copyright Statement:
++
++Copyright (C) The Internet Society (2000).  All Rights Reserved.
++
++This document and translations of it may be copied and furnished to
++others, and derivative works that comment on or otherwise explain it
++or assist in its implementation may be prepared, copied, published
++and distributed, in whole or in part, without restriction of any
++kind, provided that the above copyright notice and this paragraph are
++included on all such copies and derivative works.  However, this
++document itself may not be modified in any way, such as by removing
++the copyright notice or references to the Internet Society or other
++Internet organizations, except as needed for the purpose of
++developing Internet standards in which case the procedures for
++copyrights defined in the Internet Standards process must be
++followed, or as required to translate it into languages other than
++English.
++
++The limited permissions granted above are perpetual and will not be
++revoked by the Internet Society or its successors or assigns.
++
++This document and the information contained herein is provided on an
++"AS IS" basis and THE INTERNET SOCIETY AND THE INTERNET ENGINEERING
++TASK FORCE DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING
++BUT NOT LIMITED TO ANY WARRANTY THAT THE USE OF THE INFORMATION
++HEREIN WILL NOT INFRINGE ANY RIGHTS OR ANY IMPLIED WARRANTIES OF
++MERCHANTABILITY OR FITNESS FOR A PARTICULAR PURPOSE.
++
++------------------------------------------------------------------------------
++
++RFC 1952: GZIP file format specification version 4.3
++https://www.rfc-editor.org/rfc/rfc1952
++groups/bdl/bdlde/bdlde_crc32.cpp, lines 20-76: a comment quoting the RFC's
++sample CRC code (section 8)
++Copyright (c) 1996 L. Peter Deutsch
++SPDX-License-Identifier: LPD-document
++
++Permission is granted to copy and distribute this document for any
++purpose and without charge, including translations into other
++languages and incorporation into compilations, provided that the
++copyright notice and this notice are preserved, and that any
++substantive changes or deletions from the original are clearly
++marked.
++
++BDE's copy differs from the RFC's code only in layout (// instead of /* */
++comments, indentation, spacing, and line breaks) and in reading "should not"
++for "shouldn't".
++
++------------------------------------------------------------------------------
++
++JSONTestSuite
++https://github.com/nst/JSONTestSuite
++groups/bdl/bdljsn/bdljsn_jsontestsuiteutil.cpp, lines 93-1096: the test
++inputs, from the files under test_parsing
++Copyright (c) 2016 Nicolas Seriot
++SPDX-License-Identifier: MIT
++
++MIT License
++
++Copyright (c) 2016 Nicolas Seriot
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
++
++------------------------------------------------------------------------------
++
++Unicode Character Database 16.0.0
++https://www.unicode.org/Public/16.0.0/ucd/
++groups/bsl/bslfmt/bslfmt_formatterunicodedata.cpp, lines 39-2752: the range
++tables generated
++from GraphemeBreakProperty.txt, emoji-data.txt, DerivedGeneralCategory.txt,
++DerivedCoreProperties.txt and EastAsianWidth.txt
++Copyright 1991-2024 Unicode, Inc.
++SPDX-License-Identifier: Unicode-3.0
++
++UNICODE LICENSE V3
++
++COPYRIGHT AND PERMISSION NOTICE
++
++Copyright © 1991-2024 Unicode, Inc.
++
++NOTICE TO USER: Carefully read the following legal agreement. BY
++DOWNLOADING, INSTALLING, COPYING OR OTHERWISE USING DATA FILES, AND/OR
++SOFTWARE, YOU UNEQUIVOCALLY ACCEPT, AND AGREE TO BE BOUND BY, ALL OF THE
++TERMS AND CONDITIONS OF THIS AGREEMENT. IF YOU DO NOT AGREE, DO NOT
++DOWNLOAD, INSTALL, COPY, DISTRIBUTE OR USE THE DATA FILES OR SOFTWARE.
++
++Permission is hereby granted, free of charge, to any person obtaining a
++copy of data files and any associated documentation (the "Data Files") or
++software and any associated documentation (the "Software") to deal in the
++Data Files or Software without restriction, including without limitation
++the rights to use, copy, modify, merge, publish, distribute, and/or sell
++copies of the Data Files or Software, and to permit persons to whom the
++Data Files or Software are furnished to do so, provided that either (a)
++this copyright and permission notice appear with all copies of the Data
++Files or Software, or (b) this copyright and permission notice appear in
++associated Documentation.
++
++THE DATA FILES AND SOFTWARE ARE PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
++KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
++MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT OF
++THIRD PARTY RIGHTS.
++
++IN NO EVENT SHALL THE COPYRIGHT HOLDER OR HOLDERS INCLUDED IN THIS NOTICE
++BE LIABLE FOR ANY CLAIM, OR ANY SPECIAL INDIRECT OR CONSEQUENTIAL DAMAGES,
++OR ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS,
++WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
++ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THE DATA
++FILES OR SOFTWARE.
++
++Except as contained in this notice, the name of a copyright holder shall
++not be used in advertising or otherwise to promote the sale, use or other
++dealings in these Data Files or Software without prior written
++authorization of the copyright holder.

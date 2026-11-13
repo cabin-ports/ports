@@ -1,0 +1,15 @@
+--- a/groups/bsl/bsls/bsls_compilerfeatures.cpp
++++ b/groups/bsl/bsls/bsls_compilerfeatures.cpp
+@@ -450,7 +450,11 @@
+ // removing the enforcement from here.
+ # if !defined(BSLS_PLATFORM_CMP_CLANG) \
+            || BSLS_PLATFORM_CMP_VERSION >= 190000
+-#   ifndef __cpp_sized_deallocation
++// Changed for cabin-ports on 2026-11-12: skip this check on Apple clang,
++// whose version numbers are not LLVM's and which leaves sized
++// deallocation off by default.
++#   if defined(__apple_build_version__)
++#   elif !defined(__cpp_sized_deallocation)
+ #     error __cpp_sized_deallocation is not defined
+ #   elif __cpp_sized_deallocation < 201309L
+ #     error __cpp_sized_deallocation does not suport C++17
