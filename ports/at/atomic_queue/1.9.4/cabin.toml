@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/max0x7ba/atomic_queue/archive/refs/tags/v1.9.4.tar.gz"
+checksum = "sha256:fecfa9ca12fc203e40fd967c2bfa8033f77d0bde0e3b21c8ca5f5f9eeeabe022"
+format = "tar.gz"
+strip-prefix = "atomic_queue-1.9.4"
+
+[package]
+name = "cabin-ports/atomic_queue"
+version = "1.9.4"
+license = "MIT"
+include = ["LICENSE", "include/atomic_queue"]
+
+# spinlock.h, and atomic_queue_mutex.h, which includes it, use POSIX spinlocks
+# from <pthread.h>, which macOS and Windows lack, so those two headers build
+# only on platforms such as Linux.  Upstream bugs in them are left as shipped:
+# UnfairSpinlock cannot be constructed, TicketSpinlock's ticketless unlock()
+# skips the next ticket, whose lock() then never returns, and the lock-based
+# queues' was_empty() and was_full() do not compile.
+# The queues are cache-line aligned, which operator new honours only from C++17;
+# under C++14 allocate them statically or on the stack.
+[target.atomic_queue]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+
+# Upstream's Meson dependency links threads, which those spinlocks need before
+# glibc 2.34; its optional libatomic for Clang is left to consumers.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
