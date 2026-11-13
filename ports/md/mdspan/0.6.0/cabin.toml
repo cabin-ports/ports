@@ -11,17 +11,21 @@ license = "Apache-2.0 WITH LLVM-exception"
 include = ["LICENSE", "include"]
 
 # Consumers include <experimental/mdspan>, and <experimental/mdarray> for
-# mdarray, both in namespace std::experimental.  Upstream supports C++14 and
-# later; part of the API depends on the consumer's standard: submdspan and the
-# deduction guides need C++17, the std::span overloads C++20 (indexing an
-# mdspan with a std::span does not compile in 0.6.0: mdspan.hpp:251 and :310
-# pass the span to a helper taking std::array), and where the compiler has
-# multidimensional subscripts (C++23) mdspan and mdarray provide operator[]
-# instead of operator(), unless the consumer defines
-# MDSPAN_USE_PAREN_OPERATOR=1.  Below C++20, and with MSVC at any standard,
-# conversions the standard makes explicit, such as dynamic to static extents,
-# are implicit.  Below C++20, comparing a layout_stride mapping with another
-# layout's mapping by != uses the alternative token `not`
+# mdarray, both in namespace std::experimental.  Port limitation: upstream's
+# floor is C++14 with GCC and Clang (config.hpp:43), but cl 14.51 at
+# /std:c++14 rejects the extents constructors' constraints (extents.hpp:411
+# and :496, errors C3546 and C3520; cabin-ports CI run 43347795849), and Cabin
+# has one interface standard for all platforms, so the port declares C++17,
+# which excludes the C++14 consumers on GCC and Clang that upstream supports.
+# Part of the API depends on the consumer's standard: the std::span overloads
+# need C++20 (indexing an mdspan with a std::span does not compile in 0.6.0:
+# mdspan.hpp:251 and :310 pass the span to a helper taking std::array), and
+# where the compiler has multidimensional subscripts (C++23) mdspan and
+# mdarray provide operator[] instead of operator(), unless the consumer
+# defines MDSPAN_USE_PAREN_OPERATOR=1.  Below C++20, and with MSVC at any
+# standard, conversions the standard makes explicit, such as dynamic to static
+# extents, are implicit.  Below C++20, comparing a layout_stride mapping with
+# another layout's mapping by != uses the alternative token `not`
 # (layout_stride.hpp:460), which MSVC accepts only under /permissive- or /Za;
 # Cabin passes neither, so such an MSVC consumer includes <iso646.h> before
 # the mdspan headers.  The extents, mdarray, and strided_slice templates name
@@ -32,4 +36,4 @@ include = ["LICENSE", "include"]
 [target.mdspan]
 type = "header-only"
 include-dirs = ["include"]
-interface-cxx-standard = "c++14"
+interface-cxx-standard = "c++17"
