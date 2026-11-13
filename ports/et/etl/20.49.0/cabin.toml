@@ -1,0 +1,35 @@
+[package.upstream]
+url = "https://github.com/ETLCPP/etl/archive/refs/tags/20.49.0.tar.gz"
+checksum = "sha256:b3e7a5544795ec8f4a1b2ab46f6e88fdb78be5a07738f008ce11dd37ed14b6e4"
+format = "tar.gz"
+strip-prefix = "etl-20.49.0"
+# 0001: under libc++ below C++11, the headers failed with "typedef
+# redefinition with different types" (platform.h:557-558): ETL typedefs
+# char16_t and char32_t, which libc++'s <__config> already declares.  The
+# patch skips those typedefs when _LIBCPP_VERSION is defined, so ETL uses
+# libc++'s types.
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0002).
+patches = [
+  "patches/0001-skip-char16-typedefs-under-libcxx-cxx03.patch",
+  "patches/0002-add-third-party-notices.patch",
+]
+
+[package]
+name = "cabin-ports/etl"
+version = "20.49.0"
+# CC-BY-SA-3.0: cppreference's common_type implementation in type_traits.h.
+license = "MIT AND CC-BY-SA-3.0"
+# Not ported: the tests, examples, docs, scripts, and the Arduino, Zephyr,
+# CMake, Meson and Bazel packaging.
+include = ["LICENSE", "README.md", "THIRD_PARTY_NOTICES", "include", "patches"]
+
+# Like the vcpkg and Conan recipes, the port ships no etl_profile.h and
+# exports no defines: without a profile, platform.h detects the compiler and
+# its language support.
+# A consumer configures ETL with its own etl_profile.h on its include path,
+# which callback_timer.h and message_timer.h need: they stop with #error until
+# the profile picks a lock (ETL_*_TIMER_USE_ATOMIC_LOCK or _INTERRUPT_LOCK).
+[target.etl]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++03"

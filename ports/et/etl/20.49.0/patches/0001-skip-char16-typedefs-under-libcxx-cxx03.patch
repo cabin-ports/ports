@@ -1,0 +1,12 @@
+--- a/include/etl/platform.h
++++ b/include/etl/platform.h
+@@ -553,7 +553,8 @@
+ 
+ //*************************************
+ // Define the large character types if necessary.
+-#if ETL_NO_LARGE_CHAR_SUPPORT
++// libc++ declares char16_t and char32_t in C++03 as well.
++#if ETL_NO_LARGE_CHAR_SUPPORT && !defined(_LIBCPP_VERSION)
+ typedef uint_least16_t char16_t;
+ typedef uint_least32_t char32_t;
+   #define ETL_HAS_NATIVE_CHAR16_T 0
