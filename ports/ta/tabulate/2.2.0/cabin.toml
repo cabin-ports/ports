@@ -22,10 +22,9 @@ include = ["LICENSE", "LICENSE.optional-lite", "LICENSE.termcolor", "LICENSE.var
 # program must not mix them.
 #
 # Trimming passes each char to std::isspace, which is undefined for the
-# negative values UTF-8 bytes take where char is signed;
-# trim_mode(TrimMode::kNone) avoids that only in cells that do not wrap.
-# Without multi_byte_characters, a word wider than a one-column content
-# width never shrinks in word_wrap, so printing that cell never ends.
+# negative values UTF-8 bytes take where char is signed.  Without
+# multi_byte_characters, a word wider than a one-column content width never
+# shrinks in word_wrap, so printing that cell never ends.
 [target.tabulate]
 type = "header-only"
 include-dirs = ["include"]
