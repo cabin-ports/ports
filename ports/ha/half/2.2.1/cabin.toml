@@ -1,0 +1,20 @@
+[package.upstream]
+# The release zip vcpkg pins (SHA-512), through SourceForge's download
+# redirector.  It has no top-level directory.
+url = "https://downloads.sourceforge.net/project/half/half/2.2.1/half-2.2.1.zip"
+checksum = "sha256:76ddbf406e9d9b772ec73af2bf925b38b290b4390cc4064720a08d4b4bca0aa9"
+format = "zip"
+
+[package]
+name = "cabin-ports/half"
+version = "2.2.1"
+license = "MIT"
+include = ["LICENSE.txt", "include"]
+
+# The single header, included as <half.hpp> as vcpkg installs it.
+[target.half]
+type = "header-only"
+include-dirs = ["include"]
+# README.txt: "this library is fully C++98-compatible"; C++11 features are
+# detected at preprocessing time.
+interface-cxx-standard = "c++98"
