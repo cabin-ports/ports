@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/greg7mdp/gtl/archive/refs/tags/v1.3.1.tar.gz"
+checksum = "sha256:7252bddc62a9075c9f5935c8348715244a8c7573ba95eccf1ce396f67deb11b2"
+format = "tar.gz"
+strip-prefix = "gtl-1.3.1"
+
+[package]
+name = "cabin-ports/gtl"
+version = "1.3.1"
+# BSD-3-Clause: NOTICE:56-62 lists lamerman's LRU cache for lru_cache.hpp.
+license = "Apache-2.0 AND BSL-1.0 AND MIT AND BSD-3-Clause"
+include = ["LICENSE", "NOTICE", "include", "licenses"]
+
+# Header-only, as upstream's CMake interface target gtl, whose install copies
+# include/gtl/ whole, debugger visualizers included.  C++20 is upstream's
+# floor.  No thread library: no header starts a thread, and upstream links
+# Threads only into its threaded examples.
+#
+# meminfo.hpp defines non-inline functions, so a program that includes it in
+# two translation units fails to link (duplicate symbols).
+[target.gtl]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
