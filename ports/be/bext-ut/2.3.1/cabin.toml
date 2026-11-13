@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/boost-ext/ut/archive/refs/tags/v2.3.1.tar.gz"
+checksum = "sha256:e51bf1873705819730c3f9d2d397268d1c26128565478e2e65b7d0abb45ea9b1"
+format = "tar.gz"
+strip-prefix = "ut-2.3.1"
+
+[package]
+name = "cabin-ports/bext-ut"
+version = "2.3.1"
+license = "BSL-1.0"
+# ut.hpp:500 and :2616 credit Stack Overflow answers for a one-line concept
+# and the ordinal suffix rule, short idioms too slight to carry a term.
+include = ["LICENSE.md", "include/boost/ut.hpp"]
+
+# boost-ext/ut is not part of Boost and needs none of it; consumers write
+# `#include <boost/ut.hpp>`.  Upstream's CMake target by default also defines
+# BOOST_UT_DISABLE_MODULE, which ut.hpp never reads.
+# Not ported: the C++23 module unit include/boost/ut.cppm, which upstream
+# builds only on request, and the tests, examples, benchmarks and build files.
+# Limitation: GCC on macOS cannot compile ut.hpp: ut.hpp:3364 declares a
+# constructor priority, which GCC rejects there; Apple Clang is unaffected.
+[target.bext-ut]
+type = "header-only"
+include-dirs = ["include"]
+# CMakeLists.txt: target_compile_features(ut INTERFACE cxx_std_20).
+interface-cxx-standard = "c++20"
