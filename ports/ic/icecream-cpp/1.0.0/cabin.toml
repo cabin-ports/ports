@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/renatoGarcia/icecream-cpp/archive/refs/tags/v1.0.0.tar.gz"
+checksum = "sha256:35fdbd012a4f7990c404c59b8291e04dc6103232323371ea7a2b18613b1b7900"
+format = "tar.gz"
+strip-prefix = "icecream-cpp-1.0.0"
+
+[package]
+name = "cabin-ports/icecream-cpp"
+version = "1.0.0"
+license = "MIT"
+# LICENSE.txt names the copyright holders through AUTHORS.
+include = ["AUTHORS", "LICENSE.txt", "icecream.hpp"]
+
+# The single header, included as <icecream.hpp> as upstream installs it.
+# IC_A and IC_FA call the function after the temporaries made for literal
+# arguments are destroyed (AddressSanitizer reports stack-use-after-scope for
+# IC_A(sum, 1, 2)), so pass them named variables.
+[target.icecream-cpp]
+type = "header-only"
+include-dirs = ["."]
+# README.md:6-7: "print debugging in C++11 and forward".
+interface-cxx-standard = "c++11"
