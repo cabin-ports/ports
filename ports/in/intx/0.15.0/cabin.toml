@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/chfast/intx/archive/refs/tags/v0.15.0.tar.gz"
+checksum = "sha256:7db5d37ae5e9c3787a12c27e53a28be840a35ee51101c3ac15412ce259191600"
+format = "tar.gz"
+strip-prefix = "intx-0.15.0"
+
+[package]
+name = "cabin-ports/intx"
+version = "0.15.0"
+license = "Apache-2.0"
+include = ["LICENSE", "include"]
+
+# include/intx/intx.hpp is the whole library, C++20 as upstream's CMake
+# target requires.  Not ported: the tests, benchmarks and CMake package files.
+[target.intx]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
