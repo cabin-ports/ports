@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/andreiavrammsd/cpp-channel/archive/refs/tags/v1.3.2.tar.gz"
+checksum = "sha256:7f8580736db238134356ab22a24333f76b86251ba21bb39a6b4c82c7254dcf36"
+format = "tar.gz"
+strip-prefix = "cpp-channel-1.3.2"
+
+[package]
+name = "cabin-ports/cpp-channel"
+# Upstream tags and releases this as v1.3.2; its CMakeLists.txt still says
+# 1.3.1.
+version = "1.3.2"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# Header-only, as upstream's CMake interface target msd_channel.  C++11 is
+# upstream's floor.  No thread library: the headers start no threads and use
+# only std::mutex and std::condition_variable, and upstream declares none.
+# Limitation of upstream 1.3.2: a bounded channel with more than one writer
+# or more than one reader can deadlock; measured with one writer and two
+# readers and with two writers and one reader.
+[target.cpp-channel]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
