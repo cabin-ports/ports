@@ -1,0 +1,35 @@
+[package.upstream]
+url = "https://github.com/ZigRazor/CXXGraph/archive/refs/tags/v4.1.0.tar.gz"
+checksum = "sha256:1f6601abfcb692f35bfe14f2a34b2302f70213a257b0f7d541a110d6bd460040"
+format = "tar.gz"
+strip-prefix = "CXXGraph-4.1.0"
+
+[package]
+name = "cabin-ports/cxxgraph"
+version = "4.1.0"
+license = "MPL-2.0"
+# LICENSE is MPL-2.0 since upstream's relicensing (PR 450), which v4.1.0
+# contains; the "License: AGPL v3.0" lines in its headers are stale, and
+# upstream changed them to MPL v2.0 after the release (PR 478).
+# Not ported: the tests, benchmarks, examples, docs, packaging and CMake files.
+include = ["LICENSE", "README.md", "include"]
+
+# Consumers write `#include <CXXGraph/CXXGraph.hpp>`.  No defines: the headers
+# use zlib only under WITH_COMPRESSION, which upstream sets for its own tests
+# and benchmarks alone; a consumer that wants compressed graph files defines
+# it and depends on zlib itself.
+# With more than one thread, concurrency_breadth_first_search has data races,
+# which ThreadSanitizer reports on every run, and can hang (3 of 600 runs
+# did).  bellmanford relaxes each undirected edge in one direction only, so
+# on an undirected graph it can return wrong distances
+# (BellmanFord_impl.hpp:75-80).
+[target.cxxgraph]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+
+# Partitioning and concurrency_breadth_first_search run std::threads
+# (Partitioner.hpp:190, BestFirstSearch_impl.hpp:244): pthreads on Unix,
+# which upstream's examples link.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
