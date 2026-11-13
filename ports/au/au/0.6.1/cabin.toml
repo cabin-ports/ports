@@ -9,8 +9,8 @@ name = "cabin-ports/au"
 version = "0.6.1"
 license = "Apache-2.0"
 # au/stdx/ credits its backports of C++17/20 and Library Fundamentals TS
-# facilities as "adapted from" cppreference: short definitions those specify,
-# too slight to carry a term.
+# facilities as "adapted from" cppreference; their copyright significance is
+# uncertain.
 # The headers of upstream's CMake target Au::au.  Not ported: testing.hh and
 # chrono_policy_validation.hh, googletest helpers with their own targets.
 include = [
