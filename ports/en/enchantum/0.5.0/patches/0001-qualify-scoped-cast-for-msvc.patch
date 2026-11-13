@@ -1,0 +1,19 @@
+--- a/include/enchantum/scoped.hpp
++++ b/include/enchantum/scoped.hpp
+@@ -56,14 +56,14 @@
+       [[nodiscard]] constexpr optional<E> operator()(const string_view name) const noexcept
+       {
+         const auto n = details::remove_scope_or_empty(name, type_name<E>);
+-        return n.empty() ? optional<E>() : cast<E>(n);
++        return n.empty() ? optional<E>() : ::enchantum::cast<E>(n);
+       }
+ 
+       template<typename BinaryPred>
+       [[nodiscard]] constexpr optional<E> operator()(const string_view name, const BinaryPred binary_predicate) const noexcept
+       {
+         const auto n = details::remove_scope_or_empty(name, type_name<E>);
+-        return n.empty() ? optional<E>() : cast<E>(n, binary_predicate);
++        return n.empty() ? optional<E>() : ::enchantum::cast<E>(n, binary_predicate);
+       }
+     };
+ 
