@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/peter-winter/ctpg/archive/refs/tags/v1.3.7.tar.gz"
+checksum = "sha256:6cc7c34de4983e21070599fd5693b65ef08cd5c8f42612e43b47eda723623429"
+format = "tar.gz"
+strip-prefix = "ctpg-1.3.7"
+# Clang 23 rejects every constexpr parser ("read of dereferenced
+# one-past-the-end pointer", ctpg.hpp:2442); patch 0001 reads that grammar
+# symbol only on the non-reduction path.
+patches = ["patches/0001-defer-symbol-reference.patch"]
+
+[package]
+name = "cabin-ports/ctpg"
+version = "1.3.7"
+license = "MIT"
+include = ["LICENSE", "include", "patches"]
+
+# The single header upstream's CMake installs, at its stated C++17.
+[target.ctpg]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
