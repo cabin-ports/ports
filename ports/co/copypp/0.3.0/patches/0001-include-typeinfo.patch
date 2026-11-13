@@ -1,0 +1,20 @@
+--- a/include/icurve/copypp.hh
++++ b/include/icurve/copypp.hh
+@@ -8,6 +8,7 @@
+ #include <string>
+ #include <vector>
+ #include <ranges>
++#include <typeinfo>
+ #include "meta.hh"
+ 
+ #ifndef NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT
+--- a/include/icurve/copypp_only.hh
++++ b/include/icurve/copypp_only.hh
+@@ -8,6 +8,7 @@
+ #include <string>
+ #include <vector>
+ #include <ranges>
++#include <typeinfo>
+ // clang-format off
+ #ifndef NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT
+ #define NLOHMANN_DEFINE_TYPE_INTRUSIVE_WITH_DEFAULT(...)
