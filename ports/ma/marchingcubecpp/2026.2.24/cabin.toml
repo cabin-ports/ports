@@ -1,0 +1,30 @@
+[package.upstream]
+url = "https://github.com/aparis69/MarchingCubeCpp/archive/0e980cc9ed2309ace816622e7877a51330b54aec.tar.gz"
+checksum = "sha256:b813ec6459f5e0e66ac67c2e61b5ad3f477bfda1f1443faf0f11b6c87f9532ec"
+format = "tar.gz"
+strip-prefix = "MarchingCubeCpp-0e980cc9ed2309ace816622e7877a51330b54aec"
+
+# Upstream has no tags or releases; this is the commit conan-center-index
+# pins, versioned by its commit date (2026-02-24).
+[package]
+name = "cabin-ports/marchingcubecpp"
+version = "2026.2.24"
+license = "Unlicense OR MIT"
+# MC.h's triangle table and slab-indexed mesher adapt nsf/mc, which
+# README.md credits and which is public domain, adding no term.
+# Not ported: main.cpp and noise.h, upstream's OBJ-export example and its
+# Perlin noise.
+include = ["LICENSE", "MC.h"]
+
+# Single-header library: one translation unit defines MC_IMPLEM_ENABLE
+# before including <MC.h>, and includes it there only once, since the
+# implementation sits outside the include guard.  setDefaultArraySizes is
+# defined inline in that translation unit alone, so only it can call the
+# function.  MC_CPP_USE_DOUBLE_PRECISION makes MC_FLOAT double and must
+# agree across translation units, so the port exports no defines.  MC.h's
+# vector types put anonymous structs in unions, an extension GCC, Clang and
+# MSVC accept by default and -pedantic-errors rejects.
+[target.marchingcubecpp]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
