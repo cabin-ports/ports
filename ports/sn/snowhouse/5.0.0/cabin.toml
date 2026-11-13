@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/banditcpp/snowhouse/archive/refs/tags/v5.0.0.tar.gz"
+checksum = "sha256:a1997eb1c170292bad5545ca5e65cb7c900bc49c0f9143672116777d24189b69"
+format = "tar.gz"
+strip-prefix = "snowhouse-5.0.0"
+
+[package]
+name = "cabin-ports/snowhouse"
+version = "5.0.0"
+license = "BSL-1.0"
+include = ["LICENSE_1_0.txt", "include"]
+
+# Upstream's INTERFACE target snowhouse; consumers write
+# <snowhouse/snowhouse.h>.
+# Not ported: upstream's tests (example/) and its build and CI scripts.
+# Limitation: AssertThrows needs <exception>, which exceptions.h does not
+# include; with libc++ from C++23 the consumer must include it.
+[target.snowhouse]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
