@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/ZXShady/enchantum/archive/refs/tags/0.5.0.tar.gz"
+checksum = "sha256:654d43f6a88f6555d3cad80e9ce3e72e1346be5617c678b4ef10a06a77d7d647"
+format = "tar.gz"
+strip-prefix = "enchantum-0.5.0"
+
+[package]
+name = "cabin-ports/enchantum"
+version = "0.5.0"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# Header-only, as upstream's CMake interface target enchantum, whose install
+# copies include/ alone.  C++17 is upstream's floor.  {fmt} is not a
+# dependency: only fmt_format.hpp uses it, and all.hpp includes that header
+# only when <fmt/format.h> is found.
+[target.enchantum]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
