@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/Tessil/array-hash/archive/refs/tags/v0.7.2.tar.gz"
+checksum = "sha256:0f360be97fe21a3d6dc4e843559a3f7011e90cb31b483875802205209766591e"
+format = "tar.gz"
+strip-prefix = "array-hash-0.7.2"
+
+[package]
+name = "cabin-ports/tsl-array-hash"
+version = "0.7.2"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# Tessil's array hash map and set, header-only, as upstream's CMake interface
+# target tsl::array_hash: consumers write `#include <tsl/array_map.h>`.
+# C++11 is upstream's floor.
+# Limitation of upstream 0.7.2: deserialize reads past the serialized data when
+# the destination's growth policy rounds the bucket count differently, so
+# deserialize with the source map's growth policy.
+[target.tsl-array-hash]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
