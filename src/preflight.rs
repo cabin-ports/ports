@@ -4,8 +4,11 @@
 //! registry* through a generated probe package, so the build consumes
 //! the registry artifact rather than the scratch tree it was packaged
 //! from.  A probe's source is the port's committed consumer test, or an
-//! empty `main`.  A dry-run builds and runs every probe and a plan only
-//! builds them.  An upload builds none: a build can run a port's build
+//! empty `main`.  A dry-run builds and runs every probe, and after it
+//! the port's probe packages, the directories of its `tests/` that hold
+//! a manifest.  A plan only builds the probes: a probe package can have
+//! a build script of its own, and nothing of `tests/` runs outside a
+//! dry-run.  An upload builds none: a build can run a port's build
 //! script, which must not happen beside the upload job's OIDC token.
 
 use std::fmt;
@@ -19,6 +22,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use anyhow::{Context, Result, bail};
+use cabin_core::{ConditionContext, Dependency, DependencyKind, DependencySource, TargetPlatform};
 use cabin_publish::{RegistryPublishWorkflow, upstream};
 
 use crate::plan::PortConversion;
@@ -358,10 +362,10 @@ fn retry_download<T>(
 }
 
 /// Build the port from the preflight registry through a generated
-/// probe package, and return how long the build and the probe runs
-/// took.  `--offline` enforces that the file registry and the
-/// run-local cache satisfy the whole build.  Each probe's output prints
-/// as one block once it finishes.
+/// probe package and then, in a dry-run, the port's own probe packages,
+/// and return how long the builds and the probe runs took.  `--offline` enforces that
+/// the file registry and the run-local cache satisfy every build.  Each
+/// port's output prints as one block once it finishes.
 fn build_probe_against_registry(
     request: &PreflightRequest<'_>,
     conversion: &PortConversion,
@@ -385,17 +389,21 @@ fn build_probe_against_registry(
     }
 
     let (mut stdout, mut stderr) = (Vec::new(), Vec::new());
-    let mut cabin = |command: &[&str]| -> Result<ExitStatus> {
+    let packages = match request.probes {
+        Probes::Run => stage_probe_packages(conversion, &probe_dir, &mut stdout)?,
+        _ => Vec::new(),
+    };
+    let mut cabin = |package: &Path, command: &[&str]| -> Result<ExitStatus> {
         let output = Command::new(request.cabin)
             .args(command)
             .arg("--manifest-path")
-            .arg(probe_dir.join("cabin.toml"))
+            .arg(package.join("cabin.toml"))
             .arg("--index-path")
             .arg(registry_dir)
             .arg("--cache-dir")
             .arg(cache_dir)
             .arg("--build-dir")
-            .arg(probe_dir.join("build"))
+            .arg(package.join("build"))
             .arg("--offline")
             // One worker per CPU, each at Ninja's default of CPUs + 2,
             // would run that many heavy C++ compilations at once; two
@@ -409,24 +417,40 @@ fn build_probe_against_registry(
     };
     let started = Instant::now();
     let probed = (|| {
-        let status = cabin(&["build"])?;
-        if !status.success() {
-            bail!(
-                "preflight build of {} {} against the generated registry failed ({status})",
-                conversion.scoped_name.as_str(),
-                conversion.published_version
-            );
+        let named = packages.iter().map(|package| {
+            let name = package.file_name().unwrap().to_string_lossy();
+            (package, format!(" in probe package `{name}`"))
+        });
+        for (package, whose) in std::iter::once((&probe_dir, String::new())).chain(named) {
+            let status = cabin(package, &["build"])?;
+            if !status.success() {
+                bail!(
+                    "preflight build of {} {} against the generated registry failed{whose} \
+                     ({status})",
+                    conversion.scoped_name.as_str(),
+                    conversion.published_version
+                );
+            }
         }
         let built = started.elapsed();
         if request.probes != Probes::Run {
             return Ok((built, Duration::ZERO));
         }
-        for consumer in probe_consumers(conversion) {
-            let status = cabin(&["run", "--bin", consumer.target])?;
+        let consumers = probe_consumers(conversion);
+        let generated = consumers.iter().map(|consumer| {
+            let run = vec!["run", "--bin", consumer.target];
+            (&probe_dir, consumer.target.to_owned(), run)
+        });
+        // A probe package's one executable.
+        let committed = packages.iter().map(|package| {
+            let name = package.file_name().unwrap().to_string_lossy();
+            (package, name.into_owned(), vec!["run"])
+        });
+        for (package, name, run) in generated.chain(committed) {
+            let status = cabin(package, &run)?;
             if !status.success() {
                 bail!(
-                    "preflight probe `{}` of {} {} failed ({status})",
-                    consumer.target,
+                    "preflight probe `{name}` of {} {} failed ({status})",
                     conversion.scoped_name.as_str(),
                     conversion.published_version
                 );
@@ -470,9 +494,137 @@ fn probe_source(conversion: &PortConversion, source: &str) -> Result<Vec<u8>> {
     }
 }
 
+/// Copy the probe packages of `conversion` that are for this platform
+/// under `probe_dir`, since Cabin writes a lockfile beside the manifest
+/// it builds, and name in `log` those that are not.
+fn stage_probe_packages(
+    conversion: &PortConversion,
+    probe_dir: &Path,
+    log: &mut Vec<u8>,
+) -> Result<Vec<PathBuf>> {
+    let mut packages = Vec::new();
+    for package in probe_packages(conversion)? {
+        let name = package.file_name().unwrap();
+        let on_port = entries_on_port(&package, conversion)?;
+        if !probes_on(&on_port, &TargetPlatform::current()) {
+            let _ = writeln!(
+                log,
+                "preflight: probe package `{}` of {} {} is not for this platform",
+                name.to_string_lossy(),
+                conversion.scoped_name.as_str(),
+                conversion.published_version
+            );
+            continue;
+        }
+        let copy = probe_dir.join("packages").join(name);
+        copy_dir(&package, &copy)
+            .with_context(|| format!("copying {} to {}", package.display(), copy.display()))?;
+        packages.push(copy);
+    }
+    Ok(packages)
+}
+
+/// The probe packages a port commits: the directories of its `tests/`
+/// that hold a `cabin.toml`, by name.
+fn probe_packages(conversion: &PortConversion) -> Result<Vec<PathBuf>> {
+    let tests_dir = conversion.committed_dir.join("tests");
+    let entries = match fs::read_dir(&tests_dir) {
+        Err(err) if err.kind() == io::ErrorKind::NotFound => return Ok(Vec::new()),
+        entries => entries.with_context(|| format!("reading {}", tests_dir.display()))?,
+    };
+    let mut packages = Vec::new();
+    for entry in entries {
+        let entry = entry.with_context(|| format!("reading {}", tests_dir.display()))?;
+        // Dotfiles are no part of a port's tests.
+        let hidden = entry.file_name().to_string_lossy().starts_with('.');
+        if !hidden && entry.path().join("cabin.toml").is_file() {
+            packages.push(entry.path());
+        }
+    }
+    packages.sort();
+    Ok(packages)
+}
+
+/// Copy the directory `from`, and all beneath it, to `to`.
+fn copy_dir(from: &Path, to: &Path) -> io::Result<()> {
+    fs::create_dir_all(to)?;
+    for entry in fs::read_dir(from)? {
+        let entry = entry?;
+        let to = to.join(entry.file_name());
+        if entry.file_type()?.is_dir() {
+            copy_dir(&entry.path(), &to)?;
+        } else {
+            fs::copy(entry.path(), to)?;
+        }
+    }
+    Ok(())
+}
+
+/// The dependency entries the probe package at `package` has on
+/// `conversion` that a build can take: one leaves `[dev-dependencies]`
+/// out.
+fn entries_on_port(package: &Path, conversion: &PortConversion) -> Result<Vec<Dependency>> {
+    let manifest_path = package.join("cabin.toml");
+    let manifest = fs::read_to_string(&manifest_path)
+        .with_context(|| format!("reading {}", manifest_path.display()))?;
+    let parsed = cabin_manifest::parse_manifest_str(&manifest)
+        .with_context(|| format!("parsing {}", manifest_path.display()))?;
+    let dependencies = parsed.package.map(|package| package.dependencies);
+    Ok(dependencies
+        .into_iter()
+        .flatten()
+        .filter(|dep| dep.name == conversion.scoped_name && dep.kind != DependencyKind::Dev)
+        .collect())
+}
+
+/// Whether a probe package with the entries `on_port` on `conversion`
+/// requires it and no other version of it: another one staged beside it
+/// would be built in its place without a word.
+fn requires_exactly(on_port: &[Dependency], conversion: &PortConversion) -> Result<bool> {
+    let exact = semver::VersionReq::parse(&format!("={}", conversion.published_version))?;
+    Ok(!on_port.is_empty()
+        && on_port
+            .iter()
+            .all(|dep| matches!(&dep.source, DependencySource::Version(req) if *req == exact)))
+}
+
+/// Whether a build for `platform` of a probe package with the entries
+/// `on_port` on its port takes the port: Cabin leaves a dependency out
+/// of a build whose platform does not meet the condition of the table
+/// it sits in.
+fn probes_on(on_port: &[Dependency], platform: &TargetPlatform) -> bool {
+    let platform = ConditionContext::platform_only(platform);
+    on_port.iter().any(|dep| {
+        dep.condition
+            .as_ref()
+            .is_none_or(|condition| condition.evaluate(&platform))
+    })
+}
+
+/// The platforms pull-request CI dry-runs on (`docs/maintaining.md`,
+/// "CI"), each as a build on it sees itself: a probe package none of
+/// them builds is tested nowhere.
+fn checked_platforms() -> Vec<TargetPlatform> {
+    [
+        "x86_64-unknown-linux-gnu",
+        "aarch64-apple-darwin",
+        "x86_64-pc-windows-msvc",
+    ]
+    .into_iter()
+    .filter_map(|triple| TargetPlatform::from_triple(triple).ok())
+    .map(|mut platform| {
+        // `TargetPlatform::current` names its machine so, not by a triple.
+        platform.target = format!("{}-{}-{}", platform.arch, platform.family, platform.os);
+        platform
+    })
+    .collect()
+}
+
 /// Every entry of a port's `tests/` directory must be a source one of
-/// its probe consumers compiles: a misnamed or wrong-language test
-/// would otherwise fall back to the empty `main` without a word.
+/// its probe consumers compiles, or a probe package that requires
+/// exactly the port where CI checks: a misnamed or wrong-language test
+/// would otherwise fall back to the empty `main` without a word, and a
+/// probe package under a misspelled condition be built nowhere.
 ///
 /// # Errors
 /// Returns an error naming the first unused entry, or an unreadable
@@ -496,12 +648,35 @@ pub fn ensure_consumer_tests_used(conversions: &[PortConversion]) -> Result<()> 
             if name.starts_with('.') {
                 continue;
             }
-            if !sources.contains(&name.as_ref()) {
+            if entry.path().join("cabin.toml").is_file() {
+                let on_port = entries_on_port(&entry.path(), conversion)?;
+                let checked = checked_platforms()
+                    .iter()
+                    .any(|platform| probes_on(&on_port, platform));
+                if !requires_exactly(&on_port, conversion)? {
+                    bail!(
+                        "{} is not a probe package of this port: every dependency entry it \
+                         has on `{}` must require `={}`, and it must have one",
+                        entry.path().display(),
+                        conversion.scoped_name.as_str(),
+                        conversion.published_version
+                    );
+                }
+                if !checked {
+                    bail!(
+                        "{} is a probe package no checked platform builds: no platform CI \
+                         dry-runs on meets a condition its entries on `{}` sit under",
+                        entry.path().display(),
+                        conversion.scoped_name.as_str()
+                    );
+                }
+            } else if !sources.contains(&name.as_ref()) {
                 bail!(
                     "{} is not a consumer test this port's probe compiles: expected \
                      tests/main.cc, or tests/main.c for a target declaring an \
                      `interface-c-standard` other than \"none\" or \
-                     `interface-cxx-standard = \"none\"`",
+                     `interface-cxx-standard = \"none\"`, or a directory holding a probe \
+                     package's `cabin.toml`",
                     entry.path().display()
                 );
             }
@@ -707,6 +882,21 @@ mod tests {
         let err = ensure_consumer_tests_used(&conversions).unwrap_err();
         let unused = tests.join("main.c").display().to_string();
         assert!(err.to_string().contains(&unused), "{err}");
+    }
+
+    /// The dry-run leaves out what this machine's own platform does not
+    /// build, so a checked platform must be that one where CI runs.
+    /// Any other machine has nothing to compare.
+    #[test]
+    fn a_checked_platform_is_what_its_machine_reports() {
+        let here = TargetPlatform::current();
+        let checked = checked_platforms();
+        assert_eq!(checked.len(), 3);
+        let same =
+            |platform: &&TargetPlatform| platform.os == here.os && platform.arch == here.arch;
+        if let Some(checked) = checked.iter().find(same) {
+            assert_eq!(*checked, here);
+        }
     }
 
     #[test]

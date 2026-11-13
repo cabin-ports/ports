@@ -89,9 +89,10 @@ included, and ignored files under `ports/` too:
   under `docs/` included.
 
 Whatever it selects, the dry-run first loads and validates the whole catalog (manifests,
-identities, requirement satisfiability, publication order, consumer-test file names) and prints its
-selection and the reason before staging anything.  [CONTRIBUTING.md](../CONTRIBUTING.md#checks)
-shows the branch command and the focused `--port` check.
+identities, requirement satisfiability, publication order, the entries of each `tests/`) and
+prints its selection and the reason before staging anything.
+[CONTRIBUTING.md](../CONTRIBUTING.md#checks) shows the branch command and the focused `--port`
+check.
 
 ### Merge queue
 
@@ -102,4 +103,5 @@ every port.  The narrowing is inductive: the base is `main` or the merge-queue e
 reaches `main` only once its own run (full or selective) passed, and the merge queue requires every
 entry to pass, not just a group's head (its `ALLGREEN` grouping strategy).  So a selective run
 proves only its printed selection, and an existing port broken by newer runner images surfaces at
-the next full run.  Like every dry-run, it probes default features only.
+the next full run.  Like every dry-run, it probes default features only, and what the selected
+ports' probe packages request.
