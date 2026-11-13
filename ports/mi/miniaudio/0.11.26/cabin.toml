@@ -30,12 +30,16 @@ interface-cxx-standard = "c++98"
 links = "miniaudio"
 
 # CMakeLists.txt links pthread, m and, where it finds one, dl on Unix, plus
-# atomic on 32-bit ARM; this port links dl and atomic on Linux only, since
-# OpenBSD and NetBSD have no libdl and FreeBSD's base system no libatomic.
+# atomic on 32-bit ARM.  Here pthread skips Android, whose libc holds it; dl
+# goes to Linux and Android, since OpenBSD and NetBSD have none; and atomic is
+# Linux-only, since FreeBSD's base system has no libatomic.
 [target.'cfg(family = "unix")'.profile]
-link-libs = ["pthread", "m"]
+link-libs = ["m"]
 
-[target.'cfg(os = "linux")'.profile]
+[target.'cfg(all(family = "unix", not(os = "android")))'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(any(os = "linux", os = "android"))'.profile]
 link-libs = ["dl"]
 
 [target.'cfg(all(os = "linux", arch = "arm"))'.profile]
