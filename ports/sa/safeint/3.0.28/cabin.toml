@@ -15,11 +15,8 @@ include = ["LICENSE", "SafeInt.hpp", "safe_math.h", "safe_math_impl.h"]
 
 # SafeInt.hpp is the C++ library and safe_math.h the C one; safe_math.h stops
 # with an #error after SafeInt.hpp, so a translation unit uses only one.
-# Some of safe_math.h's C functions are wrong and left as shipped: its char
-# casts (safe_cast_int8_int32 inverts its range check), negative int32_t times
-# uint64_t (safe_mul_int32_uint64 and check_mul_int32_uint64), and the long and
-# long long check_* wrappers' pointer casts, which break strict aliasing where
-# the intNN_t is another type.
+# Some of safe_math.h's C functions are wrong and left as shipped: the char
+# casts, int32_t times uint64_t, and the long and long long check_* wrappers.
 [target.safeint]
 type = "header-only"
 include-dirs = ["."]
