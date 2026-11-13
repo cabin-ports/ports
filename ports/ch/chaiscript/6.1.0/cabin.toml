@@ -1,0 +1,42 @@
+[package.upstream]
+url = "https://github.com/chaiscript/chaiscript/archive/refs/tags/v6.1.0.tar.gz"
+checksum = "sha256:3ca9ba6434b4f0123b5ab56433e3383b01244d9666c85c06cc116d7c41e8f92a"
+format = "tar.gz"
+strip-prefix = "ChaiScript-6.1.0"
+
+[package]
+name = "cabin-ports/chaiscript"
+version = "6.1.0"
+# LICENSE and license.txt are the same BSD-3-Clause text; both ship because
+# ChaiScript's own headers say "See license.txt".  dispatchkit/short_alloc.hpp
+# carries its own MIT text (Howard Hinnant).
+# WTFPL: utility/json.hpp:1-2 is "From github.com/nbsdx/SimpleJSON. Released
+# under the DWTFYW PL".
+license = "BSD-3-Clause AND MIT AND WTFPL"
+include = ["LICENSE", "license.txt", "include"]
+
+# Header-only; consumers write `#include <chaiscript/chaiscript.hpp>`.
+# Threads and module loading stay on, as upstream ships them;
+# CHAISCRIPT_NO_THREADS and CHAISCRIPT_NO_DYNLOAD remain consumer opt-ins.
+# Not ported: the chai interpreter, the fuzzer and the loadable modules
+# (stdlib, stl_extra) in src/, the static_libs, samples, unit and performance
+# tests, contrib and build files.
+# Limitation: with Apple clang 21's libc++ the headers compile only up to
+# C++17; at C++20 and C++23 libc++ rejects eval_error's std::vector of the
+# still-incomplete AST_Node_Trace (language/chaiscript_common.hpp:173).
+[target.chaiscript]
+type = "header-only"
+include-dirs = ["include"]
+# readme.md:46: "ChaiScript requires a C++14 compiler".
+interface-cxx-standard = "c++14"
+
+# The standard library's async starts a thread (chaiscript_stdlib.hpp:57);
+# upstream links -pthread on every Unix (CMakeLists.txt:247-260).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# The engine calls dladdr on construction (language/chaiscript_engine.hpp:293)
+# and dlopen to load modules, both in libdl before glibc 2.34; upstream links
+# dl (CMakeLists.txt:240-245).
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["dl"]
