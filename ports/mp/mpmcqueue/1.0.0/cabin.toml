@@ -1,0 +1,24 @@
+[package.upstream]
+# The commit vcpkg pins, six after tag v1.0; its CMakeLists.txt still declares
+# VERSION 1.0, hence 1.0.0, though it also adds size() and empty().  Before
+# C++17 the tag frees _aligned_malloc memory with free() on Windows when WIN32
+# is undefined (MSVC predefines only _WIN32); this commit tests _WIN32.
+url = "https://github.com/rigtorp/MPMCQueue/archive/28d05c021d68fc5280b593329d1982ed02f9d7b3.tar.gz"
+checksum = "sha256:89c07a1111e901956b580ccea47dc5311e38d554f46e2fadaea0424c3411ad76"
+format = "tar.gz"
+strip-prefix = "MPMCQueue-28d05c021d68fc5280b593329d1982ed02f9d7b3"
+
+[package]
+name = "cabin-ports/mpmcqueue"
+version = "1.0.0"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# The queue aligns its slots to std::hardware_destructive_interference_size
+# where the standard library defines it (except on Apple) and to 64 bytes
+# otherwise, so where that constant is not 64 its layout can differ between
+# translation units built at different standards.
+[target.mpmcqueue]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
