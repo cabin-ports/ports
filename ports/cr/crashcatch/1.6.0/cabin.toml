@@ -1,0 +1,32 @@
+[package.upstream]
+url = "https://github.com/keithpotz/CrashCatch/archive/refs/tags/v1.6.0.tar.gz"
+checksum = "sha256:601802cb2d99e3d302773520a50f97259c3bd5cff771263a658a12d01bf8d013"
+format = "tar.gz"
+strip-prefix = "CrashCatch-1.6.0"
+
+[package]
+name = "cabin-ports/crashcatch"
+version = "1.6.0"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# Header-only, as upstream installs it; consumers write
+# `#include <CrashCatch.hpp>`.  The v1.6.0 release still labels its headers
+# 1.5.0.  Upstream's CMake target also defines _CRT_SECURE_NO_WARNINGS on
+# Windows, a warning switch left to consumers.
+# Not ported: the examples, tests, packaging and build files.
+# Limitation: CrashCatchDLL.hpp's C API implementation, compiled by defining
+# CRASHCATCH_DLL_EXPORTS before including it, builds at C++17 and fails at
+# C++20 and C++23 with clang and GCC: from C++20 path::u8string() returns
+# std::u8string (CrashCatchDLL.hpp:184-197).
+[target.crashcatch]
+type = "header-only"
+include-dirs = ["include"]
+# CMakeLists.txt:4 sets C++17; CrashCatchDLL.hpp:12: "CrashCatch.hpp requires
+# C++17".
+interface-cxx-standard = "c++17"
+
+# The Windows handler writes minidumps and walks the stack through DbgHelp
+# and can show a MessageBox; upstream links both (CMakeLists.txt:11).
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["dbghelp", "user32"]
