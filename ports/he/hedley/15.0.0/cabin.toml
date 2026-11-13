@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/nemequ/hedley/archive/refs/tags/v15.tar.gz"
+checksum = "sha256:e91c71b58f59d08c7b8289be8f687866863d934dfaa528e4be30b178139ae863"
+format = "tar.gz"
+strip-prefix = "hedley-15"
+
+# Upstream's release v15, padded to three components.
+[package]
+name = "cabin-ports/hedley"
+version = "15.0.0"
+license = "CC0-1.0"
+include = ["COPYING", "hedley.h"]
+
+# hedley.h is the whole library, preprocessor macros only.  Not ported:
+# upstream's tests and CI files.  The C89 and C++98 floors are upstream's:
+# it defines its one variadic macro, HEDLEY_NON_NULL, with
+# -Wvariadic-macros suppressed (hedley.h:1268-1285).  hedley.h redefines
+# its macros only when no Hedley of version 15 or newer was included first
+# (hedley.h:13-17), so beside another library's newer bundled copy, that
+# copy's definitions apply.
+#
+# As upstream ships it, HEDLEY_IS_CONSTANT and HEDLEY_REQUIRE_CONSTEXPR do
+# not compile in C on MSVC: there the C11 fallback of HEDLEY_IS_CONSTEXPR_
+# drops its argument and expands to `(intptr_t) * 0` (hedley.h:1797).
+[target.hedley]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
