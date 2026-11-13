@@ -1,0 +1,81 @@
+[package.upstream]
+url = "https://github.com/recp/cglm/archive/refs/tags/v0.9.7.tar.gz"
+checksum = "sha256:cc0862eee2885d2a2b4870eb29b97c6e9b9ebc7c66e8854e1fa8f3d18d9d8475"
+format = "tar.gz"
+strip-prefix = "cglm-0.9.7"
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+[package]
+name = "cabin-ports/cglm"
+version = "0.9.7"
+license = "MIT"
+include = ["CREDITS", "LICENSE", "THIRD_PARTY_NOTICES", "include/cglm", "patches", "src"]
+
+# Upstream's static library from the sources its CMake build lists
+# (CMakeLists.txt:73-121).  The sources build as C11 (CMAKE_C_STANDARD); the
+# headers are C99, as upstream's docs state, and strict C89 fails despite their
+# "compatible with C89".  cglm/struct/handed/euler_to_quat_lh.h and _rh.h
+# include a ../common.h that upstream does not ship, so neither compiles.
+[target.cglm]
+type = "library"
+links = "cglm"
+sources = [
+  "src/euler.c",
+  "src/affine.c",
+  "src/io.c",
+  "src/quat.c",
+  "src/cam.c",
+  "src/vec2.c",
+  "src/ivec2.c",
+  "src/vec3.c",
+  "src/ivec3.c",
+  "src/vec4.c",
+  "src/ivec4.c",
+  "src/mat2.c",
+  "src/mat2x3.c",
+  "src/mat2x4.c",
+  "src/mat3.c",
+  "src/mat3x2.c",
+  "src/mat3x4.c",
+  "src/mat4.c",
+  "src/mat4x2.c",
+  "src/mat4x3.c",
+  "src/plane.c",
+  "src/noise.c",
+  "src/frustum.c",
+  "src/box.c",
+  "src/aabb2d.c",
+  "src/project.c",
+  "src/sphere.c",
+  "src/ease.c",
+  "src/curve.c",
+  "src/bezier.c",
+  "src/ray.c",
+  "src/affine2d.c",
+  "src/clipspace/ortho_lh_no.c",
+  "src/clipspace/ortho_lh_zo.c",
+  "src/clipspace/ortho_rh_no.c",
+  "src/clipspace/ortho_rh_zo.c",
+  "src/clipspace/persp_lh_no.c",
+  "src/clipspace/persp_lh_zo.c",
+  "src/clipspace/persp_rh_no.c",
+  "src/clipspace/persp_rh_zo.c",
+  "src/clipspace/view_lh_no.c",
+  "src/clipspace/view_lh_zo.c",
+  "src/clipspace/view_rh_no.c",
+  "src/clipspace/view_rh_zo.c",
+  "src/clipspace/project_no.c",
+  "src/clipspace/project_zo.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+interface-c-standard = "c99"
+# Upstream's static build defines CGLM_STATIC publicly (CMakeLists.txt:126);
+# without it, MSVC declares the functions dllimport (common.h:28-35).
+defines = ["CGLM_STATIC"]
+interface-defines = ["CGLM_STATIC"]
+
+# libm, which upstream's Meson build links wherever one exists.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
