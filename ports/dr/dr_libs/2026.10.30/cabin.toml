@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/mackron/dr_libs/archive/refs/tags/wav-0.14.6.tar.gz"
+checksum = "sha256:8497d58110bb0e4cac07a012ead1602b5e0deef37506ace34f5d7e6523586fc5"
+format = "tar.gz"
+strip-prefix = "dr_libs-wav-0.14.6"
+
+# Upstream tags each library separately.  This is tag wav-0.14.6 (dr_wav
+# 0.14.6, with dr_flac 0.13.4 and dr_mp3 0.7.4), versioned by its commit
+# date (2026-10-30).
+[package]
+name = "cabin-ports/dr_libs"
+version = "2026.10.30"
+# CC0-1.0 is minimp3's dedication, which dr_mp3.h carries for the decoder it
+# derives from it (dr_mp3.h:5135-5140).
+license = "(Unlicense OR MIT-0) AND CC0-1.0"
+# Not ported: the tests, fuzzers, external/ (test dependencies) and CMake
+# file.
+include = ["LICENSE", "README.md", "dr_flac.h", "dr_mp3.h", "dr_wav.h"]
+
+# Single-file libraries: one translation unit defines DR_WAV_IMPLEMENTATION,
+# DR_FLAC_IMPLEMENTATION or DR_MP3_IMPLEMENTATION before including the
+# header.  Configuration macros are the consumer's choice, so the port
+# exports no defines.  Upstream's CI builds C89 (ci.yml:46-47) and states no
+# C++ standard; C++98 is the measured floor.
+[target.dr_libs]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
