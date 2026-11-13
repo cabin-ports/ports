@@ -1,0 +1,32 @@
+[package.upstream]
+url = "https://github.com/arximboldi/zug/archive/refs/tags/v0.1.2.tar.gz"
+checksum = "sha256:75ff666a4ce1615b3ca26abbb17b10f5cb5cf5f86c9c293ec430c34750d3ea27"
+format = "tar.gz"
+strip-prefix = "zug-0.1.2"
+
+[package]
+name = "cabin-ports/zug"
+version = "0.1.2"
+license = "BSL-1.0"
+include = ["LICENSE", "zug"]
+
+# zug::skip_state is std::variant from C++17 and boost::variant below
+# (zug/skip.hpp), so Boost.Variant keeps upstream's C++14 support; C++17
+# consumers get the dependency unused.
+[dependencies]
+"cabin-ports/boost-variant" = "^1.92"
+
+# Consumers write <zug/...>.  Not ported: the Catch2 tests and the docs.
+# Limitations:
+# - Cabin passes cl no /Zc:__cplusplus, so on MSVC zug takes its pre-C++17
+#   paths, Boost.Variant included, at every /std:.  The C++14 consumer test
+#   takes the Boost.Variant path on every OS.  MSVC's STL removes those
+#   paths' std::result_of in C++20, so at /std:c++20 and later define
+#   _HAS_DEPRECATED_RESULT_OF=1.
+# - sequence.hpp and transducer/distinct.hpp need <functional>, and
+#   transducer/range.hpp <algorithm>, included before them.
+[target.zug]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++14"
+deps = [{ name = "cabin-ports/boost-variant", public = true }]
