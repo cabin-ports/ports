@@ -1,0 +1,35 @@
+[package.upstream]
+url = "https://github.com/kokkos/mdspan/archive/refs/tags/mdspan-0.6.0.tar.gz"
+checksum = "sha256:79f94d7f692cbabfbaff6cd0d3434704435c853ee5087b182965fa929a48a592"
+format = "tar.gz"
+strip-prefix = "mdspan-mdspan-0.6.0"
+
+[package]
+name = "cabin-ports/mdspan"
+version = "0.6.0"
+license = "Apache-2.0 WITH LLVM-exception"
+include = ["LICENSE", "include"]
+
+# Consumers include <experimental/mdspan>, and <experimental/mdarray> for
+# mdarray, both in namespace std::experimental.  Upstream supports C++14 and
+# later; part of the API depends on the consumer's standard: submdspan and the
+# deduction guides need C++17, the std::span overloads C++20 (indexing an
+# mdspan with a std::span does not compile in 0.6.0: mdspan.hpp:251 and :310
+# pass the span to a helper taking std::array), and where the compiler has
+# multidimensional subscripts (C++23) mdspan and mdarray provide operator[]
+# instead of operator(), unless the consumer defines
+# MDSPAN_USE_PAREN_OPERATOR=1.  Below C++20, and with MSVC at any standard,
+# conversions the standard makes explicit, such as dynamic to static extents,
+# are implicit.  Below C++20, comparing a layout_stride mapping with another
+# layout's mapping by != uses the alternative token `not`
+# (layout_stride.hpp:460), which MSVC accepts only under /permissive- or /Za;
+# Cabin passes neither, so such an MSVC consumer includes <iso646.h> before
+# the mdspan headers.  The extents, mdarray, and strided_slice templates name
+# internal-linkage helpers (extents.hpp:34 and :50, mdarray.hpp:41,
+# strided_slice.hpp:23), so using the library in more than one translation
+# unit of a program is formally an ODR violation.  Not ported: the
+# MDSPAN_ENABLE_SYCL option, which only adds -fsycl to consumers.
+[target.mdspan]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
