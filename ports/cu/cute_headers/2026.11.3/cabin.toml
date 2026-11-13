@@ -44,10 +44,7 @@ include-dirs = ["."]
 interface-c-standard = "c99"
 interface-cxx-standard = "c++98"
 
-# cute_c2.h calls sqrtf, sinf and cosf from libm.
+# cute_c2.h calls sqrtf, sinf and cosf from libm, and cute_sync.h's POSIX
+# backend uses pthreads.
 [target.'cfg(family = "unix")'.profile]
-link-libs = ["m"]
-
-# cute_sync.h's POSIX backend uses pthreads; Android's libc provides them.
-[target.'cfg(all(family = "unix", not(os = "android")))'.profile]
-link-libs = ["pthread"]
+link-libs = ["m", "pthread"]
