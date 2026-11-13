@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/Taywee/args/archive/refs/tags/6.6.1.tar.gz"
+checksum = "sha256:61cdbb13f55493e6ffe07018c86b17f9ff68a5c1059eb15f4f079e04429915ff"
+format = "tar.gz"
+strip-prefix = "args-6.6.1"
+
+[package]
+name = "cabin-ports/args"
+version = "6.6.1"
+license = "MIT"
+include = ["LICENSE", "args.hxx"]
+
+# Taywee's args, upstream's header-only args target; consumers write
+# `#include <args.hxx>`.  Not ported: its tests, examples, fuzz and proof of
+# concept sources, and its build and packaging files.
+[target.args]
+type = "header-only"
+include-dirs = ["."]
+# README.md and CMakeLists.txt describe it as a C++11 library.
+interface-cxx-standard = "c++11"
