@@ -1,0 +1,33 @@
+[package.upstream]
+url = "https://github.com/yhirose/cpp-peglib/archive/refs/tags/v1.31.0.tar.gz"
+checksum = "sha256:78cf9fc9110af3775c967592f5269563e6f8ee21024eb3d81a572bc0866fcb91"
+format = "tar.gz"
+strip-prefix = "cpp-peglib-1.31.0"
+# cl reports __cplusplus as 199711L without /Zc:__cplusplus, which upstream
+# requires (README.md:9) and Cabin cannot pass to consumers; the patch lets
+# peglib.h:60's C++17 check also accept _MSVC_LANG.
+patches = ["patches/0001-accept-msvc-lang.patch"]
+
+[package]
+name = "cabin-ports/cpp-peglib"
+version = "1.31.0"
+license = "MIT"
+# peglib.h:72-73 credits WG21 paper N4189 for scope_exit; its copyright
+# significance is uncertain.
+include = ["LICENSE", "patches", "peglib.h"]
+
+# The one header upstream installs (CMakeLists.txt:50); consumers write
+# `#include <peglib.h>`.
+# Not ported: the rest of the archive (programs, tests, grammars, the docs/
+# web playground, editor and build files).
+[target.cpp-peglib]
+type = "header-only"
+include-dirs = ["."]
+# peglib.h:60-62 rejects anything before C++17.
+interface-cxx-standard = "c++17"
+
+# README.md:52: some Linux distributions need -pthread when linking;
+# upstream's programs link Threads on Linux (CMakeLists.txt:16-18).  Linked
+# on every Unix, which is harmless where libc provides it.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
