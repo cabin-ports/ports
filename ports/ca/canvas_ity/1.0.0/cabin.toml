@@ -1,0 +1,23 @@
+[package.upstream]
+# Upstream has no tags or releases.  This is main's head (2024-02-29);
+# src/canvas_ity.hpp is unchanged since the "v1.00 release" commit, and the
+# version is the header's declared v1.00.
+url = "https://github.com/a-e-k/canvas_ity/archive/8be29cb154d06392385687c721f822d8cce0dc05.tar.gz"
+checksum = "sha256:e1ed21c68b97320a19103259a1f35f5900055dca6c3b1083f00158b2b08a5eed"
+format = "tar.gz"
+strip-prefix = "canvas_ity-8be29cb154d06392385687c721f822d8cce0dc05"
+
+[package]
+name = "cabin-ports/canvas_ity"
+version = "1.0.0"
+license = "ISC"
+include = ["LICENSE.txt", "src"]
+
+# Single-header: exactly one C++ translation unit defines
+# CANVAS_ITY_IMPLEMENTATION before including <canvas_ity.hpp>; every other
+# one gets declarations only.  Upstream states C++03 and tests at -std=c++98.
+# Not ported: test/ and demos/, upstream's test suite and tiger demo.
+[target.canvas_ity]
+type = "header-only"
+include-dirs = ["src"]
+interface-cxx-standard = "c++98"
