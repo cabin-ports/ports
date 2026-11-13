@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/dcleblanc/SafeInt/archive/refs/tags/3.0.28a.tar.gz"
+checksum = "sha256:9e652d065a3cef80623287d5dc61edcf6a95ddab38a9dfeb34f155261fc9cef7"
+format = "tar.gz"
+strip-prefix = "SafeInt-3.0.28a"
+
+# Version 3.0.28 from upstream's 3.0.28a tag, its fix of 3.0.28: the C
+# header's functions became static inline, so they link without optimization,
+# and reserved macro names were renamed.
+[package]
+name = "cabin-ports/safeint"
+version = "3.0.28"
+license = "MIT"
+include = ["LICENSE", "SafeInt.hpp", "safe_math.h", "safe_math_impl.h"]
+
+# SafeInt.hpp is the C++ library and safe_math.h the C one; safe_math.h stops
+# with an #error after SafeInt.hpp, so a translation unit uses only one.
+# Some of safe_math.h's C functions are wrong and left as shipped: its char
+# casts (safe_cast_int8_int32 inverts its range check), negative int32_t times
+# uint64_t (safe_mul_int32_uint64 and check_mul_int32_uint64), and the long and
+# long long check_* wrappers' pointer casts, which break strict aliasing where
+# the intNN_t is another type.
+[target.safeint]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
