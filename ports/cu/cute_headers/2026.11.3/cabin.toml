@@ -1,0 +1,50 @@
+[package.upstream]
+url = "https://github.com/RandyGaul/cute_headers/archive/476d688d8cdcaf1c3890a106a6421849a29ed988.tar.gz"
+checksum = "sha256:4b46039a56d24a622465458050822546a712653161c67d25949ad330d97deddd"
+format = "tar.gz"
+strip-prefix = "cute_headers-476d688d8cdcaf1c3890a106a6421849a29ed988"
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+[package]
+name = "cabin-ports/cute_headers"
+version = "2026.11.3"
+# ISC and MIT: libhydrogen and its STROBE-based x25519 code, embedded in
+# cute_net.h.  Zlib and MIT: cute_c2.h's GJK and time-of-impact code, from
+# Erin Catto's GDC 2010 demo and Box2D.  Mattias Gustavsson's code (MIT OR
+# Unlicense) adds no term.
+# cute_tls.h:134 credits Martins Mozeiko's SChannel sample for the TLS set-up;
+# its copyright significance is uncertain.  cute_aseprite.h:36 and
+# cute_sound.h:1756 credit Noel Berry's blah and the SDL wiki for short
+# routines; their copyright significance is uncertain.
+license = "Zlib AND ISC AND MIT"
+include = [
+  "LICENSE",
+  "THIRD_PARTY_NOTICES",
+  "cute_aseprite.h",
+  "cute_c2.h",
+  "cute_net.h",
+  "cute_png.h",
+  "cute_sound.h",
+  "cute_spritebatch.h",
+  "cute_sync.h",
+  "cute_tiled.h",
+  "cute_tls.h",
+  "patches",
+]
+
+# The nine headers at the archive root, as upstream and vcpkg ship them.
+# cute_sound.h needs SDL3, and cute_tls.h needs s2n-tls on Linux or Apple's
+# Network framework; the consumer supplies them.  cute_tiled.h compiles only
+# as C++: C rejects cute_tiled_chunk_t, used without a typedef at line 344.
+[target.cute_headers]
+type = "header-only"
+include-dirs = ["."]
+# Upstream states no standard; C99 and C++98 are the measured floors.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+
+# cute_c2.h calls sqrtf, sinf and cosf from libm, and cute_sync.h's POSIX
+# backend uses pthreads.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m", "pthread"]

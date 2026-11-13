@@ -1,0 +1,96 @@
+--- /dev/null
++++ b/THIRD_PARTY_NOTICES
+@@ -0,0 +1,93 @@
++Third-party notices for cabin-ports/cute_headers
++
++cute_headers' own license is in LICENSE.  cute_c2.h adapts code from Erin
++Catto's GJK demo and Box2D, and cute_net.h embeds libhydrogen, whose x25519
++code is based on STROBE, all without their license texts.
++
++========================================================================
++Erin Catto's GJK demo (GDC 2010)
++https://box2d.org/files/ErinCatto_GJK_Source.zip
++cute_c2.h, lines 776-1083 (c22, c23, c2GJK): adapted from Distance2D.cpp,
++credited at cute_c2.h:898-900.
++Copyright (c) 2010 Erin Catto
++SPDX-License-Identifier: Zlib
++
++Copyright (c) 2010 Erin Catto http://wwwABC.gphysics.com
++
++This software is provided 'as-is', without any express or implied
++warranty.  In no event will the authors be held liable for any damages
++arising from the use of this software.
++Permission is granted to anyone to use this software for any purpose,
++including commercial applications, and to alter it and redistribute it
++freely, subject to the following restrictions:
++1. The origin of this software must not be misrepresented; you must not
++claim that you wrote the original software. If you use this software
++in a product, an acknowledgment in the product documentation would be
++appreciated but is not required.
++2. Altered source versions must be plainly marked as such, and must not be
++misrepresented as being the original software.
++3. This notice may not be removed or altered from any source distribution.
++
++========================================================================
++Box2D
++https://github.com/erincatto/box2d
++cute_c2.h, lines 1085-1193 (c2TOI): adapted from b2ShapeCast, credited at
++cute_c2.h:103 and 1085.
++Copyright (c) 2019 Erin Catto
++SPDX-License-Identifier: MIT
++Terms: "MIT License" at the end of this file.
++
++========================================================================
++libhydrogen
++https://github.com/jedisct1/libhydrogen
++cute_net.h, lines 670-4116: libhydrogen's source, embedded as one block.
++Copyright (c) 2017-2021
++Frank Denis <j at pureftpd dot org>
++SPDX-License-Identifier: ISC
++
++ISC License
++
++Copyright (c) 2017-2021
++Frank Denis <j at pureftpd dot org>
++
++Permission to use, copy, modify, and/or distribute this software for any
++purpose with or without fee is hereby granted, provided that the above
++copyright notice and this permission notice appear in all copies.
++
++THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
++WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
++MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
++ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
++WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
++ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
++OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
++
++========================================================================
++STROBE
++https://sourceforge.net/projects/strobe/
++cute_net.h, lines 2697-3080: libhydrogen's x25519 code, "Based on Michael
++Hamburg's STROBE reference implementation".
++Copyright (c) 2015-2016 Cryptography Research, Inc.
++SPDX-License-Identifier: MIT
++Terms: "MIT License" at the end of this file.
++
++========================================================================
++MIT License
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
