@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/rvarago/absent/archive/refs/tags/0.3.1.tar.gz"
+checksum = "sha256:fe0a96303c6438f1095273b093e56c8f10a3b79dea86676b59aec94e6ed89224"
+format = "tar.gz"
+strip-prefix = "absent-0.3.1"
+
+[package]
+name = "cabin-ports/absent"
+version = "0.3.1"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# Header-only, C++17 as upstream's CMake target requires and the measured
+# floor.  Not ported: the tests and the CMake, Conan and Docker files.
+[target.absent]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
