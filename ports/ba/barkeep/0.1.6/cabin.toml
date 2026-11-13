@@ -1,0 +1,35 @@
+[package.upstream]
+url = "https://github.com/oir/barkeep/archive/refs/tags/v0.1.6.tar.gz"
+checksum = "sha256:fbb1a1ae1243ac553c8107a5f241793ee3f6d069d37430d0711a8e45feaa4628"
+format = "tar.gz"
+strip-prefix = "barkeep-0.1.6"
+# cl at /std:c++17, without /permissive- (which Cabin cannot pass to
+# consumers), rejects the header's alternative tokens: "barkeep.h(237):
+# error C2065: 'not': undeclared identifier".  The patch spells its uses of
+# not, and and or as !, && and ||; its comment line is the change notice
+# Apache-2.0 section 4(b) requires.
+patches = ["patches/0001-spell-operators-for-msvc.patch"]
+
+[package]
+name = "cabin-ports/barkeep"
+version = "0.1.6"
+license = "Apache-2.0"
+# Not ported: python/ (upstream's pybind11 bindings), the tests and demos,
+# docs/, test_package/ and the Meson and Conan files.
+include = ["LICENSE", "barkeep", "patches"]
+
+# README.md:685-686 says C++20 is needed only for the designated
+# initializers in its examples and that older standards can set the config
+# fields directly; the header itself needs C++17.
+# BARKEEP_ENABLE_FMT_FORMAT needs fmt, which the port does not depend on,
+# and BARKEEP_ENABLE_STD_FORMAT needs C++20's <format>.
+[target.barkeep]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++17"
+
+# Displays render on a std::thread (barkeep.h:229): pthreads on Unix, which
+# upstream's own build links (meson.build:12).  Folded into libc since
+# glibc 2.34, where the extra -lpthread is a harmless no-op.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]

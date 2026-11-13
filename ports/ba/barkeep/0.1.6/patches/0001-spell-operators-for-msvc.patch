@@ -1,0 +1,123 @@
+--- a/barkeep/barkeep.h
++++ b/barkeep/barkeep.h
+@@ -11,6 +11,7 @@
+ // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
++// Changed for cabin-ports on 2026-11-13: not/and/or spelled !/&&/|| for cl.
+ 
+ #ifndef BARKEEP_H
+ #define BARKEEP_H
+@@ -234,11 +235,11 @@
+         {
+           std::unique_lock lock(done_m_);
+           done = done_;
+-          while (not done and std::chrono::steady_clock::now() < deadline) {
++          while (!done && std::chrono::steady_clock::now() < deadline) {
+             done_cv_.wait_until(lock, deadline);
+             if (std::chrono::steady_clock::now() < deadline) {
+               // early wake-up, display again
+-              if (not no_tty_) { display_(/*redraw=*/true); }
++              if (!no_tty_) { display_(/*redraw=*/true); }
+             }
+             done = done_;
+           }
+@@ -256,7 +257,7 @@
+ 
+   /// End the display.
+   virtual void done() {
+-    if (not running()) { return; } // noop if already done() before
++    if (!running()) { return; } // noop if already done() before
+     {
+       std::lock_guard lock(done_m_);
+       done_ = true;
+@@ -288,7 +289,7 @@
+   /// Display the message to output stream.
+   /// @return Number of `\n` characters in the message.
+   long render_message_() const {
+-    if (not message_.empty()) { out() << message_ << " "; }
++    if (!message_.empty()) { out() << message_ << " "; }
+     return std::count(message_.begin(), message_.end(), '\n');
+   }
+ 
+@@ -338,7 +339,7 @@
+   static const auto clear_line = "\033[K";
+   static const auto cursor_up = "\033[A";
+ 
+-  if (not no_tty_) {
++  if (!no_tty_) {
+     *out_ << "\r" << clear_line;
+     for (long i = 0; i < last_num_newlines_; i++) {
+       *out_ << cursor_up << clear_line;
+@@ -383,7 +384,7 @@
+ 
+   long render_(bool redraw = false, const std::string& end = " ") override {
+     long nls = render_message_();
+-    if (not redraw) { frame_ = (frame_ + 1) % stills_.size(); }
++    if (!redraw) { frame_ = (frame_ + 1) % stills_.size(); }
+     out() << stills_[frame_] << end;
+     return nls; // assuming no newlines in stills
+   }
+@@ -438,7 +439,7 @@
+       std::lock_guard lock(message_mutex_);
+       nls = render_message_();
+     }
+-    if (not redraw) { frame_ = (frame_ + 1) % stills_.size(); }
++    if (!redraw) { frame_ = (frame_ + 1) % stills_.size(); }
+     out() << stills_[frame_] << end;
+     return nls; // assuming no newlines in stills
+   }
+@@ -690,7 +691,7 @@
+   ///                 considered.
+   Speedometer(const ProgressProvider& progress_provider, double discount)
+       : progress_provider_(progress_provider), discount_(discount) {
+-    if (discount < 0 or discount > 1) {
++    if (discount < 0 || discount > 1) {
+       throw std::runtime_error("Discount must be in [0, 1]");
+     }
+   }
+@@ -739,7 +740,7 @@
+   /// Write the value of progress with the message to the output stream
+   long render_(bool /*redraw*/ = false, const std::string& end = " ") override {
+ #if defined(BARKEEP_ENABLE_FMT_FORMAT)
+-    if (not format_.empty()) {
++    if (!format_.empty()) {
+       using namespace fmt::literals;
+       value_t<Progress> progress = progress_provider_.load();
+       if (speedom_) {
+@@ -769,7 +770,7 @@
+       return std::count(format_.begin(), format_.end(), '\n');
+     }
+ #elif defined(BARKEEP_ENABLE_STD_FORMAT)
+-    if (not format_.empty()) {
++    if (!format_.empty()) {
+       value_t<Progress> progress = progress_provider_.load();
+       auto speed = speedom_ ? speedom_->speed() : std::nan("");
+       out() << std::vformat(format_,
+@@ -989,7 +990,7 @@
+   /// Run all of the individual render methods to write everything to stream
+   long render_(bool /*redraw*/ = false, const std::string& end = " ") override {
+ #if defined(BARKEEP_ENABLE_FMT_FORMAT)
+-    if (not format_.empty()) {
++    if (!format_.empty()) {
+       using namespace fmt::literals;
+       value_t<Progress> progress = progress_provider_.load();
+ 
+@@ -1032,7 +1033,7 @@
+       return std::count(format_.begin(), format_.end(), '\n');
+     }
+ #elif defined(BARKEEP_ENABLE_STD_FORMAT)
+-    if (not format_.empty()) {
++    if (!format_.empty()) {
+       value_t<Progress> progress = progress_provider_.load();
+ 
+       std::stringstream bar_ss;
+@@ -1200,7 +1201,7 @@
+       auto& front = displays.front()->displayer_;
+       front->interval(
+           std::min(front->interval(), display->displayer_->interval()));
+-      front->no_tty(front->no_tty() or display->displayer_->no_tty());
++      front->no_tty(front->no_tty() || display->displayer_->no_tty());
+ 
+       display->displayer_->out(&front->out());
+     }
