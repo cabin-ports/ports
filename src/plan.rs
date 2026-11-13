@@ -252,16 +252,6 @@ fn registry_edges(
     package: &cabin_core::Package,
     manifest_path: &Path,
 ) -> Result<(Vec<PortDependencyEdge>, Vec<DeclaredRequirement>)> {
-    // Host pkg-config would make the published build host-dependent.
-    if let Some(system) = package.system_dependencies.first() {
-        bail!(
-            "{} declares the system dependency `{}`; port packages carry registry \
-             dependencies only",
-            manifest_path.display(),
-            system.name.as_str()
-        );
-    }
-
     let activated_by_default = default_activated_optional_deps(package);
 
     let mut dependencies = Vec::new();
@@ -1240,23 +1230,6 @@ pub(crate) mod tests {
         );
         let conversions = load_conversions(dir.path()).unwrap();
         assert_eq!(conversions[0].probe_standards, ProbeStandards::default());
-    }
-
-    #[test]
-    fn a_package_with_a_system_dependency_is_refused() {
-        let dir = assert_fs::TempDir::new().unwrap();
-        write_package(
-            dir.path(),
-            "fmt",
-            "12.2.0",
-            &package_manifest(
-                "cabin-ports/fmt",
-                "12.2.0",
-                "[dependencies]\nzlib = { version = \"1.3\", system = true }\n\n",
-            ),
-        );
-        let err = load_conversions(dir.path()).unwrap_err();
-        assert!(format!("{err:#}").contains("system dependency"), "{err:#}");
     }
 
     #[test]

@@ -53,7 +53,7 @@ version = "1.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "40c48f72fd53cd289104fc64099abca73db4166ad86ea0b4341abe65af83dadc"
 dependencies = [
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -64,7 +64,7 @@ checksum = "291e6a250ff86cd4a820112fb8898808a366d8f9f58ce16d1f538353ad55747d"
 dependencies = [
  "anstyle",
  "once_cell_polyfill",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -171,7 +171,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-artifact"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=cf25026e7fb3b59647e64f4abd58afe17e22c689#cf25026e7fb3b59647e64f4abd58afe17e22c689"
+source = "git+https://github.com/cabinpkg/cabin?rev=4deef9cd22d9cea58bf84d3becc6ed48200440e1#4deef9cd22d9cea58bf84d3becc6ed48200440e1"
 dependencies = [
  "atomic-write-file",
  "cabinpkg-core",
@@ -189,7 +189,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-core"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=cf25026e7fb3b59647e64f4abd58afe17e22c689#cf25026e7fb3b59647e64f4abd58afe17e22c689"
+source = "git+https://github.com/cabinpkg/cabin?rev=4deef9cd22d9cea58bf84d3becc6ed48200440e1#4deef9cd22d9cea58bf84d3becc6ed48200440e1"
 dependencies = [
  "cabinpkg-env",
  "cabinpkg-fs",
@@ -207,7 +207,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-credentials"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=cf25026e7fb3b59647e64f4abd58afe17e22c689#cf25026e7fb3b59647e64f4abd58afe17e22c689"
+source = "git+https://github.com/cabinpkg/cabin?rev=4deef9cd22d9cea58bf84d3becc6ed48200440e1#4deef9cd22d9cea58bf84d3becc6ed48200440e1"
 dependencies = [
  "atomic-write-file",
  "cabinpkg-env",
@@ -224,7 +224,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-env"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=cf25026e7fb3b59647e64f4abd58afe17e22c689#cf25026e7fb3b59647e64f4abd58afe17e22c689"
+source = "git+https://github.com/cabinpkg/cabin?rev=4deef9cd22d9cea58bf84d3becc6ed48200440e1#4deef9cd22d9cea58bf84d3becc6ed48200440e1"
 dependencies = [
  "shlex 2.0.1",
  "thiserror",
@@ -233,7 +233,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-fs"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=cf25026e7fb3b59647e64f4abd58afe17e22c689#cf25026e7fb3b59647e64f4abd58afe17e22c689"
+source = "git+https://github.com/cabinpkg/cabin?rev=4deef9cd22d9cea58bf84d3becc6ed48200440e1#4deef9cd22d9cea58bf84d3becc6ed48200440e1"
 dependencies = [
  "atomic-write-file",
  "dunce",
@@ -242,7 +242,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-index"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=cf25026e7fb3b59647e64f4abd58afe17e22c689#cf25026e7fb3b59647e64f4abd58afe17e22c689"
+source = "git+https://github.com/cabinpkg/cabin?rev=4deef9cd22d9cea58bf84d3becc6ed48200440e1#4deef9cd22d9cea58bf84d3becc6ed48200440e1"
 dependencies = [
  "cabinpkg-core",
  "semver",
@@ -255,7 +255,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-index-http"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=cf25026e7fb3b59647e64f4abd58afe17e22c689#cf25026e7fb3b59647e64f4abd58afe17e22c689"
+source = "git+https://github.com/cabinpkg/cabin?rev=4deef9cd22d9cea58bf84d3becc6ed48200440e1#4deef9cd22d9cea58bf84d3becc6ed48200440e1"
 dependencies = [
  "cabinpkg-core",
  "cabinpkg-credentials",
@@ -271,7 +271,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-manifest"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=cf25026e7fb3b59647e64f4abd58afe17e22c689#cf25026e7fb3b59647e64f4abd58afe17e22c689"
+source = "git+https://github.com/cabinpkg/cabin?rev=4deef9cd22d9cea58bf84d3becc6ed48200440e1#4deef9cd22d9cea58bf84d3becc6ed48200440e1"
 dependencies = [
  "cabinpkg-core",
  "camino",
@@ -287,7 +287,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-package"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=cf25026e7fb3b59647e64f4abd58afe17e22c689#cf25026e7fb3b59647e64f4abd58afe17e22c689"
+source = "git+https://github.com/cabinpkg/cabin?rev=4deef9cd22d9cea58bf84d3becc6ed48200440e1#4deef9cd22d9cea58bf84d3becc6ed48200440e1"
 dependencies = [
  "cabinpkg-core",
  "cabinpkg-fs",
@@ -305,7 +305,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-publish"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=cf25026e7fb3b59647e64f4abd58afe17e22c689#cf25026e7fb3b59647e64f4abd58afe17e22c689"
+source = "git+https://github.com/cabinpkg/cabin?rev=4deef9cd22d9cea58bf84d3becc6ed48200440e1#4deef9cd22d9cea58bf84d3becc6ed48200440e1"
 dependencies = [
  "cabinpkg-artifact",
  "cabinpkg-core",
@@ -321,7 +321,7 @@ dependencies = [
 [[package]]
 name = "cabinpkg-registry-file"
 version = "0.18.0"
-source = "git+https://github.com/cabinpkg/cabin?rev=cf25026e7fb3b59647e64f4abd58afe17e22c689#cf25026e7fb3b59647e64f4abd58afe17e22c689"
+source = "git+https://github.com/cabinpkg/cabin?rev=4deef9cd22d9cea58bf84d3becc6ed48200440e1#4deef9cd22d9cea58bf84d3becc6ed48200440e1"
 dependencies = [
  "cabinpkg-core",
  "cabinpkg-fs",
@@ -469,9 +469,9 @@ dependencies = [
 
 [[package]]
 name = "crc32fast"
-version = "1.5.3"
+version = "1.5.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0ba106e844045ddc02c20768ac4b0b7cb45f2cc2ecbd833ac9f5dacb183c2055"
+checksum = "2b929dd2a135771f40afabd1073f85eed59c800b7c61901e5c254270497dad64"
 dependencies = [
  "cfg-if",
 ]
@@ -579,7 +579,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -846,9 +846,9 @@ dependencies = [
 
 [[package]]
 name = "ignore"
-version = "0.4.33"
+version = "0.4.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "00b69833ed729dc5aa7d19541d96d6cf8e9137194207a04916d658e43168402f"
+checksum = "484be5657551d7868d67587df967fb4fcbe9d266a761cc855aaa148fda0b3cc7"
 dependencies = [
  "crossbeam-deque",
  "globset",
@@ -1187,7 +1187,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1467,7 +1467,7 @@ dependencies = [
  "getrandom 0.4.3",
  "once_cell",
  "rustix",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -1767,7 +1767,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2062,14 +2062,15 @@ dependencies = [
 
 [[package]]
 name = "zip"
-version = "9.2.1"
+version = "9.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "848dad21639597378c3be94c59fd4de683f0f6d8a5387575896e1245737d4f37"
+checksum = "23f17fbc870bfac28c6228aed7d6e6df352e26bf7015c4313727e16a7a01ce5e"
 dependencies = [
  "crc32fast",
  "flate2",
  "getrandom 0.4.3",
  "indexmap",
+ "libc",
  "memchr",
  "nix",
  "typed-path",
