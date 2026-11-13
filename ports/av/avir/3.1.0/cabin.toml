@@ -1,0 +1,30 @@
+[package.upstream]
+url = "https://github.com/avaneev/avir/archive/refs/tags/3.1.tar.gz"
+checksum = "sha256:8235740e578f86d08d03d3f7ae2a6893554c1ae17a061117475219fe3538a7d2"
+format = "tar.gz"
+strip-prefix = "avir-3.1"
+
+# Upstream tags this release 3.1, the version avir.h's AVIR_VERSION and every
+# header's @version state; Cabin versions have three components.
+[package]
+name = "cabin-ports/avir"
+version = "3.1.0"
+license = "MIT"
+include = [
+  "LICENSE",
+  "avir.h",
+  "avir_dil.h",
+  "avir_float4_sse.h",
+  "avir_float8_avx.h",
+  "lancir.h",
+]
+
+# Header-only: consumers include "avir.h" and "lancir.h".  The opt-in SIMD
+# headers are x86 only: "avir_float4_sse.h" uses SSE2 intrinsics and
+# "avir_float8_avx.h" AVX intrinsics.
+# Not ported: the prebuilt imageresize demo programs (bin/) and other/.
+[target.avir]
+type = "header-only"
+include-dirs = ["."]
+# Upstream states no C++ standard; C++98 is the measured floor.
+interface-cxx-standard = "c++98"
