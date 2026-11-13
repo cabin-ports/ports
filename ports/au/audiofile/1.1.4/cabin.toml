@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/adamstark/AudioFile/archive/refs/tags/1.1.4.tar.gz"
+checksum = "sha256:e3749f90a9356b5206ef8928fa0a9c039e7db49e46bb7f32c3963d6c44c5bea8"
+format = "tar.gz"
+strip-prefix = "AudioFile-1.1.4"
+
+[package]
+name = "cabin-ports/audiofile"
+version = "1.1.4"
+license = "MIT"
+# Not ported: tests/ (doctest and the test audio), examples/ and the CMake
+# file.
+include = ["LICENSE", "AudioFile.h"]
+
+# Consumers write `#include <AudioFile.h>`, as upstream's README and build
+# tree do; upstream's CMake install instead nests it under AudioFile/.
+# Loading does not fully validate chunk sizes: malformed data can read out
+# of bounds or crash instead of failing the load, and a truncated file can
+# abort on an assert unless NDEBUG is defined.  Loading an AIFF file with an
+# iXML chunk, even one AudioFile saved, can crash, since the decoder reads
+# that chunk's size little-endian.
+[target.audiofile]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++17"
