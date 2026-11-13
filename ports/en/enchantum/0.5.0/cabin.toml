@@ -3,12 +3,19 @@ url = "https://github.com/ZXShady/enchantum/archive/refs/tags/0.5.0.tar.gz"
 checksum = "sha256:654d43f6a88f6555d3cad80e9ce3e72e1346be5617c678b4ef10a06a77d7d647"
 format = "tar.gz"
 strip-prefix = "enchantum-0.5.0"
+# cl without /permissive-, which Cabin cannot pass to consumers, binds
+# scoped.hpp's unqualified cast<E> calls to scoped::cast at instantiation, so
+# scoped::cast fails: "main.cc:205: check failed:
+# enchantum::scoped::cast<app::Level>("Level::Error") == app::Level::Error".
+# The patch qualifies both calls as ::enchantum::cast<E>, the function
+# conforming compilers already bind there, as scoped::cast is declared later.
+patches = ["patches/0001-qualify-scoped-cast-for-msvc.patch"]
 
 [package]
 name = "cabin-ports/enchantum"
 version = "0.5.0"
 license = "MIT"
-include = ["LICENSE", "include"]
+include = ["LICENSE", "include", "patches"]
 
 # Header-only, as upstream's CMake interface target enchantum, whose install
 # copies include/ alone.  C++17 is upstream's floor.  {fmt} is not a
