@@ -137,10 +137,13 @@ int main() {
               std::make_tuple(3, "friend"), std::make_tuple(4, "!!")}));
     std::stringstream bad("1 2 3 x 4 5 6");
     CHECK(into_vector(read<int>(bad)) == (ints{1, 2, 3}));
+#if !defined(_MSC_VER) || defined(__clang__)
+    // cl rejects zug::write: see the limitations in cabin.toml.
     std::stringstream input("1 2 3 4 5");
     std::stringstream output;
     run(comp(read<int>(input), write(output, ';')));
     CHECK(output.str() == "1;2;3;4;5");
+#endif
   }
 
   // sequence.cpp: the lazy iterator over a filtered, mapped vector.

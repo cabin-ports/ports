@@ -31,6 +31,8 @@ include = ["LICENSE", "patches", "zug"]
 #   _HAS_DEPRECATED_RESULT_OF=1.
 # - sequence.hpp and transducer/distinct.hpp need <functional>, and
 #   transducer/range.hpp <algorithm>, included before them.
+# - cl at /std:c++14 rejects uses of zug::write (zug/transducer/write.hpp,
+#   error C3521), which GCC and Clang accept; other cl modes are untested.
 [target.zug]
 type = "header-only"
 include-dirs = ["."]
