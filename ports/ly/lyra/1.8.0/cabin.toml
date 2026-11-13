@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/bfgroup/Lyra/archive/refs/tags/1.8.0.tar.gz"
+checksum = "sha256:cd657146167cd2f80c27e4414ecd1a6639537f5a6d527e608bcd0c633d8beca9"
+format = "tar.gz"
+strip-prefix = "Lyra-1.8.0"
+
+[package]
+name = "cabin-ports/lyra"
+version = "1.8.0"
+license = "BSL-1.0"
+# detail/trait_utils.hpp:39 credits is_specialization_of to WG21 paper
+# P2098R1; it shares only a standard idiom, too slight to carry a term.
+include = ["LICENSE.txt", "include"]
+
+# The include/lyra headers, as upstream's CMake installs them.
+[target.lyra]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
