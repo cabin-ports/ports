@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/k06a/boolinq/archive/refs/tags/3.0.4.tar.gz"
+checksum = "sha256:3cbee2b5f70ad98a8dfd1332dad0554a60628b69acb2477b5f035155fb9aed45"
+format = "tar.gz"
+strip-prefix = "boolinq-3.0.4"
+
+[package]
+name = "cabin-ports/boolinq"
+version = "3.0.4"
+license = "MIT"
+include = ["LICENSE", "include/boolinq/boolinq.h"]
+
+# The single header.  Upstream's build only compiles its tests and
+# benchmarks (not ported) and installs nothing; consumers write
+# #include <boolinq/boolinq.h>, the layout vcpkg and Conan install.
+# Sequences signal their end by throwing boolinq::LinqEndException, so
+# consumers need C++ exceptions enabled.  Upstream's concat() keeps polling
+# its first sequence after it ends, and take() and takeWhile() resume after
+# ending, so x.take(n).concat(y) mixes x's later elements into the result;
+# copy such a first operand into a named container before concatenating.
+[target.boolinq]
+type = "header-only"
+include-dirs = ["include"]
+# README and test/CMakeLists.txt: C++11.
+interface-cxx-standard = "c++11"
