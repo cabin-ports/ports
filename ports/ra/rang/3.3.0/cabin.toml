@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/agauniyal/rang/archive/refs/tags/v3.3.tar.gz"
+checksum = "sha256:e835f79e71e1befb0b0c2906cfaa5cb07e12c6f88789931cd3c86c80c852453a"
+format = "tar.gz"
+strip-prefix = "rang-3.3"
+
+[package]
+name = "cabin-ports/rang"
+version = "3.3.0"
+license = "Unlicense"
+include = ["LICENSE", "include/rang.hpp"]
+
+# Upstream's header-only rang target; consumers write #include "rang.hpp".
+# The version follows tag v3.3; CMakeLists.txt still says 3.2.0.  Not
+# ported: the tests, the Conan test package and the build files.  On
+# Windows, rang.hpp includes <windows.h> without NOMINMAX, stops with
+# #error if _WIN32_WINNT is below Vista, and defines it as Vista when still
+# unset, hiding newer APIs.  Under control::Force on Windows, a stream whose
+# buffer is not that of cout, cerr or clog gets colour codes only under
+# winTerm::Ansi.
+[target.rang]
+type = "header-only"
+include-dirs = ["include"]
+# CMakeLists.txt and meson.build: C++11.
+interface-cxx-standard = "c++11"
