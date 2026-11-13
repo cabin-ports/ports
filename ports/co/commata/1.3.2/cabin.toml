@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/furfurylic/commata/archive/refs/tags/v1.3.2.tar.gz"
+checksum = "sha256:79f6b6a71f93e133927004a1044e818eaed7107af37aa77c4af56c0c93a742cd"
+format = "tar.gz"
+strip-prefix = "commata-1.3.2"
+
+[package]
+name = "cabin-ports/commata"
+version = "1.3.2"
+license = "Unlicense"
+include = ["LICENSE", "include"]
+
+# Header-only, as upstream's CMake interface target commata.  C++17 is
+# upstream's floor.  include/commata/commata.natvis, a Visual Studio debugger
+# visualizer, ships but is not attached to MSVC consumers as upstream's CMake
+# does; it is not a build input.
+[target.commata]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
