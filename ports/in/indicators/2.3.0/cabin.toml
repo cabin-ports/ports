@@ -1,0 +1,33 @@
+[package.upstream]
+url = "https://github.com/p-ranav/indicators/archive/refs/tags/v2.3.tar.gz"
+checksum = "sha256:70da7a693ff7a6a283850ab6d62acf628eea17d386488af8918576d0760aef7b"
+format = "tar.gz"
+strip-prefix = "indicators-2.3"
+
+# MIT: indicators' LICENSE, and setting.hpp's own MIT notice.
+# BSD-3-Clause: the bundled termcolor (termcolor.hpp, LICENSE.termcolor).
+# HPND-Markus-Kuhn: display_width.hpp's wcwidth functions, from Kuhn's
+# wcwidth.c, with his notice at display_width.hpp:67-71.
+[package]
+name = "cabin-ports/indicators"
+# Upstream tags this release v2.3; CMakeLists.txt calls it 2.3.0.
+version = "2.3.0"
+license = "MIT AND BSD-3-Clause AND HPND-Markus-Kuhn"
+include = ["LICENSE", "LICENSE.termcolor", "include"]
+
+# Header-only, as upstream's CMake interface target indicators, whose install
+# copies include/indicators.  C++11 is upstream's floor.
+#
+# Drawing a bar calls setlocale(LC_ALL, "") and leaves the process in the
+# environment's locale.  Measured on macOS: with LC_ALL=de_DE.UTF-8,
+# printf("%.1f", 1.5) then prints 1,5, and an unknown LC_ALL crashes the
+# first draw.
+[target.indicators]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+
+# Upstream links Threads::Threads into its interface target: pthreads on
+# Unix, folded into libc since glibc 2.34.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
