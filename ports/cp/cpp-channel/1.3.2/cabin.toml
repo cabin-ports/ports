@@ -13,9 +13,11 @@ license = "MIT"
 include = ["LICENSE", "include"]
 
 # Header-only, as upstream's CMake interface target msd_channel.  C++11 is
-# upstream's floor.  Limitation of upstream 1.3.2: a bounded channel with
-# more than one writer or more than one reader can deadlock; measured with
-# one writer and two readers and with two writers and one reader.
+# upstream's floor.  No thread library: the headers start no threads and use
+# only std::mutex and std::condition_variable, and upstream declares none.
+# Limitation of upstream 1.3.2: a bounded channel with more than one writer
+# or more than one reader can deadlock; measured with one writer and two
+# readers and with two writers and one reader.
 [target.cpp-channel]
 type = "header-only"
 include-dirs = ["include"]
