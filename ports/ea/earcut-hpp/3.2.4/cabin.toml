@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/mapbox/earcut.hpp/archive/refs/tags/v3.2.4.tar.gz"
+checksum = "sha256:70c00e90811950b2c3d973ecfd46010680b946f7952306ffa2785c0368fe2db0"
+format = "tar.gz"
+strip-prefix = "earcut.hpp-3.2.4"
+
+[package]
+name = "cabin-ports/earcut-hpp"
+version = "3.2.4"
+license = "ISC"
+include = ["LICENSE", "include"]
+
+# Upstream's earcut_hpp INTERFACE target and install layout
+# (CMakeLists.txt:19-25, :182-187): consumers write <mapbox/earcut.hpp>.
+# The header needs C++14 (std::make_unique); upstream builds only its
+# own programs as C++17 (CMakeLists.txt:27).  Not ported: the test,
+# benchmark and visualizer programs, which fetch earcut.js's fixtures,
+# GoogleTest, Google Benchmark and GLFW at configure time.  Limitation:
+# earcut's output is the same on every compiler only without
+# floating-point contraction.  Upstream builds its tests with
+# -ffp-contract=off (CMakeLists.txt:49-52, :114-117) but does not pass it
+# to consumers, and where the compiler fuses multiply-adds by default (GCC
+# and clang on arm64, or on x86-64 when targeting FMA, e.g. with
+# -march=native), input with rounding-sensitive degeneracies, such as
+# nearly collinear points, can triangulate differently.
+[target.earcut-hpp]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
