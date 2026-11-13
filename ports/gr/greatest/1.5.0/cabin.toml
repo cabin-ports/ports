@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/silentbicycle/greatest/archive/refs/tags/v1.5.0.tar.gz"
+checksum = "sha256:33e4c93b1b7f631fec173b8675582d1739b1238a5440b7f4ad50582f0cf38c34"
+format = "tar.gz"
+strip-prefix = "greatest-1.5.0"
+
+[package]
+name = "cabin-ports/greatest"
+version = "1.5.0"
+license = "ISC"
+include = ["LICENSE", "greatest.h"]
+
+# greatest.h is the whole library.  Not ported: upstream's examples,
+# contrib awk scripts, Makefile, and docs.  Exactly one translation unit
+# expands GREATEST_MAIN_DEFS(), which defines the runner and its state
+# greatest_info (greatest.h:704-1181).  Every translation unit that includes
+# greatest.h must agree on GREATEST_USE_TIME, GREATEST_USE_LONGJMP, and
+# GREATEST_TESTNAME_BUF_SIZE, which change the layout of that state
+# (greatest.h:232-285), and C++ ones also on GREATEST_NO_EXTERN_CPLUSPLUS,
+# which drops the header's C linkage (greatest.h:20-22, :1262-1264) and so
+# must stay undefined where C and C++ share one runner.
+[target.greatest]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
