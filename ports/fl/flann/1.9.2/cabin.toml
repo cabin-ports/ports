@@ -1,0 +1,109 @@
+[package.upstream]
+url = "https://github.com/flann-lib/flann/archive/refs/tags/1.9.2.tar.gz"
+checksum = "sha256:e26829bb0017f317d9cc45ab83ddcb8b16d75ada1ae07157006c1e7d601c8824"
+format = "tar.gz"
+strip-prefix = "flann-1.9.2"
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+# The 1.9.2 release tag, as conan-center-index packages it.  vcpkg's pin,
+# master f9caaf6, adds CUDA and CMake changes; outside CUDA it differs only
+# in sentinel spellings and in making NNIndex's search overloads virtual.
+# Without that, Index and the C API bypass AutotunedIndex's radiusSearch and
+# std::vector knnSearch and LshIndex's std::vector knnSearch: such a search
+# on an autotuned index reaches findNeighbors' assert(false), finding nothing
+# under NDEBUG, and one on an LSH index may repeat neighbours.
+[package]
+name = "cabin-ports/flann"
+version = "1.9.2"
+# COPYING (BSD-3-Clause) covers algorithms/center_chooser.h and
+# util/serialization.h, which have no header; every other source file but
+# util/any.h has a BSD-2-Clause header.  any.h is BSL-1.0, and its text,
+# which upstream does not ship, is in THIRD_PARTY_NOTICES (patch 0001).
+license = "BSD-3-Clause AND BSD-2-Clause AND BSL-1.0"
+# The CPU library's sources and headers.  Not shipped: the CUDA index
+# (algorithms/kdtree_cuda_*, util/cuda/, and util/cutil_math.h, which is
+# under NVIDIA's EULA), the HDF5 helpers (io/) and the MPI server and client
+# (mpi/), whose dependencies are not ported, and the language bindings,
+# examples, tests and datasets.
+include = [
+  "COPYING",
+  "THIRD_PARTY_NOTICES",
+  "patches",
+  "src/cpp/flann/algorithms/all_indices.h",
+  "src/cpp/flann/algorithms/autotuned_index.h",
+  "src/cpp/flann/algorithms/center_chooser.h",
+  "src/cpp/flann/algorithms/composite_index.h",
+  "src/cpp/flann/algorithms/dist.h",
+  "src/cpp/flann/algorithms/hierarchical_clustering_index.h",
+  "src/cpp/flann/algorithms/kdtree_index.h",
+  "src/cpp/flann/algorithms/kdtree_single_index.h",
+  "src/cpp/flann/algorithms/kmeans_index.h",
+  "src/cpp/flann/algorithms/linear_index.h",
+  "src/cpp/flann/algorithms/lsh_index.h",
+  "src/cpp/flann/algorithms/nn_index.h",
+  "src/cpp/flann/config.h",
+  "src/cpp/flann/defines.h",
+  "src/cpp/flann/flann.cpp",
+  "src/cpp/flann/flann.h",
+  "src/cpp/flann/flann.hpp",
+  "src/cpp/flann/flann_cpp.cpp",
+  "src/cpp/flann/general.h",
+  "src/cpp/flann/nn",
+  "src/cpp/flann/util/allocator.h",
+  "src/cpp/flann/util/any.h",
+  "src/cpp/flann/util/dynamic_bitset.h",
+  "src/cpp/flann/util/heap.h",
+  "src/cpp/flann/util/logger.h",
+  "src/cpp/flann/util/lsh_table.h",
+  "src/cpp/flann/util/matrix.h",
+  "src/cpp/flann/util/object_factory.h",
+  "src/cpp/flann/util/params.h",
+  "src/cpp/flann/util/random.h",
+  "src/cpp/flann/util/result_set.h",
+  "src/cpp/flann/util/sampling.h",
+  "src/cpp/flann/util/saving.h",
+  "src/cpp/flann/util/serialization.h",
+  "src/cpp/flann/util/timer.h",
+]
+
+[dependencies]
+"cabin-ports/lz4" = "^1.11.0"
+
+# Upstream's static libraries flann_cpp_s and flann_s, each compiled with
+# FLANN_STATIC, which consumers need too: without it defines.h makes
+# FLANN_EXPORT dllimport wherever WIN32 is defined.  flann_cpp_s's
+# FLANN_USE_CUDA goes with the CUDA index.  OpenMP is off, as vcpkg and
+# conan-center-index build it, so the index's #pragma omp loops run on one
+# thread.  Cabin passes upstream's MSVC /bigobj, which flann.cpp needs, on
+# every MSVC compile; upstream's /W1 and _CRT_/_SCL_SECURE_NO_WARNINGS only
+# quiet warnings and are not reproduced.
+
+# The C++ API, flann/flann.hpp: header templates over lz4 (index
+# serialization) that use C++11's <random>; flann_cpp.cpp only includes the
+# header.
+[target.flann_cpp]
+type = "library"
+sources = ["src/cpp/flann/flann_cpp.cpp"]
+include-dirs = ["src/cpp"]
+cxx-standard = "c++17"
+interface-c-standard = "none"
+interface-cxx-standard = "c++11"
+defines = ["FLANN_STATIC"]
+interface-defines = ["FLANN_STATIC"]
+deps = [{ name = "cabin-ports/lz4", public = true }]
+links = "flann_cpp"
+
+# The C API, flann/flann.h, whose enums end in commas, which C99 allows.
+# Included from C++, flann.h also includes flann.hpp, so lz4 is public here
+# too.
+[target.flann]
+type = "library"
+sources = ["src/cpp/flann/flann.cpp"]
+include-dirs = ["src/cpp"]
+cxx-standard = "c++17"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+defines = ["FLANN_STATIC"]
+interface-defines = ["FLANN_STATIC"]
+deps = [{ name = "cabin-ports/lz4", public = true }]
+links = "flann"
