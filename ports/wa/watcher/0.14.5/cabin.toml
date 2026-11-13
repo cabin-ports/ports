@@ -1,0 +1,50 @@
+[package.upstream]
+url = "https://github.com/e-dant/watcher/archive/refs/tags/0.14.5.tar.gz"
+checksum = "sha256:190bbe5e19923083db2beb3aa68f4e99a563c8f685d8037b0536780b0116c4d3"
+format = "tar.gz"
+strip-prefix = "watcher-0.14.5"
+
+[package]
+name = "cabin-ports/watcher"
+version = "0.14.5"
+license = "MIT"
+include = [
+  "include",
+  "license",
+  "watcher-c/include",
+  "watcher-c/src/watcher-c.cpp",
+]
+
+# The single-header C++ library (CMakeLists.txt:423-426); consumers write
+# `#include <wtr/watcher.hpp>`.
+# Not ported: the CLI programs, the Go, Node.js, Python and Rust bindings,
+# the tests and development tree, and the build files.
+# Limitation: GCC cannot compile it on macOS: the CoreServices headers it
+# includes use clang's blocks extension (MDItem.h:178 in the macOS 26 SDK).
+[target.watcher]
+type = "header-only"
+include-dirs = ["include"]
+# readme.md:631-633: C++17 and up.
+interface-cxx-standard = "c++17"
+
+# Upstream's watcher-c, the C API over watcher.hpp, built static
+# (CMakeLists.txt:428-447); consumers write `#include <wtr/watcher-c.h>`.
+# Not ported: its shared build.
+[target.watcher-c]
+type = "library"
+sources = ["watcher-c/src/watcher-c.cpp"]
+include-dirs = ["watcher-c/include"]
+deps = ["watcher"]
+links = "watcher-c"
+# CMakeLists.txt:48 builds everything as C++17.
+cxx-standard = "c++17"
+# watcher-c.h uses <stdbool.h> and <stdint.h>.
+interface-c-standard = "c99"
+
+# Upstream links Threads::Threads except on Android, and the FSEvents
+# frameworks on Apple platforms (CMakeLists.txt:113-127).
+[target.'cfg(all(family = "unix", not(os = "android")))'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(os = "macos")'.profile]
+frameworks = ["CoreFoundation", "CoreServices"]
