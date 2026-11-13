@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/igormironchik/args-parser/archive/refs/tags/6.3.6.tar.gz"
+checksum = "sha256:d65b205f3314ec4353f8c11ef21f567967f56b15a9c81c35162c2dfa45231924"
+format = "tar.gz"
+strip-prefix = "args-parser-6.3.6"
+
+[package]
+name = "cabin-ports/args-parser"
+version = "6.3.6"
+license = "MIT"
+include = ["LICENSES", "args-parser"]
+
+# Consumers include <args-parser/all.hpp>.  The port provides upstream's
+# default std::string build; ARGS_LIST and ARGS_DEQUE are macros a consumer
+# defines before the include, the same in every translation unit.  Upstream
+# limitations: ARGS_WSTRING_BUILD does not compile in 6.3.6 (narrow literals
+# at help_printer.hpp:657-658 and :877), ARGS_QSTRING_BUILD needs Qt, which is
+# not a port, and an argument in scope with a flag but no name matches "--"
+# (arg.hpp:182), so "--" ends the options under HandlePositionalArguments only
+# when no such argument is in scope and no many-valued argument before it takes
+# it as a value.
+[target.args-parser]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++14"
