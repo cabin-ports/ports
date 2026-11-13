@@ -1,0 +1,81 @@
+[package.upstream]
+url = "https://github.com/mborgerding/kissfft/archive/refs/tags/131.2.0.tar.gz"
+checksum = "sha256:205a8f6a448ef12b091f8ac6a514b5091bb5f6b0b543431ed75f673116cf5cbf"
+format = "tar.gz"
+strip-prefix = "kissfft-131.2.0"
+
+# Upstream installs its public headers into include/kissfft
+# (CMakeLists.txt:116, 298-303).
+[[package.upstream.copy]]
+from = "kiss_fft.h"
+to = "include/kissfft/kiss_fft.h"
+
+[[package.upstream.copy]]
+from = "kiss_fftnd.h"
+to = "include/kissfft/kiss_fftnd.h"
+
+[[package.upstream.copy]]
+from = "kiss_fftndr.h"
+to = "include/kissfft/kiss_fftndr.h"
+
+[[package.upstream.copy]]
+from = "kiss_fftr.h"
+to = "include/kissfft/kiss_fftr.h"
+
+[[package.upstream.copy]]
+from = "kissfft.hh"
+to = "include/kissfft/kissfft.hh"
+
+[package]
+name = "cabin-ports/kissfft"
+# Upstream's release 131.2.0.  Its Makefile, which CMake reads the version
+# from, still says 131.1.0 (Makefile:20-22).
+version = "131.2.0"
+license = "BSD-3-Clause"
+# COPYING names the licence and its holder, LICENSES/BSD-3-Clause holds the
+# text.  test/doit.c, the only Unlicense file, is not shipped.
+include = [
+  "COPYING",
+  "LICENSES/BSD-3-Clause",
+  "_kiss_fft_guts.h",
+  "include",
+  "kfc.c",
+  "kfc.h",
+  "kiss_fft.c",
+  "kiss_fft_log.h",
+  "kiss_fftnd.c",
+  "kiss_fftndr.c",
+  "kiss_fftr.c",
+]
+
+# The static library upstream's CMake builds with KISSFFT_STATIC=ON
+# (CMakeLists.txt:50, 123-128), in its default datatype, float, which it
+# makes public as kiss_fft_scalar=float (:44, 145, 231).  Consumers include
+# <kiss_fft.h>, as upstream's CMake package and pkg-config file give, or
+# <kissfft/kiss_fft.h>; kissfft.hh is a header-only C++ template that needs
+# no library.  Not built: the shared library upstream builds by default, the
+# other datatypes (double, int16_t, int32_t, simd), the OpenMP and alloca
+# options, the tools and the tests.  Not reproduced: -ffast-math and
+# -fomit-frame-pointer (:98-102), since Cabin drops a dependency's raw
+# compiler flags.  Upstream limitation, not patched: kissfft::assign with
+# the same length and the other direction conjugates the twiddles but never
+# updates _inverse (kissfft.hh:61-76), which the radix-4 butterfly and
+# transform_real read (:170, 236) and later assigns compare against, so the
+# object then computes wrong transforms; construct a new kissfft instead.
+[target.kissfft]
+type = "library"
+sources = ["kfc.c", "kiss_fft.c", "kiss_fftnd.c", "kiss_fftndr.c", "kiss_fftr.c"]
+include-dirs = ["include", "include/kissfft"]
+defines = ["kiss_fft_scalar=float"]
+interface-defines = ["kiss_fft_scalar=float"]
+# cl.exe has no C99 mode; the library needs C99 (variadic macros).
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+links = "kissfft"
+
+# The library calls cos, sin, sqrt and floor, which Unix systems other
+# than macOS keep in libm.  Upstream links it only for native Linux,
+# kFreeBSD and GNU builds (:245-247).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
