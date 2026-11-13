@@ -26,10 +26,7 @@ include = ["Licence.txt", "include"]
 # wraps std::variant.  win32_code.hpp, nt_code.hpp and com_code.hpp are
 # Windows-only and getaddrinfo_code.hpp POSIX-only, each refusing to compile
 # elsewhere.  boost_error_code.hpp needs Boost.System, which the port does
-# not depend on.  SYSTEM_ERROR2_AVOID_STDIO_INCLUDE, on by default except on
-# Apple, makes config.hpp declare write() itself instead of including
-# <unistd.h>; on 64-bit MinGW that declaration conflicts with <io.h>'s, so a
-# translation unit including both needs SYSTEM_ERROR2_AVOID_STDIO_INCLUDE=0.
+# not depend on.
 [target.status-code]
 type = "header-only"
 include-dirs = ["include"]
