@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/muellan/clipp/archive/refs/tags/v1.2.3.tar.gz"
+checksum = "sha256:73da8e3d354fececdea99f7deb79d0343647349563ace3eafb7f4cca6e86e90b"
+format = "tar.gz"
+strip-prefix = "clipp-1.2.3"
+
+[package]
+name = "cabin-ports/clipp"
+version = "1.2.3"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# Consumers include <clipp.h>.  Upstream limitations: clipp.h names
+# std::result_of (clipp.h:163, :174), which C++20 removes.  libstdc++ keeps it,
+# but libc++ and MSVC's standard library drop it at C++20, so with them a
+# C++20-or-later consumer fails inside clipp.h: build at C++17 or lower, or
+# with libc++ define _LIBCPP_ENABLE_CXX20_REMOVED_TYPE_TRAITS.  parse()'s
+# helpers have internal linkage (clipp.h:5163), so using clipp in more than one
+# translation unit of a program is formally an ODR violation.
+[target.clipp]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
