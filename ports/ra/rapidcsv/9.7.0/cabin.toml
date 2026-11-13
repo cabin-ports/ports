@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/d99kris/rapidcsv/archive/refs/tags/v9.07.tar.gz"
+checksum = "sha256:442c1d60080171fcd621d0578eb9dc03ad77781b1f4e35e7f6cd6271e4c3072e"
+format = "tar.gz"
+strip-prefix = "rapidcsv-9.07"
+
+# Upstream's 9.07 is 9.7.0: SemVer forbids the leading zero in 07.
+[package]
+name = "cabin-ports/rapidcsv"
+version = "9.7.0"
+license = "BSD-3-Clause"
+include = ["LICENSE", "src"]
+
+# Header-only, as upstream's CMake interface target, with src/ (rapidcsv.h
+# alone) as the include root, so consumers write `#include <rapidcsv.h>`
+# as with upstream's installed header.
+[target.rapidcsv]
+type = "header-only"
+include-dirs = ["src"]
+interface-cxx-standard = "c++11"
