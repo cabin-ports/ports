@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/serge1/ELFIO/archive/refs/tags/Release_3.12.tar.gz"
+checksum = "sha256:e4ebc9ce3d6916461bc3e7765bb45e6210f0a9b93978bf91e59b05388c024489"
+format = "tar.gz"
+strip-prefix = "ELFIO-Release_3.12"
+
+[package]
+name = "cabin-ports/elfio"
+# Upstream's release 3.12 (tag Release_3.12; elfio_version.hpp says "3.12").
+version = "3.12.0"
+license = "MIT"
+include = ["LICENSE.txt", "elfio"]
+
+# The elfio directory upstream installs (CMakeLists.txt:94-99); consumers
+# write `#include <elfio/elfio.hpp>`.
+# Not ported: the examples, among them a C wrapper, the tests and their ELF
+# samples, the documentation and the build files.
+[target.elfio]
+type = "header-only"
+include-dirs = ["."]
+# CMakeLists.txt:52 builds upstream's tests and examples as C++17; the
+# headers use std::string_view (elfio.hpp:961, elfio_modinfo.hpp:59).
+interface-cxx-standard = "c++17"
