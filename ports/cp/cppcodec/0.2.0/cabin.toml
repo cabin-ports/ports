@@ -1,0 +1,58 @@
+[package.upstream]
+url = "https://github.com/tplgy/cppcodec/archive/refs/tags/v0.2.tar.gz"
+checksum = "sha256:0edaea2a9d9709d456aa99a1c3e17812ed130f9ef2b5c2d152c230a5cbc5c482"
+format = "tar.gz"
+strip-prefix = "cppcodec-0.2"
+# Two upstream commits from master after v0.2, verbatim and in upstream's
+# order; each changes only cppcodec/detail/stream_codec.hpp and neither
+# changes behaviour:
+# - 0001, 9f67d7026d ("Fix #62"), parenthesizes std::numeric_limits<T>::max()
+#   and min() (:190-191), so the headers compile after <windows.h> without
+#   NOMINMAX.  vcpkg applies the same commit.
+# - 0002, d3cab2d329 ("Fix #59"), makes padder's member template operator()
+#   a static pad() (:54-70) and calls it from encode() after the tail
+#   symbols (:141-149).  v0.2 calls the operator without `template` when
+#   _MSC_VER is defined (:96-101), which clang rejects (upstream issue #79,
+#   still open, from clang on Windows).  Checked only by proxy: clang with
+#   _MSC_VER defined, syntax only, rejects the headers at :98 without this
+#   patch and accepts them with it; clang-cl itself is not verified.
+patches = [
+  "patches/0001-parenthesize-numeric-limits-max-and-min.patch",
+  "patches/0002-call-padder-from-encode.patch",
+]
+
+[package]
+name = "cabin-ports/cppcodec"
+# Upstream's release v0.2.  CMakeLists.txt:3 still says 0.1.
+version = "0.2.0"
+# LICENSE and every header carry the MIT terms.  detail/base64.hpp and
+# detail/base32.hpp adapt code from arduino-base64 and libbase32, both MIT,
+# and keep those authors' copyright lines.  data/access.hpp:89-121's
+# fallback namespace and sizeof dispatch are a short adaptation of
+# Johannes Schaub - litb's Stack Overflow answer
+# https://stackoverflow.com/a/1386390 (2009, CC BY-SA 2.5,
+# https://creativecommons.org/licenses/by-sa/2.5/), which the file credits;
+# no CC BY-SA terms ship because its copyright significance is uncertain.
+# detail/stream_codec.hpp:152-181's seq, gen_seq and make_lookup_table are
+# the standard index-sequence idiom, pointing to a Stack Overflow question
+# and a blog post.
+license = "MIT"
+include = ["LICENSE", "cppcodec", "patches"]
+
+# Header-only, as upstream installs it: the cppcodec/ headers under the
+# include root (CMakeLists.txt:33-62, 73-76), so consumers write
+# `#include <cppcodec/base64_rfc4648.hpp>`.  C++11 is upstream's minimum
+# (:11-15).  Not shipped: the example and tool programs, the tests and the
+# pkg-config file.  Upstream limitation, not patched: decode() forms
+# pointers past the end of arrays without dereferencing them, which the
+# standard leaves undefined: its padding counter, past its index array,
+# when the input carries more padding than a block holds
+# (detail/stream_codec.hpp:382), before it throws padding_error; and its
+# input pointer, two past the input's last character, when decoding
+# reaches the end without a padding or NUL character (:358), which leaves
+# the array only for input that ends it, such as a std::vector<char> (a
+# std::string's terminator keeps the pointer in bounds).
+[target.cppcodec]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
