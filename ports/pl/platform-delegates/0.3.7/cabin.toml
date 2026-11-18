@@ -1,0 +1,35 @@
+[package.upstream]
+url = "https://github.com/linksplatform/Delegates/archive/refs/tags/cpp_0.3.7.tar.gz"
+checksum = "sha256:4b9c72f6fa40a7d968db47f61da302d77d865c07fc70e177b08b4bfeaedfb1c2"
+format = "tar.gz"
+strip-prefix = "Delegates-cpp_0.3.7"
+# MulticastDelegate's -= calls std::find without <algorithm>, which GCC 16's
+# libstdc++ rejects at C++17 ("no matching function for call to 'find(...)'";
+# measured).
+patches = ["patches/0001-include-algorithm.patch"]
+
+# ConanCenter's platform.delegates; Cabin names reject '.'.
+[package]
+name = "cabin-ports/platform-delegates"
+version = "0.3.7"
+# The nuspec and ConanCenter say MIT; LICENSE, the only licence text, decides.
+license = "Unlicense"
+include = [
+  "LICENSE",
+  "README.md",
+  "cpp/Platform.Delegates/Platform.Delegates.h",
+  "cpp/Platform.Delegates/Platform.Delegates.Delegate.h",
+  "cpp/Platform.Delegates/Platform.Delegates.MulticastDelegate.h",
+  "patches",
+]
+
+# Consumers include <Platform.Delegates.h> (namespace Platform::Delegates).
+# MulticastDelegate forwards by-value arguments to each delegate, so with an
+# argument such as std::string, every delegate but the newest receives it
+# moved-from (MulticastDelegate.h:142; measured).
+[target.platform-delegates]
+type = "header-only"
+include-dirs = ["cpp/Platform.Delegates"]
+# Inferred: the deduction guides need C++17; at C++14, GCC reports "expected
+# constructor, destructor, or type conversion before ';' token" (measured).
+interface-cxx-standard = "c++17"
