@@ -1,0 +1,28 @@
+[package.upstream]
+url = "https://github.com/datenwolf/linmath.h/archive/3eef82841046507e16a0f6194a61cee2eadd34b3.tar.gz"
+checksum = "sha256:786c3f9c5e415cc1607d377242759eca736ea1002dcf6312a7f6ae08bc3d6e87"
+format = "tar.gz"
+strip-prefix = "linmath.h-3eef82841046507e16a0f6194a61cee2eadd34b3"
+
+# Upstream has no tags; the version is the date of master's head commit.
+[package]
+name = "cabin-ports/linmath"
+version = "2022.6.19"
+# linmath.h:402 credits Android's OpenGL Matrix.java for mat4x4_look_at; its
+# copyright significance is uncertain.
+license = "WTFPL"
+include = ["LICENCE", "linmath.h"]
+
+# The single header, included as <linmath.h>.  Before C23, GCC's -Wpedantic
+# diagnoses every call that passes a non-const mat4x4 to a `mat4x4 const`
+# parameter, in the header and in consumer code alike.
+[target.linmath]
+type = "header-only"
+include-dirs = ["."]
+# Upstream states no standard; C99 and C++98 are the measured floors.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+
+# sqrtf, sinf, cosf, tanf and acos come from libm, which upstream's CI links.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
