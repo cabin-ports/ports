@@ -1,0 +1,48 @@
+[package.upstream]
+url = "https://github.com/UniStuttgart-VISUS/datraw/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:dc2b7a33229b36a80c186b4c720a19a71763c26c40855792c918d80a436a65e1"
+format = "tar.gz"
+strip-prefix = "datraw-1.1.0"
+
+[package]
+name = "cabin-ports/datraw"
+version = "1.1.0"
+license = "MIT"
+include = [
+  "LICENCE.md",
+  "README.md",
+  "datraw/datraw.h",
+  "datraw/datraw/abi.h",
+  "datraw/datraw/convert.h",
+  "datraw/datraw/convert.inl",
+  "datraw/datraw/endianness.h",
+  "datraw/datraw/grid_type.h",
+  "datraw/datraw/info.h",
+  "datraw/datraw/info.inl",
+  "datraw/datraw/literal.h",
+  "datraw/datraw/parse.h",
+  "datraw/datraw/parse.inl",
+  "datraw/datraw/raw_reader.h",
+  "datraw/datraw/raw_reader.inl",
+  "datraw/datraw/scalar_type.h",
+  "datraw/datraw/string.h",
+  "datraw/datraw/string.inl",
+  "datraw/datraw/types.h",
+  "datraw/datraw/variant.h",
+  "datraw/datraw/variant.inl",
+]
+
+# Consumers include datraw.h (README.md:33).  C++14 is the measured floor
+# (variant.h:394 uses std::enable_if_t); upstream states none and builds with
+# cl's default.  Not ported: the tests and the Visual Studio and NuGet builds.
+# Limitations (measured with clang and GCC): the native byte order
+# (endianness.h:37) evaluates as big-endian, so raw_reader byte-swaps
+# little-endian multi-byte data on little-endian hosts (a USHORT 1 reads as
+# 256).  ObjectFileName is used as a printf format (info.inl:592), so a name
+# containing % is mangled or crashes (ASan SEGV); do not read untrusted dat
+# files.  convert from an integer to a floating type, variant == and !=,
+# read_next and the wchar_t readers do not compile.
+[target.datraw]
+type = "header-only"
+include-dirs = ["datraw"]
+interface-cxx-standard = "c++14"
