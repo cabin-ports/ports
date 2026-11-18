@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/hliberacki/cpp-member-accessor/archive/refs/tags/v1.0.0.tar.gz"
+checksum = "sha256:10f9ceedc96d2ff3dc95ed0dba50708739107ccbe659d5ca4e0250f8c0ac824d"
+format = "tar.gz"
+strip-prefix = "cpp-member-accessor-1.0.0"
+
+[package]
+name = "cabin-ports/cpp-member-accessor"
+version = "1.0.0"
+license = "MIT"
+# Not ported: README.md (it quotes cppreference), the examples and the tests.
+include = ["LICENSE", "include"]
+
+# Consumers include <accessor/accessor.hpp>.
+[target.cpp-member-accessor]
+type = "header-only"
+include-dirs = ["include"]
+# conanfile.py:32, check_min_cppstd 14.
+interface-cxx-standard = "c++14"
