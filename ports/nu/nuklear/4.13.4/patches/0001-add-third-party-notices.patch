@@ -1,0 +1,41 @@
+--- /dev/null
++++ b/THIRD_PARTY_NOTICES
+@@ -0,0 +1,38 @@
++Third-party notices for cabin-ports/nuklear
++
++nuklear.h embeds the ProggyClean font (https://github.com/bluescan/proggyfonts)
++as nk_proggy_clean_ttf_compressed_data_base85 (nuklear.h:17478-17564).
++
++ProggyClean, under the MIT License (SPDX: MIT):
++
++Copyright (c) 2004, 2005 Tristan Grimmer
++
++nuklear.h's cursor bitmap, NK_CURSOR_DATA_W, NK_CURSOR_DATA_H and
++nk_custom_cursor_data (nuklear.h:17568-17599), is the one in Dear ImGui
++(https://github.com/ocornut/imgui), and nk_decode_85_byte and nk_decode_85
++(nuklear.h:17721-17747) are its Decode85Byte and Decode85.
++
++Dear ImGui, under the MIT License (SPDX: MIT); the copyright line as in the
++Dear ImGui v1.49 LICENSE:
++
++Copyright (c) 2014-2015 Omar Cornut and ImGui contributors
++
++The MIT License, the same text for both:
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.
