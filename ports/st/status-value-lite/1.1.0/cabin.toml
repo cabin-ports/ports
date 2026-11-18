@@ -1,0 +1,34 @@
+[package.upstream]
+url = "https://github.com/nonstd-lite/status-value-lite/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:adcc9f3938b7805c1c465b5cde4e96143e126e7ddbccc00a53b452a8cc4d8ba8"
+format = "tar.gz"
+strip-prefix = "status-value-lite-1.1.0"
+
+[package]
+name = "cabin-ports/status-value-lite"
+version = "1.1.0"
+license = "BSL-1.0"
+include = ["LICENSE.txt", "include"]
+
+# Header-only, as upstream's CMake interface target (CMakeLists.txt:64-74),
+# which installs include/ (:116-119).  The header takes the standard from
+# _MSVC_LANG on cl.exe (status_value.hpp:29-35).
+# Limitations:
+# - status_value.hpp uses placement new (:110, :115) without including <new>;
+#   with LLVM 23's libc++, or Apple clang 21 at C++23, a translation unit in
+#   which no other header brings in <new> does not compile.
+# - With exceptions off (-fno-exceptions or nssv_CONFIG_NO_EXCEPTIONS=1) it
+#   does not compile: it calls std::terminate (:164) without including
+#   <exception>.  With <exception> included, value() on a non-const rvalue
+#   still does not compile, since :305 passes std::move(m_status) to the
+#   S & parameter at :162.
+# - status_value_cpp98.hpp uses size_t (:305, :327, :338) and
+#   std::aligned_storage (:489) without including <cstddef> or
+#   <type_traits>; it does not compile with LLVM 23's libc++, nor with Apple
+#   clang 21 at C++23.
+# Including the missing headers before these avoids the include failures.
+[target.status-value-lite]
+type = "header-only"
+include-dirs = ["include"]
+# status_value.hpp:3: "This version targets C++11 and later."
+interface-cxx-standard = "c++11"
