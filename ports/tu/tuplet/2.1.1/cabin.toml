@@ -15,6 +15,8 @@ include = ["LICENSE", "include/tuplet/tuple.hpp"]
 # The library, included as <tuplet/tuple.hpp>.  Clang's -Wmissing-braces (in
 # -Wall) warns on flat brace initialization of a tuple of two or more
 # elements, such as tuplet::tuple<int, int> t{1, 2}; GCC 16 does not.
+# GCC 13 rejects operator[] on a tuple lvalue for an rvalue-reference element,
+# such as one forward_as_tuple makes from an rvalue (tuple.hpp:630).
 # Not ported: include/tuplet/format.hpp, the opt-in formatter for {fmt},
 # which this package does not depend on.
 [target.tuplet]

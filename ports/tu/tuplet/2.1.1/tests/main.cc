@@ -93,8 +93,12 @@ static void test_tie_and_forward() {
   auto fwd = tuplet::forward_as_tuple(n, std::move(tmp));
   static_assert(std::is_same_v<decltype(fwd), tuplet::tuple<int &, std::string &&>>, "forward_as_tuple keeps value categories");
   fwd[0_tag] = 5;
+  check(n == 5, "forward_as_tuple refers to its lvalue argument");
+#if defined(__clang__) || !defined(__GNUC__) || __GNUC__ >= 16
+  // GCC 13 rejects this access (cabin.toml); GCC 16 accepts it.
   std::string moved = static_cast<std::string &&>(fwd[1_tag]);
-  check(n == 5 && moved == "tmp" && &fwd[1_tag] == &tmp, "forward_as_tuple refers to its arguments");
+  check(moved == "tmp" && &fwd[1_tag] == &tmp, "forward_as_tuple refers to its rvalue argument");
+#endif
 }
 
 static void test_convert() {
