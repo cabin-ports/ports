@@ -1,0 +1,61 @@
+[package.upstream]
+url = "https://github.com/TartanLlama/ranges/archive/b395fe32fec42c1f710e3c90a91b5bcab8d8b656.tar.gz"
+checksum = "sha256:3e2fb61d704f16e7e9ea001a91034268b92738910688395dd6b4e48762e09b8e"
+format = "tar.gz"
+strip-prefix = "ranges-b395fe32fec42c1f710e3c90a91b5bcab8d8b656"
+# Patch 0001 adds includes these headers lack (measured).  The first four fail
+# when included alone:
+# - tl/functional/predicates.hpp, <tuple> and <utility>: "predicates.hpp:6:21:
+#   error: use of undeclared identifier 'std'" (Apple Clang, Clang 23; GCC 16:
+#   "predicates.hpp:6:26: error: 'forward' is not a member of 'std'").
+# - tl/utility/semiregular_box.hpp, <functional>: "semiregular_box.hpp:58:25:
+#   error: 'invoke' is not a member of 'std'" (GCC 16).
+# - tl/k_combinations.hpp, <cmath>: "k_combinations.hpp:153:25: error: 'pow'
+#   is not a member of 'std'" (GCC 16; also Clang 23, and Apple Clang at C++23).
+# - tl/chunk_by.hpp, <algorithm>: "chunk_by.hpp:28:38: error: no member named
+#   'adjacent_find' in namespace 'std'" (Clang 23 at C++20).
+# - tl/adjacent_transform.hpp, "functional/bind.hpp": adjacent_transform<2>(f)
+#   at C++20 fails with "adjacent_transform.hpp:179:32: error: use of
+#   undeclared identifier 'bind_back'" (Apple Clang, Clang 23; GCC 16:
+#   "'bind_back' was not declared in this scope").
+# Eight one-argument adaptor forms (all but partial_sum's) call bind_back
+# unqualified, so at C++23 ADL also finds std::bind_back for a std argument and
+# the call is ambiguous: "chunk_by.hpp:107:32: error: call to 'bind_back' is
+# ambiguous" (Apple Clang, Clang 23; GCC 16: "chunk_by.hpp:107:41: error: call
+# of overloaded 'bind_back(...)' is ambiguous"), measured with a std function
+# object for adjacent_transform, chunk_by, chunk_by_key, transform_join and
+# transform_maybe.  Patch 0002 qualifies all eight as tl::bind_back; chunk,
+# slide and stride take an integer and are qualified for uniformity.  CI builds
+# at C++20, where the call is not ambiguous.
+patches = [
+  "patches/0001-include-missing-headers.patch",
+  "patches/0002-qualify-bind-back.patch",
+]
+
+# CMake's, vcpkg's and ConanCenter's name.  Upstream has no tags or releases:
+# b395fe32 (2024-12-09) is the newest commit, eight after 361dae81
+# (2022-12-07), which vcpkg and ConanCenter pin.  0.1.0 is CMakeLists.txt's
+# project VERSION, the same at both commits.
+[package]
+name = "cabin-ports/tl-ranges"
+version = "0.1.0"
+license = "CC0-1.0"
+include = ["COPYING", "README.md", "include", "patches"]
+
+# Consumers include <tl/enumerate.hpp>, <tl/chunk.hpp> and so on.
+# Clang rejects tl/concat.hpp (prev_impl, concat.hpp:111-127); GCC accepts it,
+# but decrementing a concat iterator does not compile.
+# Subtracting two repeat_n iterators gives the wrong sign (cursor::distance_to,
+# repeat_n.hpp:54); end - it and std::ranges::distance of the view are correct.
+# k_combinations' distance_to (size_t i >= 0) indexes out of bounds; reached by
+# std::ranges::size, distance and empty, empty(), it - it and nested tl::to.
+# chunk_by_key does not compile with a key function that returns a reference,
+# such as a data member pointer (key_type keeps the reference).
+[target.tl-ranges]
+type = "header-only"
+include-dirs = ["include"]
+# Inferred from the headers, which need C++20 concepts and <ranges> (at C++17,
+# Clang: "tl/common.hpp:10:7: error: unknown type name 'concept'"); the
+# interface target states no standard, and upstream builds its tests at C++20
+# (C++23 with MSVC).
+interface-cxx-standard = "c++20"
