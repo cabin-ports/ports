@@ -196,6 +196,10 @@ it.  The port's consumer test replaces the probe's empty `main`, so a new port m
 meaningful one that exercises a real public API and checks its behavior.  An empty `main` or a
 compile-only smoke test is not sufficient evidence of correctness.
 
+The probe links libraries.  A port whose default features build an `executable` target is also
+installed from the staged port with `cabin install`.  That builds the program and does not run
+it: a [probe package](#probe-packages) does, as one that requires the port as a build dependency.
+
 `tests/main.cc` is the C++ consumer.  `tests/main.c` is the C consumer, which a port has when a
 library target that its default features enable declares, itself or through the package, an
 `interface-c-standard` other than `"none"` or `interface-cxx-standard = "none"`.  Keep C

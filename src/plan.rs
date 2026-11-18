@@ -50,6 +50,9 @@ pub struct PortConversion {
     /// may the probe use the bare-package shorthand, which Cabin
     /// refuses as ambiguous against several targets.
     pub sole_library_target: bool,
+    /// Whether `cabin install` of the package finds a program: an
+    /// `executable` target its default features build.
+    pub has_executable: bool,
 }
 
 /// The `c-standard` / `cxx-standard` a generated probe consumer must
@@ -242,6 +245,12 @@ fn load_package(package_dir: &Path) -> Result<PortConversion> {
         declared_requirements,
         sole_library_target: library_like.len() == 1,
         library_like_target_keys,
+        has_executable: package.targets.iter().any(|target| {
+            target.kind == cabin_core::TargetKind::Executable
+                && target
+                    .missing_required_features(&default_features)
+                    .is_empty()
+        }),
     })
 }
 
@@ -1084,6 +1093,24 @@ pub(crate) mod tests {
             "{:?}",
             conversions[0].library_like_target_keys
         );
+    }
+
+    /// `cabin install` builds the programs the default features
+    /// enable, and fails over a package that has none.
+    #[test]
+    fn only_a_default_executable_is_installed() {
+        let executable = |gate: &str| {
+            let dir = assert_fs::TempDir::new().unwrap();
+            let manifest = format!(
+                "{}\n[target.tool]\ntype = \"executable\"\nsources = [\"b.c\"]\n\
+                 c-standard = \"c11\"\n{gate}",
+                package_manifest("cabin-ports/fmt", "12.2.0", "[features]\nextra = []\n\n")
+            );
+            write_package(dir.path(), "fmt", "12.2.0", &manifest);
+            load_conversions(dir.path()).unwrap()[0].has_executable
+        };
+        assert!(executable(""));
+        assert!(!executable("required-features = [\"extra\"]\n"));
     }
 
     #[test]
