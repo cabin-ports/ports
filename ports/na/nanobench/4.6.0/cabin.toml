@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/martinus/nanobench/archive/refs/tags/v4.6.0.tar.gz"
+checksum = "sha256:80fe0835e85da6acc57285354d86b17d5d1dc7182432a5eaea3b2098a17d4c26"
+format = "tar.gz"
+strip-prefix = "nanobench-4.6.0"
+
+[package]
+name = "cabin-ports/nanobench"
+version = "4.6.0"
+license = "MIT"
+include = ["LICENSE", "README.md", "src/include/nanobench.h", "src/test/app/nanobench.cpp"]
+
+# Upstream's static library: src/test/app/nanobench.cpp compiles the
+# implementation (ANKERL_NANOBENCH_IMPLEMENT), so consumers include
+# <nanobench.h> and must not define it.  The library builds at C++17, as
+# upstream's target does under add_subdirectory: the header declares
+# Bench::name(std::string_view), which run(std::string_view, op) calls, only
+# from C++17, so the library must define it for C++17 consumers.  C++11 is
+# upstream's floor; consumers below C++17 see the header without those overloads.
+[target.nanobench]
+type = "library"
+sources = ["src/test/app/nanobench.cpp"]
+include-dirs = ["src/include"]
+links = "nanobench"
+cxx-standard = "c++17"
+interface-cxx-standard = "c++11"
