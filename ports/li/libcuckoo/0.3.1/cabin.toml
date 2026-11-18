@@ -1,0 +1,28 @@
+[package.upstream]
+url = "https://github.com/efficient/libcuckoo/archive/refs/tags/v0.3.1.tar.gz"
+checksum = "sha256:a87122b963ef6b7eadca3e41cb4b533f3b6ad9b588ab2f2140eb6ab0db9a7ba8"
+format = "tar.gz"
+strip-prefix = "libcuckoo-0.3.1"
+# THIRD_PARTY_NOTICES supplies the Apache-2.0 text missing from LICENSE.
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+[package]
+name = "cabin-ports/libcuckoo"
+version = "0.3.1"
+license = "Apache-2.0"
+include = ["LICENSE", "THIRD_PARTY_NOTICES", "libcuckoo", "libcuckoo-c", "patches"]
+
+# Header-only, as upstream's CMake interface target libcuckoo, whose build
+# interface is the source root, so consumers include <libcuckoo/...>.  C++11
+# is upstream's floor.  No C interface: upstream's libcuckoo-c wrapper links
+# only with a C++ file of the consumer's that instantiates
+# cuckoo_table_template.cc, so C files cannot use it through this package.
+[target.libcuckoo]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
+
+# Upstream links Threads::Threads into its interface target: resizes and
+# locked tables can start worker threads.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
