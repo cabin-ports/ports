@@ -18,3 +18,12 @@
    static_assert(std::is_same_v<result_t, event::response>,
                  "keyframeLeave callback must return tweeny::event::response");
    keyframe_leave_listeners.emplace_back(std::forward<Callback>(cb));
+@@ -240,7 +240,7 @@
+ auto tweeny::tween<FirstValueType, RemainingValueTypes...>::render(uint32_t target_frame) const -> tween_value_t {
+   constexpr std::size_t ValuesCount = sizeof...(RemainingValueTypes) + 1;
+ 
+-  const auto as_return_value = [](const auto & val) -> tween_value_t {
++  const auto as_return_value = [&](const auto & val) -> tween_value_t {
+     if constexpr (ValuesCount == 1) {
+       return std::get<0>(val);
+     } else {
