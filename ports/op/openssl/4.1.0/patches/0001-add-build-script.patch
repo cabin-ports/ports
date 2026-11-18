@@ -1,0 +1,209 @@
+--- /dev/null
++++ b/build.c
+@@ -0,0 +1,206 @@
++/* OpenSSL for Cabin: the system's libraries by default, or the
++ * package's own sources built with upstream's Configure and make under
++ * the feature `vendored`.
++ *
++ * System libraries come from the directory CABIN_SDK_OPENSSL_DIR names
++ * (an installation prefix: `include/openssl`, `lib`), and without it
++ * from pkg-config (`libcrypto`, `libssl`), which an MSVC build cannot
++ * use. */
++#define _POSIX_C_SOURCE 200809L
++#define _DARWIN_C_SOURCE
++#define _CRT_SECURE_NO_WARNINGS
++#include <stdarg.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++
++#ifdef _WIN32
++#include <io.h>
++#define exists(path) (_access(path, 0) == 0)
++#else
++#include <sys/stat.h>
++#include <sys/wait.h>
++#include <unistd.h>
++#define exists(path) (access(path, F_OK) == 0)
++#endif
++
++/* The oldest OpenSSL whose API this package's dependents are written for. */
++#define OLDEST_MAJOR 3
++
++static void fail(const char *format, ...) {
++    va_list args;
++    va_start(args, format);
++    fputs("openssl: ", stderr);
++    vfprintf(stderr, format, args);
++    fputc('\n', stderr);
++    va_end(args);
++    exit(1);
++}
++
++static const char *need(const char *name) {
++    const char *value = getenv(name);
++    if (!value || !*value) fail("%s is not set", name);
++    return value;
++}
++
++static int is(const char *name, const char *value) { return strcmp(need(name), value) == 0; }
++
++/* `OPENSSL_VERSION_MAJOR` of the headers under `include`, 0 when they
++ * do not say (OpenSSL before 3.0). */
++static int headers_major(const char *include) {
++    char path[4096], line[512];
++    int major = 0;
++    FILE *file;
++    snprintf(path, sizeof path, "%s/openssl/opensslv.h", include);
++    if (!(file = fopen(path, "r"))) fail("no OpenSSL headers in %s (cannot read %s)", include, path);
++    while (fgets(line, sizeof line, file)) {
++        if (sscanf(line, " # define OPENSSL_VERSION_MAJOR %d", &major) == 1) break;
++    }
++    fclose(file);
++    return major;
++}
++
++/* The first of the `NULL`-ended `names` that exists in `dir`. */
++static const char *first_in(const char *dir, const char *const names[], char *path, size_t size) {
++    for (; *names; names++) {
++        snprintf(path, size, "%s/%s", dir, *names);
++        if (exists(path)) return path;
++    }
++    return NULL;
++}
++
++/* Report `library` (`crypto` or `ssl`) from the installation in `sdk`. */
++static void from_sdk(FILE *result, const char *sdk, const char *library) {
++    char include[4096], dir[4096], file[4096], shared[64], archive[64], import[64];
++    const char *const lib_dirs[] = {"lib", "lib64", NULL};
++    const char *names[4];
++    const char *found = NULL;
++    int msvc = is("CABIN_TARGET_DIALECT", "msvc");
++    size_t i;
++    snprintf(include, sizeof include, "%s/include", sdk);
++    snprintf(import, sizeof import, "lib%s.lib", library);
++    snprintf(archive, sizeof archive, "lib%s.a", library);
++    snprintf(shared, sizeof shared, "lib%s.%s", library, is("CABIN_TARGET_OS", "macos") ? "dylib" : "so");
++    /* As a linker given `-L<dir> -l<library>` chooses. */
++    names[0] = msvc ? import : shared;
++    names[1] = msvc ? NULL : archive;
++    names[2] = NULL;
++    for (i = 0; !found && lib_dirs[i]; i++) {
++        snprintf(dir, sizeof dir, "%s/%s", sdk, lib_dirs[i]);
++        found = first_in(dir, names, file, sizeof file);
++    }
++    if (!found && msvc) {
++        /* The layout of the installers at slproweb.com. */
++        const char *arch = is("CABIN_TARGET_ARCH", "x86_64") ? "x64"
++                         : is("CABIN_TARGET_ARCH", "aarch64") ? "arm64" : "x86";
++        snprintf(dir, sizeof dir, "%s/lib/VC/%s/MD", sdk, arch);
++        found = first_in(dir, names, file, sizeof file);
++    }
++    if (!found) fail("no %s library in CABIN_SDK_OPENSSL_DIR (%s)", library, sdk);
++    fprintf(result, "external %s\ninclude-dir %s %s\nlink-file %s %s\n", library, library, include,
++            library, found);
++}
++
++#ifndef _WIN32
++/* Runs `argv` and waits for it, without a shell. */
++static void run(const char *what, char *const argv[]) {
++    int status = 0;
++    pid_t child = fork();
++    if (child == 0) {
++        execvp(argv[0], argv);
++        fprintf(stderr, "openssl: cannot run `%s`, which upstream's build needs: ", argv[0]);
++        perror(NULL);
++        _exit(127);
++    }
++    if (child < 0 || waitpid(child, &status, 0) != child || !WIFEXITED(status)) fail("%s was killed", what);
++    if (WEXITSTATUS(status) != 0) fail("%s failed (status %d)", what, WEXITSTATUS(status));
++}
++
++/* Upstream's name for the platform the package is built for. */
++static const char *configure_target(void) {
++    static const char *const known[][3] = {
++        {"macos", "aarch64", "darwin64-arm64"}, {"macos", "x86_64", "darwin64-x86_64"},
++        {"linux", "x86_64", "linux-x86_64"},    {"linux", "aarch64", "linux-aarch64"},
++    };
++    size_t i;
++    for (i = 0; i < sizeof known / sizeof known[0]; i++) {
++        if (is("CABIN_TARGET_OS", known[i][0]) && is("CABIN_TARGET_ARCH", known[i][1])) return known[i][2];
++    }
++    fail("the vendored build knows no Configure target for %s on %s", need("CABIN_TARGET_OS"),
++         need("CABIN_TARGET_ARCH"));
++    return NULL;
++}
++#endif
++
++/* Build the static libraries from the package's sources into
++ * `CABIN_OUT_DIR/stage` and report them. */
++static void vendored(FILE *result) {
++#ifdef _WIN32
++    (void)result;
++    fail("the feature `vendored` is not supported on Windows: upstream's build runs nmake, whose "
++         "commands need a command interpreter that a build script cannot start; install OpenSSL "
++         "and name its directory in CABIN_SDK_OPENSSL_DIR");
++#else
++    const char *out = need("CABIN_OUT_DIR");
++    char build[4096], stage[4096], configure[4096], destdir[4096], ranlib[4096], jobs[32];
++    snprintf(build, sizeof build, "%s/build", out);
++    snprintf(stage, sizeof stage, "%s/stage", out);
++    snprintf(configure, sizeof configure, "%s/Configure", need("CABIN_MANIFEST_DIR"));
++    snprintf(destdir, sizeof destdir, "DESTDIR=%s", stage);
++    snprintf(ranlib, sizeof ranlib, "%s -s", need("CABIN_AR"));
++    snprintf(jobs, sizeof jobs, "-j%ld", sysconf(_SC_NPROCESSORS_ONLN));
++    /* Upstream builds outside its sources, which a script cannot write. */
++    if (mkdir(build, 0777) != 0 || chdir(build) != 0) fail("cannot use %s", build);
++    /* Upstream's build takes its tools from the environment. */
++    setenv("CC", need("CABIN_CC"), 1);
++    setenv("AR", need("CABIN_AR"), 1);
++    setenv("RANLIB", ranlib, 1);
++    {
++        /* Only what a library package has no use for is left out: the
++         * shared libraries, the test suite, and the manual pages. */
++        char *argv[] = {"perl", configure, (char *)configure_target(), "no-shared", "no-tests", "no-docs",
++                        "--prefix=/usr/local", "--libdir=lib", NULL};
++        run("upstream's Configure", argv);
++    }
++    {
++        char *argv[] = {"make", jobs, "build_libs", NULL};
++        run("upstream's build (make build_libs)", argv);
++    }
++    {
++        char *argv[] = {"make", "install_dev", destdir, NULL};
++        run("upstream's install (make install_dev)", argv);
++    }
++    fprintf(result, "external crypto\ninclude-dir crypto %s/usr/local/include\n"
++                    "link-file crypto %s/usr/local/lib/libcrypto.a\n", stage, stage);
++    fprintf(result, "external ssl\ninclude-dir ssl %s/usr/local/include\n"
++                    "link-file ssl %s/usr/local/lib/libssl.a\n", stage, stage);
++#endif
++}
++
++int main(void) {
++    const char *sdk = getenv("CABIN_SDK_OPENSSL_DIR");
++    FILE *result = fopen(need("CABIN_RESULT_FILE"), "w");
++    if (!result) fail("cannot write the result file");
++
++    if (getenv("CABIN_FEATURE_VENDORED")) {
++        vendored(result);
++    } else if (sdk && *sdk) {
++        char include[4096];
++        int major;
++        snprintf(include, sizeof include, "%s/include", sdk);
++        major = headers_major(include);
++        if (major < OLDEST_MAJOR) {
++            fail("the OpenSSL in CABIN_SDK_OPENSSL_DIR (%s) is older than %d.0", sdk, OLDEST_MAJOR);
++        }
++        from_sdk(result, sdk, "crypto");
++        from_sdk(result, sdk, "ssl");
++    } else if (is("CABIN_TARGET_DIALECT", "msvc")) {
++        fail("an MSVC build takes OpenSSL from a directory: set CABIN_SDK_OPENSSL_DIR to an "
++             "OpenSSL %d.0 or newer built for MSVC (the directory holding `include` and `lib`), "
++             "or enable the feature `vendored` where it is supported", OLDEST_MAJOR);
++    } else {
++        fprintf(result, "external crypto\npkg-config crypto libcrypto >=%d.0.0\n", OLDEST_MAJOR);
++        fprintf(result, "external ssl\npkg-config ssl libssl >=%d.0.0\n", OLDEST_MAJOR);
++    }
++    return fclose(result) != 0;
++}

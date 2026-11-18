@@ -128,6 +128,16 @@ jobs:
           GROUP_HEAD: ${{ github.event.merge_group.head_sha }}
         run: scripts/actions/dry-run-base.sh
 
+      # TEMPORARY, removed before merge.
+      - name: See what the openssl port refuses
+        continue-on-error: true
+        shell: bash
+        env:
+          CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: scripts/actions/tmp-openssl-refusals.sh "${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}"
+
       - name: Run the publisher dry-run
         env:
           CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache

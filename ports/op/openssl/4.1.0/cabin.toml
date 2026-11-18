@@ -1,0 +1,127 @@
+[package.upstream]
+url = "https://github.com/openssl/openssl/releases/download/openssl-4.1.0/openssl-4.1.0.tar.gz"
+checksum = "sha256:50c17baf54cb008f6ce42d50deb4b28050a1aad711636cabd4b241c7e90cc2fd"
+format = "tar.gz"
+strip-prefix = "openssl-4.1.0"
+# 0001 adds build.c, the package's build script.  It supplies the
+# system's libcrypto and libssl (OpenSSL 3.0 or newer): those of the
+# installation CABIN_SDK_OPENSSL_DIR names, or else what pkg-config
+# finds, which an MSVC build cannot use.  Under the feature `vendored`
+# it builds this package's sources instead, with upstream's Configure
+# and make, as static libraries; that needs perl and make, and is not
+# supported on Windows, where upstream's build runs nmake.
+patches = ["patches/0001-add-build-script.patch"]
+
+[package]
+name = "cabin-ports/openssl"
+version = "4.1.0"
+# crypto/seed/seed.c, crypto/seed/seed_local.h, and
+# include/openssl/seed.h carry KISA's notice (BSD-Source-Code) in their
+# headers.  external/perl/Text-Template-1.56, which upstream's Configure
+# runs, is under Perl's terms, stated in its LICENSE.
+license = "Apache-2.0 AND BSD-Source-Code AND (Artistic-1.0-Perl OR GPL-1.0-or-later)"
+# Upstream's Configure reads every build.info, so those of the test
+# suite, the manual, the demos, and the fuzzers stay; the rest of those
+# four directories is left out.
+include = [
+  "ACKNOWLEDGEMENTS.md",
+  "AUTHORS.md",
+  "CHANGES.md",
+  "CODE-OF-CONDUCT.md",
+  "CONTRIBUTING.md",
+  "Configurations",
+  "Configure",
+  "DOCUMENTATION.md",
+  "HOWTO.md",
+  "INSTALL.md",
+  "LICENSE.txt",
+  "NEWS.md",
+  "NOTES-ANDROID.md",
+  "NOTES-C99.md",
+  "NOTES-DJGPP.md",
+  "NOTES-NONSTOP.md",
+  "NOTES-PERL.md",
+  "NOTES-POSIX.md",
+  "NOTES-SANITIZERS.md",
+  "NOTES-UNIX.md",
+  "NOTES-VALGRIND.md",
+  "NOTES-VMS.md",
+  "NOTES-WINDOWS.md",
+  "README-FIPS.md",
+  "README-PROVIDERS.md",
+  "README-QUIC.md",
+  "README.md",
+  "STYLE.md",
+  "SUPPORT.md",
+  "VERSION.dat",
+  "VMS",
+  "apps",
+  "build.info",
+  "config",
+  "config.com",
+  "configdata.pm.in",
+  "crypto",
+  "exporters",
+  "external",
+  "funding.json",
+  "include",
+  "ms",
+  "os-dep",
+  "patches",
+  "providers",
+  "ssl",
+  "util",
+  "demos/bio/build.info",
+  "demos/build.info",
+  "demos/cipher/build.info",
+  "demos/cms/build.info",
+  "demos/digest/build.info",
+  "demos/dtlsecho/build.info",
+  "demos/dtlslistenerecho/build.info",
+  "demos/encode/build.info",
+  "demos/encrypt/build.info",
+  "demos/guide/build.info",
+  "demos/http3/build.info",
+  "demos/info/build.info",
+  "demos/kdf/build.info",
+  "demos/keyexch/build.info",
+  "demos/mac/build.info",
+  "demos/pkcs12/build.info",
+  "demos/pkey/build.info",
+  "demos/quic/build.info",
+  "demos/quic/poll-server/build.info",
+  "demos/quic/server/build.info",
+  "demos/signature/build.info",
+  "demos/smime/build.info",
+  "demos/sslecho/build.info",
+  "doc/build.info",
+  "doc/man1/build.info",
+  "fuzz/build.info",
+  "test/build.info",
+  "test/quic-openssl-docker/build.info",
+  "test/quic-openssl-docker/hq-interop/build.info",
+  "test/unit/build.info",
+]
+
+[features]
+vendored = []
+
+# What a static libcrypto needs from a Linux system, as the libcrypto.pc
+# that upstream's build writes lists it (Libs.private).
+[target.'cfg(all(feature = "vendored", os = "linux"))'.profile]
+link-libs = ["dl", "pthread"]
+
+[target.crypto]
+type = "library"
+sources = []
+links = "crypto"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+[target.ssl]
+type = "library"
+sources = []
+deps = [{ name = "crypto", public = true }]
+links = "ssl"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
