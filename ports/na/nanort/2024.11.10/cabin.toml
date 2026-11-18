@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/lighttransport/nanort/archive/cdf474ae9176b87a9334c858bb06c9e028ed0e0d.tar.gz"
+checksum = "sha256:99c011d695b8e158ce317ab5d47aa69f6c5ad272062ab26801f15f56b7122e49"
+format = "tar.gz"
+strip-prefix = "nanort-cdf474ae9176b87a9334c858bb06c9e028ed0e0d"
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+# Upstream has no tags; the version is the date of the release branch's head
+# commit.
+[package]
+name = "cabin-ports/nanort"
+version = "2024.11.10"
+# MIT: nanort's LICENSE.  BSD-3-Clause: the copy of Chromium's
+# stack_container.h in nanort.h.
+license = "MIT AND BSD-3-Clause"
+include = ["LICENSE", "THIRD_PARTY_NOTICES", "nanort.h", "patches"]
+
+# The single header, included as "nanort.h".
+[target.nanort]
+type = "header-only"
+include-dirs = ["."]
+# README.md:15, "Only use C++-03 features by default".
+interface-cxx-standard = "c++03"
+
+# Defining NANORT_USE_CPP11_FEATURE (which needs C++11) turns on the threaded
+# BVH build.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
