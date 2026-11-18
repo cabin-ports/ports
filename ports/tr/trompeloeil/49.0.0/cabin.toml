@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/rollbear/trompeloeil/archive/refs/tags/v49.tar.gz"
+checksum = "sha256:2523571fb7920b2813cbc23b46e60294aba8ead7eba434bfec69c24408615593"
+format = "tar.gz"
+strip-prefix = "trompeloeil-49"
+
+# vcpkg's and ConanCenter's name.  Upstream numbers releases with single
+# integers (tag v49, CMakeLists.txt:13 VERSION 49), so 49 maps to 49.0.0.
+[package]
+name = "cabin-ports/trompeloeil"
+version = "49.0.0"
+# include/trompeloeil/cpp11_shenanigans.hpp:36-165 credits WG21 papers N3656,
+# N3655, N3688 and N3658 for make_unique, the alias templates, exchange and
+# integer_sequence; their copyright significance is uncertain.
+license = "BSL-1.0"
+include = ["LICENSE_1_0.txt", "include"]
+
+# <trompeloeil.hpp>, plus the framework adapters such as
+# <catch2/trompeloeil.hpp>, each used after its framework's own header.
+[target.trompeloeil]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:19, "A thread-safe header-only mocking framework for C++11/14";
+# C++11 code uses the _V expectation macros (docs/Backward.md).
+interface-cxx-standard = "c++11"
