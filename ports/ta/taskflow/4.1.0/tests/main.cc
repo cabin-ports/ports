@@ -97,8 +97,7 @@ void check_algorithms(tf::Executor &executor) {
   std::iota(v.begin(), v.end(), 1);
   int sum = 100;
   std::vector<std::int64_t> squares(1000, -1), prefix(1000), expect(1000);
-  std::inclusive_scan(v.begin(), v.end(), expect.begin(),
-                      std::plus<std::int64_t>{});
+  std::inclusive_scan(v.begin(), v.end(), expect.begin());
   tf::Taskflow taskflow;
   taskflow.reduce(v.begin(), v.end(), sum, std::plus<int>{});
   taskflow.for_each_index(0, 1000, 1, [&](int i) {
