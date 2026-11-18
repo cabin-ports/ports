@@ -24,8 +24,8 @@ include = [
 
 # SeqAn 2 (namespace seqan2), header-only as upstream's seqan-config.cmake
 # exports it; consumers include <seqan/sequence.h> and the other modules.
-# C++14 is upstream's floor (platform.h).  From that config: NOMINMAX for its
-# <windows.h> includes (only Windows reads it), pthread, and rt for POSIX aio.
+# From that config: NOMINMAX for its <windows.h> includes (only Windows reads
+# it), pthread, and rt for POSIX aio.
 # Not ported: the optional zlib, bzip2 and OpenMP support (SEQAN_HAS_ZLIB,
 # SEQAN_HAS_BZIP2, SEQAN_HAS_OPENMP).
 # ArgumentParser checks for updates online through system() unless
@@ -33,7 +33,10 @@ include = [
 [target.seqan]
 type = "header-only"
 include-dirs = ["include"]
-interface-cxx-standard = "c++14"
+# platform.h:158-162 states C++14, but the bam_io, bed_io, rna_io, roi_io and
+# vcf_io record headers declare C++17 inline variables, which cl at /std:c++14
+# rejects (C7525; check-windows job 134598346624, windows-2025-vs2026).
+interface-cxx-standard = "c++17"
 interface-defines = ["NOMINMAX"]
 
 [target.'cfg(family = "unix")'.profile]

@@ -1,12 +1,11 @@
 --- /dev/null
 +++ b/THIRD_PARTY_NOTICES
-@@ -0,0 +1,138 @@
+@@ -0,0 +1,137 @@
 +Third-party notices for cabin-ports/seqan
 +
 +SeqAn's own license is in share/doc/seqan/LICENSE.  Some headers contain
-+code taken from Boost 1.47, zlib 1.1.4 and a Stack Overflow answer without
-+the license texts or attribution those sources require.  The copyright
-+lines and notices below are from those sources.
++code taken from Boost 1.47, zlib 1.1.4 and a Stack Overflow answer; this
++file gives those sources' copyright notices and license terms.
 +
 +========================================================================
 +Boost 1.47
