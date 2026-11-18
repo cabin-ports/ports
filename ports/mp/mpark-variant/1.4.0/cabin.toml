@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/mpark/variant/archive/refs/tags/v1.4.0.tar.gz"
+checksum = "sha256:8f6b28ab3640b5d76d5b6664dda7257a4405ce59179220431b8fd196c79b2ecb"
+format = "tar.gz"
+strip-prefix = "variant-1.4.0"
+
+[package]
+name = "cabin-ports/mpark-variant"
+version = "1.4.0"
+license = "BSL-1.0"
+include = ["LICENSE.md", "include"]
+
+# Upstream's mpark_variant, with include/mpark/ as it installs it.  C++11 is
+# README.md's stated requirement.
+[target.mpark-variant]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
