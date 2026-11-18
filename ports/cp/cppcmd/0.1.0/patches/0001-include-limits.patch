@@ -1,0 +1,10 @@
+--- a/include/cppcmd/CommandInterpreter.hpp
++++ b/include/cppcmd/CommandInterpreter.hpp
+@@ -4,6 +4,7 @@
+ #include <functional>
+ #include <iomanip>
+ #include <iostream>
++#include <limits>
+ #include <optional>
+ #include <string>
+ #include <string_view>

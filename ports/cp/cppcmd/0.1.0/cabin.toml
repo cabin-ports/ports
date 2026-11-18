@@ -1,0 +1,30 @@
+[package.upstream]
+url = "https://github.com/remysalim/cppcmd/archive/refs/tags/v0.1.0.tar.gz"
+checksum = "sha256:f9813c298f40fd29ebdfa0a9e68cdea80ec1b0f93c32e8fafef58dc01eb48368"
+format = "tar.gz"
+strip-prefix = "cppcmd-0.1.0"
+# CommandInterpreter.hpp uses std::numeric_limits without including <limits>,
+# which GCC 16 rejects at C++17 (measured): "'numeric_limits' is not a member
+# of 'std'".
+patches = ["patches/0001-include-limits.patch"]
+
+[package]
+name = "cabin-ports/cppcmd"
+version = "0.1.0"
+license = "MIT"
+include = ["LICENSE", "README.md", "include", "patches"]
+
+# Consumers include <cppcmd/CommandInterpreter.hpp>.
+# Include cppcmd from one translation unit per program: Parser.hpp defines
+# non-inline globals, so a second one fails to link with duplicate symbols
+# (measured).
+# Include <cppcmd/CommandInterpreter.hpp> or <cppcmd/Expression.hpp> first:
+# Value.hpp before them, or Parser.hpp after them, fails to compile (measured).
+[target.cppcmd]
+type = "header-only"
+include-dirs = ["include"]
+# Upstream's CMake target defines it by default (CMakeLists.txt:6-12); without
+# it, as<double> and other stream-parsed types do not compile.
+interface-defines = ["CPPCMD_HAS_STREAM_OPERATORS"]
+# CMakeLists.txt:3, CMAKE_CXX_STANDARD 17.
+interface-cxx-standard = "c++17"
