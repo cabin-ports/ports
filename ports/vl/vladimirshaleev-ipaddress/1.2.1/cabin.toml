@@ -1,0 +1,31 @@
+[package.upstream]
+url = "https://github.com/VladimirShaleev/ipaddress/archive/refs/tags/v1.2.1.tar.gz"
+checksum = "sha256:7ad9af8218ad3e96c348d100706b1f5a02706ff49be811913ee2a438ddfa61d2"
+format = "tar.gz"
+strip-prefix = "ipaddress-1.2.1"
+# uint128.hpp specializes std::numeric_limits, but no header includes
+# <limits>.  GCC 16.2 fails at c++11 (6 errors) and c++14 (4 errors), the
+# first being "uint128.hpp:1929:27: error: 'float_denorm_style' in namespace
+# 'std' does not name a type"; patch 0001 adds the include to config.hpp.
+# Third-party notices are in THIRD_PARTY_NOTICES (patch 0002).
+patches = [
+  "patches/0001-include-limits.patch",
+  "patches/0002-add-third-party-notices.patch",
+]
+
+# vcpkg's name: upstream and ConanCenter call it ipaddress, which is too
+# generic for this registry.
+[package]
+name = "cabin-ports/vladimirshaleev-ipaddress"
+version = "1.2.1"
+# BSD-2-Clause: uint128.hpp's double conversions derive from floatconv.
+license = "MIT AND BSD-2-Clause"
+# Not ported: the optional C++20 module unit, src/ipaddress.ixx.
+include = ["LICENSE", "THIRD_PARTY_NOTICES", "include", "patches"]
+
+# C++11 is upstream's floor (README.md:14).  The IPADDRESS_* configuration
+# macros stay consumer opt-ins.
+[target.vladimirshaleev-ipaddress]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"

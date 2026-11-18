@@ -1,0 +1,10 @@
+--- a/include/ipaddress/config.hpp
++++ b/include/ipaddress/config.hpp
+@@ -35,6 +35,7 @@
+ #  include <algorithm>
+ #  include <stdexcept>
+ #  include <type_traits>
++#  include <limits>
+ #endif
+ 
+ #ifndef IPADDRESS_NAMESPACE
