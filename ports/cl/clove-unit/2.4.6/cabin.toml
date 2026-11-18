@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/fdefelici/clove-unit/archive/refs/tags/v2.4.6.tar.gz"
+checksum = "sha256:ecdbd6c4b11bc1eb6e0e5022104f053cb5d1f1ef95e04499a6e29e21289e5063"
+format = "tar.gz"
+strip-prefix = "clove-unit-2.4.6"
+
+[package]
+name = "cabin-ports/clove-unit"
+version = "2.4.6"
+license = "MIT"
+include = ["LICENSE", "README.md", "clove-unit.h"]
+
+# Consumers include "clove-unit.h".
+# CLOVE_DOUBLE_EQ, and _P precisions of 10 or more, compare more loosely than
+# README.md documents: CLOVE_DOUBLE_EQ(1.0, 1.0 + 1e-12) passes (measured).
+[target.clove-unit]
+type = "header-only"
+include-dirs = ["."]
+# CMakeLists.txt:34, c_std_11.
+interface-c-standard = "c11"
+# tests/stricts/clove-cpp/CMakeLists.txt:8 builds the header as C++11.
+interface-cxx-standard = "c++11"
