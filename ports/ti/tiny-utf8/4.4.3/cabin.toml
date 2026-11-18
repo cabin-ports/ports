@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/DuffsDevice/tiny-utf8/archive/refs/tags/v4.4.3.tar.gz"
+checksum = "sha256:8e3f61651909c9f3105d3501932a96aa65733127fb6e7cf94cb1b0a2dff42c8f"
+format = "tar.gz"
+strip-prefix = "tiny-utf8-4.4.3"
+
+[package]
+# Upstream's repository name; vcpkg and the CMake project call it tinyutf8.
+name = "cabin-ports/tiny-utf8"
+# The v4.4.3 release; CMakeLists.txt still says 4.0.2.
+version = "4.4.3"
+license = "BSD-3-Clause"
+include = ["LICENCE", "README.md", "include"]
+
+# C++11 is upstream's floor (README.md).
+[target.tiny-utf8]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
