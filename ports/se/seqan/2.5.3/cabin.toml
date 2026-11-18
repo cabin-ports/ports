@@ -1,0 +1,46 @@
+[package.upstream]
+url = "https://github.com/seqan/seqan/releases/download/seqan-v2.5.3/seqan-library-2.5.3.zip"
+checksum = "sha256:7da029319f0d0674f5aa1a3939b4e7b89d2a9a8e7a288a182492347ce3b5db3d"
+format = "zip"
+strip-prefix = "seqan-library-2.5.3"
+# Notices that the Boost- and zlib-derived headers lack are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+[package]
+name = "cabin-ports/seqan"
+version = "2.5.3"
+# MIT: bam_io/bam_index_bai.h's samtools notice.  Zlib: the stream headers from
+# Jonathan de Halleux and the zlib copy.  LicenseRef-qsufsort: Larsson's terms in
+# index/index_sa_lss.h:43-54.  Boost and CC BY-SA terms: see THIRD_PARTY_NOTICES.
+license = "BSD-3-Clause AND BSL-1.0 AND CC-BY-SA-3.0 AND LicenseRef-Boost-pre-BSL AND LicenseRef-qsufsort AND MIT AND Zlib"
+include = [
+  "THIRD_PARTY_NOTICES",
+  "include",
+  "patches",
+  "share/doc/seqan/CHANGELOG.md",
+  "share/doc/seqan/LICENSE",
+  "share/doc/seqan/README.md",
+]
+
+# SeqAn 2 (namespace seqan2), header-only as upstream's seqan-config.cmake
+# exports it; consumers include <seqan/sequence.h> and the other modules.
+# From that config: NOMINMAX for its <windows.h> includes (only Windows reads
+# it), pthread, and rt for POSIX aio.
+# Not ported: the optional zlib, bzip2 and OpenMP support (SEQAN_HAS_ZLIB,
+# SEQAN_HAS_BZIP2, SEQAN_HAS_OPENMP).
+# ArgumentParser checks for updates online through system() unless
+# SEQAN_DISABLE_VERSION_CHECK is defined.
+[target.seqan]
+type = "header-only"
+include-dirs = ["include"]
+# platform.h:158-162 states C++14, but the bam_io, bed_io, rna_io, roi_io and
+# vcf_io record headers declare C++17 inline variables, which cl at /std:c++14
+# rejects (C7525; check-windows job 134598346624, windows-2025-vs2026).
+interface-cxx-standard = "c++17"
+interface-defines = ["NOMINMAX"]
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["rt"]
