@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/AlexInLog/ReactivePlusPlus/archive/refs/tags/v2.2.4.tar.gz"
+checksum = "sha256:e9b451f34af60927b5dc3737d22999c1b9c0c628a598881aa3bc513c07fbb25d"
+format = "tar.gz"
+strip-prefix = "ReactivePlusPlus-2.2.4"
+
+[package]
+name = "cabin-ports/reactiveplusplus"
+version = "2.2.4"
+# Readme.md credits reactivex.io (CC BY 3.0) for some doc comments in
+# src/rpp/rpp, e.g. operators/delay.hpp's; its copyright significance is
+# uncertain.
+license = "BSL-1.0"
+include = ["LICENSE", "Readme.md", "src/rpp/rpp"]
+
+# The rpp core (upstream's RPP::rpp), header-only; consumers include
+# <rpp/rpp.hpp>.  C++20 is upstream's floor (Readme.md).  pthread for the
+# new_thread and thread_pool schedulers (upstream links Threads::Threads).
+# Not ported: the rppqt, rppasio and rppgrpc extensions, which need Qt, asio
+# and gRPC.
+[target.reactiveplusplus]
+type = "header-only"
+include-dirs = ["src/rpp"]
+interface-cxx-standard = "c++20"
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
