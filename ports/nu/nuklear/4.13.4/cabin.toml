@@ -1,0 +1,38 @@
+[package.upstream]
+url = "https://github.com/Immediate-Mode-UI/Nuklear/archive/refs/tags/v4.13.4.tar.gz"
+checksum = "sha256:1ce8e78346017518810e3307d85e0b8f701e5ee2f5c34ab9203d99f2ab73ff77"
+format = "tar.gz"
+strip-prefix = "Nuklear-4.13.4"
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+[package]
+name = "cabin-ports/nuklear"
+# Release v4.13.4 (clib.json:3); nuklear.h:6 was left at v4.13.3.
+version = "4.13.4"
+# Nuklear and its embedded stb_rect_pack and stb_truetype are MIT or the
+# Unlicense (LICENSE, nuklear.h:11776-11812, :16854-16890); the embedded
+# ProggyClean font and the code from Dear ImGui are MIT.  stb_textedit and the
+# MurmurHash3 in nk_murmur_hash (nuklear.h:7790-7792) are public domain.
+# nuklear.h:6529-6530 credits Wikipedia's fast inverse square root article for
+# nk_inv_sqrt; its copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "THIRD_PARTY_NOTICES", "nuklear.h", "patches"]
+
+# The single-header library; consumers write `#include <nuklear.h>` and
+# define NK_IMPLEMENTATION in one C or C++ file (README.md:37-42), with the
+# same NK_INCLUDE_* options in every file.
+# Not ported: the demos and their backends, the example, the extra fonts,
+# the src/ fragments nuklear.h is generated from, and the build files.
+# nk_memset breaks strict aliasing; Apple clang 21 -O2/-O3 test builds trap.
+# Define NK_MEMSET as memset (with <string.h>) or use -fno-strict-aliasing.
+[target.nuklear]
+type = "header-only"
+include-dirs = ["."]
+# README.md:18: C89.
+interface-c-standard = "c89"
+
+# The embedded stb_truetype calls libm from the file that defines
+# NK_IMPLEMENTATION with NK_INCLUDE_FONT_BAKING.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
