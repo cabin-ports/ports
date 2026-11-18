@@ -1,0 +1,29 @@
+--- a/include/tweeny/tween.tcc
++++ b/include/tweeny/tween.tcc
+@@ -157,7 +157,7 @@
+ template <typename FirstValueType, typename ... RemainingValueTypes>
+ template <typename Callback>
+ auto tweeny::tween<FirstValueType, RemainingValueTypes...>::on(detail::event::keyframeEnter_t, Callback && cb) -> void {
+-  using result_t = std::invoke_result_t<Callback, tween&, event::keyframeEnter>;
++  using result_t = std::invoke_result_t<Callback, tween&, struct event::keyframeEnter>;
+   static_assert(std::is_same_v<result_t, event::response>,
+                 "keyframeEnter callback must return tweeny::event::response");
+   keyframe_enter_listeners.emplace_back(std::forward<Callback>(cb));
+@@ -166,7 +166,7 @@
+ template <typename FirstValueType, typename ... RemainingValueTypes>
+ template <typename Callback>
+ auto tweeny::tween<FirstValueType, RemainingValueTypes...>::on(detail::event::keyframeLeave_t, Callback && cb) -> void {
+-  using result_t = std::invoke_result_t<Callback, tween&, event::keyframeLeave>;
++  using result_t = std::invoke_result_t<Callback, tween&, struct event::keyframeLeave>;
+   static_assert(std::is_same_v<result_t, event::response>,
+                 "keyframeLeave callback must return tweeny::event::response");
+   keyframe_leave_listeners.emplace_back(std::forward<Callback>(cb));
+@@ -240,7 +240,7 @@
+ auto tweeny::tween<FirstValueType, RemainingValueTypes...>::render(uint32_t target_frame) const -> tween_value_t {
+   constexpr std::size_t ValuesCount = sizeof...(RemainingValueTypes) + 1;
+ 
+-  const auto as_return_value = [](const auto & val) -> tween_value_t {
++  const auto as_return_value = [&](const auto & val) -> tween_value_t {
+     if constexpr (ValuesCount == 1) {
+       return std::get<0>(val);
+     } else {
