@@ -3,6 +3,10 @@ url = "https://github.com/DuffsDevice/tiny-utf8/archive/refs/tags/v4.4.3.tar.gz"
 checksum = "sha256:8e3f61651909c9f3105d3501932a96aa65733127fb6e7cf94cb1b0a2dff42c8f"
 format = "tar.gz"
 strip-prefix = "tiny-utf8-4.4.3"
+# Patch 0001 makes starts_with(const char32_t (&)[N]) step a pointer instead of
+# the array, which Clang rejects at definition (check-macos job 134625969747)
+# and GCC and MSVC reject when it is called.
+patches = ["patches/0001-fix-starts-with-array.patch"]
 
 [package]
 # Upstream's repository name; vcpkg and the CMake project call it tinyutf8.
@@ -10,7 +14,7 @@ name = "cabin-ports/tiny-utf8"
 # The v4.4.3 release; CMakeLists.txt still says 4.0.2.
 version = "4.4.3"
 license = "BSD-3-Clause"
-include = ["LICENCE", "README.md", "include"]
+include = ["LICENCE", "README.md", "include", "patches"]
 
 # C++11 is upstream's floor (README.md).
 [target.tiny-utf8]
