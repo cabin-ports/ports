@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/gershnik/intrusive_shared_ptr/archive/refs/tags/v1.13.tar.gz"
+checksum = "sha256:8fdad3b3e3ca1477421e0035e3aaa08986abca34e737fb30125e2c78f4ecd363"
+format = "tar.gz"
+strip-prefix = "intrusive_shared_ptr-1.13"
+
+# Upstream's VERSION file says 1.13.
+[package]
+name = "cabin-ports/intrusive_shared_ptr"
+version = "1.13.0"
+license = "MIT"
+include = ["LICENSE.txt", "inc"]
+
+# The headers, included as <intrusive_shared_ptr/...>.  Like upstream's isptr
+# target this links nothing: users of apple_cf_ptr.h or python_ptr.h provide
+# CoreFoundation or CPython themselves.  The experimental module unit
+# (modules/isptr.cppm) is not ported.
+[target.intrusive_shared_ptr]
+type = "header-only"
+include-dirs = ["inc"]
+# README.md:5: "The code requires a C++17 or above compiler."
+interface-cxx-standard = "c++17"
