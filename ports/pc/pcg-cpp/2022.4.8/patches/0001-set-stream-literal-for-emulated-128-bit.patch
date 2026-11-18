@@ -1,0 +1,12 @@
+--- a/include/pcg_random.hpp
++++ b/include/pcg_random.hpp
+@@ -333,7 +333,8 @@
+ 
+     void set_stream(itype specific_seq)
+     {
+-         inc_ = (specific_seq << 1) | 1;
++         // Changed for cabin-ports on 2026-11-18: itype(1U) instead of 1, as the constructor below.
++         inc_ = (specific_seq << 1) | itype(1U);
+     }
+ 
+     static constexpr bool can_specify_stream = true;
