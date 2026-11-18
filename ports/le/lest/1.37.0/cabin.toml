@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/martinmoene/lest/archive/refs/tags/v1.37.0.tar.gz"
+checksum = "sha256:ff31a4ded6589387d029d7d10ec1d787420adf1ccdb2ec96ab2da92b4d5993a7"
+format = "tar.gz"
+strip-prefix = "lest-1.37.0"
+
+[package]
+name = "cabin-ports/lest"
+version = "1.37.0"
+# lest.hpp and lest_cpp03.hpp adapt code from Catch, which CHANGES.txt
+# credits; Catch is under the same BSL-1.0 text as LICENSE.txt.
+license = "BSL-1.0"
+include = ["LICENSE.txt", "include"]
+
+# include/ is all upstream installs (CMakeLists.txt:38): lest/lest.hpp and
+# three variants that share its include guard, so a translation unit includes
+# one of them.  C++11 is README.md's stated standard for lest.hpp.  The floor
+# also covers lest_cpp03.hpp, so C++98/03 consumers cannot use that variant.
+[target.lest]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
