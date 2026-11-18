@@ -1,0 +1,10 @@
+--- a/cpp/Platform.Delegates/Platform.Delegates.MulticastDelegate.h
++++ b/cpp/Platform.Delegates/Platform.Delegates.MulticastDelegate.h
+@@ -2,6 +2,7 @@
+ 
+ // Based on https://stackoverflow.com/a/23974539/710069 
+ 
++#include <algorithm>
+ #include <mutex>
+ #include <list>
+ #include "Platform.Delegates.Delegate.h"
