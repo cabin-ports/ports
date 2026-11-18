@@ -1,0 +1,68 @@
+[package.upstream]
+url = "https://github.com/JoelLefkowitz/caches/archive/refs/tags/v0.5.0.tar.gz"
+checksum = "sha256:564a7058a35487ac9d22b94c3d0e33f29f3d425c8053faa45bc14d9d73eae239"
+format = "tar.gz"
+strip-prefix = "caches-0.5.0"
+
+# The headers under include/caches/, where upstream's Conan recipe installs
+# src/ (publish/all/conanfile.py:59-64), so consumers write
+# <caches/queues/fifo_cache.tpp> as README.md does.
+[[package.upstream.copy]]
+from = "src/abstract/aliases.hpp"
+to = "include/caches/abstract/aliases.hpp"
+
+[[package.upstream.copy]]
+from = "src/abstract/deque_cache.hpp"
+to = "include/caches/abstract/deque_cache.hpp"
+
+[[package.upstream.copy]]
+from = "src/abstract/deque_cache.tpp"
+to = "include/caches/abstract/deque_cache.tpp"
+
+[[package.upstream.copy]]
+from = "src/queues/fifo_cache.hpp"
+to = "include/caches/queues/fifo_cache.hpp"
+
+[[package.upstream.copy]]
+from = "src/queues/fifo_cache.tpp"
+to = "include/caches/queues/fifo_cache.tpp"
+
+[[package.upstream.copy]]
+from = "src/queues/lifo_cache.hpp"
+to = "include/caches/queues/lifo_cache.hpp"
+
+[[package.upstream.copy]]
+from = "src/queues/lifo_cache.tpp"
+to = "include/caches/queues/lifo_cache.tpp"
+
+[[package.upstream.copy]]
+from = "src/stores/lru_cache.hpp"
+to = "include/caches/stores/lru_cache.hpp"
+
+[[package.upstream.copy]]
+from = "src/stores/lru_cache.tpp"
+to = "include/caches/stores/lru_cache.tpp"
+
+[[package.upstream.copy]]
+from = "src/stores/store_cache.hpp"
+to = "include/caches/stores/store_cache.hpp"
+
+[[package.upstream.copy]]
+from = "src/stores/store_cache.tpp"
+to = "include/caches/stores/store_cache.tpp"
+
+[package]
+name = "cabin-ports/caches"
+version = "0.5.0"
+license = "MIT"
+include = ["LICENSE.md", "README.md", "include"]
+
+# C++11 is upstream's floor (README.md:11).  Not ported: the gtest specs, the
+# SCons and Conan builds, the docs, and the development tooling.
+# Copying an LRUCache or StoreCache is unsafe: the copy's map points into
+# the source's list, so lookups through it corrupt both (measured: ASan
+# heap-use-after-free).
+[target.caches]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
