@@ -1,0 +1,38 @@
+[package.upstream]
+url = "https://github.com/skramm/homog2d/archive/refs/tags/v2.13.tar.gz"
+checksum = "sha256:3acc829fa9380edaecf211dff10121e529cdabe6be8479b94c6fbd75561bb7d6"
+format = "tar.gz"
+strip-prefix = "homog2d-2.13"
+# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
+# homog2d.hpp calls std::time without including <ctime>, so with LLVM 23's
+# libc++ it fails to compile (measured: "no member named 'time' in namespace
+# 'std'"); patch 0002 includes it.
+patches = [
+  "patches/0001-add-third-party-notices.patch",
+  "patches/0002-include-ctime.patch",
+]
+
+[package]
+name = "cabin-ports/homog2d"
+# Tag v2.13's homog2d.hpp:231 declares 2.13.1.
+version = "2.13.1"
+# homog2d.hpp:5500 credits a Stack Overflow answer (6853926) for its
+# point-to-segment distance; its copyright significance is uncertain.
+license = "MPL-2.0"
+include = [
+  "LICENCE",
+  "README.md",
+  "THIRD_PARTY_NOTICES",
+  "homog2d.hpp",
+  "patches",
+]
+
+# Consumers write `#include <homog2d.hpp>`.  The tinyxml2, Eigen,
+# Boost.Geometry, OpenCV and ttmath integrations (HOMOG2D_USE_* macros) stay
+# consumer opt-ins, so this port declares no dependency.
+# Not ported: the tests, demos and docs.
+[target.homog2d]
+type = "header-only"
+include-dirs = ["."]
+# README.md:20: "Language: C++17".
+interface-cxx-standard = "c++17"
