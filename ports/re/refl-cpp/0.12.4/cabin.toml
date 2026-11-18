@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/veselink1/refl-cpp/archive/refs/tags/v0.12.4.tar.gz"
+checksum = "sha256:8f6e02535ac3d1e51c1d8288d755378b914bb72f817020d2dec261de33f78b5c"
+format = "tar.gz"
+strip-prefix = "refl-cpp-0.12.4"
+
+# vcpkg's and ConanCenter's name.  CMakeLists.txt still says 0.12.1; the tag
+# and CHANGELOG.md say 0.12.4.
+[package]
+name = "cabin-ports/refl-cpp"
+version = "0.12.4"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# The single header, included as <refl.hpp>.
+[target.refl-cpp]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:90-91, "Minimum language standard: C++17".  At C++17, Clang's
+# -Wpedantic flags every REFL_AUTO use as a C++20 extension.
+interface-cxx-standard = "c++17"
