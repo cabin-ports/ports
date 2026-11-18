@@ -1,0 +1,10 @@
+--- a/include/quaternion.h
++++ b/include/quaternion.h
+@@ -36,6 +36,7 @@
+ #include <type_traits>
+ #include <array>
+ #include <complex>
++#include <functional>
+ #include <iterator>
+ #include <assert.h>
+ 

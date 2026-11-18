@@ -3,6 +3,10 @@ url = "https://github.com/ferd36/quaternions/archive/a5ef2e58b05b9b314aa21ff5b27
 checksum = "sha256:cfdacf51bf9c9d81e06f6ad34c04688657c8f9c01bb801901bd81d98adba964c"
 format = "tar.gz"
 strip-prefix = "quaternions-a5ef2e58b05b9b314aa21ff5b2791cd86bf241a7"
+# Patch 0001 includes <functional>, which quaternion.h uses for
+# std::unary_function and std::binary_function; without it MSVC fails
+# (check-windows job 134613179163).
+patches = ["patches/0001-include-functional.patch"]
 
 [package]
 name = "cabin-ports/quaternions"
@@ -11,7 +15,7 @@ version = "2024.12.10"
 # include/quaternion.h's hash<T> reproduces fast-hash's fasthash64 (MIT, Zilong
 # Tan); its copyright significance is uncertain.
 license = "MIT"
-include = ["LICENSE", "README.md", "include"]
+include = ["LICENSE", "README.md", "include", "patches"]
 
 # C++11 is upstream's floor (README.md).
 # quaternion_io.h defines two static data members out of line, so including it
