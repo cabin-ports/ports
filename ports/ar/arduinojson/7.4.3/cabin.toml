@@ -1,0 +1,28 @@
+[package.upstream]
+url = "https://github.com/bblanchon/ArduinoJson/archive/refs/tags/v7.4.3.tar.gz"
+checksum = "sha256:a2a8a277fc3cd0404499199bf1468682ea3688f354be0eaf6af8648366911257"
+format = "tar.gz"
+strip-prefix = "ArduinoJson-7.4.3"
+
+[package]
+name = "cabin-ports/arduinojson"
+# ConanCenter pins 7.4.2; 7.4.3 adds the make_float() overrun fix (issue
+# #2220).
+version = "7.4.3"
+license = "MIT"
+include = ["LICENSE.txt", "README.md", "CHANGELOG.md", "src"]
+
+# Header-only, as upstream's CMake interface target (src/CMakeLists.txt).  The
+# ARDUINOJSON_* configuration macros stay consumer opt-ins.
+# src/ArduinoJson/Configuration.hpp:49 enables std::string_view support only
+# when __cplusplus >= 201703L; cl reports 199711L unless /Zc:__cplusplus is
+# given, which Cabin does not pass, so consumers on cl who want it define
+# ARDUINOJSON_ENABLE_STRING_VIEW=1 at C++17 or later.
+# Not ported: the examples, tests and Arduino, PlatformIO and ESP-IDF metadata.
+[target.arduinojson]
+type = "header-only"
+include-dirs = ["src"]
+# src/ArduinoJson.hpp:7-9: "ArduinoJson requires C++11 or newer".
+interface-cxx-standard = "c++11"
+# src/ArduinoJson.h:15 is an #error in C.
+interface-c-standard = "none"
