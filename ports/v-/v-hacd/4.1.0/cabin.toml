@@ -14,6 +14,9 @@ include = ["LICENSE", "README.md", "include"]
 
 # C++11 is upstream's floor (app/CMakeLists.txt:9).  No interface defines:
 # ENABLE_VHACD_IMPLEMENTATION and VHACD_DISABLE_THREADING are the consumer's.
+# GCC 16.2 at -O2 -Wall reports -Warray-bounds and -Wstringop-overflow in the
+# TU that defines ENABLE_VHACD_IMPLEMENTATION; the program runs ASan-clean
+# (measured).
 [target.v-hacd]
 type = "header-only"
 include-dirs = ["include"]
