@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/Forceflow/libmorton/archive/refs/tags/v0.2.13.tar.gz"
+checksum = "sha256:3b003b54d8624e85d45047249a13da7b30b2814cba220138dcfd75ecbafe7c1e"
+format = "tar.gz"
+strip-prefix = "libmorton-0.2.13"
+
+# The release tag's version; CMakeLists.txt:4 still says 0.2.12.
+[package]
+name = "cabin-ports/libmorton"
+version = "0.2.13"
+license = "MIT"
+include = ["LICENSE", "include"]
+# morton2D.h:117 and :244 credit JarkkoPFC's gist for m2D_e_magicbits_combined
+# and m2D_d_magicbits_combined; its copyright significance is uncertain.
+
+# The headers, included as <libmorton/morton.h>.
+[target.libmorton]
+type = "header-only"
+include-dirs = ["include"]
+# CMakeLists.txt:2: "required because of c++11".
+interface-cxx-standard = "c++11"
