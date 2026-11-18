@@ -1,0 +1,10 @@
+--- a/include/cajun/json/elements.inl
++++ b/include/cajun/json/elements.inl
+@@ -31,6 +31,7 @@
+ #include "reader.h"
+ #include <cassert>
+ #include <algorithm>
++#include <functional>
+ #include <map>
+ 
+ /*  
