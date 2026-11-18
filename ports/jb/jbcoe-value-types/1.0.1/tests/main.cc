@@ -53,6 +53,38 @@ bool operator==(const counting_allocator<T> &a,
   return a.c == b.c;
 }
 
+int live = 0;
+int rect_moves = 0;
+
+struct shape {
+  shape() { ++live; }
+  shape(const shape &) { ++live; }
+  virtual ~shape() { --live; }
+  virtual int area() const = 0;
+  virtual void scale(int k) = 0;
+};
+
+struct square : shape {
+  int side;
+  explicit square(int s) : side(s) {}
+  int area() const override { return side * side; }
+  void scale(int k) override { side *= k; }
+};
+
+struct rect : shape {
+  int w, h;
+  rect(int w, int h) : w(w), h(h) {}
+  rect(const rect &) = default;
+  rect(rect &&other) noexcept : shape(other), w(other.w), h(other.h) {
+    ++rect_moves;
+  }
+  int area() const override { return w * h; }
+  void scale(int k) override {
+    w *= k;
+    h *= k;
+  }
+};
+
 void check_indirect() {
   xyz::indirect<int> a(std::in_place, 42);
   CHECK(*a == 42 && !a.valueless_after_move());
@@ -83,6 +115,8 @@ void check_indirect() {
   CHECK(b != 42 && b < 42);
   c = 1;
   CHECK(*c == 1);
+  xyz::indirect<int> e(std::move(c));
+  CHECK(*e == 1 && b == c);
 
   xyz::indirect<std::vector<int>> v(std::in_place, {1, 2, 3});
   v->push_back(4);
@@ -90,6 +124,11 @@ void check_indirect() {
   xyz::indirect d(std::string("cabin"));
   static_assert(std::is_same_v<decltype(d), xyz::indirect<std::string>>);
   CHECK(*d == "cabin" && d->size() == 5);
+  {
+    xyz::indirect<square> s(std::in_place, 4);
+    xyz::indirect<square> t(s);
+    CHECK(t->area() == 16 && live == 2);
+  }
 
   counts n, m;
   {
@@ -104,33 +143,6 @@ void check_indirect() {
   }
   CHECK(n.deallocations == 2 && m.deallocations == 1);
 }
-
-int live = 0;
-
-struct shape {
-  shape() { ++live; }
-  shape(const shape &) { ++live; }
-  virtual ~shape() { --live; }
-  virtual int area() const = 0;
-  virtual void scale(int k) = 0;
-};
-
-struct square : shape {
-  int side;
-  explicit square(int s) : side(s) {}
-  int area() const override { return side * side; }
-  void scale(int k) override { side *= k; }
-};
-
-struct rect : shape {
-  int w, h;
-  rect(int w, int h) : w(w), h(h) {}
-  int area() const override { return w * h; }
-  void scale(int k) override {
-    w *= k;
-    h *= k;
-  }
-};
 
 void check_polymorphic() {
   xyz::polymorphic<shape> p(std::in_place_type<square>, 3);
@@ -174,6 +186,8 @@ void check_polymorphic() {
                                      std::move(y));
     CHECK(m.allocations == 1 && z->area() == 12 &&
           dynamic_cast<const rect *>(&*z) != nullptr);
+    // Unequal allocators: the object is moved into a new allocation.
+    CHECK(rect_moves == 1);
   }
   CHECK(n.deallocations == 2 && m.deallocations == 1);
 }
