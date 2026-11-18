@@ -3,13 +3,18 @@ url = "https://github.com/serge1/ELFIO/archive/refs/tags/Release_3.12.tar.gz"
 checksum = "sha256:e4ebc9ce3d6916461bc3e7765bb45e6210f0a9b93978bf91e59b05388c024489"
 format = "tar.gz"
 strip-prefix = "ELFIO-Release_3.12"
+# elf_types.hpp uses uint16_t and the other fixed-width types without
+# including <cstdint>.  The ubuntu-26.04 CI job 134553567408 failed with
+# "elfio/elf_types.hpp:30:20: error: 'uint16_t' does not name a type";
+# patch 0001 adds the include.
+patches = ["patches/0001-include-cstdint.patch"]
 
 [package]
 name = "cabin-ports/elfio"
 # Upstream's release 3.12 (tag Release_3.12; elfio_version.hpp says "3.12").
 version = "3.12.0"
 license = "MIT"
-include = ["LICENSE.txt", "elfio"]
+include = ["LICENSE.txt", "elfio", "patches"]
 
 # The elfio directory upstream installs (CMakeLists.txt:94-99); consumers
 # write `#include <elfio/elfio.hpp>`.
