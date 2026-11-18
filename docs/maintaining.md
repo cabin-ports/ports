@@ -65,6 +65,12 @@ Each `lint` step runs locally, from the repository root, exactly as `ci.yml` wri
 `shellcheck` and Go: `go run` fetches the `shfmt` and `actionlint` versions the job pins, and the
 `yq` version `scripts/actions/check-inline-runs.sh` pins.
 
+The jobs that lint and build name their runner's image (`ubuntu-24.04`, `macos-26`,
+`windows-2025-vs2026`), and so does every job of `publish.yml`.  A label such as `ubuntu-latest`
+moves to a new release by itself, with a toolchain no port was checked with, and every later
+change that dry-runs all ports then fails on the ports that do not build with it.  Moving to a
+newer image is a pull request of its own: it dry-runs every port.
+
 ### Selective dry-runs
 
 `--dry-run --changed-since <rev>` preflights only what the change since `<rev>` needs.  It compares
