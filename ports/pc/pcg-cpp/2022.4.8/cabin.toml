@@ -5,16 +5,12 @@ url = "https://github.com/imneme/pcg-cpp/archive/428802d1a5634f96bcd0705fab379ff
 checksum = "sha256:79f23706ed0cbc1bb57ea35d50d0abed66898b8f7b0bcf2aaecdfd234863b060"
 format = "tar.gz"
 strip-prefix = "pcg-cpp-428802d1a5634f96bcd0705fab379ff0113bcf13"
-# cl has no __uint128_t, so pcg64 uses upstream's emulated uint_x4, whose
-# operator| takes two uint_x4; set_stream (which operator>> calls) ors in a
-# plain 1.  The patch writes itype(1U), as the stream constructor does.
-patches = ["patches/0001-set-stream-literal-for-emulated-128-bit.patch"]
 
 [package]
 name = "cabin-ports/pcg-cpp"
 version = "2022.4.8"
 license = "Apache-2.0 OR MIT"
-include = ["LICENSE-APACHE.txt", "LICENSE-MIT.txt", "LICENSE.spdx", "README.md", "include", "patches"]
+include = ["LICENSE-APACHE.txt", "LICENSE-MIT.txt", "LICENSE.spdx", "README.md", "include"]
 
 # Header-only; consumers include <pcg_random.hpp> from the flat include/.
 # C++11 is upstream's floor.
