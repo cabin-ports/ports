@@ -12,8 +12,9 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   the unscoped package name, or the whole name when it has one character (`ports/zl/zlib/`,
   `ports/z/z/`).  Only `<name>` and `<version>` form the identity.  Discovery refuses anything
   else under `ports/` above a version directory, so CI fails a misplaced port.
-- A port directory, except its unpublished `tests/`, is published verbatim, so every edit,
-  including a comment, changes archive bytes.  Do not fold a port correction into unrelated work;
+- A port's `cabin.toml` and declared patches are published verbatim, and nothing else of its
+  directory is, so every edit to them, including a comment, changes archive bytes.  Do not fold a
+  port correction into unrelated work;
   a correction to a published version ships as a packaging revision of the same upstream version.
 - Patches apply byte-exactly.  `.gitattributes` disables line-ending conversion for them; never
   normalize, re-wrap, or re-generate a committed patch.

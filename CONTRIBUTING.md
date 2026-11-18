@@ -14,11 +14,11 @@ native `cabin.toml` - to Cabin's build model.  The catalog is curated, and found
 - **not** Cabin's public registry;
 - **not** a submission queue for arbitrary C/C++ libraries;
 - **not** a mechanism for distributing pre-built binaries or compiled artifacts;
-- **not** a place for build scripts - they only describe libraries whose
-  source layout fits Cabin's existing target model (a list of sources plus include directories),
-  optionally placing a prebuilt file with a static `[[package.upstream.copy]]` step or correcting
-  one with a declared byte-exact patch.  Ports that need code generation or a configure run do
-  not belong here.
+- **not** a place for a build script where a manifest can describe the library - most ports only
+  describe a library whose source layout fits Cabin's target model (a list of sources plus
+  include directories), optionally placing a prebuilt file with a static
+  `[[package.upstream.copy]]` step or correcting one with a declared byte-exact patch.  A port
+  carries a [build script](#build-scripts) only when that model cannot build the library.
 
 A foundation port should be **retired** once its upstream project ships and maintains a native
 `cabin.toml`.
@@ -61,8 +61,8 @@ declared `[package.upstream].patches` as byte-exact unified diffs.
 
 - Sources must be pinned by URL and SHA-256.  Floating references (`latest`, branches, tag-only
   without integrity) are rejected.
-- No upstream build-system invocation today.  Cabin does not run CMake, Autotools, Meson, Make, or
-  upstream `configure` scripts.
+- Cabin itself runs no upstream build system: no CMake, Autotools, Meson, Make, or `configure`.
+  Only a port's own [build script](#build-scripts) can run one.
 
 ### Placing prebuilt files with `[[package.upstream.copy]]`
 
@@ -100,6 +100,46 @@ materialization.  `.gitattributes` keeps Git from converting their line endings,
 normalize, re-wrap, or regenerate a committed patch.  See
 [`[package.upstream]`](https://cabinpkg.com/docs/manifest/#packageupstream) for the full rules.
 
+## Build scripts
+
+Most ports need none.  A port carries a [build script](https://cabinpkg.com/docs/build-scripts/)
+only when Cabin's target model cannot build the library: its upstream build configures or
+generates what it compiles.  A library a manifest can describe stays a plain port built from its
+sources, whether or not systems install it.  Cabin compiles the script and runs it confined
+before it builds the package, on every machine that builds it, so the port and every port that
+requires it build only
+[where Cabin confines a script](https://cabinpkg.com/docs/build-scripts/#confinement).
+
+- The script is the port's own `build.c` or `build.cpp`, which a declared patch adds at the root
+  of the sources.  The publisher takes only `cabin.toml` and the declared patches from the port
+  directory, so a `build.c` beside the manifest is not published, and the registry refuses
+  upstream's own root `build.c` or `build.cpp`, unchanged, as one.
+- The manifest's comments say what the script does and what it needs of the machine: a system
+  library and the oldest version of it the script accepts, a tool such as `perl` or `make`.  The
+  build names what is missing and fails.  A script reaches no network and builds none of the
+  tools it asks of the machine.
+- Where systems install the library, the script supplies the system's copy by default, found as
+  Cabin's
+  [package for a system library](https://cabinpkg.com/docs/build-scripts/#a-package-for-a-system-library)
+  finds it - the installation `CABIN_SDK_<NAME>_DIR` names, or else what pkg-config finds - and
+  the library built from the port's own sources under a feature named `vendored`.  A port between
+  it and a consumer passes the choice on with a feature named `vendored-<name>`
+  (`vendored-openssl`).  What the default build links is the machine's library, not the port's
+  version of it, so a port that requires it uses only what the oldest accepted version has.
+- The default build has to pass the dry-run on Linux, macOS, and Windows and build in the publish
+  workflow, on runner images that hold the library.  Where pkg-config does not supply it there,
+  the workflows set the port's `CABIN_SDK_<NAME>_DIR` first, in a pull request of their own.
+- A script may run upstream's own build (`Configure`, `make`) on the port's sources where the
+  manifest would otherwise have to restate it.  [Upstream fidelity](#upstream-fidelity) holds for
+  that build as for any target: the configuration upstream intends, with nothing left out to make
+  it pass.
+- Where a platform cannot run a build the script offers under a feature, the manifest says so and
+  the script fails there with a message.
+- A port takes no other port as a build dependency yet: the publisher orders ports by their
+  `[dependencies]` only.
+- The consumer test covers the default build of the port's libraries.  Each other feature the
+  script reads needs a [probe package](#probe-packages) that requests it.
+
 ## Upstream fidelity
 
 - Preserve upstream functionality and intended build semantics.  Never omit required sources,
@@ -107,9 +147,10 @@ normalize, re-wrap, or regenerate a committed patch.  See
   limitations explicitly, for example in a `cabin.toml` comment; a library whose required build
   model Cabin cannot represent is not ported.
 - Patches under `patches/` (if any) should be limited to what is strictly required to make a port
-  build through Cabin - build-system fixes and portability tweaks - or to add the one notices
-  file a package may need ([Licenses and notices](#licenses-and-notices)), never feature changes
-  or divergence from upstream behavior.
+  build through Cabin - build-system fixes, portability tweaks, and a
+  [build script](#build-scripts) - or to add the one notices file a package may need
+  ([Licenses and notices](#licenses-and-notices)), never feature changes or divergence from
+  upstream behavior.
   Upstream bugs and quality concerns are not a reason to patch; document a limitation instead
   when it matters to consumers.
 - Verify dependencies, public include paths, link requirements, platform assumptions, upstream
