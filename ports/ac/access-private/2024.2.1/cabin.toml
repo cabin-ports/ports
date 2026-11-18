@@ -1,0 +1,28 @@
+[package.upstream]
+url = "https://github.com/martong/access_private/archive/9e47d135067ecfe569158b2f42ead9c6db9aaedf.tar.gz"
+checksum = "sha256:72a8b53bcbc09ad98468a94178143245c4e00e86a9e2387d2376cb159d7fbfaa"
+format = "tar.gz"
+strip-prefix = "access_private-9e47d135067ecfe569158b2f42ead9c6db9aaedf"
+
+[package]
+# Upstream and ConanCenter spell it access_private.
+name = "cabin-ports/access-private"
+# Upstream has no tags; this is the date of commit 9e47d135.  ConanCenter pins
+# c65d54b (2021-06-21); later commits add access to overloaded functions and
+# constexpr accessors.
+version = "2024.2.1"
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+# access_private.hpp has no include guard, so a second inclusion in one
+# translation unit fails (measured: "redefinition of 'private_access'").
+# With -std=c++11 it defines std::enable_if_t and std::remove_reference_t
+# (access_private.hpp:4-11); Clang rejects another std::enable_if_t that
+# declares the default "class T = void" in the same translation unit (measured:
+# "template parameter redefines default argument").
+# Not ported: the tests.
+[target.access-private]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:17: "This is a C++11/C++14 libary".
+interface-cxx-standard = "c++11"
