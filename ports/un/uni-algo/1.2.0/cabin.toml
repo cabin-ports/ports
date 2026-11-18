@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/uni-algo/uni-algo/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:f2a1539cd8635bc6088d05144a73ecfe7b4d74ee0361fabed6f87f9f19e74ca9"
+format = "tar.gz"
+strip-prefix = "uni-algo-1.2.0"
+
+[package]
+name = "cabin-ports/uni-algo"
+version = "1.2.0"
+# Unicode-DFS-2016 covers the generated Unicode 15.1.0 tables; their notice,
+# include/uni_algo/impl/data/LICENSE.txt, ships with include/.
+license = "(Unlicense OR MIT) AND Unicode-DFS-2016"
+include = ["LICENSE.md", "README.md", "CHANGELOG.md", "include", "src"]
+
+# Consumers include <uni_algo/case.h>, <uni_algo/norm.h> and so on.
+# Not ported: upstream's shared library and its UNI_ALGO_HEADER_ONLY build;
+# this is its default static build.
+[target.uni-algo]
+type = "library"
+sources = ["src/data.cpp"]
+include-dirs = ["include"]
+# include/uni_algo/config.h:87-88, "C++17 or higher is required".
+cxx-standard = "c++17"
+interface-cxx-standard = "c++17"
+links = "uni-algo"
