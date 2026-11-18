@@ -5,8 +5,12 @@ format = "tar.gz"
 strip-prefix = "cppcmd-0.1.0"
 # CommandInterpreter.hpp uses std::numeric_limits without including <limits>,
 # which GCC 16 rejects at C++17 (measured): "'numeric_limits' is not a member
-# of 'std'".
-patches = ["patches/0001-include-limits.patch"]
+# of 'std'".  Parser.hpp uses uint8_t without including <cstdint>, which
+# check-linux rejects ("'uint8_t' does not name a type").
+patches = [
+  "patches/0001-include-limits.patch",
+  "patches/0002-include-cstdint.patch",
+]
 
 [package]
 name = "cabin-ports/cppcmd"
