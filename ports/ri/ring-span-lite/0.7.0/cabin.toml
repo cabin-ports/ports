@@ -3,7 +3,7 @@ url = "https://github.com/martinmoene/ring-span-lite/archive/refs/tags/v0.7.0.ta
 checksum = "sha256:7650bb1bcf76cb0f7ac75240c5346203cbe7eb7027c0843c60253f6db08a93c1"
 format = "tar.gz"
 strip-prefix = "ring-span-lite-0.7.0"
-# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
+# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
 patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
