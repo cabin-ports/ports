@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/wangyi-fudan/wyhash/archive/refs/tags/wyhash_final4.tar.gz"
+checksum = "sha256:a3f2da3acf300fba43f51c8299dae71c4e0774cd6fdd96e264fad5777b12ae3a"
+format = "tar.gz"
+strip-prefix = "wyhash-wyhash_final4"
+
+# wyhash_final4 is upstream's newest release and ConanCenter's pin
+# (wyhash.h:11, version 4).  main's later sprp and is_prime are not static,
+# so two TUs that include its wyhash.h fail to link (measured).
+[package]
+name = "cabin-ports/wyhash"
+version = "4.0.0"
+license = "Unlicense"
+# Not ported: wyhash32.h, a separate 32-bit hash that redefines wyrand when
+# included with wyhash.h (measured).
+include = ["LICENSE", "README.md", "wyhash.h"]
+
+# makefile:4 builds at -std=c++11; wyhash.h's inline functions need C99
+# (measured).
+[target.wyhash]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
