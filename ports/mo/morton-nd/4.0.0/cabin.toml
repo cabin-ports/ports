@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/kevinhartman/morton-nd/archive/refs/tags/v4.0.0.tar.gz"
+checksum = "sha256:29337c7f7afb6361dd483ca4fe2111aad9d590f3b9d3fe519856a5bdf450e059"
+format = "tar.gz"
+strip-prefix = "morton-nd-4.0.0"
+# Both headers use uint32_t, uint_least8_t and the like without including
+# <cstdint>.  The ubuntu-26.04 CI job failed with "'uint_least8_t' was not
+# declared in this scope" (mortonND_LUT.h:36) and "'uint64_t' does not name a
+# type" (mortonND_BMI2.h:37); patch 0001 includes <cstdint> in both.
+patches = ["patches/0001-include-cstdint.patch"]
+
+[package]
+name = "cabin-ports/morton-nd"
+version = "4.0.0"
+license = "MIT"
+# Not ported: the tests, docs and packaging.
+include = ["LICENSE", "NOTICE", "README.md", "include", "patches"]
+
+[target.morton-nd]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
