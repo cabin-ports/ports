@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/PragmaTwice/protopuf/archive/refs/tags/v3.1.0.tar.gz"
+checksum = "sha256:094ead00fe10c52725ae8c6871da907215e0ae752ed017d98907a9b410e52318"
+format = "tar.gz"
+strip-prefix = "protopuf-3.1.0"
+
+[package]
+name = "cabin-ports/protopuf"
+version = "3.1.0"
+license = "Apache-2.0"
+include = ["LICENSE", "README.md", "include"]
+
+# C++20 is upstream's floor (README.md:14).
+[target.protopuf]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
