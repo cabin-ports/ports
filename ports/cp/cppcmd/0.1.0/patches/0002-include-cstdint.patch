@@ -1,0 +1,8 @@
+--- a/include/cppcmd/Parser.hpp
++++ b/include/cppcmd/Parser.hpp
+@@ -1,4 +1,5 @@
+ #include <charconv>
++#include <cstdint>
+ #include <exception>
+ #include <regex>
+ #include <string_view>
