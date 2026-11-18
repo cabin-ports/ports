@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/vincentlaucsb/classify_scalar/archive/refs/tags/v1.1.2.tar.gz"
+checksum = "sha256:fe9ba502ef976432a9b93a6e65cfd5b733065363f1445ef59e7480179908eb83"
+format = "tar.gz"
+strip-prefix = "classify_scalar-1.1.2"
+
+# vcpkg's name.  vcpkg pins 1.1.0; 1.1.2 fixes float classification at the
+# int64 boundaries (measured) and detects floating std::from_chars through
+# __cpp_lib_to_chars.
+[package]
+name = "cabin-ports/vincentlaucsb-classify-scalar"
+version = "1.1.2"
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+# Consumers include <classify_scalar.hpp>.
+# The CLASSIFY_SCALAR_* switches stay consumer opt-ins.
+[target.vincentlaucsb-classify-scalar]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:7, "for C++11 and newer".
+interface-cxx-standard = "c++11"
