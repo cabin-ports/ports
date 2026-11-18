@@ -1,0 +1,38 @@
+--- /dev/null
++++ b/THIRD_PARTY_NOTICES
+@@ -0,0 +1,35 @@
++Third-party notices for cabin-ports/pprint
++
++pprint's own license is in LICENSE.  include/pprint.hpp, lines 93-384,
++contains code from magic_enum without its copyright notice or license text.
++
++========================================================================
++magic_enum
++https://github.com/Neargye/magic_enum
++include/pprint.hpp, lines 93-384
++SPDX-License-Identifier: MIT
++
++The closest upstream match for these lines is magic_enum v0.4.2 (commit
++34a0ee72b6fd77c3a90c9c789dbf452da52e2f64), whose LICENSE follows.
++
++MIT License
++
++Copyright (c) 2019 Daniil Goncharov
++
++Permission is hereby granted, free of charge, to any person obtaining a copy
++of this software and associated documentation files (the "Software"), to deal
++in the Software without restriction, including without limitation the rights
++to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++copies of the Software, and to permit persons to whom the Software is
++furnished to do so, subject to the following conditions:
++
++The above copyright notice and this permission notice shall be included in all
++copies or substantial portions of the Software.
++
++THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
++SOFTWARE.

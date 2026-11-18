@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/p-ranav/pprint/archive/refs/tags/v0.9.1.tar.gz"
+checksum = "sha256:b9cc0d42f7be4abbb50b2e3b6a89589c5399201a3dc1fd7cfa72d412afdb2f86"
+format = "tar.gz"
+strip-prefix = "pprint-0.9.1"
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+[package]
+name = "cabin-ports/pprint"
+version = "0.9.1"
+# include/pprint.hpp:49 credits http://loungecpp.wikidot.com/tips-and-tricks:indices
+# for its index-sequence idiom; its copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "THIRD_PARTY_NOTICES", "include", "patches"]
+
+# Upstream's include/ layout: consumers write <pprint.hpp>.  C++17 is
+# README.md's stated standard.  The header keeps its bundled magic_enum.
+# Two TUs that include pprint.hpp fail to link: non-inline to_string overloads.
+# A TU with pprint.hpp and <magic_enum/magic_enum.hpp> fails: both define magic_enum.
+# An enum class needs an operator<<.  On Apple clang 21, an enum without a fixed underlying
+# type can fail to compile (magic_enum casts values outside the enum's range); declare one.
+[target.pprint]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
