@@ -1,0 +1,10 @@
+--- a/homog2d.hpp
++++ b/homog2d.hpp
+@@ -45,6 +45,7 @@
+ #include <limits>
+ #include <cstdint> // required for uint8_t
+ #include <memory>  // required for std::unique_ptr
++#include <ctime>
+ 
+ #ifdef HOMOG2D_USE_SVG_IMPORT
+ 	#define HOMOG2D_ENABLE_VRTP
