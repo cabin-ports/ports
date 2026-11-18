@@ -3,13 +3,17 @@ url = "https://github.com/scoopr/vectorial/archive/3a00e8c00d017cb49b12eeffd7464
 checksum = "sha256:06eaac3df75fc2aebb36cf164dae9375f6669d8ef64d6e617b04f2f070f058d1"
 format = "tar.gz"
 strip-prefix = "vectorial-3a00e8c00d017cb49b12eeffd7464246d172ea97"
+# vec2f.h and vec3f.h test include guards they never define (vec2f.h:6,
+# vec3f.h:7), so a second inclusion fails ("redefinition of 'vec3f'",
+# check-macos); patch 0001 defines them.
+patches = ["patches/0001-define-include-guards.patch"]
 
 [package]
 name = "cabin-ports/vectorial"
 # Upstream has no tags; this is the date of commit 3a00e8c0.
 version = "2019.6.28"
 license = "BSD-2-Clause"
-include = ["LICENSE", "README", "include"]
+include = ["LICENSE", "README", "include", "patches"]
 
 # On NEON targets simd4f_neon.h is C++-only (:112, :215), so C consumers there
 # define VECTORIAL_FORCED with VECTORIAL_GNU or VECTORIAL_SCALAR (measured).
