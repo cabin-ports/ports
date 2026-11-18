@@ -1,0 +1,34 @@
+[package.upstream]
+url = "https://github.com/m-peko/bitflags/archive/refs/tags/v1.5.0.tar.gz"
+checksum = "sha256:1ea19e03e05e8e78faf0126a1a100e591467828bc816224e9cda330b104e69b5"
+format = "tar.gz"
+strip-prefix = "bitflags-1.5.0"
+
+[package]
+name = "cabin-ports/bitflags"
+# The v1.5.0 release tag decides the version; CMakeLists.txt:7-9 still says
+# 1.4.1.
+version = "1.5.0"
+# LICENSE is the MIT text, while bitflags.hpp's own header (:1-28) carries the
+# BSD-2-Clause text by the same author; both ship.
+license = "MIT AND BSD-2-Clause"
+include = ["LICENSE", "README.md", "include"]
+
+# Header-only, as upstream's CMake interface target (CMakeLists.txt:70-78).
+# At most 33 FLAG or RAW_FLAG lines per set, although std::uint64_t is
+# selected: shift() is 1U << offset (bitflags.hpp:220), so using a 34th fails
+# (measured; GCC 16: "right operand of shift expression '(1 << 32)' ...").
+# Before C++17, and on cl at any /std (cl reports __cplusplus 199711L without
+# /Zc:__cplusplus, which Cabin does not pass), a flag computed with |, &, ^ or
+# ~ has an uninitialized .name (bitflags.hpp:149); reading it is undefined
+# (measured).
+# The header defines unprefixed global macros (FLAG, RAW_FLAG, BEGIN_BITFLAGS,
+# END_BITFLAGS, BEGIN_RAW_BITFLAGS, END_RAW_BITFLAGS, DEFINE_FLAG, NODISCARD,
+# NON_CONST_CONSTEXPR); a consumer macro of the same name collides (measured:
+# "'FLAG' macro redefined").
+# Not ported: the tests, benchmark and plotting script.
+[target.bitflags]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:5: "Single-header header-only C++11 / C++14 / C++17 library".
+interface-cxx-standard = "c++11"
