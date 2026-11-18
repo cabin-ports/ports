@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/Tessil/hopscotch-map/archive/refs/tags/v2.4.0.tar.gz"
+checksum = "sha256:c147d1f6af9559c0e91af3ecf62274404ce5fb35ce94d2234c080ccc7a5913de"
+format = "tar.gz"
+strip-prefix = "hopscotch-map-2.4.0"
+
+[package]
+name = "cabin-ports/tsl-hopscotch-map"
+version = "2.4.0"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# Tessil's hopscotch hash map and set, header-only, as upstream's CMake
+# interface target tsl::hopscotch_map: include/ is the include root, so
+# consumers write `#include <tsl/hopscotch_map.h>` (CMakeLists.txt:7-13).
+# C++17 is upstream's floor since 2.4.0: README.md:95 asks for a C++17
+# compiler, and its tests build as C++17 (tests/CMakeLists.txt:11).
+# Not ported: tsl-hopscotch-map.natvis, a Visual Studio debugger visualizer
+# that upstream attaches to the target and installs on MSVC
+# (CMakeLists.txt:23-26, 38-41); it is not a build input.
+[target.tsl-hopscotch-map]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
