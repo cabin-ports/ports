@@ -31,6 +31,12 @@ struct vertex {
   nk_byte color[4];
 };
 
+/* Named, unlike NK_ALIGNOF's struct, which cl (C4116) and clang warn about. */
+struct vertex_align {
+  char c;
+  struct vertex v;
+};
+
 static void check_utilities(void) {
   static const char text[] = "  -123abc";
   static const char fox[] = "The quick brown fox jumps over the lazy dog";
@@ -133,7 +139,7 @@ int main(void) {
   memset(&config, 0, sizeof config);
   config.vertex_layout = layout;
   config.vertex_size = sizeof(struct vertex);
-  config.vertex_alignment = NK_ALIGNOF(struct vertex);
+  config.vertex_alignment = offsetof(struct vertex_align, v);
   config.tex_null = tex_null;
   config.circle_segment_count = 22;
   config.curve_segment_count = 22;
