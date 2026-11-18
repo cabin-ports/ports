@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/gracicot/kangaru/archive/refs/tags/v4.3.2.tar.gz"
+checksum = "sha256:ed2dec53087fe4c5fbfc7f7ffcb0e963b3e0a7f27699338c4bc5a116193113b8"
+format = "tar.gz"
+strip-prefix = "kangaru-4.3.2"
+# CMake generates include/kangaru/detail/config.hpp from
+# cmake/config/config.hpp.in, which #cmakedefines three options.  Patch 0001
+# adds it with only the template's include guard; the target defines the
+# option upstream recommends (CMakeLists.txt:26-31) and the vcpkg and
+# conan-center recipes enable.
+patches = ["patches/0001-add-the-generated-config-header.patch"]
+
+[package]
+name = "cabin-ports/kangaru"
+version = "4.3.2"
+# detail/hash.hpp:14 and type_id.hpp:72 credit TheLartians/StaticTypeInfo
+# (MIT) for the FNV-1a hash and the type-name slicing; their copyright
+# significance is uncertain.
+license = "MIT"
+# Not ported: the tests, examples, benchmarks, docs and packaging.
+include = ["LICENSE", "README.md", "include", "patches"]
+
+[target.kangaru]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+interface-defines = ["KGR_KANGARU_REVERSE_DESTRUCTION"]
