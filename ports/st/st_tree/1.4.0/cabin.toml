@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/erikerlandson/st_tree/archive/refs/tags/version_1.4.0.tar.gz"
+checksum = "sha256:fca5c74921ddd27ccf068f8ac74acbf7584054a67c33a6f11380b2e99efcf419"
+format = "tar.gz"
+strip-prefix = "st_tree-version_1.4.0"
+
+# ConanCenter's name and upstream's CMake project name; vcpkg calls it st-tree.
+[package]
+name = "cabin-ports/st_tree"
+version = "1.4.0"
+license = "Apache-2.0"
+include = ["LICENSE", "include"]
+
+# The headers, included as <st_tree.h>.  Destroying a node that has children
+# calls tree() from ~node_base, which static_casts this to the derived node
+# type whose destructor has already run (st_tree_nodes.h:82-91, :104); GCC
+# 16's -fsanitize=undefined (vptr) reports an invalid downcast there.
+[target.st_tree]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:28 claims only "standard ANSI C++"; CMakeLists.txt:16-17 builds
+# GCC with -std=c++11, and upstream's CI tests C++11 through C++20.
+interface-cxx-standard = "c++11"
