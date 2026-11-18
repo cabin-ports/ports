@@ -1,0 +1,39 @@
+[package.upstream]
+url = "https://github.com/rlogiacco/CircularBuffer/archive/refs/tags/1.4.0.tar.gz"
+checksum = "sha256:e01a837d2fe46fea168e8d36e1a4225d9414a855484d55b5a240f239ab53fc0a"
+format = "tar.gz"
+strip-prefix = "CircularBuffer-1.4.0"
+# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+[package]
+name = "cabin-ports/circularbuffer"
+version = "1.4.0"
+# CircularBuffer.hpp:5-8 and CircularBuffer.tpp:5-8 grant version 3 "or (at
+# your option) any later version".
+license = "LGPL-3.0-or-later"
+include = [
+  "CircularBuffer.h",
+  "CircularBuffer.hpp",
+  "CircularBuffer.tpp",
+  "LICENSE",
+  "README.md",
+  "THIRD_PARTY_NOTICES",
+  "patches",
+]
+
+# The headers sit at the archive root and include one another with angle
+# brackets (CircularBuffer.hpp:207, CircularBuffer.h:1).
+# CircularBuffer.hpp:27 declares namespace Helper at global scope, so a
+# consumer's own global Helper that is not a namespace fails to compile
+# (measured: "redefinition of 'Helper' as different kind of symbol").
+# pop(), and unshift() on a full buffer, step tail before the array's first
+# slot (CircularBuffer.tpp:31, :76); GCC -O2 can warn "array subscript -1 is
+# outside array bounds" at the call site even through -isystem (measured).
+# Not ported: the Arduino examples.
+[target.circularbuffer]
+type = "header-only"
+include-dirs = ["."]
+# Upstream states no standard; C++11 is inferred from its alias declarations
+# and deleted members (CircularBuffer.hpp:30-40, :74-82).
+interface-cxx-standard = "c++11"
