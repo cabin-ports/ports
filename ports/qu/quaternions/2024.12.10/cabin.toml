@@ -1,0 +1,31 @@
+[package.upstream]
+url = "https://github.com/ferd36/quaternions/archive/a5ef2e58b05b9b314aa21ff5b2791cd86bf241a7.tar.gz"
+checksum = "sha256:cfdacf51bf9c9d81e06f6ad34c04688657c8f9c01bb801901bd81d98adba964c"
+format = "tar.gz"
+strip-prefix = "quaternions-a5ef2e58b05b9b314aa21ff5b2791cd86bf241a7"
+
+[package]
+name = "cabin-ports/quaternions"
+# Upstream has no tags; this is the date of commit a5ef2e58.
+version = "2024.12.10"
+# include/quaternion.h's hash<T> reproduces fast-hash's fasthash64 (MIT, Zilong
+# Tan); its copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+# C++11 is upstream's floor (README.md).
+# quaternion_io.h defines two static data members out of line, so including it
+# from two translation units fails to link with duplicate symbols (measured
+# with Apple clang and GCC 16).
+# quaternion.h derives from std::unary_function and std::binary_function, which
+# libc++ rejects at C++17 and later unless the consumer defines
+# _LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION (measured with Apple clang).
+# `s - q` with a plain scalar s computes q - s; `Quaternion<T>(s) - q` is
+# correct (measured with Apple clang and GCC 16).
+[target.quaternions]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
