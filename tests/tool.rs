@@ -804,6 +804,60 @@ version = "0.0.0"
     }
 }
 
+/// A port's programs are installed from the staged registry, by a
+/// dry-run and by a plan: the generated probe links libraries only.
+#[test]
+fn a_port_with_an_executable_is_installed() {
+    require_build_tools();
+    let dir = TempDir::new().unwrap();
+    let (ports, cache) = (dir.child("ports"), dir.child("cache"));
+    let (bytes, hex) = make_tar_gz(&[("answer-1.0.0/main.c", "int main(void) { return 0; }\n")]);
+    seed_port_cache(cache.path(), &bytes, &hex);
+    write_port_package(
+        &ports,
+        "answer",
+        "1.0.0",
+        &hex,
+        &[],
+        "[target.answer]\ntype = \"executable\"\nsources = [\"main.c\"]\nc-standard = \"c11\"\n",
+    );
+    commit_ports(dir.path());
+    let user_cache = dir.child("user-cache");
+    let install = |work: &str, mode: &[&str]| {
+        let output = scrubbed(tool())
+            .current_dir(dir.path())
+            .args(mode)
+            .arg("--ports-dir")
+            .arg(ports.path())
+            .arg("--cache-dir")
+            .arg(cache.path())
+            .arg("--work-dir")
+            .arg(dir.child(work).path())
+            .arg("--cabin")
+            .arg(cabin_binary())
+            .env("CABIN_CACHE_HOME", user_cache.path())
+            .output()
+            .unwrap();
+        assert!(
+            output.status.success(),
+            "{}",
+            String::from_utf8_lossy(&output.stderr)
+        );
+        let installed = dir.child(format!(
+            "{work}/run/probes/answer/1.0.0/root/bin/answer{}",
+            std::env::consts::EXE_SUFFIX
+        ));
+        assert!(installed.path().is_file(), "{work}: nothing was installed");
+    };
+    install("dry-run", &["--dry-run"]);
+    install(
+        "plan",
+        &["--plan", "--run-id", RUN, "--prepared", "prepared.json"],
+    );
+    // Each worker's cache is its own: sharing one is a race.
+    assert!(!user_cache.path().exists());
+}
+
 /// The source does not exist: a build of the package would fail.
 #[test]
 fn a_plan_builds_no_probe_package() {

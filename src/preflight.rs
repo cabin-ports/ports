@@ -4,11 +4,13 @@
 //! registry* through a generated probe package, so the build consumes
 //! the registry artifact rather than the scratch tree it was packaged
 //! from.  A probe's source is the port's committed consumer test, or an
-//! empty `main`.  A dry-run builds and runs every probe, and after it
-//! the port's probe packages, the directories of its `tests/` that hold
-//! a manifest.  A plan only builds the probes: a probe package can have
-//! a build script of its own, and nothing of `tests/` runs outside a
-//! dry-run.  An upload builds none: a build can run a port's build
+//! empty `main`.  A port's `executable` targets, which no probe links,
+//! are built by `cabin install` from the same registry.  A dry-run
+//! also runs every probe, and builds and runs the port's probe
+//! packages, the directories of its `tests/` that hold a manifest.  A
+//! plan builds no probe package and runs nothing: a probe package can
+//! have a build script of its own, and nothing of `tests/` runs outside
+//! a dry-run.  An upload builds none: a build can run a port's build
 //! script, which must not happen beside the upload job's OIDC token.
 
 use std::fmt;
@@ -215,7 +217,7 @@ struct PortTimings {
     materialize: Duration,
     /// Packaging and the file-registry write.
     publish: Duration,
-    /// The probe's `cabin build`.
+    /// Every `cabin build`, and the `cabin install`.
     build: Duration,
     /// The probe's `cabin run`s (dry-run only).
     run: Duration,
@@ -393,27 +395,16 @@ fn build_probe_against_registry(
         Probes::Run => stage_probe_packages(conversion, &probe_dir, &mut stdout)?,
         _ => Vec::new(),
     };
-    let mut cabin = |package: &Path, command: &[&str]| -> Result<ExitStatus> {
-        let output = Command::new(request.cabin)
-            .args(command)
-            .arg("--manifest-path")
-            .arg(package.join("cabin.toml"))
-            .arg("--index-path")
-            .arg(registry_dir)
-            .arg("--cache-dir")
-            .arg(cache_dir)
-            .arg("--build-dir")
-            .arg(package.join("build"))
-            .arg("--offline")
-            // One worker per CPU, each at Ninja's default of CPUs + 2,
-            // would run that many heavy C++ compilations at once; two
-            // per probe still splits the late, largest ports' builds.
-            .args(["--jobs", "2"])
+    let mut cabin = |command: &mut Command| -> Result<ExitStatus> {
+        let output = command
             .output()
-            .with_context(|| format!("running {} {}", request.cabin.display(), command[0]))?;
+            .with_context(|| format!("running {command:?}"))?;
         stdout.extend(output.stdout);
         stderr.extend(output.stderr);
         Ok(output.status)
+    };
+    let over = |package: &Path, arguments: &[&str]| {
+        probe_command(request.cabin, package, registry_dir, cache_dir, arguments)
     };
     let started = Instant::now();
     let probed = (|| {
@@ -421,8 +412,16 @@ fn build_probe_against_registry(
             let name = package.file_name().unwrap().to_string_lossy();
             (package, format!(" in probe package `{name}`"))
         });
-        for (package, whose) in std::iter::once((&probe_dir, String::new())).chain(named) {
-            let status = cabin(package, &["build"])?;
+        let mut builds: Vec<(Command, String)> = std::iter::once((&probe_dir, String::new()))
+            .chain(named)
+            .map(|(package, whose)| (over(package, &["build"]), whose))
+            .collect();
+        if conversion.has_executable {
+            let install = install(request.cabin, conversion, &probe_dir, cache_dir)?;
+            builds.push((install, " in `cabin install`".to_owned()));
+        }
+        for (mut build, whose) in builds {
+            let status = cabin(&mut build)?;
             if !status.success() {
                 bail!(
                     "preflight build of {} {} against the generated registry failed{whose} \
@@ -447,7 +446,7 @@ fn build_probe_against_registry(
             (package, name.into_owned(), vec!["run"])
         });
         for (package, name, run) in generated.chain(committed) {
-            let status = cabin(package, &run)?;
+            let status = cabin(&mut over(package, &run))?;
             if !status.success() {
                 bail!(
                     "preflight probe `{name}` of {} {} failed ({status})",
@@ -480,6 +479,69 @@ fn build_probe_against_registry(
         );
     }
     probed
+}
+
+/// `cabin <arguments>` over a probe's package, against the staged
+/// registry.
+fn probe_command(
+    cabin: &Path,
+    package: &Path,
+    registry_dir: &Path,
+    cache_dir: &Path,
+    arguments: &[&str],
+) -> Command {
+    let mut command = Command::new(cabin);
+    command
+        .args(arguments)
+        .arg("--manifest-path")
+        .arg(package.join("cabin.toml"))
+        .arg("--index-path")
+        .arg(registry_dir)
+        .arg("--cache-dir")
+        .arg(cache_dir)
+        .arg("--build-dir")
+        .arg(package.join("build"))
+        .arg("--offline")
+        // One worker per CPU, each at Ninja's default of CPUs + 2,
+        // would run that many heavy C++ compilations at once; two
+        // per probe still splits the late, largest ports' builds.
+        .args(["--jobs", "2"]);
+    command
+}
+
+/// `cabin install` of the port from the staged registry into
+/// `<probe_dir>/root`, as its users get its programs.  The generated
+/// probe links libraries only, so nothing else builds an `executable`
+/// target.
+fn install(
+    cabin: &Path,
+    conversion: &PortConversion,
+    probe_dir: &Path,
+    cache_dir: &Path,
+) -> Result<Command> {
+    // `cabin install` has no `--index-path`: a config file names the
+    // registry, relative to itself (`<run>/probes/<name>/<version>/`).
+    let config = probe_dir.join("install.toml");
+    fs::write(&config, "[registry]\nindex-path = \"../../../registry\"\n")
+        .with_context(|| format!("writing {}", config.display()))?;
+    let mut command = Command::new(cabin);
+    command
+        .arg("install")
+        .arg(format!(
+            "{}@={}",
+            conversion.scoped_name.as_str(),
+            conversion.published_version
+        ))
+        .arg("--root")
+        .arg(probe_dir.join("root"))
+        .arg("--offline")
+        .env("CABIN_CONFIG", config)
+        // Set, it would have Cabin read no config file at all.
+        .env_remove("CABIN_NO_CONFIG")
+        .env("CABIN_CACHE_DIR", cache_dir)
+        // The probe builds' `--jobs 2`.
+        .env("CABIN_BUILD_JOBS", "2");
+    Ok(command)
 }
 
 /// A probe consumer's source: the port's committed consumer test for
@@ -832,6 +894,7 @@ mod tests {
             declared_requirements: Vec::<crate::plan::DeclaredRequirement>::new(),
             library_like_target_keys: target_keys.iter().map(|k| (*k).to_owned()).collect(),
             sole_library_target: target_keys.len() == 1,
+            has_executable: false,
         }
     }
 
