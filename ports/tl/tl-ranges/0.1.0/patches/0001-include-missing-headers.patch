@@ -1,0 +1,52 @@
+--- a/include/tl/adjacent_transform.hpp
++++ b/include/tl/adjacent_transform.hpp
+@@ -7,6 +7,7 @@
+ #include "adjacent.hpp"
+ #include "common.hpp"
+ #include "utility/meta.hpp"
++#include "functional/bind.hpp"
+ 
+ namespace tl {
+    namespace detail {
+--- a/include/tl/chunk_by.hpp
++++ b/include/tl/chunk_by.hpp
+@@ -1,6 +1,7 @@
+ #ifndef TL_RANGES_CHUNK_BY
+ #define TL_RANGES_CHUNK_BY
+ 
++#include <algorithm>
+ #include <ranges>
+ #include <iterator>
+ #include "common.hpp"
+--- a/include/tl/functional/predicates.hpp
++++ b/include/tl/functional/predicates.hpp
+@@ -1,6 +1,9 @@
+ #ifndef TL_RANGES_PREDICATES_HPP
+ #define TL_RANGES_PREDICATES_HPP
+ 
++#include <tuple>
++#include <utility>
++
+ namespace tl {
+     inline constexpr auto eq = [](auto&& x) {
+         return [x = std::forward<decltype(x)>(x)](auto&& y) {
+--- a/include/tl/k_combinations.hpp
++++ b/include/tl/k_combinations.hpp
+@@ -2,6 +2,7 @@
+ #define TL_RANGES_K_COMBINATIONS
+ 
+ 
++#include <cmath>
+ #include <ranges>
+ #include <tl/common.hpp>
+ #include <tl/fold.hpp>
+--- a/include/tl/utility/semiregular_box.hpp
++++ b/include/tl/utility/semiregular_box.hpp
+@@ -2,6 +2,7 @@
+ #define TL_RANGES_SEMIREGULAR_BOX_HPP
+ 
+ #include <concepts>
++#include <functional>
+ #include <optional>
+ 
+ namespace tl {

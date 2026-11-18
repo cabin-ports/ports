@@ -1,0 +1,88 @@
+--- a/include/tl/adjacent_transform.hpp
++++ b/include/tl/adjacent_transform.hpp
+@@ -177,7 +177,7 @@
+ 
+             template <class F>
+             constexpr auto operator()(F f) const {
+-               return pipeable(bind_back(adjacent_transform_fn_base<N>{}, std::move(f)));
++               return pipeable(tl::bind_back(adjacent_transform_fn_base<N>{}, std::move(f)));
+             }
+          };
+       }  // namespace detail
+--- a/include/tl/chunk.hpp
++++ b/include/tl/chunk.hpp
+@@ -221,7 +221,7 @@
+ 
+             template <std::integral N>
+             constexpr auto operator()(N n) const {
+-               return pipeable(bind_back(chunk_fn_base{}, n));
++               return pipeable(tl::bind_back(chunk_fn_base{}, n));
+             }
+          };
+       }
+--- a/include/tl/chunk_by.hpp
++++ b/include/tl/chunk_by.hpp
+@@ -104,7 +104,7 @@
+ 
+             template <class F>
+             constexpr auto operator()(F f) const {
+-               return pipeable(bind_back(chunk_by_fn_base{}, std::move(f)));
++               return pipeable(tl::bind_back(chunk_by_fn_base{}, std::move(f)));
+             }
+          };
+       }
+--- a/include/tl/chunk_by_key.hpp
++++ b/include/tl/chunk_by_key.hpp
+@@ -112,7 +112,7 @@
+ 
+             template <class F>
+             constexpr auto operator()(F f) const {
+-               return pipeable(bind_back(chunk_by_key_fn_base{}, std::move(f)));
++               return pipeable(tl::bind_back(chunk_by_key_fn_base{}, std::move(f)));
+             }
+          };
+       }
+--- a/include/tl/slide.hpp
++++ b/include/tl/slide.hpp
+@@ -215,7 +215,7 @@
+ 
+                 template <std::integral N>
+                 constexpr auto operator()(N n) const {
+-                    return pipeable(bind_back(slide_fn_base{}, n));
++                    return pipeable(tl::bind_back(slide_fn_base{}, n));
+                 }
+             };
+         }
+--- a/include/tl/stride.hpp
++++ b/include/tl/stride.hpp
+@@ -220,7 +220,7 @@
+ 
+             template <std::integral N>
+             constexpr auto operator()(N n) const {
+-               return pipeable(bind_back(stride_fn_base{}, n));
++               return pipeable(tl::bind_back(stride_fn_base{}, n));
+             }
+          };
+       }
+--- a/include/tl/transform_join.hpp
++++ b/include/tl/transform_join.hpp
+@@ -40,7 +40,7 @@
+ 
+             template <class F>
+             constexpr auto operator()(F f) const {
+-               return pipeable(bind_back(transform_join_fn_base{}, std::move(f)));
++               return pipeable(tl::bind_back(transform_join_fn_base{}, std::move(f)));
+             }
+          };
+       }
+--- a/include/tl/transform_maybe.hpp
++++ b/include/tl/transform_maybe.hpp
+@@ -130,7 +130,7 @@
+ 
+             template <class F>
+             constexpr auto operator()(F f) const {
+-               return pipeable(bind_back(transform_maybe_fn_base{}, std::move(f)));
++               return pipeable(tl::bind_back(transform_maybe_fn_base{}, std::move(f)));
+             }
+          };
+       }
