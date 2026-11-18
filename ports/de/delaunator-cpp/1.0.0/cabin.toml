@@ -28,7 +28,8 @@ include = [
 type = "library"
 sources = ["include/delaunator.cpp"]
 include-dirs = ["include"]
-# cmake/compiler_options.cmake:1-2, CMAKE_CXX_STANDARD 11.
-cxx-standard = "c++11"
+# Upstream requires C++11 (cmake/compiler_options.cmake:1-2); C++14 is the
+# oldest standard Cabin can request from MSVC.
+cxx-standard = "c++14"
 interface-cxx-standard = "c++11"
 links = "delaunator"
