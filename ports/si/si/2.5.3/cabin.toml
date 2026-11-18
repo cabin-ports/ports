@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/bernedom/SI/archive/refs/tags/2.5.3.tar.gz"
+checksum = "sha256:5c06f9f471474b97ed16e0f63f301d41702d27f6b9f340f0420eb0cfb928d0c6"
+format = "tar.gz"
+strip-prefix = "SI-2.5.3"
+
+# vcpkg's and ConanCenter's name.
+[package]
+name = "cabin-ports/si"
+version = "2.5.3"
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+# Consumers include <SI/length.h>, <SI/stream.h> and so on.
+# SI_DISABLE_IMPLICIT_RATIO_CONVERSION (detail/unit.h:14) is a consumer opt-in.
+[target.si]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:123, "uses **C++17** features".
+interface-cxx-standard = "c++17"
