@@ -1,0 +1,38 @@
+[package.upstream]
+url = "https://github.com/taskflow/taskflow/archive/refs/tags/v4.1.0.tar.gz"
+checksum = "sha256:2107f90e315e48a676922010b036357ff2b0c6b9160ce17fa9396e5860b1d715"
+format = "tar.gz"
+strip-prefix = "taskflow-4.1.0"
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+[package]
+name = "cabin-ports/taskflow"
+version = "4.1.0"
+license = "MIT AND Zlib AND MPL-2.0 AND NCSA AND BSL-1.0"
+include = ["LICENSE", "THIRD_PARTY_NOTICES", "patches", "taskflow"]
+
+# The taskflow/ headers, which upstream installs whole (CMakeLists.txt:348);
+# consumers write `#include <taskflow/taskflow.hpp>`.
+# Not ported: the C++20 module units (modules/, TF_BUILD_MODULES), the tfprof
+# viewer, and the examples, tests, benchmarks, sandbox and build files.  Not
+# reproduced: MSVC's warning-only /wd4324 (CMakeLists.txt:301-303).
+# Limitation: with GCC on macOS, code using tf::ObjectPool with its default
+# TaggedHead128 head links only with -latomic, which this port adds on Linux
+# alone; Apple Clang needs none.
+[target.taskflow]
+type = "header-only"
+include-dirs = ["."]
+# README.md:250-257 and CMakeLists.txt:34: C++20.
+interface-cxx-standard = "c++20"
+
+# Upstream links Threads::Threads (CMakeLists.txt:296).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# Upstream also links libatomic where its probe, the 128-bit compare-exchange
+# that tf::ObjectPool (utility/object_pool.hpp) does by default, fails without
+# it (cmake/Atomic/CheckAtomic.cmake); this adds it on Linux only, as oatpp
+# does, since FreeBSD's base system ships none.
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["atomic"]
