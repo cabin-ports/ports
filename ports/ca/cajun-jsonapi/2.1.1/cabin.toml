@@ -1,0 +1,35 @@
+[package.upstream]
+url = "https://github.com/cajun-jsonapi/cajun-jsonapi/archive/refs/tags/2.1.1.tar.gz"
+checksum = "sha256:88f1eecf105e7ea337cd4142d1ea1bd165e84b0fa91cdaa098437b2e153a234c"
+format = "tar.gz"
+strip-prefix = "cajun-jsonapi-2.1.1"
+# reader.inl uses uint16_t without including <cstdint>, which check-linux
+# rejects ("'uint16_t' was not declared in this scope"); elements.inl derives
+# from std::unary_function without including <functional>, which
+# check-windows rejects ("'unary_function': is not a member of 'std'").
+# Patches 0001 and 0002 include them.
+patches = [
+  "patches/0001-include-cstdint.patch",
+  "patches/0002-include-functional.patch",
+]
+
+[package]
+name = "cabin-ports/cajun-jsonapi"
+version = "2.1.1"
+license = "BSD-3-Clause"
+include = ["LICENSE", "Readme.md", "include", "patches"]
+
+# With libc++, C++17 and later fail on elements.inl:254's std::unary_function
+# unless the consumer defines _LIBCPP_ENABLE_CXX17_REMOVED_UNARY_BINARY_FUNCTION
+# (measured: "no template named 'unary_function'"). Include elements.h, reader.h
+# or writer.h before visitor.h, which fails alone (measured: "member access into
+# incomplete type 'ConstVisitor'"). Reading an empty or whitespace-only document
+# crashes instead of throwing (measured: SIGSEGV). Writing a non-ASCII string
+# leaves the stream in hex with fill '0' (measured: a later << 255 prints "ff").
+# Not ported: the tests.
+[target.cajun-jsonapi]
+type = "header-only"
+include-dirs = ["include"]
+# Upstream states no standard; C++11 is inferred from its tests' -std=c++11
+# (Makefile:14).
+interface-cxx-standard = "c++11"

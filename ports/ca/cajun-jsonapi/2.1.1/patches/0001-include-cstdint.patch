@@ -1,0 +1,10 @@
+--- a/include/cajun/json/reader.inl
++++ b/include/cajun/json/reader.inl
+@@ -28,6 +28,7 @@
+ ******************************************************************************/
+ 
+ #include <cassert>
++#include <cstdint>
+ #include <set>
+ #include <sstream>
+ 
