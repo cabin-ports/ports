@@ -1,0 +1,28 @@
+[package.upstream]
+url = "https://github.com/Tessil/ordered-map/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:3053e2d62db8a158c5941b75dacf397e1c695cd99dda4db78a32af76f4523423"
+format = "tar.gz"
+strip-prefix = "ordered-map-1.2.0"
+
+[package]
+name = "cabin-ports/tsl-ordered-map"
+version = "1.2.0"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# Tessil's insertion-ordered hash map and set, header-only, as upstream's CMake
+# interface target tsl::ordered_map: include/ is the include root, so
+# consumers write `#include <tsl/ordered_map.h>` (CMakeLists.txt:7-13).
+# C++11 is upstream's floor: README.md:71 asks for a C++11 compiler, and its
+# tests build as C++11 (tests/CMakeLists.txt:10).
+# Not ported: tsl-ordered-map.natvis, a Visual Studio debugger visualizer
+# that upstream attaches to the target and installs on MSVC
+# (CMakeLists.txt:20-23, 35-38); it is not a build input.
+# Limitation of upstream 1.2.0: when a probe run wraps past the last bucket,
+# erase(first, last) over an entry in that run can leave remaining keys that
+# iteration still visits but find() no longer locates; erasing those elements
+# one at a time, by iterator or key, or with erase_if is unaffected.
+[target.tsl-ordered-map]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
