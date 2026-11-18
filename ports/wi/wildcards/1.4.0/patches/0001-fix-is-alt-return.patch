@@ -1,0 +1,11 @@
+--- a/single_include/wildcards.hpp
++++ b/single_include/wildcards.hpp
+@@ -1197,7 +1197,7 @@
+ "The program execution should never end up here throwing this exception");
+ #else
+ return throw_logic_error(
+-p, "The program execution should never end up here throwing this exception");
++"The program execution should never end up here throwing this exception");
+ #endif
+ }
+ p = cx::next(p);

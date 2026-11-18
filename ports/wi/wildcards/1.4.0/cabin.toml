@@ -1,0 +1,42 @@
+[package.upstream]
+url = "https://github.com/zemasoft/wildcards/archive/refs/tags/v1.4.0.tar.gz"
+checksum = "sha256:da8846215df2c1493e9796392d9e17ca2da8cfeae0f718fe1d6e0544cbcfaa0f"
+format = "tar.gz"
+strip-prefix = "wildcards-1.4.0"
+# On the branch compilers other than clang take at C++14 and later, is_alt in
+# single_include/wildcards.hpp returns the iterator overload of
+# throw_logic_error, which does not compile for a class-type iterator such as
+# std::string's; patch 0001 calls the bool overload, as is_set does.  Without
+# it, check-windows job 134637208266 (cl /std:c++14) failed with
+# "wildcards.hpp(1199): error C2440: 'return': cannot convert from 'T' to
+# 'bool'", and GCC 16 at C++14 and later (measured) fails with
+# "wildcards.hpp:1199:25: error: cannot convert
+# '__gnu_cxx::__normal_iterator<const char*, std::__cxx11::basic_string<char> >'
+# to 'bool' in return".
+patches = ["patches/0001-fix-is-alt-return.patch"]
+
+[package]
+name = "cabin-ports/wildcards"
+version = "1.4.0"
+# The generated headers in single_include inline QuickCppLib's cpp_feature.h
+# (README.md:106-109), whose notice is in include/cpp_feature.hpp:1-23, shipped
+# for that notice.  It offers Apache-2.0 or BSL-1.0; this port takes BSL-1.0,
+# the licence of the rest of the package.
+license = "BSL-1.0"
+include = [
+  "LICENSE_1_0.txt",
+  "README.md",
+  "single_include",
+  "include/cpp_feature.hpp",
+  "patches",
+]
+
+# Header-only, from upstream's generated single header (README.md:44-48).  The
+# multi-header tree's include/wildcards.hpp exists only after CMake's
+# configure_file (CMakeLists.txt:19-22), so include/ is not the include path.
+# Not ported: the tests and examples.
+[target.wildcards]
+type = "header-only"
+include-dirs = ["single_include"]
+# README.md:58: "The library requires at least a C++11 compiler".
+interface-cxx-standard = "c++11"
