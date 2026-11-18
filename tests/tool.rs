@@ -631,6 +631,224 @@ fn a_selected_dry_run_still_checks_every_consumer_test_name() {
     assert!(stderr.contains("main.cpp"), "{stderr}");
 }
 
+/// A probe package, a directory of a port's `tests/` holding a manifest,
+/// is built from the staged registry and run beside the generated probe.
+#[test]
+fn a_probe_package_is_built_and_run_in_the_dry_run() {
+    require_build_tools();
+    let dir = TempDir::new().unwrap();
+    let (ports, cache) = zlib_only(&dir);
+    let package = dir.child("ports/zl/zlib/1.3.1/tests/answer");
+    package
+        .child("cabin.toml")
+        .write_str(
+            r#"[package]
+name = "answer"
+version = "0.0.0"
+c-standard = "c11"
+
+[dependencies]
+"cabin-ports/zlib" = "=1.3.1"
+
+[target.answer]
+type = "executable"
+sources = ["src/main.c"]
+deps = ["cabin-ports/zlib"]
+"#,
+        )
+        .unwrap();
+    // Relative to the probe's inherited working directory, as above.
+    package
+        .child("src/main.c")
+        .write_str(
+            r#"#include <stdio.h>
+#include "zlib.h"
+int main(void) {
+    FILE *ran = fopen("ran", "w");
+    if (ran) fclose(ran);
+    return zlib_answer() != 42;
+}
+"#,
+        )
+        .unwrap();
+    // Like every dotfile of `tests/`, no probe package.
+    dir.child("ports/zl/zlib/1.3.1/tests/.cache/cabin.toml")
+        .write_str("not a manifest")
+        .unwrap();
+    let output = scrubbed(tool())
+        .current_dir(dir.path())
+        .args(["--dry-run", "--ports-dir"])
+        .arg(&ports)
+        .arg("--cache-dir")
+        .arg(&cache)
+        .arg("--work-dir")
+        .arg(dir.child("work").path())
+        .arg("--cabin")
+        .arg(cabin_binary())
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    assert!(dir.child("ran").path().exists(), "the package never ran");
+    assert!(!package.child("cabin.lock").path().exists());
+}
+
+/// A probe package whose only entry on its port is under a condition
+/// this machine does not meet is not built: Cabin would find no such
+/// dependency for its target.
+#[test]
+fn a_probe_package_for_another_platform_is_skipped() {
+    require_build_tools();
+    let dir = TempDir::new().unwrap();
+    let (ports, cache) = zlib_only(&dir);
+    // Every platform but this one meets the condition, and the source
+    // does not exist.
+    dir.child("ports/zl/zlib/1.3.1/tests/elsewhere/cabin.toml")
+        .write_str(&format!(
+            r#"[package]
+name = "elsewhere"
+version = "0.0.0"
+c-standard = "c11"
+
+[target.'cfg(not(os = "{}"))'.dependencies]
+"cabin-ports/zlib" = "=1.3.1"
+
+[target.elsewhere]
+type = "executable"
+sources = ["src/main.c"]
+deps = ["cabin-ports/zlib"]
+"#,
+            std::env::consts::OS
+        ))
+        .unwrap();
+    let output = scrubbed(tool())
+        .args(["--dry-run", "--ports-dir"])
+        .arg(&ports)
+        .arg("--cache-dir")
+        .arg(&cache)
+        .arg("--work-dir")
+        .arg(dir.child("work").path())
+        .arg("--cabin")
+        .arg(cabin_binary())
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    assert!(
+        stdout.contains(
+            "probe package `elsewhere` of cabin-ports/zlib 1.3.1 is not for this platform"
+        ),
+        "{stdout}"
+    );
+}
+
+/// A probe package that would take another version of its port, were
+/// one staged, is refused before anything is.
+#[test]
+fn a_probe_package_that_would_not_probe_its_port_is_refused() {
+    let dir = TempDir::new().unwrap();
+    let (ports, cache) = zlib_only(&dir);
+    for (entry, refusal) in [
+        (
+            r#"[dependencies]
+"cabin-ports/zlib" = "^1.3"
+"#,
+            "is not a probe package",
+        ),
+        // A build leaves the table out.
+        (
+            r#"[dev-dependencies]
+"cabin-ports/zlib" = "=1.3.1"
+"#,
+            "is not a probe package",
+        ),
+        // Cabin's name for it is `macos`.
+        (
+            r#"[target.'cfg(os = "darwin")'.dependencies]
+"cabin-ports/zlib" = "=1.3.1"
+"#,
+            "is a probe package no checked platform builds",
+        ),
+    ] {
+        dir.child("ports/zl/zlib/1.3.1/tests/loose/cabin.toml")
+            .write_str(&format!(
+                r#"[package]
+name = "loose"
+version = "0.0.0"
+
+{entry}"#
+            ))
+            .unwrap();
+        let output = scrubbed(tool())
+            .args(["--dry-run", "--ports-dir"])
+            .arg(&ports)
+            .arg("--cache-dir")
+            .arg(&cache)
+            .arg("--work-dir")
+            .arg(dir.child("work").path())
+            // Never reached: the check fails before any build.
+            .arg("--cabin")
+            .arg(env!("CARGO_BIN_EXE_port-publish"))
+            .output()
+            .unwrap();
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert!(!output.status.success(), "{entry}{stderr}");
+        assert!(stderr.contains(refusal), "{entry}{stderr}");
+    }
+}
+
+/// The source does not exist: a build of the package would fail.
+#[test]
+fn a_plan_builds_no_probe_package() {
+    require_build_tools();
+    let dir = TempDir::new().unwrap();
+    let (ports, cache) = zlib_only(&dir);
+    dir.child("ports/zl/zlib/1.3.1/tests/unbuilt/cabin.toml")
+        .write_str(
+            r#"[package]
+name = "unbuilt"
+version = "0.0.0"
+c-standard = "c11"
+
+[dependencies]
+"cabin-ports/zlib" = "=1.3.1"
+
+[target.unbuilt]
+type = "executable"
+sources = ["src/main.c"]
+deps = ["cabin-ports/zlib"]
+"#,
+        )
+        .unwrap();
+    commit_ports(dir.path());
+    let output = scrubbed(tool())
+        .current_dir(dir.path())
+        .args(["--plan", "--run-id", RUN, "--prepared"])
+        .arg(dir.child("prepared.json").path())
+        .arg("--ports-dir")
+        .arg(&ports)
+        .arg("--cache-dir")
+        .arg(&cache)
+        .arg("--work-dir")
+        .arg(dir.child("work").path())
+        .arg("--cabin")
+        .arg(cabin_binary())
+        .output()
+        .unwrap();
+    assert!(
+        output.status.success(),
+        "{}",
+        String::from_utf8_lossy(&output.stderr)
+    );
+}
+
 /// Selection is dry-run only: `--publish` refuses it while parsing its
 /// arguments, before any preflight or upload.
 #[test]

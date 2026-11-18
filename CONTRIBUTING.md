@@ -33,7 +33,7 @@ canonical scoped identity (`cabin-ports/<name>`) and a complete `[package.upstre
 ports/<prefix>/<name>/<version>/
   cabin.toml   the published manifest
   patches/     unified diffs declared by [package.upstream].patches, if any
-  tests/       the consumer test (main.cc, main.c); never published
+  tests/       the consumer test (main.cc, main.c) and probe packages; never published
 ```
 
 `<prefix>` is the first two characters of the name, or the whole name when it has only one: zlib
@@ -199,8 +199,46 @@ compile-only smoke test is not sufficient evidence of correctness.
 `tests/main.cc` is the C++ consumer.  `tests/main.c` is the C consumer, which a port has when a
 library target that its default features enable declares, itself or through the package, an
 `interface-c-standard` other than `"none"` or `interface-cxx-standard = "none"`.  Keep C
-first-class alongside C++: a port with a C interface tests it from C too.  Any other file under
-`tests/` is an error; dotfiles are ignored.
+first-class alongside C++: a port with a C interface tests it from C too.  Any other entry of
+`tests/` but a [probe package](#probe-packages) is an error; dotfiles are ignored.
+
+### Probe packages
+
+A directory of `tests/` that holds a `cabin.toml` is a probe package: a whole Cabin package that
+the dry-run builds against the staged port after the generated probe, and whose one executable it
+then runs.  It tests what the generated probe cannot: a non-default feature of the port, a port
+required as a build dependency, a consumer that has a build script of its own.  Publishing builds
+no probe package.
+
+```toml
+# ports/ex/example/1.0.0/tests/tls/cabin.toml
+[package]
+name = "tls"
+version = "0.0.0"
+c-standard = "c11"
+
+[dependencies]
+"cabin-ports/example" = { version = "=1.0.0", features = ["tls"] }
+
+[target.tls]
+type = "executable"
+sources = ["src/main.c"]
+deps = ["cabin-ports/example"]
+```
+
+Every entry the manifest has on its port outside `[dev-dependencies]`, which a build leaves out,
+requires exactly the port's version, as above, and it has at least one; the publisher refuses any
+other, because a newer version staged beside the port would be built in its place.  Beside its
+port, a probe package requires only what the port requires with its default features: nothing else
+is sure to be staged when it builds, a dependency that only a non-default feature of the port
+brings in included.  Like a consumer test, it must check behavior, and it adds to the port's
+`tests/main.cc` or `tests/main.c` without replacing it.
+
+Where what a probe package tests does not exist on a platform, its entry on the port goes in a
+`[target.'cfg(...)'.dependencies]` table.  The dry-run does not build a probe package on a machine
+that meets the condition of none of its entries on the port, and says so.  The publisher refuses
+a probe package that none of the platforms CI checks would build, as one under a misspelled
+condition.
 
 ## Checks
 
@@ -232,8 +270,8 @@ $ cargo run --locked -- --dry-run --changed-since "$(git merge-base HEAD origin/
 `--port <name>` (repeatable) instead preflights the named ports and their dependencies without
 Git - a focused local check, not a replacement for the selection CI makes.  Before opening a pull
 request, run the `--changed-since` dry-run from the branch's merge base, or the full dry-run.  A
-selective dry-run proves only the selection it prints, and every dry-run probes default features
-only, so it does not validate non-default features.
+selective dry-run proves only the selection it prints, and the generated probe enables default
+features only, so a non-default feature is validated only by a probe package that requests it.
 [Selective dry-runs](docs/maintaining.md#selective-dry-runs) describes what each change selects,
 and [CI](docs/maintaining.md#ci) what pull-request CI runs.
 

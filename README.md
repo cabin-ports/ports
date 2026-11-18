@@ -37,7 +37,7 @@ publish-holds.txt                 port versions held back from automatic publish
 - `patches/` holds the unified diffs the manifest declares, for the rare port that needs a small
   correction to its upstream source.
 - `tests/` holds the port's consumer test, a small program built and run against the packaged
-  port.  It is never published.
+  port, and its probe packages, whole packages built and run the same way.  It is never published.
 - `port-publish` stages every port from its upstream archive, builds and tests it, and publishes it
   to the registry.
 
