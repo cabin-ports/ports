@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/codeinred/tuplet/archive/refs/tags/v2.1.1.tar.gz"
+checksum = "sha256:2df403ffeed38a9687a3f2a7d2a68419ba029f519244e9bcd30caa0e8ec2ead3"
+format = "tar.gz"
+strip-prefix = "tuplet-2.1.1"
+
+# vcpkg's and ConanCenter's name.
+[package]
+name = "cabin-ports/tuplet"
+version = "2.1.1"
+# LICENSE:1, "Boost Software License - Version 1.0"; the headers carry none.
+license = "BSL-1.0"
+include = ["LICENSE", "include/tuplet/tuple.hpp"]
+
+# The library, included as <tuplet/tuple.hpp>.  Clang's -Wmissing-braces (in
+# -Wall) warns on flat brace initialization of a tuple of two or more
+# elements, such as tuplet::tuple<int, int> t{1, 2}; GCC 16 does not.
+# GCC 13 rejects operator[] on a tuple lvalue for an rvalue-reference element,
+# such as one forward_as_tuple makes from an rvalue (tuple.hpp:630;
+# check-linux job 134622130840, ubuntu-24.04).
+# Not ported: include/tuplet/format.hpp, the opt-in formatter for {fmt},
+# which this package does not depend on.
+[target.tuplet]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:161, "tuplet has been backported to C++17".
+interface-cxx-standard = "c++17"
