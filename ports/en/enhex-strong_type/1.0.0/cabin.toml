@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/Enhex/strong_type/archive/refs/tags/v1.0.0.tar.gz"
+checksum = "sha256:d9ae1f6314ab16e628920460aa901417a762687457c00efd9ade531b82f30b6b"
+format = "tar.gz"
+strip-prefix = "strong_type-1.0.0"
+
+# ConanCenter's name; the owner prefix tells it apart from rollbear's
+# cabin-ports/strong_type.
+[package]
+name = "cabin-ports/enhex-strong_type"
+version = "1.0.0"
+license = "MIT"
+include = ["LICENSE.txt", "README.md", "include"]
+
+# Coexists with cabin-ports/strong_type in one translation unit (measured):
+# <strong_type.h> declares a global strong_type template and STRONG_TYPE
+# macro; rollbear's headers are <strong_type/*.hpp> in namespace strong.
+# Not ported: the example and tests.
+[target.enhex-strong_type]
+type = "header-only"
+include-dirs = ["include"]
+# tests/CMakeLists.txt:7: "set(CMAKE_CXX_STANDARD 17)".
+interface-cxx-standard = "c++17"
