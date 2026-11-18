@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/nicbarker/clay/archive/refs/tags/v0.14.tar.gz"
+checksum = "sha256:ee8f6477020dd72afe8cf6f8d3ab6855980028289a2b677a1423d17aab983585"
+format = "tar.gz"
+strip-prefix = "clay-0.14"
+
+[package]
+name = "cabin-ports/clay"
+# Upstream's version is two-part (v0.14, clay.h:1); Cabin versions are SemVer.
+version = "0.14.0"
+license = "Zlib"
+include = ["LICENSE.md", "README.md", "clay.h"]
+
+# Define CLAY_IMPLEMENTATION before #include <clay.h> in exactly one C or C++
+# file (clay.h:3-8).
+# On MSVC, C and C++ lay out clay's structs differently, so the
+# CLAY_IMPLEMENTATION file and its callers must use the same language
+# (measured on check-windows).
+# C99 and C++20 are upstream's floors (clay.h:31-37).
+# Not ported: the renderers, the language bindings, the examples and tests,
+# and the CMake build.
+[target.clay]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++20"
