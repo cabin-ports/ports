@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/bitwizeshift/BackportCpp/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:8efded40a1d0e6674824336499d8706043a62bd8ae8aef62210c8c215f710b84"
+format = "tar.gz"
+strip-prefix = "BackportCpp-1.2.0"
+# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+# ConanCenter's name.
+[package]
+name = "cabin-ports/backport-cpp"
+version = "1.2.0"
+# BSL-1.0 covers uncaught_exceptions in bpstd/exception.hpp, from Boost.Core.
+license = "MIT AND BSL-1.0"
+include = ["LICENSE", "README.md", "THIRD_PARTY_NOTICES", "include", "patches"]
+
+# Consumers include <bpstd/string_view.hpp>, <bpstd/optional.hpp> and so on.
+# basic_string_view::cend() and crend() call themselves (string_view.hpp:1189,
+# 1225): Clang overflows the stack and GCC rejects the call; 169d7fa4, after
+# 1.2.0, fixes cend() only (measured).
+[target.backport-cpp]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:12-13, "compatible with C++11".  At C++20, libc++ rejects
+# type_traits.hpp ("no template named 'is_literal_type'"; measured); libstdc++
+# accepts it.
+interface-cxx-standard = { min = "c++11", max = "c++17" }
