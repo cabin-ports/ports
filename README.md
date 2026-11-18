@@ -35,7 +35,7 @@ publish-holds.txt                 port versions held back from automatic publish
 - `cabin.toml` is the manifest the port publishes: the package identity, the pinned upstream
   archive in `[package.upstream]`, and the Cabin targets that build the library.
 - `patches/` holds the unified diffs the manifest declares, for the rare port that needs a small
-  correction to its upstream source.
+  correction to its upstream source or carries a build script.
 - `tests/` holds the port's consumer test, a small program built and run against the packaged
   port, and its probe packages, whole packages built and run the same way.  It is never published.
 - `port-publish` stages every port from its upstream archive, builds and tests it, and publishes it
