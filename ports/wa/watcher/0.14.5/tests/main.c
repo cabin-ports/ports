@@ -45,15 +45,17 @@ static int failures = 0;
   } while (0)
 
 #define PATH_LEN 1024
+/* Room for a PATH_LEN directory name plus a prefix or a file name. */
+#define NAME_LEN (PATH_LEN + 32)
 
 /* What the callback, which runs on the watcher's thread, has seen.  It
    compares the borrowed event strings while they are valid. */
 struct seen {
   lock_type lock;
-  char live[PATH_LEN];
-  char die[PATH_LEN];
-  char target[PATH_LEN];
-  char renamed[PATH_LEN];
+  char live[NAME_LEN];
+  char die[NAME_LEN];
+  char target[NAME_LEN];
+  char renamed[NAME_LEN];
   int events;
   int live_ok;
   int file_creates;
@@ -155,9 +157,9 @@ int main(void) {
   static struct seen s;
   char dir[PATH_LEN];
   char reported[PATH_LEN];
-  char probe[PATH_LEN];
-  char target[PATH_LEN];
-  char renamed[PATH_LEN];
+  char probe[NAME_LEN];
+  char target[NAME_LEN];
+  char renamed[NAME_LEN];
   void *watcher;
   int i, created = 0, ready = 0;
 
