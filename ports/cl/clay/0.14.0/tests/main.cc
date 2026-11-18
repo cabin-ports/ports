@@ -60,7 +60,6 @@ int main() {
     std::free(memory);
     if (failures != 0)
         return 1;
-    std::printf("clay C++ consumer test passed (Clay_ChildAlignment %zu, Clay_LayoutConfig %zu bytes)\n",
-                sizeof(Clay_ChildAlignment), sizeof(Clay_LayoutConfig));
+    std::puts("clay C++ consumer test passed");
     return 0;
 }

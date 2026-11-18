@@ -13,6 +13,9 @@ include = ["LICENSE.md", "README.md", "clay.h"]
 
 # Define CLAY_IMPLEMENTATION before #include <clay.h> in exactly one C or C++
 # file (clay.h:3-8).
+# On MSVC, C and C++ lay out clay's structs differently, so the
+# CLAY_IMPLEMENTATION file and its callers must use the same language
+# (measured on check-windows).
 # C99 and C++20 are upstream's floors (clay.h:31-37).
 # Not ported: the renderers, the language bindings, the examples and tests,
 # and the CMake build.

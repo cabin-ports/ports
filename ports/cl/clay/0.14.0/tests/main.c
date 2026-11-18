@@ -59,7 +59,6 @@ int main(void) {
     free(memory);
     if (failures != 0)
         return 1;
-    printf("clay C consumer test passed (Clay_ChildAlignment %zu, Clay_LayoutConfig %zu bytes)\n",
-           sizeof(Clay_ChildAlignment), sizeof(Clay_LayoutConfig));
+    puts("clay C consumer test passed");
     return 0;
 }
