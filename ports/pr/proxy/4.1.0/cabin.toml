@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/ngcpp/proxy/archive/refs/tags/4.1.0.tar.gz"
+checksum = "sha256:f46fd0fbcaf461f4904f35416edf94abc62d5582b66d6e769e676fd7bd478311"
+format = "tar.gz"
+strip-prefix = "proxy-4.1.0"
+
+# Microsoft's Proxy library, now maintained at ngcpp/proxy; vcpkg and
+# ConanCenter both name it proxy.
+[package]
+name = "cabin-ports/proxy"
+version = "4.1.0"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# The headers, included as <proxy/proxy.h>.  <proxy/proxy_fmt.h> also needs
+# {fmt}, which this package does not depend on.
+[target.proxy]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:225-233 gives C++20 as the minimum for every compiler.  Clang at
+# C++20 warns (-Wc++23-extensions) at each static call operator that the
+# headers and the PRO_DEF_* macros declare, and -pedantic-errors makes those
+# errors; upstream's own builds pass Clang -Wno-c++2b-extensions.
+interface-cxx-standard = "c++20"
