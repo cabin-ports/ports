@@ -1,0 +1,11 @@
+--- a/include/protopuf/array.h
++++ b/include/protopuf/array.h
+@@ -16,6 +16,8 @@
+ #define PROTOPUF_ARRAY_H
+ 
+ #include <ranges>
++// Changed for cabin-ports on 2026-11-18: include <string>.
++#include <string>
+ #include <vector>
+ #include "coder.h"
+ #include "varint.h"
