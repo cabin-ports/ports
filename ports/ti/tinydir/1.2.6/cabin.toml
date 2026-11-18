@@ -13,6 +13,9 @@ include = ["COPYING", "README.md", "tinydir.h"]
 # The single header at the archive root; consumers write `#include <tinydir.h>`.
 # README.md:63 states ANSI C (C90).  Upstream states no C++ standard; the
 # header wraps itself in extern "C", and C++98 is the measured floor.
+# Under a strict -std on glibc, tinydir uses stat() instead of lstat(), so a
+# dangling symlink makes tinydir_open_sorted fail with ENOENT for the whole
+# directory (check-linux job 134602575224).
 [target.tinydir]
 type = "header-only"
 include-dirs = ["."]
