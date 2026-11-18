@@ -1,0 +1,37 @@
+[package.upstream]
+url = "https://github.com/7bitcoder/7bitDI/archive/refs/tags/v3.4.0.tar.gz"
+checksum = "sha256:8381102f5966a5d83cf590b8fa45904d055d74ec90822628240786ab100fb929"
+format = "tar.gz"
+strip-prefix = "7bitDI-3.4.0"
+
+# ConanCenter's name; upstream spells it 7bitDI, and vcpkg has no port.
+[package]
+name = "cabin-ports/7bitdi"
+version = "3.4.0"
+license = "MIT"
+include = ["LICENSE", "README.md", "Include", "Source"]
+
+# C++17 is upstream's floor (README.md:37).  Not ported: upstream's Shared
+# and HeaderOnly library types; this is its default Static build.
+# Consumers include <SevenBit/DI.hpp>.  Every consumer TU gets the empty
+# unprefixed macros INLINE and EXPORT (measured).
+# Windows consumers that include <windows.h> before <SevenBit/DI.hpp> need
+# NOMINMAX: Details/Utils/Cast.hpp calls std::numeric_limits<size_t>::max()
+# (measured with an equivalent max macro).
+# Registering a service under a base class makes clang's
+# -fsanitize=alignment report "upcast of misaligned address" in
+# Details/Utils/Cast.hpp (measured).
+[target.7bitdi]
+type = "library"
+sources = ["Source/Source.cpp"]
+include-dirs = ["Include"]
+# Upstream's Static build regenerates CmakeDef.hpp with _7BIT_DI_STATIC_LIB
+# (Cmake/Setup.cmake:61-72).  The shipped CmakeDef.hpp selects header-only
+# mode, and LibraryConfig.hpp lets a predefined _7BIT_DI_STATIC_LIB override
+# it.  Consumers need the define too, or they compile inline copies of what
+# Source.cpp defines.
+defines = ["_7BIT_DI_STATIC_LIB"]
+interface-defines = ["_7BIT_DI_STATIC_LIB"]
+cxx-standard = "c++17"
+interface-cxx-standard = "c++17"
+links = "7bitDI"
