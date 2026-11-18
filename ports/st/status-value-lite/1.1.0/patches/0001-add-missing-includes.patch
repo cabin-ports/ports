@@ -1,0 +1,31 @@
+--- a/include/nonstd/status_value.hpp
++++ b/include/nonstd/status_value.hpp
+@@ -12,6 +12,7 @@
+ #ifndef NONSTD_STATUS_VALUE_HPP
+ #define NONSTD_STATUS_VALUE_HPP
+ 
++#include <new>
+ #include <utility>
+ 
+ #define status_value_MAJOR  1
+--- a/include/nonstd/status_value_cpp98.hpp
++++ b/include/nonstd/status_value_cpp98.hpp
+@@ -13,6 +13,7 @@
+ #define NONSTD_STATUS_VALUE_HPP
+ 
+ #include <cassert>
++#include <cstddef>
+ #include <stdexcept>
+ #include <utility>
+ 
+@@ -64,6 +65,10 @@
+ #define nssv_CPP17_OR_GREATER  ( nssv_CPLUSPLUS >= 201703L )
+ #define nssv_CPP20_OR_GREATER  ( nssv_CPLUSPLUS >= 202000L )
+ 
++#if nssv_CPP11_OR_GREATER
++# include <type_traits>
++#endif
++
+ // C++ language version (represent 98 as 3):
+ 
+ #define nssv_CPLUSPLUS_V  ( nssv_CPLUSPLUS / 100 - (nssv_CPLUSPLUS > 200000 ? 2000 : 1994) )

@@ -1,0 +1,38 @@
+[package.upstream]
+url = "https://github.com/nonstd-lite/status-value-lite/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:adcc9f3938b7805c1c465b5cde4e96143e126e7ddbccc00a53b452a8cc4d8ba8"
+format = "tar.gz"
+strip-prefix = "status-value-lite-1.1.0"
+# status_value.hpp uses placement new without including <new>, and
+# status_value_cpp98.hpp uses size_t and std::aligned_storage without
+# including <cstddef> or <type_traits>; patch 0001 adds the includes.
+# Without it (measured), Homebrew clang 23.1.5 (LLVM 23's libc++) at C++11
+# and Apple clang 21 at C++23 fail with "status_value.hpp:115:9: error: no
+# matching 'operator new' function for non-allocating placement new
+# expression; include <new>"; on status_value_cpp98.hpp LLVM 23 fails with
+# ":305:11: error: unknown type name 'size_t'" and Apple clang 21 at C++23
+# with ":489:45: error: no type named 'aligned_storage' in namespace 'std'".
+patches = ["patches/0001-add-missing-includes.patch"]
+
+[package]
+name = "cabin-ports/status-value-lite"
+version = "1.1.0"
+license = "BSL-1.0"
+include = ["LICENSE.txt", "include", "patches"]
+
+# Header-only, as upstream's CMake interface target (CMakeLists.txt:64-74),
+# which installs include/ (:116-119).  The header takes the standard from
+# _MSVC_LANG on cl.exe (status_value.hpp:29-35).
+# Limitations:
+# - With exceptions off (-fno-exceptions or nssv_CONFIG_NO_EXCEPTIONS=1),
+#   status_value.hpp does not compile: report_bad_status_value_access calls
+#   std::terminate without including <exception>.  With <exception> included,
+#   value() on a non-const rvalue still does not compile, since it passes
+#   std::move(m_status) to that function's S & parameter.
+# - With clang at C++23, status_value_cpp98.hpp warns that
+#   std::aligned_storage is deprecated.
+[target.status-value-lite]
+type = "header-only"
+include-dirs = ["include"]
+# status_value.hpp:3: "This version targets C++11 and later."
+interface-cxx-standard = "c++11"
