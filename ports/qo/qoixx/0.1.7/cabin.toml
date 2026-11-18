@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/wx257osn2/qoixx/archive/refs/tags/v0.1.7.tar.gz"
+checksum = "sha256:9da53e0fc035f4b75f872a196a76cd870b63568612254035dadc84e46f47d779"
+format = "tar.gz"
+strip-prefix = "qoixx-0.1.7"
+
+[package]
+name = "cabin-ports/qoixx"
+version = "0.1.7"
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+# Single header, as upstream ships it; consumers include <qoixx.hpp>.  C++20
+# is upstream's floor (README.md).  SIMD paths follow the consumer's own
+# target macros (AVX2, NEON, SVE); QOIXX_NO_SIMD forces the scalar code.
+# Decoding a truncated stream reads past the end of the input (upstream #32,
+# fixed after 0.1.7; measured with ASan).
+[target.qoixx]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
