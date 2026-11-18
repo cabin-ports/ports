@@ -1,0 +1,28 @@
+[package.upstream]
+url = "https://github.com/kimwalisch/libpopcnt/archive/refs/tags/v4.2.tar.gz"
+checksum = "sha256:8da403a3214b75ba95afcc5848e82cb03bacb3a58da8bf417be785281c061198"
+format = "tar.gz"
+strip-prefix = "libpopcnt-4.2"
+
+[package]
+name = "cabin-ports/libpopcnt"
+# Release v4.2 (ChangeLog:3); the header declares no version.
+version = "4.2.0"
+# popcnt_avx2 is copied from Wojciech Muła's sse-popcount (README.md:131-133),
+# BSD-2-Clause by Muła, whom LICENSE already names.
+license = "BSD-2-Clause"
+# libpopcnt.h:296-300 credits Wikipedia's Hamming weight article for
+# popcnt64_bitwise; its copyright significance is uncertain.
+include = ["LICENSE", "libpopcnt.h"]
+
+# The one header upstream installs (CMakeLists.txt:10); consumers write
+# `#include <libpopcnt.h>`.
+# Not ported: the benchmark, the tests and scripts, and the build files.
+[target.libpopcnt]
+type = "header-only"
+include-dirs = ["."]
+# Upstream states no standard.  Below C99 and C++11 the header needs long
+# long (libpopcnt.h:304-307), and on x86 a for-loop declaration (:620) and
+# <atomic> (:206), which GCC rejects.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
