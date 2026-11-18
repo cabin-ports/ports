@@ -1,0 +1,31 @@
+[package.upstream]
+url = "https://github.com/p-ranav/glob/archive/refs/tags/v0.0.1.tar.gz"
+checksum = "sha256:f0b74df0417d04a0116bceeca2f2401a77a1d44e7ea75b369b98b87b791853ae"
+format = "tar.gz"
+strip-prefix = "glob-0.0.1"
+
+# vcpkg's and ConanCenter's name; a bare glob would read as POSIX glob(3).
+[package]
+name = "cabin-ports/p-ranav-glob"
+version = "0.0.1"
+license = "MIT"
+include = ["LICENSE", "README.md", "include", "source"]
+
+# Upstream's two-file flavor, as its CMake and vcpkg build it; the
+# single_include/ header is left out.  C++17 is upstream's floor (README.md:33).
+# Limitations (measured): matching departs silently from Python's glob in
+# several forms (rglob's ** never matches zero directories; relative
+# patterns mishandle hidden files, symlinks and matches outside the working
+# directory; a file named "\n" matches every wildcard). A doubled hyphen in
+# a class followed by more pattern, such as "[a--c]*.txt", reads out of
+# bounds in translate (glob.cpp:60, ASan), and concurrent first calls race
+# on a static map (TSan). Test the pattern forms you rely on, and do not
+# glob untrusted patterns.
+[target.glob]
+type = "library"
+sources = ["source/glob.cpp"]
+include-dirs = ["include"]
+cxx-standard = "c++17"
+interface-cxx-standard = "c++17"
+# Upstream's library name (CMakeLists.txt:47).
+links = "glob"
