@@ -1,0 +1,34 @@
+[package.upstream]
+url = "https://github.com/abellgithub/delaunator-cpp/archive/refs/tags/v1.0.0.tar.gz"
+checksum = "sha256:27fdcbd92b3d0147a3952ee61fb34e86cfc3e87b7fb05afccca045582d0a83f4"
+format = "tar.gz"
+strip-prefix = "delaunator-cpp-1.0.0"
+# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+[package]
+name = "cabin-ports/delaunator-cpp"
+version = "1.0.0"
+# ISC covers the code translated from mapbox/delaunator.
+license = "MIT AND ISC"
+include = [
+  "LICENSE",
+  "README.md",
+  "THIRD-PARTY-NOTICES",
+  "THIRD_PARTY_NOTICES",
+  "include",
+  "patches",
+]
+
+# Consumers include <delaunator.hpp>.
+# Empty, one-point and all-duplicate input indexes points out of range before
+# the constructor throws, and an odd-length coordinate vector is read past its
+# end (measured).
+[target.delaunator-cpp]
+type = "library"
+sources = ["include/delaunator.cpp"]
+include-dirs = ["include"]
+# cmake/compiler_options.cmake:1-2, CMAKE_CXX_STANDARD 11.
+cxx-standard = "c++11"
+interface-cxx-standard = "c++11"
+links = "delaunator"
