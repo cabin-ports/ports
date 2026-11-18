@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/Sedeniono/tiny-optional/archive/refs/tags/v1.5.3.tar.gz"
+checksum = "sha256:159974ea51fc1273cb4e642666d4f00b3bb1adbf15c0a35ec7315fec67e7c9ac"
+format = "tar.gz"
+strip-prefix = "tiny-optional-1.5.3"
+
+[package]
+name = "cabin-ports/tiny-optional"
+version = "1.5.3"
+license = "BSL-1.0"
+include = ["LICENSE", "include"]
+
+# Sedeniono's tiny::optional, header-only, as upstream's CMake interface
+# target tiny-optional::tiny-optional: include/ is the include root, so
+# consumers write `#include <tiny/optional.h>` (CMakeLists.txt:14-30).
+# include/ also holds tiny_optional.natvis, a Visual Studio debugger
+# visualizer that upstream installs with the headers.
+# C++17 is upstream's floor: README.md:162 requires at least C++17, and the
+# CMake target requires cxx_std_17 (CMakeLists.txt:26).
+# Limitation: on architectures other than x86 and x64 (measured on arm64),
+# the header #errors unless the consumer defines
+# TINY_OPTIONAL_USE_SEPARATE_BOOL_INSTEAD_OF_UB_TRICKS, as upstream documents
+# (README.md:850-856).  The manifest cannot attach interface-defines per
+# architecture (a cfg table carries no interface-defines), and defining the
+# macro everywhere would give up the compressed optionals on x86 and x64.
+[target.tiny-optional]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
