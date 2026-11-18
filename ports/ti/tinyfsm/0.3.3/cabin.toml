@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/digint/tinyfsm/archive/refs/tags/v0.3.3.tar.gz"
+checksum = "sha256:99aaad53ddb9b9b3fbb535a6983e9c86a0b8c8ef112181cddcb6f3857b440d09"
+format = "tar.gz"
+strip-prefix = "tinyfsm-0.3.3"
+
+[package]
+name = "cabin-ports/tinyfsm"
+version = "0.3.3"
+license = "MIT"
+include = ["COPYING", "include"]
+
+# The single header, included as <tinyfsm.hpp>.
+[target.tinyfsm]
+type = "header-only"
+include-dirs = ["include"]
+# doc/20-Installation.md:14, "TinyFSM requires a compiler supporting the C++11
+# language standard".
+interface-cxx-standard = "c++11"
