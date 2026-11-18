@@ -17,6 +17,11 @@
 
 static int failures = 0;
 
+#ifndef _WIN32
+/* Temporary CI probe: strict c89 on glibc does not declare symlink. */
+int symlink(const char *target, const char *linkpath);
+#endif
+
 #define CHECK(cond)                                                            \
   do {                                                                         \
     if (!(cond)) {                                                             \
@@ -294,6 +299,23 @@ int main(void) {
     check_unsorted();
     check_file_open();
   }
+
+#ifndef _WIN32
+  {
+    /* Temporary CI probe: a dangling symlink in the listed directory. */
+    char link[PATH_LEN];
+    tinydir_dir dir;
+    int rc;
+    CHECK(symlink("no-such-target", join(link, root, "dangling")) == 0);
+    errno = 0;
+    rc = tinydir_open_sorted(&dir, root);
+    fprintf(stderr, "dangling-symlink probe: tinydir_open_sorted returned %d, errno %d\n", rc, errno);
+    CHECK(rc == 0);
+    if (rc == 0)
+      tinydir_close(&dir);
+    CHECK(remove_file(link));
+  }
+#endif
 
   CHECK(remove_file(i));
   CHECK(remove_dir(s));
