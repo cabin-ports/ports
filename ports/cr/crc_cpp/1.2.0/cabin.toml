@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/AshleyRoll/crc_cpp/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:508a609d9ef12c3088ed17a8ed820c965161a36dd90738c7358333fbfbe96af5"
+format = "tar.gz"
+strip-prefix = "crc_cpp-1.2.0"
+
+[package]
+name = "cabin-ports/crc_cpp"
+version = "1.2.0"
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+# Where std::size_t is 32 bits, the MSB-first table generator shifts it by 56
+# to 62 bits (crc_cpp.h:203), so non-reflected 64-bit algorithms such as
+# crc64_ecma fail to compile (measured: clang i386 and armv7, "shift count 56 >=
+# width of type 'std::size_t'").
+# Not ported: the tests.
+[target.crc_cpp]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:10-11: "C++20 and above" and "C++17 using a fall back static table
+# generator pattern".
+interface-cxx-standard = "c++17"
