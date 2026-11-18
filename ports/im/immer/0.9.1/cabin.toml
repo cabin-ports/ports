@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/arximboldi/immer/archive/refs/tags/v0.9.1.tar.gz"
+checksum = "sha256:b18b92ba60ec3186dc36ef671d3c2ae542cbb63eb6dc0e258476c6111a67c971"
+format = "tar.gz"
+strip-prefix = "immer-0.9.1"
+
+# The "VERSION 0.9.0" in CMakeLists.txt was not bumped for v0.9.1.
+[package]
+name = "cabin-ports/immer"
+version = "0.9.1"
+license = "BSL-1.0"
+# Not ported: the tests, examples, benchmarks, docs, tools, the bindings and
+# fuzzers under extra/, and the packaging.
+include = ["LICENSE", "README.rst", "immer"]
+
+# Most headers under immer/extra/ and immer/experimental/ include cereal, fmt
+# or Boost headers, and heap/gc_heap.hpp stops with #error without Boehm GC;
+# the port provides none of them.
+[target.immer]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++14"
