@@ -3,13 +3,18 @@ url = "https://github.com/ikalnytskyi/termcolor/archive/refs/tags/v2.1.0.tar.gz"
 checksum = "sha256:435994c32557674469404cb1527c283fdcf45746f7df75fd2996bb200d6a759f"
 format = "tar.gz"
 strip-prefix = "termcolor-2.1.0"
+# termcolor.hpp uses uint8_t without including <cstdint>.  The ubuntu-24.04
+# CI job 134597690302 failed with "termcolor.hpp:200:15: error: 'uint8_t' has
+# not been declared"; patch 0001 adds the include.
+patches = ["patches/0001-include-cstdint.patch"]
 
 [package]
 name = "cabin-ports/termcolor"
 version = "2.1.0"
 license = "BSD-3-Clause"
-include = ["LICENSE", "include"]
+include = ["LICENSE", "include", "patches"]
 
+# C++11 is upstream's floor (CMakeLists.txt:14).
 [target.termcolor]
 type = "header-only"
 include-dirs = ["include"]
