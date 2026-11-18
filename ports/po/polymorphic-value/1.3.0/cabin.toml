@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/jbcoe/polymorphic_value/archive/refs/tags/v1.3.0.tar.gz"
+checksum = "sha256:61ce07d1b76b1409ceaa34dc88f2c5dc8c4c51c0c62387b97857f5b7eef7382e"
+format = "tar.gz"
+strip-prefix = "polymorphic_value-1.3.0"
+
+# Named as vcpkg does.  1.3.0 is the final release: upstream is archived in
+# favour of jbcoe/value_types (cabin-ports/jbcoe-value-types).
+[package]
+name = "cabin-ports/polymorphic-value"
+version = "1.3.0"
+license = "MIT"
+include = ["LICENSE.txt", "polymorphic_value.h", "polymorphic_value.natvis"]
+
+# The header and MSVC debugger visualiser upstream installs
+# (CMakeLists.txt:150-156); consumers write `#include <polymorphic_value.h>`.
+# Not ported: the tests, the talks and proposal draft, the other development
+# files, and the build files.
+# Converting an empty polymorphic_value<U> to polymorphic_value<T> gives a
+# value that tests true and crashes when copied or dereferenced.
+[target.polymorphic-value]
+type = "header-only"
+include-dirs = ["."]
+# CMakeLists.txt:39-42; despite README.md:10's C++14 badge, the header needs
+# C++17's std::in_place_type_t (polymorphic_value.h:244).
+interface-cxx-standard = "c++17"
