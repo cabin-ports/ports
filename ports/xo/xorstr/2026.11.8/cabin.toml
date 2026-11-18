@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/JustasMasiulis/xorstr/archive/7cd289998f4da2c8bc2362befb3090b851f2490a.tar.gz"
+checksum = "sha256:76e163d9fdf50955ec9d5f10b06e77293e1e051d3f8ad9b478bb60ce73caa8ff"
+format = "tar.gz"
+strip-prefix = "xorstr-7cd289998f4da2c8bc2362befb3090b851f2490a"
+
+# Upstream has no releases or tags; 2026.11.8 is the date of master's commit
+# 7cd28999, which vcpkg also pins.  ConanCenter pins 8ab29322 as
+# cci.20210417.
+[package]
+name = "cabin-ports/xorstr"
+version = "2026.11.8"
+license = "Apache-2.0"
+include = ["LICENSE", "README.md", "include"]
+
+# C++17 is upstream's floor (README.md:2).
+[target.xorstr]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+# Without it, clang on x86-64 rejects the AVX intrinsics unless the consumer
+# passes -mavx2, which Cabin cannot propagate (measured).  The switch selects
+# upstream's SSE2 path on x86; arm64 keeps NEON, and only the alignment drops.
+interface-defines = ["JM_XORSTR_DISABLE_AVX_INTRINSICS"]
