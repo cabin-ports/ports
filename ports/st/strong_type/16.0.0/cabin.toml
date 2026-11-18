@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/rollbear/strong_type/archive/refs/tags/v16.tar.gz"
+checksum = "sha256:b0582ff8ebff7a909464216e4686cdba90a5924dc261672aa6ed0407cd53f5f1"
+format = "tar.gz"
+strip-prefix = "strong_type-16"
+
+# ConanCenter's name, in upstream's spelling (vcpkg says strong-type).
+# Upstream numbers releases with one integer (CMakeLists.txt:54, tag v16).
+[package]
+name = "cabin-ports/strong_type"
+version = "16.0.0"
+license = "BSL-1.0"
+include = ["LICENSE", "include"]
+
+# The headers, included as <strong_type/strong_type.hpp> or one modifier's
+# header such as <strong_type/ordered.hpp>.
+[target.strong_type]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:2, "An additive strong typedef library for C++14/17/20".
+interface-cxx-standard = "c++14"
