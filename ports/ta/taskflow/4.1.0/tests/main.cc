@@ -104,7 +104,7 @@ void check_algorithms(tf::Executor &executor) {
     squares[static_cast<std::size_t>(i)] = std::int64_t{i} * i;
   });
   taskflow.inclusive_scan(v.begin(), v.end(), prefix.begin(),
-                          std::plus<std::int64_t>{});
+                          std::plus<int>{});
   executor.run(taskflow).wait();
   CHECK(sum == 500600);
   CHECK(squares[0] == 0 && squares[999] == 998001);
