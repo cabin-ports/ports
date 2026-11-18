@@ -1,0 +1,34 @@
+[package.upstream]
+url = "https://github.com/samhocevar/portable-file-dialogs/archive/refs/tags/0.1.0.tar.gz"
+checksum = "sha256:db57f02a45b169613c41d1fb94edab5f03020cc5cdc5033f538c08b4982cd5d4"
+format = "tar.gz"
+strip-prefix = "portable-file-dialogs-0.1.0"
+# On macOS the header's _POSIX_C_SOURCE 2 hides newer POSIX and Darwin APIs
+# from the standard headers included after it: libc++'s <fstream> then fails
+# to compile (no fseeko), and so does libstdc++'s <cstdlib> (no quick_exit).
+# The patch is upstream's fix after 0.1.0 (d814e3c8 and 4af2a0db): define
+# _DARWIN_C_SOURCE.
+patches = ["patches/0001-define-darwin-c-source-on-apple.patch"]
+
+[package]
+name = "cabin-ports/portable-file-dialogs"
+version = "0.1.0"
+# portable-file-dialogs.h:723 credits https://stackoverflow.com/a/10444161
+# for its activation-context setup; its copyright significance is uncertain.
+license = "WTFPL"
+include = ["COPYING", "portable-file-dialogs.h", "patches"]
+
+# The header at the archive root, as upstream's CMake target exposes it.  C++11
+# is README.md's stated standard.  At run time macOS needs osascript and Linux
+# zenity, matedialog, qarma or kdialog.  Outside Windows, result() of a
+# cancelled save_file or select_folder calls back() on an empty string, which
+# hardened standard libraries trap.
+[target.portable-file-dialogs]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
+
+# The header calls user32 and shell32 and uses CLSID_FileOpenDialog from uuid;
+# it loads comdlg32 and ole32 at run time.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["user32", "shell32", "uuid"]
