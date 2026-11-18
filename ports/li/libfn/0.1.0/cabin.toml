@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/libfn/functional/archive/refs/tags/v0.1.0.tar.gz"
+checksum = "sha256:acdead379a4e5d0dfad39ece8eebe99c001ab93f338dcf3a69ece4e15b2af387"
+format = "tar.gz"
+strip-prefix = "functional-0.1.0"
+
+[package]
+name = "cabin-ports/libfn"
+version = "0.1.0"
+license = "ISC"
+include = ["LICENSE.md", "include"]
+
+# Header-only, the union of upstream's interface targets version, pfn and fn
+# over include/.  C++20 is upstream's floor; it gives cl /std:c++20, which
+# implies the /permissive- upstream requires.  Upstream's opt-in fn_cxx26
+# entry (LIBFN_CXX26 with C++26 std::type_order) is not provided.
+[target.libfn]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
+# Upstream sets it for cl; Cabin cannot gate it, and only the MSVC STL (clang-cl too) reads it.
+interface-defines = ["_HAS_CXX23"]
