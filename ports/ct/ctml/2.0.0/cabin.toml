@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/tinfoilboy/CTML/archive/refs/tags/2.0.0.tar.gz"
+checksum = "sha256:e13b3bb04903f47b90b286f8a4695232179e28474a0a33f1a3f333552338d132"
+format = "tar.gz"
+strip-prefix = "CTML-2.0.0"
+
+[package]
+name = "cabin-ports/ctml"
+version = "2.0.0"
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+# Consumers include <ctml.hpp>.
+[target.ctml]
+type = "header-only"
+include-dirs = ["include"]
+# CMakeLists.txt:4, CMAKE_CXX_STANDARD 11.
+interface-cxx-standard = "c++11"
