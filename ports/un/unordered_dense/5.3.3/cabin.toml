@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/martinus/unordered_dense/archive/refs/tags/v5.3.3.tar.gz"
+checksum = "sha256:862605ef21424c6c92881aac4cf8f09c3abd91c80588446c83892583228eca67"
+format = "tar.gz"
+strip-prefix = "unordered_dense-5.3.3"
+
+# Upstream's repository and CMake name; vcpkg calls it unordered-dense.
+[package]
+name = "cabin-ports/unordered_dense"
+version = "5.3.3"
+# include/ankerl/unordered_dense.h:82 credits Boost for the
+# ANKERL_UNORDERED_DENSE_PREFETCH macro; its copyright significance is
+# uncertain.
+license = "MIT"
+# Not ported: the optional C++20 module, src/ankerl.unordered_dense.cpp.
+include = ["LICENSE", "include"]
+
+# C++17 is upstream's floor (README.md:9).
+[target.unordered_dense]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
