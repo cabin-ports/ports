@@ -1,0 +1,23 @@
+--- /dev/null
++++ b/THIRD_PARTY_NOTICES
+@@ -0,0 +1,20 @@
++Third-party notices for cabin-ports/pretty-name
++
++pretty-name's own license is in LICENSE.
++
++========================================================================
++Stack Overflow answer by Howard Hinnant
++Title: "Is it possible to print a variable's type in standard C++?"
++Author: Howard Hinnant, https://stackoverflow.com/users/576911/howard-hinnant
++https://stackoverflow.com/a/20170989 (revision 5, 2016-04-22,
++https://stackoverflow.com/revisions/20170989/5)
++Revision 5 states that it adapts Jamboree's answer
++https://stackoverflow.com/a/35943472 (CC BY-SA 3.0).
++include/pretty-name/pretty_name.hpp:23-54 and 60-78: static_string, its
++operator<< and type_name
++Licensed under CC BY-SA 3.0, https://creativecommons.org/licenses/by-sa/3.0/
++Changed: constexpr and noexcept replace the answer's CONSTEXPR11_TN,
++CONSTEXPR14_TN and NOEXCEPT_TN macros, type_name gains an #error branch for
++other compilers, operator<< takes const static_string& for static_string
++const&, and the code is reformatted.
++SPDX-License-Identifier: CC-BY-SA-3.0

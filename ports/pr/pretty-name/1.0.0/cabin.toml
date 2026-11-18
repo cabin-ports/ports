@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/Rechip/pretty-name/archive/refs/tags/v1.0.0.tar.gz"
+checksum = "sha256:dd8f3ef9900b944f077096447f9c4cc56d1339d6076932e20f39ca341cade3c5"
+format = "tar.gz"
+strip-prefix = "pretty-name-1.0.0"
+# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+# Upstream's and ConanCenter's name.
+[package]
+name = "cabin-ports/pretty-name"
+version = "1.0.0"
+# CC-BY-SA-3.0 covers static_string, its operator<< and type_name in
+# pretty_name.hpp, adapted from a Stack Overflow answer.
+license = "MIT AND CC-BY-SA-3.0"
+include = ["LICENSE", "README.md", "THIRD_PARTY_NOTICES", "include", "patches"]
+
+# Consumers include <pretty-name/pretty_name.hpp>.  Besides namespace
+# pretty_name, the header puts static_string, type_name and static_to_string in
+# the global namespace.  Names keep each compiler's spelling: GCC gives
+# "long int" and "std::__cxx11::basic_string<char>", Clang with libc++ "long"
+# and "std::string".
+[target.pretty-name]
+type = "header-only"
+include-dirs = ["include"]
+# Upstream states no standard; ConanCenter requires C++14.  type_name's
+# constexpr body declares a local variable, which needs C++14; at C++11, GCC
+# returns "[with T = int" for int (measured).
+interface-cxx-standard = "c++14"
