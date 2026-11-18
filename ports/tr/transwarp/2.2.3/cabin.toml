@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/bloomen/transwarp/archive/refs/tags/2.2.3.tar.gz"
+checksum = "sha256:258ef6d511390bf813e4c33faed37556812acd273126cc02c3aea51fee359400"
+format = "tar.gz"
+strip-prefix = "transwarp-2.2.3"
+
+[package]
+name = "cabin-ports/transwarp"
+version = "2.2.3"
+license = "MIT"
+include = ["LICENSE.md", "include"]
+
+# C++17 is upstream's default mode (README.md:9); TRANSWARP_CPP11 is not set.
+[target.transwarp]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+
+# tw::parallel runs tasks on std::threads; upstream links its tests and
+# examples with -pthread outside MSVC (CMakeLists.txt:115-126).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
