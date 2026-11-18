@@ -13,24 +13,14 @@ include = ["LICENSE", "README.md", "include", "source"]
 
 # Upstream's two-file flavor, as its CMake and vcpkg build it; the
 # single_include/ header is left out.  C++17 is upstream's floor (README.md:33).
-# Limitations (measured):
-# - rglob's ** never matches zero directories, so rglob("d/**/*.txt") misses
-#   d's own files.
-# - glob("d/*.txt") returns d/.h.txt, yet relative wildcard patterns whose
-#   matches lie outside the working directory or in one of its
-#   dot-directories, such as glob("../*.txt") or glob(".hid/*.txt"), match
-#   nothing.
-# - A relative pattern's wildcard matches and reports a symlink by its
-#   target's filename, so glob("d/*.txt") returns d/real.txt for
-#   d/link.dat -> ../e/real.txt.
-# - "[a--c]" throws std::regex_error, and "[a--c]*.txt" also reads out of
-#   bounds in translate (glob.cpp:60) (measured with ASan).
-# - With libstdc++, a class that starts with "]", such as "[]x]", matches
-#   nothing.
-# - A file named only "\n" matches every pattern whose last component has a
-#   wildcard, and a literal path to a broken symlink matches nothing, though
-#   glob.h:14 says broken symlinks are included.
-# - Concurrent first calls race on translate's static map (measured with TSan).
+# Limitations (measured): matching departs silently from Python's glob in
+# several forms (rglob's ** never matches zero directories; relative
+# patterns mishandle hidden files, symlinks and matches outside the working
+# directory; a file named "\n" matches every wildcard). A doubled hyphen in
+# a class followed by more pattern, such as "[a--c]*.txt", reads out of
+# bounds in translate (glob.cpp:60, ASan), and concurrent first calls race
+# on a static map (TSan). Test the pattern forms you rely on, and do not
+# glob untrusted patterns.
 [target.glob]
 type = "library"
 sources = ["source/glob.cpp"]
