@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/kevinhartman/morton-nd/archive/refs/tags/v4.0.0.tar.gz"
+checksum = "sha256:29337c7f7afb6361dd483ca4fe2111aad9d590f3b9d3fe519856a5bdf450e059"
+format = "tar.gz"
+strip-prefix = "morton-nd-4.0.0"
+
+[package]
+name = "cabin-ports/morton-nd"
+version = "4.0.0"
+license = "MIT"
+# Not ported: the tests, docs and packaging.
+include = ["LICENSE", "NOTICE", "README.md", "include"]
+
+[target.morton-nd]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
