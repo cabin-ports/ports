@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/Enhex/generic_serialization/archive/refs/tags/v1.0.0.tar.gz"
+checksum = "sha256:1f6397845460e03b501970a10aa292acfcbdcceff2667bf89fb16eaec7df50bd"
+format = "tar.gz"
+strip-prefix = "generic_serialization-1.0.0"
+# serializer.h calls std::forward without including <utility>, so a TU that
+# includes it first fails with "use of undeclared identifier 'std'"
+# (measured); patch 0001 adds the include.
+patches = ["patches/0001-include-utility.patch"]
+
+# ConanCenter's name; the owner prefix keeps it off the generic name.
+[package]
+name = "cabin-ports/enhex-generic_serialization"
+version = "1.0.0"
+license = "MIT"
+include = ["LICENSE.txt", "README.md", "include", "patches"]
+
+# C++17 is upstream's floor (test_package/CMakeLists.txt:7).  README.md:4
+# spells the header gs/Binary.h; the shipped file is gs/binary.h.
+[target.enhex-generic_serialization]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
