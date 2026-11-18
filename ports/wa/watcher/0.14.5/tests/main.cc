@@ -29,8 +29,8 @@ int failures = 0;
 
 namespace fs = std::filesystem;
 using wtr::event;
-using effect = enum wtr::event::effect_type;
-using kind = enum wtr::event::path_type;
+using effect = decltype(wtr::event::effect_type);
+using kind = decltype(wtr::event::path_type);
 
 // Collects the events a watcher's thread delivers.
 class recorder {
