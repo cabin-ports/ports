@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/jbcoe/indirect_value/archive/refs/tags/v0.0.1.tar.gz"
+checksum = "sha256:01b61737f9e6b3601fc588a0070833f2fbb67ab5fb1d1482d5b8ca8b64f44f33"
+format = "tar.gz"
+strip-prefix = "indirect_value-0.0.1"
+
+[package]
+name = "cabin-ports/indirect_value"
+version = "0.0.1"
+license = "MIT"
+include = ["LICENSE.txt", "indirect_value.h", "indirect_value.natvis"]
+
+# The header, included as <indirect_value.h>, and its debugger visualizer, as
+# upstream installs them.
+[target.indirect_value]
+type = "header-only"
+include-dirs = ["."]
+# CMakeLists.txt:39-42 requires cxx_std_17.
+interface-cxx-standard = "c++17"
