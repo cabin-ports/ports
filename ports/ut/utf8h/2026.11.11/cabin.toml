@@ -1,0 +1,28 @@
+[package.upstream]
+url = "https://github.com/sheredom/utf8.h/archive/913014e0d56051b242a1959d24d3f3cb5d13a9ef.tar.gz"
+checksum = "sha256:06507da21c28537ab424b27fd394bd7fe20e10076be00fce3389871d161af7f8"
+format = "tar.gz"
+strip-prefix = "utf8.h-913014e0d56051b242a1959d24d3f3cb5d13a9ef"
+
+[package]
+name = "cabin-ports/utf8h"
+# Upstream has no versioned releases; this is main at 913014e0, committed
+# 2026-11-11.  Its only tag, pre-ai (a6cd7d43, 2026-03-09), "denotes the last
+# release where AI tooling was not used" (README.md:332-334); it predates
+# main's out-of-bounds-read fixes.  vcpkg pins a 2021-11-17 commit and
+# ConanCenter a 2024-02-02 one.
+version = "2026.11.11"
+# utf8.h's zero-width and wide ranges (from :1554) match Markus Kuhn's
+# wcwidth.c (2007-05-26), which upstream credits; its grant attaches no
+# conditions, so no licence term or notice is added.
+license = "Unlicense"
+include = ["LICENSE", "README.md", "utf8.h"]
+
+# Header-only, in upstream's root layout.  Not ported: the tests.
+[target.utf8h]
+type = "header-only"
+include-dirs = ["."]
+# Upstream tests gnu89 (test/CMakeLists.txt:107-108); strict c89 (measured).
+interface-c-standard = "c89"
+# Upstream tests gnu++98 (test/CMakeLists.txt:118); strict c++98 (measured).
+interface-cxx-standard = "c++98"
