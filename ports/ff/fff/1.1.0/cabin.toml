@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/meekrosoft/fff/archive/refs/tags/v1.1.tar.gz"
+checksum = "sha256:510efb70ab17a0035affd170960401921c9cc36ec81002ed00d2bfec6e08f385"
+format = "tar.gz"
+strip-prefix = "fff-1.1"
+
+# Upstream's v1.1 tag; the header declares no version.
+[package]
+name = "cabin-ports/fff"
+version = "1.1.0"
+license = "MIT"
+include = ["LICENSE", "fff.h"]
+
+# The generated header upstream commits (fakegen.rb is not run), included as
+# <fff.h>.
+[target.fff]
+type = "header-only"
+include-dirs = ["."]
+# test/Makefile:42 builds the C tests with -std=c99.
+interface-c-standard = "c99"
+# Upstream states no C++ standard; C++98 with -pedantic-errors rejects the
+# header's variadic macros (fff.h:3318).
+interface-cxx-standard = "c++11"
