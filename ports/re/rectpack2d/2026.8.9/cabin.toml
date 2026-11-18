@@ -1,0 +1,22 @@
+[package.upstream]
+# Upstream tags no releases and declares no version; this is the commit vcpkg
+# pins, master's head, versioned YYYY.M.D by its commit date (2026-08-09).
+url = "https://github.com/TeamHypersomnia/rectpack2D/archive/7dde22ed7a707b952b9f8fb263bf3c94f4cef898.tar.gz"
+checksum = "sha256:cf49dfbc16fc6ced3cbc9bb3b7aa5e5d2ebd0753c288db8c163a51dd0ea27b61"
+format = "tar.gz"
+strip-prefix = "rectpack2D-7dde22ed7a707b952b9f8fb263bf3c94f4cef898"
+
+[package]
+# vcpkg and Conan Center name it rectpack2d; upstream's repository and CMake
+# target are rectpack2D.
+name = "cabin-ports/rectpack2d"
+version = "2026.8.9"
+license = "MIT"
+include = ["LICENSE", "README.md", "src/rectpack2D"]
+
+# Upstream's src/ include directory: consumers write
+# <rectpack2D/finders_interface.h>.  C++17 is src/CMakeLists.txt's.
+[target.rectpack2d]
+type = "header-only"
+include-dirs = ["src"]
+interface-cxx-standard = "c++17"
