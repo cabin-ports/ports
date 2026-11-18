@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/ashvardanian/StringZilla/archive/refs/tags/v5.3.2.tar.gz"
+checksum = "sha256:c64f6359015205f6a492fecfbc6f092e5ae45b54ce44998c4a96f9e1e91a88ae"
+format = "tar.gz"
+strip-prefix = "StringZilla-5.3.2"
+
+[package]
+name = "cabin-ports/stringzilla"
+# The newest release; vcpkg's recipe pins 5.1.2 and conan-center's 4.6.0.
+version = "5.3.2"
+# include/stringzilla/utf8_norm/tables.h:6-11 and other utf8_* tables credit
+# the Unicode Character Database for their generated data; its copyright
+# significance is uncertain.
+license = "Apache-2.0"
+include = ["LICENSE", "include/stringzilla"]
+
+# The header-only C and C++ library, upstream's stringzilla::header target
+# (CMakeLists.txt:402-408).  The SIMD backends follow the consumer's compiler
+# flags, with dynamic dispatch off as in upstream's header-only use
+# (types.h:59-60).
+# Not ported: the parallel engines in include/stringzillas, the precompiled
+# dynamic-dispatch libraries, the language bindings, and the tests, benchmarks
+# and build files.
+[target.stringzilla]
+type = "header-only"
+include-dirs = ["include"]
+# include/stringzilla/README.md:16 and CMakeLists.txt:71-72: C99 and C++11.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
