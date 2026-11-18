@@ -1,0 +1,37 @@
+[package.upstream]
+url = "https://github.com/bernedom/bertrand/archive/refs/tags/0.0.17.tar.gz"
+checksum = "sha256:72e59971bd8ae48d95da9337ad78004b99ba4e8d0eeb3b613ce17b577ca41012"
+format = "tar.gz"
+strip-prefix = "bertrand-0.0.17"
+# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+[package]
+name = "cabin-ports/bertrand"
+version = "0.0.17"
+license = "LGPL-3.0-or-later"
+include = [
+  "CHANGELOG.md",
+  "LICENSE",
+  "README.md",
+  "THIRD_PARTY_NOTICES",
+  "include",
+  "patches",
+]
+
+# The unprefixed macros Require, Ensure and Invariant take those names with
+# contracts on or off: a member function named Require fails to compile
+# (measured).
+# While contracts are on, inline namespace bertrand puts the class template find
+# in the global namespace, so an unqualified find(first, last, value), by ADL or
+# under using namespace std, fails to compile (measured).
+# After a contract fails, the stack trace (where <execinfo.h> exists, unless
+# BERTRAND_DISABLE_STACKTRACE) frees backtrace_symbols' malloc'd array with
+# delete[] (bertrand.hpp:123; measured: ASan "alloc-dealloc-mismatch").
+# Not ported: the tests.
+[target.bertrand]
+type = "header-only"
+include-dirs = ["include"]
+# CMakeLists.txt:38: "target_compile_features(${PROJECT_NAME} INTERFACE
+# cxx_std_17)".
+interface-cxx-standard = "c++17"
