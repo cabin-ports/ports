@@ -1,0 +1,11 @@
+--- a/include/ChefFun/Option.hh
++++ b/include/ChefFun/Option.hh
+@@ -27,6 +27,8 @@
+ #include <stdexcept>
+ #include <functional>
+ #include <type_traits>
++// Changed for cabin-ports on 2026-11-18: include <vector>.
++#include <vector>
+ 
+ 
+ #if !defined( __cpp_exceptions )
