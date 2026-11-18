@@ -3,30 +3,13 @@ url = "https://github.com/TartanLlama/ranges/archive/b395fe32fec42c1f710e3c90a91
 checksum = "sha256:3e2fb61d704f16e7e9ea001a91034268b92738910688395dd6b4e48762e09b8e"
 format = "tar.gz"
 strip-prefix = "ranges-b395fe32fec42c1f710e3c90a91b5bcab8d8b656"
-# Patch 0001 adds includes these headers lack (measured).  The first four fail
-# when included alone:
-# - tl/functional/predicates.hpp, <tuple> and <utility>: "predicates.hpp:6:21:
-#   error: use of undeclared identifier 'std'" (Apple Clang, Clang 23; GCC 16:
-#   "predicates.hpp:6:26: error: 'forward' is not a member of 'std'").
-# - tl/utility/semiregular_box.hpp, <functional>: "semiregular_box.hpp:58:25:
-#   error: 'invoke' is not a member of 'std'" (GCC 16).
-# - tl/k_combinations.hpp, <cmath>: "k_combinations.hpp:153:25: error: 'pow'
-#   is not a member of 'std'" (GCC 16; also Clang 23, and Apple Clang at C++23).
-# - tl/chunk_by.hpp, <algorithm>: "chunk_by.hpp:28:38: error: no member named
-#   'adjacent_find' in namespace 'std'" (Clang 23 at C++20).
-# - tl/adjacent_transform.hpp, "functional/bind.hpp": adjacent_transform<2>(f)
-#   at C++20 fails with "adjacent_transform.hpp:179:32: error: use of
-#   undeclared identifier 'bind_back'" (Apple Clang, Clang 23; GCC 16:
-#   "'bind_back' was not declared in this scope").
-# Eight one-argument adaptor forms (all but partial_sum's) call bind_back
-# unqualified, so at C++23 ADL also finds std::bind_back for a std argument and
-# the call is ambiguous: "chunk_by.hpp:107:32: error: call to 'bind_back' is
-# ambiguous" (Apple Clang, Clang 23; GCC 16: "chunk_by.hpp:107:41: error: call
-# of overloaded 'bind_back(...)' is ambiguous"), measured with a std function
-# object for adjacent_transform, chunk_by, chunk_by_key, transform_join and
-# transform_maybe.  Patch 0002 qualifies all eight as tl::bind_back; chunk,
-# slide and stride take an integer and are qualified for uniformity.  CI builds
-# at C++20, where the call is not ambiguous.
+# Patch 0001 adds includes these headers lack (measured): predicates.hpp
+# (<tuple>, <utility>), semiregular_box.hpp (<functional>), k_combinations.hpp
+# (<cmath>) and chunk_by.hpp (<algorithm>) fail when included alone, and
+# adjacent_transform.hpp lacks "functional/bind.hpp", so adjacent_transform<2>(f)
+# fails at C++20.  Patch 0002 qualifies the eight unqualified bind_back calls:
+# at C++23, ADL also finds std::bind_back for a std function object and the call
+# is ambiguous (measured; CI builds at C++20, where it is not).
 patches = [
   "patches/0001-include-missing-headers.patch",
   "patches/0002-qualify-bind-back.patch",
