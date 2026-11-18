@@ -19,6 +19,11 @@ namespace {
 
 int failures = 0;
 
+// Namespace scope: MSVC rejects a lambda that names a local constexpr it does
+// not capture (C3493).
+constexpr int kThreads = 4;
+constexpr int kPerThread = 250;
+
 void check(bool ok, const char* what) {
   if (!ok) {
     std::fprintf(stderr, "FAIL: %s\n", what);
@@ -83,8 +88,6 @@ void TestFormatting(quill::Logger* logger, CaptureSink& capture) {
 }
 
 void TestThreads(quill::Logger* logger, CaptureSink& capture) {
-  constexpr int kThreads = 4;
-  constexpr int kPerThread = 250;
   std::vector<std::thread> threads;
   for (int t = 0; t < kThreads; ++t) {
     threads.emplace_back([logger, t] {
