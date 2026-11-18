@@ -1,0 +1,35 @@
+[package.upstream]
+url = "https://github.com/copperspice/cs_libguarded/archive/refs/tags/libguarded-2.0.1.tar.gz"
+checksum = "sha256:59167282e7a7957a614271d993c3070fadddf895d0f5aecf08f2e4e90d16ee2d"
+format = "tar.gz"
+strip-prefix = "cs_libguarded-libguarded-2.0.1"
+
+[package]
+name = "cabin-ports/cs_libguarded"
+version = "2.0.1"
+license = "BSD-2-Clause"
+include = [
+  "LICENSE",
+  "README.md",
+  "src/cs_cow_guarded.h",
+  "src/cs_deferred_guarded.h",
+  "src/cs_lock_guards.h",
+  "src/cs_lr_guarded.h",
+  "src/cs_ordered_guarded.h",
+  "src/cs_plain_guarded.h",
+  "src/cs_rcu_guarded.h",
+  "src/cs_rcu_list.h",
+  "src/cs_shared_guarded.h",
+]
+
+# Consumers write <cs_plain_guarded.h>, as upstream's tests do; the
+# <CsLibGuarded/...> form its headers document is not provided.  C++20 is
+# upstream's floor (README.md:15).  Not ported: the tests and the CMake build.
+# Moving or move-assigning an rcu_guarded handle, or move-assigning an
+# lr_guarded read handle (for example h = g.lock_shared()), runs off the end
+# of upstream's operator= and crashes (measured: UBSan "reached the end of a
+# value-returning function").
+[target.cs_libguarded]
+type = "header-only"
+include-dirs = ["src"]
+interface-cxx-standard = "c++20"
