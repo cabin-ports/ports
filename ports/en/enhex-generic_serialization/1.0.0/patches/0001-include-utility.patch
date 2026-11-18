@@ -1,0 +1,11 @@
+--- a/include/gs/serializer.h
++++ b/include/gs/serializer.h
+@@ -20,6 +20,8 @@
+ #ifndef gs_serializer_h
+ #define gs_serializer_h
+ 
++#include <utility>
++
+ namespace gs
+ {
+ 	// takes a parameter pack of objects and serializes them into a stream
