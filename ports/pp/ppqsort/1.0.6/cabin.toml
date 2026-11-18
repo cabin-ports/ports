@@ -1,0 +1,30 @@
+[package.upstream]
+url = "https://github.com/GabTux/PPQSort/archive/refs/tags/v1.0.6.tar.gz"
+checksum = "sha256:12d9c05363fa3d36f4916a78f1c7e237748dfe111ef44b8b7a7ca0f3edad44da"
+format = "tar.gz"
+strip-prefix = "PPQSort-1.0.6"
+
+[package]
+name = "cabin-ports/ppqsort"
+version = "1.0.6"
+# include/ppqsort.h's header says only "TBD: license"; the root LICENSE (MIT) covers the package.
+# include/ppqsort/mainloop.h:26-47 reproduces pdqsort's (Zlib) pattern-breaking swaps and
+# include/ppqsort/partition.h:52-82 restates its partition_right; their copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+# Header-only, as upstream's CMake interface target; consumers include
+# <ppqsort.h>.  C++20 is upstream's floor; on cl, /std:c++20 implies the
+# /permissive- upstream adds for MSVC consumers.
+# With libstdc++ assertions (on by default without optimisation; measured
+# with GCC 16.2), every parallel sort aborts on a std::binary_semaphore
+# over-release (upstream issue #10).  Building without them (optimised and
+# without _GLIBCXX_ASSERTIONS, or with -D_GLIBCXX_NO_ASSERTIONS) avoids it.
+[target.ppqsort]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
+
+# Upstream links Threads::Threads into its interface target.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
