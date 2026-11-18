@@ -44,6 +44,8 @@ env:
   # The registry's receipts log is `receipts.jsonl` on this branch.
   RECEIPTS_BRANCH: publish-receipts
 
+# Every job runs on the image CI checks the ports on (`ci.yml`):
+# `prepare` and `publish` run the binaries `build` built there.
 jobs:
   # Resolves the mode, requires CI for `new`, and finds the receipts log
   # before anything is built. A scheduled run starts no job at all
@@ -54,7 +56,7 @@ jobs:
       github.repository == 'cabin-ports/ports' && github.ref == 'refs/heads/main' &&
       !inputs.exchange-check && (github.event_name == 'workflow_dispatch' ||
       (github.event_name == 'schedule' && vars.PORTS_AUTO_PUBLISH == 'true'))
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       checks: read
@@ -95,7 +97,7 @@ jobs:
   build:
     needs: gate
     if: needs.gate.outputs.mode != 'off'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     outputs:
       cabin-rev: ${{ steps.rev.outputs.cabin-rev }}
       work: ${{ steps.pending.outputs.work }}
@@ -145,7 +147,7 @@ jobs:
     if: >-
       needs.gate.outputs.mode == 'all' ||
       (needs.gate.outputs.mode == 'new' && needs.build.outputs.work == 'true')
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
       actions: read
@@ -175,7 +177,7 @@ jobs:
     if: >-
       !failure() && !cancelled() && (needs.lock.outputs.go == 'true' ||
       (needs.gate.outputs.mode == 'plan' && needs.build.outputs.work == 'true'))
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -231,7 +233,7 @@ jobs:
   await-deploy:
     needs: [build, lock]
     if: needs.lock.outputs.go == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -255,7 +257,7 @@ jobs:
   # uploads a version only as `prepare` built it in this run.
   publish:
     needs: [gate, lock, build, prepare, await-deploy]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       # `cabin publish` exchanges the run's OIDC token for its
@@ -382,7 +384,7 @@ jobs:
   record:
     needs: [lock, build, publish]
     if: always() && needs.lock.outputs.locked == 'true'
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: write
     steps:
@@ -418,7 +420,7 @@ jobs:
     # the registry's uniform 401. No checkout: the probe needs only the
     # run's OIDC identity.
     if: inputs.exchange-check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       id-token: write
     steps:

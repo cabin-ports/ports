@@ -43,7 +43,7 @@ jobs:
         run: scripts/actions/cabin-rev.sh --on-main
 
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -75,9 +75,11 @@ jobs:
   # the change needs is staged, built, and its consumer test run, on
   # each platform the ports must support (docs/maintaining.md, "CI").
   # One job per platform, never a matrix: `required` judges each by name.
+  # Each names its image: a label that moves to a new release by itself
+  # brings a toolchain no port was checked with.
   check-linux:
     needs: pin
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps: &check
       - uses: actions/checkout@v7.0.1
         with:
