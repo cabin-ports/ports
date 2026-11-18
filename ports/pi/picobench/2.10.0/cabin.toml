@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/iboB/picobench/archive/refs/tags/v2.10.0.tar.gz"
+checksum = "sha256:65bdee215110c95a48a3d2aead7e38a89a8260fb7ba1c5f982e2df1690822c81"
+format = "tar.gz"
+strip-prefix = "picobench-2.10.0"
+
+[package]
+name = "cabin-ports/picobench"
+version = "2.10.0"
+license = "MIT"
+include = ["LICENSE.txt", "include"]
+
+# Header-only, as upstream's CMake interface target picobench.  The consumer
+# compiles the implementation by defining PICOBENCH_IMPLEMENT or
+# PICOBENCH_IMPLEMENT_WITH_MAIN in one file.  C++11 is upstream's floor.
+[target.picobench]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
