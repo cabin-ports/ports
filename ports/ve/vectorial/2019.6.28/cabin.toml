@@ -1,0 +1,30 @@
+[package.upstream]
+url = "https://github.com/scoopr/vectorial/archive/3a00e8c00d017cb49b12eeffd7464246d172ea97.tar.gz"
+checksum = "sha256:06eaac3df75fc2aebb36cf164dae9375f6669d8ef64d6e617b04f2f070f058d1"
+format = "tar.gz"
+strip-prefix = "vectorial-3a00e8c00d017cb49b12eeffd7464246d172ea97"
+
+[package]
+name = "cabin-ports/vectorial"
+# Upstream has no tags; this is the date of commit 3a00e8c0.
+version = "2019.6.28"
+license = "BSD-2-Clause"
+include = ["LICENSE", "README", "include"]
+
+# On NEON targets simd4f_neon.h is C++-only (:112, :215), so C consumers there
+# define VECTORIAL_FORCED with VECTORIAL_GNU or VECTORIAL_SCALAR (measured).
+# vec2f.h, vec3f.h and vec4f.h add min and max overloads to namespace std
+# (measured).
+# VECTORIAL_OSTREAM (operator<<) and VECTORIAL_FORCED stay consumer opt-ins.
+# Not ported: the specs, benchmark and tools.
+[target.vectorial]
+type = "header-only"
+include-dirs = ["include"]
+# Upstream states no standard; these are the measured floors.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+
+# sinf, cosf and tanf (simd4x4f rotation and perspective) are libm on glibc
+# (measured references).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
