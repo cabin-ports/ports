@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/jbcoe/value_types/archive/refs/tags/v1.0.1.tar.gz"
+checksum = "sha256:7514cfe263b998ce094185068753497cd9a2d9c4fb62898c32b4d5b1f9dbddf3"
+format = "tar.gz"
+strip-prefix = "value_types-1.0.1"
+
+# Named as vcpkg does; the repository name alone, value_types, is too generic.
+[package]
+name = "cabin-ports/jbcoe-value-types"
+# Release v1.0.1; CMakeLists.txt:9 keeps the placeholder 0.0.1.
+version = "1.0.1"
+license = "MIT"
+include = ["LICENSE.txt", "indirect.h", "polymorphic.h"]
+
+# The two headers upstream installs (CMakeLists.txt:223-229); consumers write
+# `#include <indirect.h>` and `#include <polymorphic.h>`.
+# Not ported: the C++14 and no-vtable variants, which upstream builds but does
+# not install; the tests, benchmarks, proposals and other development files;
+# and the build files.
+[target.jbcoe-value-types]
+type = "header-only"
+include-dirs = ["."]
+# xyz_value_types (CMakeLists.txt:30-33) takes xyz_add_library's default,
+# cxx_std_20 (cmake/xyz_add_library.cmake:49-50).
+interface-cxx-standard = "c++20"
