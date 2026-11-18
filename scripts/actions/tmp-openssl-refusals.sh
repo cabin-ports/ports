@@ -1,13 +1,14 @@
 #!/usr/bin/env bash
 # Usage: tmp-openssl-refusals.sh <cabin>
 #
-# TEMPORARY, removed before merge.  Dry-runs the openssl port under
-# conditions it must refuse and prints what each refusal says.  Every
-# case runs; the script fails at the end if a dry-run passed.
+# TEMPORARY, removed before merge.  Makes two OpenSSL directories the
+# openssl port must refuse and, except on Windows, dry-runs the port
+# with each; tmp-openssl-refusals.ps1 does that there, because Git Bash
+# puts its own link.exe before MSVC's.  Every case runs; the script
+# fails at the end if a dry-run passed.
 set -euo pipefail
 
 cabin=$1
-port=ports/op/openssl/4.1.0
 work=$RUNNER_TEMP/openssl-refusals
 status=0
 
@@ -38,20 +39,9 @@ clang --target="$other" -c "$work/x.c" -o "$work/x.o"
 "$ar" rcs "$work/wrong/lib/libcrypto.$suffix" "$work/x.o"
 "$ar" rcs "$work/wrong/lib/libssl.$suffix" "$work/x.o"
 
-refused "an SDK directory without OpenSSL" CABIN_SDK_OPENSSL_DIR="$work/empty"
-refused "libraries of another architecture" CABIN_SDK_OPENSSL_DIR="$work/wrong"
-
-if [[ $RUNNER_OS == Windows ]]; then
-  refused "an MSVC build without CABIN_SDK_OPENSSL_DIR" -u CABIN_SDK_OPENSSL_DIR
-
-  # Every copy on PATH, in order; then the image's own order, without
-  # the step that puts OpenSSL's bin first.
-  where.exe libcrypto-3-x64.dll
-  refused "another program's DLL first on PATH" PATH="${PATH/\/c\/Program Files\/OpenSSL\/bin:/}"
-
-  cp -R scripts/actions/tmp-openssl/vendored-on-windows "$port/tests/"
-  refused "the feature vendored on Windows"
-  rm -r "$port/tests/vendored-on-windows"
+if [[ $RUNNER_OS != Windows ]]; then
+  refused "an SDK directory without OpenSSL" CABIN_SDK_OPENSSL_DIR="$work/empty"
+  refused "libraries of another architecture" CABIN_SDK_OPENSSL_DIR="$work/wrong"
 fi
 
 exit "$status"

@@ -138,6 +138,16 @@ jobs:
           TEMP: ${{ runner.temp }}
         run: scripts/actions/tmp-openssl-refusals.sh "${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}"
 
+      # TEMPORARY, removed before merge.
+      - name: See what the openssl port refuses on Windows
+        if: runner.os == 'Windows'
+        continue-on-error: true
+        env:
+          CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: scripts/actions/tmp-openssl-refusals.ps1 "${{ runner.temp }}/cabin/bin/cabin.exe"
+
       - name: Run the publisher dry-run
         env:
           CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache

@@ -145,7 +145,7 @@
 +         "and name its directory in CABIN_SDK_OPENSSL_DIR");
 +#else
 +    const char *out = need("CABIN_OUT_DIR");
-+    char build[4096], stage[4096], configure[4096], destdir[4096], ranlib[4096], jobs[32];
++    char build[4096], stage[4096], configure[4096], destdir[sizeof stage + 8], ranlib[4096], jobs[32];
 +    snprintf(build, sizeof build, "%s/build", out);
 +    snprintf(stage, sizeof stage, "%s/stage", out);
 +    snprintf(configure, sizeof configure, "%s/Configure", need("CABIN_MANIFEST_DIR"));
