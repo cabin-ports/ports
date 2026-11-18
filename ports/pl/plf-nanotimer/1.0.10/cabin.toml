@@ -1,0 +1,21 @@
+[package.upstream]
+# Upstream tags no releases; this is the commit vcpkg pins.  Its subject is
+# "v1.0.10", and upstream's version history (https://plflib.org/nanotimer.htm)
+# lists it as "2026-07-05: v1.0.10".
+url = "https://github.com/mattreecebentley/plf_nanotimer/archive/84f93c76df71500689835897e8ad119c1aeb5e68.tar.gz"
+checksum = "sha256:429817ac7f571ac8837b4163c59a646a4a93b2298e271bb96191396c4760d39e"
+format = "tar.gz"
+strip-prefix = "plf_nanotimer-84f93c76df71500689835897e8ad119c1aeb5e68"
+
+[package]
+name = "cabin-ports/plf-nanotimer"
+version = "1.0.10"
+license = "Zlib"
+include = ["LICENSE.md", "plf_nanotimer.h"]
+
+# The header at the archive root, which vcpkg copies into include/.  C++03 is
+# README.md's stated standard.
+[target.plf-nanotimer]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++98"
