@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/kmammou/v-hacd/archive/refs/tags/v4.1.0.tar.gz"
+checksum = "sha256:9fe895cd10ec995d2171b11bde97aaaa221b418a3aaed0f5d9a068ae057d626b"
+format = "tar.gz"
+strip-prefix = "v-hacd-4.1.0"
+
+[package]
+name = "cabin-ports/v-hacd"
+version = "4.1.0"
+# include/VHACD.h:1191 credits John Burkardt for ComputeArea
+# (TRIANGLE_AREA_3D); its copyright significance is uncertain.
+license = "BSD-3-Clause"
+include = ["LICENSE", "README.md", "include"]
+
+# C++11 is upstream's floor (app/CMakeLists.txt:9).  No interface defines:
+# ENABLE_VHACD_IMPLEMENTATION and VHACD_DISABLE_THREADING are the consumer's.
+[target.v-hacd]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+
+# The implementation runs a std::thread pool unless VHACD_DISABLE_THREADING
+# is set; upstream links pthread on every non-Windows OS
+# (app/CMakeLists.txt:17-21).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
