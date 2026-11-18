@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/eyalz800/zpp_bits/archive/refs/tags/v4.7.7.tar.gz"
+checksum = "sha256:cb813308e51ad1922c6578759202927c3efa4588227fd9f182934bf1f38ecd4c"
+format = "tar.gz"
+strip-prefix = "zpp_bits-4.7.7"
+
+[package]
+# Upstream's and ConanCenter's name; vcpkg calls it zpp-bits.
+name = "cabin-ports/zpp_bits"
+# Newer than the recipes (vcpkg 4.7.6, ConanCenter 4.4.25); 4.7.7 only changes
+# how containers of empty types are encoded (#220).
+version = "4.7.7"
+license = "MIT"
+include = ["LICENSE", "README.md", "zpp_bits.h"]
+
+# C++20 is upstream's floor (README.md).
+# Input archives resize a container to the length the input declares before
+# checking the bytes exist; pass zpp::bits::alloc_limit<N>{} to bound it
+# (upstream #219; measured with Apple clang).
+# Without C++26 structured-binding packs (measured: GCC 16 at C++20, not at
+# C++26), zpp_bits cannot count the members of an aggregate holding a
+# std::optional; declare using serialize = zpp::bits::members<N>; in it.
+[target.zpp_bits]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++20"
