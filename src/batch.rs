@@ -7,10 +7,10 @@
 //! `uploaded` line is final, so a rejected upload is never revived by
 //! resubmitting it.  A `failed` line's upload may have landed, so that
 //! version waits for `--retry-failed`.  A version without a line is a
-//! candidate unless [`HOLDS_FILE`] names it or something it requires is
-//! blocked.  No probe runs: `--plan-new` builds them and records what
-//! it built, and `--publish-new` builds nothing and uploads only what
-//! that record lists ([`crate::prepared`]).  An uploaded requirement
+//! candidate unless something it requires is blocked.  No probe runs:
+//! `--plan-new` builds them and records what it built, and
+//! `--publish-new` builds nothing and uploads only what that record
+//! lists ([`crate::prepared`]).  An uploaded requirement
 //! must stage the bytes of its last receipt, or its dependents wait for
 //! its packaging revision.
 
@@ -25,11 +25,6 @@ use serde::{Deserialize, Serialize};
 use crate::Options;
 use crate::plan::PortConversion;
 use crate::{preflight, prepared, remote, select};
-
-/// The reviewed hold list, beside the ports directory: one
-/// `<name> <version> <reason>` line per version `--publish-new` must
-/// not upload, `#` starting a comment line.
-pub const HOLDS_FILE: &str = "publish-holds.txt";
 
 /// `--list-new`, `--plan-new`, and `--publish-new`.
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -144,66 +139,6 @@ impl Receipts {
     }
 }
 
-/// The hold list beside `ports_dir`, every entry naming a loaded
-/// version; a missing file holds nothing.
-///
-/// # Errors
-/// An unreadable or malformed file, or an entry naming no committed
-/// version (a typo must not leave the intended version unheld).
-pub fn load_holds(
-    ports_dir: &Path,
-    conversions: &[PortConversion],
-) -> Result<BTreeMap<Key, String>> {
-    let ports_dir = fs::canonicalize(ports_dir)
-        .with_context(|| format!("resolving {}", ports_dir.display()))?;
-    let path = ports_dir.parent().unwrap_or(&ports_dir).join(HOLDS_FILE);
-    let text = match fs::read_to_string(&path) {
-        Ok(text) => text,
-        Err(err) if err.kind() == std::io::ErrorKind::NotFound => return Ok(BTreeMap::new()),
-        Err(err) => return Err(err).with_context(|| format!("reading {}", path.display())),
-    };
-    let holds = parse_holds(&text).with_context(|| format!("reading {}", path.display()))?;
-    let loaded: BTreeSet<Key> = conversions.iter().map(key).collect();
-    if let Some((name, version)) = holds.keys().find(|held| !loaded.contains(*held)) {
-        bail!(
-            "{} holds {name} {version}, which is not a committed port version",
-            path.display()
-        );
-    }
-    Ok(holds)
-}
-
-fn parse_holds(text: &str) -> Result<BTreeMap<Key, String>> {
-    let mut holds = BTreeMap::new();
-    for (number, line) in text.lines().enumerate() {
-        let line = line.trim();
-        if line.is_empty() || line.starts_with('#') {
-            continue;
-        }
-        let mut fields = line.split_whitespace();
-        let (Some(name), Some(version)) = (fields.next(), fields.next()) else {
-            bail!("line {}: expected `<name> <version> <reason>`", number + 1);
-        };
-        let reason = fields.collect::<Vec<_>>().join(" ");
-        if reason.is_empty() {
-            bail!("line {}: a hold needs a reason", number + 1);
-        }
-        let held = (
-            crate::plan::scoped_package_name(name)
-                .with_context(|| format!("line {}", number + 1))?
-                .as_str()
-                .to_owned(),
-            semver::Version::parse(version)
-                .with_context(|| format!("line {}: version `{version}`", number + 1))?
-                .to_string(),
-        );
-        if holds.insert(held, reason).is_some() {
-            bail!("line {}: {name} {version} is held twice", number + 1);
-        }
-    }
-    Ok(holds)
-}
-
 /// Where a version stands for this run.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Status {
@@ -218,11 +153,10 @@ pub enum Status {
     Blocked(String),
 }
 
-/// Each version's status from the receipts and holds alone.
+/// Each version's status from the receipts alone.
 pub fn classify(
     conversions: &[PortConversion],
     receipts: &Receipts,
-    holds: &BTreeMap<Key, String>,
     retry_failed: bool,
 ) -> Vec<Status> {
     conversions
@@ -231,9 +165,6 @@ pub fn classify(
             let key = key(conversion);
             if receipts.uploaded.contains_key(&key) {
                 return Status::Uploaded;
-            }
-            if let Some(reason) = holds.get(&key) {
-                return Status::Blocked(format!("held: {reason}"));
             }
             if receipts.failed.contains(&key) && !retry_failed {
                 return Status::Blocked(
@@ -304,11 +235,10 @@ fn check_staged_bytes(
 
 /// Defer every candidate that `main` no longer agrees with: when main
 /// changed a path outside the ports directory (the publisher, the Cabin
-/// pin, the workflow) other than the hold list and the files
-/// `select::NOT_BUILD_INPUTS` lists, all of them; otherwise each one whose
-/// staging closure touches a name main changed or a version main holds.
-/// A later run uploads them from main.  This is a last check before
-/// uploading, not a transaction with later merges.
+/// pin, the workflow) other than the files `select::NOT_BUILD_INPUTS`
+/// lists, all of them; otherwise each one whose staging closure touches
+/// a name main changed.  A later run uploads them from main.  This is a
+/// last check before uploading, not a transaction with later merges.
 ///
 /// # Errors
 /// When Git cannot compare the checked-out commit with `main`.
@@ -333,37 +263,18 @@ pub fn defer_stale(
     let defer = |status: &mut [Status], index: usize, why: &str| {
         status[index] = Status::Blocked(format!("deferred: {why}; a later run uploads from main"));
     };
-    let holds_path = format!(
-        "{}{HOLDS_FILE}",
-        prefix
-            .trim_end_matches('/')
-            .rsplit_once('/')
-            .map_or(String::new(), |(dir, _)| format!("{dir}/"))
-    );
     let mut changed_names = BTreeSet::new();
     for path in diff.split('\0').filter(|path| !path.is_empty()) {
         if let Some(port_path) = path.strip_prefix(&prefix) {
             // `<prefix>/<name>/...`: the name, not the prefix it shares.
             changed_names.insert(port_path.split('/').nth(1).unwrap_or_default());
-        } else if path != holds_path && !select::NOT_BUILD_INPUTS.contains(&path) {
+        } else if !select::NOT_BUILD_INPUTS.contains(&path) {
             for index in upload_order(status) {
                 defer(status, index, &format!("main changed {path}"));
             }
             return Ok(());
         }
     }
-    let held_at_main = if select::git(top, &["ls-tree", "--name-only", &main, "--", &holds_path])?
-        .trim()
-        .is_empty()
-    {
-        BTreeMap::new()
-    } else {
-        parse_holds(&select::git(
-            top,
-            &["show", &format!("{main}:{holds_path}")],
-        )?)
-        .with_context(|| format!("reading {holds_path} at main"))?
-    };
     for index in upload_order(status) {
         let reach = select::closure_of(conversions, [index]);
         let why = conversions
@@ -372,16 +283,12 @@ pub fn defer_stale(
             .filter(|(_, reached)| *reached)
             .find_map(|(conversion, _)| {
                 let name = conversion.scoped_name.base_name();
-                if changed_names.contains(name) {
-                    Some(format!(
+                changed_names.contains(name).then(|| {
+                    format!(
                         "main changed {prefix}{}/{name}/",
                         crate::plan::port_prefix(name)
-                    ))
-                } else if held_at_main.contains_key(&key(conversion)) {
-                    Some(format!("main holds {}", label(conversion)))
-                } else {
-                    None
-                }
+                    )
+                })
             });
         if let Some(why) = why {
             defer(status, index, &why);
@@ -427,14 +334,9 @@ fn commit(dir: &Path, rev: &str) -> Result<String> {
 /// # Errors
 /// Unreadable state, an unwritable list, a failed preflight, or a
 /// failed upload.
-pub fn run(
-    new: &New,
-    conversions: &[PortConversion],
-    holds: &BTreeMap<Key, String>,
-    options: &Options,
-) -> Result<()> {
+pub fn run(new: &New, conversions: &[PortConversion], options: &Options) -> Result<()> {
     let receipts = Receipts::read(&new.receipts, &new.index_url)?;
-    let mut status = classify(conversions, &receipts, holds, new.retry_failed);
+    let mut status = classify(conversions, &receipts, new.retry_failed);
     println!(
         "new: {} of {} versions have an upload receipt for {}",
         status.iter().filter(|s| **s == Status::Uploaded).count(),
@@ -630,10 +532,9 @@ mod tests {
             .collect()
     }
 
-    fn plan(conversions: &[PortConversion], log: &str, holds: &str, retry: bool) -> Vec<String> {
+    fn plan(conversions: &[PortConversion], log: &str, retry: bool) -> Vec<String> {
         let receipts = Receipts::parse(log, REGISTRY).unwrap();
-        let holds = parse_holds(holds).unwrap();
-        let mut status = classify(conversions, &receipts, &holds, retry);
+        let mut status = classify(conversions, &receipts, retry);
         propagate(conversions, &mut status);
         statuses(conversions, &status)
     }
@@ -643,7 +544,7 @@ mod tests {
         let (_dir, conversions) = catalog();
         // Publication order: tool and zlib, then libpng, then app.
         assert_eq!(
-            plan(&conversions, "", "", false),
+            plan(&conversions, "", false),
             [
                 "tool candidate",
                 "zlib candidate",
@@ -656,7 +557,7 @@ mod tests {
         let log =
             receipt("zlib", "1.0.0", "uploaded", 'a') + &receipt("tool", "1.0.0", "uploaded", 'b');
         assert_eq!(
-            plan(&conversions, &log, "", false),
+            plan(&conversions, &log, false),
             [
                 "tool uploaded",
                 "zlib uploaded",
@@ -673,57 +574,13 @@ mod tests {
         assert!(Receipts::parse(&log.replace("uploaded", "verified"), REGISTRY).is_err());
     }
 
-    #[test]
-    fn a_held_or_blocked_version_blocks_what_requires_it() {
-        let (_dir, conversions) = catalog();
-        let plan = plan(
-            &conversions,
-            "",
-            "# comment\nzlib 1.0.0 awaiting a decision\n",
-            false,
-        );
-        assert_eq!(plan[0], "tool candidate");
-        assert_eq!(plan[1], "zlib blocked: held: awaiting a decision");
-        assert_eq!(
-            plan[2],
-            "libpng blocked: requires cabin-ports/zlib 1.0.0, which is blocked"
-        );
-        assert_eq!(
-            plan[3],
-            "app blocked: requires cabin-ports/zlib 1.0.0, which is blocked"
-        );
-
-        for (holds, error) in [
-            ("zlib 1.0.0\n", "needs a reason"),
-            ("zlib\n", "expected"),
-            ("zlib 1.0 why\n", "version"),
-            ("zlib 1.0.0 a\nzlib 1.0.0 b\n", "held twice"),
-            ("Zlib 1.0.0 why\n", "line 1"),
-        ] {
-            let err = format!("{:#}", parse_holds(holds).unwrap_err());
-            assert!(err.contains(error), "{holds:?}: {err}");
-        }
-    }
-
-    #[test]
-    fn a_hold_must_name_a_committed_version() {
-        let (dir, conversions) = catalog();
-        let ports = dir.path().join("ports");
-        assert!(load_holds(&ports, &conversions).unwrap().is_empty());
-        fs::write(dir.path().join(HOLDS_FILE), "zlib 1.0.0 why\n").unwrap();
-        assert_eq!(load_holds(&ports, &conversions).unwrap().len(), 1);
-        fs::write(dir.path().join(HOLDS_FILE), "zlib 9.9.9 why\n").unwrap();
-        let err = load_holds(&ports, &conversions).unwrap_err().to_string();
-        assert!(err.contains("not a committed port version"), "{err}");
-    }
-
     /// A failed upload may have landed, so it and what requires it wait
     /// for `--retry-failed`; a later upload receipt settles it.
     #[test]
     fn a_failed_upload_waits_for_retry_failed() {
         let (_dir, conversions) = catalog();
         let failed = receipt("libpng", "1.0.0", "failed", 'c');
-        let plan_failed = plan(&conversions, &failed, "", false);
+        let plan_failed = plan(&conversions, &failed, false);
         assert_eq!(plan_failed[..2], ["tool candidate", "zlib candidate"]);
         assert!(
             plan_failed[2].starts_with("libpng blocked: its upload failed"),
@@ -734,7 +591,7 @@ mod tests {
             "app blocked: requires cabin-ports/libpng 1.0.0, which is blocked"
         );
         assert_eq!(
-            plan(&conversions, &failed, "", true),
+            plan(&conversions, &failed, true),
             [
                 "tool candidate",
                 "zlib candidate",
@@ -743,10 +600,7 @@ mod tests {
             ]
         );
         let settled = failed + &receipt("libpng", "1.0.0", "uploaded", 'c');
-        assert_eq!(
-            plan(&conversions, &settled, "", false)[2],
-            "libpng uploaded"
-        );
+        assert_eq!(plan(&conversions, &settled, false)[2], "libpng uploaded");
     }
 
     #[test]
@@ -754,7 +608,7 @@ mod tests {
         let (_dir, conversions) = catalog();
         let log = receipt("zlib", "1.0.0", "uploaded", 'a');
         let receipts = Receipts::parse(&log, REGISTRY).unwrap();
-        let mut status = classify(&conversions, &receipts, &BTreeMap::new(), false);
+        let mut status = classify(&conversions, &receipts, false);
         propagate(&conversions, &mut status);
         let zlib = 1;
         let same = format!("sha256:{}", "a".repeat(64));
@@ -781,7 +635,7 @@ mod tests {
         let log = receipt("zlib", "1.0.0", "uploaded", 'a')
             + &receipt("libpng", "1.0.0", "uploaded", 'b');
         let receipts = Receipts::parse(&log, REGISTRY).unwrap();
-        let mut status = classify(&conversions, &receipts, &BTreeMap::new(), false);
+        let mut status = classify(&conversions, &receipts, false);
         let other = format!("sha256:{}", "f".repeat(64));
         check_staged_bytes(&conversions, &mut status, &receipts, [(zlib, other)]);
         propagate(&conversions, &mut status);
@@ -814,8 +668,8 @@ mod tests {
     }
 
     /// A snapshot finishes when main only added unrelated work; a
-    /// candidate whose closure main changed or now holds, or every
-    /// candidate after a shared input changed, waits for a later run.
+    /// candidate whose closure main changed, or every candidate after a
+    /// shared input changed, waits for a later run.
     #[test]
     fn main_defers_only_the_candidates_it_changed() {
         let (dir, conversions) = catalog();
@@ -836,7 +690,7 @@ mod tests {
             main
         };
         let defer = |main: &str| {
-            let mut status = classify(&conversions, &Receipts::default(), &BTreeMap::new(), false);
+            let mut status = classify(&conversions, &Receipts::default(), false);
             defer_stale(&conversions, &mut status, &ports, main).unwrap();
             propagate(&conversions, &mut status);
             fixture_git(repo, &["checkout", "-q", "main"]);
@@ -870,18 +724,6 @@ mod tests {
                 "{plan:?}"
             );
         }
-
-        let main = commit(HOLDS_FILE, "libpng 1.0.0 held after the snapshot\n");
-        let plan = defer(&main);
-        assert_eq!(plan[..2], ["tool candidate", "zlib candidate"]);
-        assert!(
-            plan[2].contains("main holds cabin-ports/libpng 1.0.0"),
-            "{plan:?}"
-        );
-        assert!(
-            plan[3].contains("main holds cabin-ports/libpng 1.0.0"),
-            "{plan:?}"
-        );
 
         let main = commit("Cargo.lock", "pin moved\n");
         for line in defer(&main) {

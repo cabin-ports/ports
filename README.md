@@ -26,7 +26,6 @@ are consumed and the rules a port meets.
 ```
 ports/<prefix>/<name>/<version>/  one port: cabin.toml, optional patches/ and tests/
 Cargo.toml, src/, tests/          port-publish, the tool that checks and publishes the ports
-publish-holds.txt                 port versions held back from automatic publishing
 .github/workflows/                CI (ci.yml) and publishing (publish.yml)
 ```
 

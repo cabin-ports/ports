@@ -91,8 +91,8 @@ No other job has them, so such a probe package requires its port under `cfg(os =
 included, and ignored files under `ports/` too:
 
 - A change that only adds files under `ports/<prefix>/<name>/<version>/` for names `<rev>` lacks,
-  besides editing `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `docs/maintaining.md`,
-  `docs/publishing.md`, or `publish-holds.txt` (paths from the repository root), preflights every
+  besides editing `README.md`, `AGENTS.md`, `CONTRIBUTING.md`, `docs/maintaining.md`, or
+  `docs/publishing.md` (paths from the repository root), preflights every
   version of those names plus every committed version any of their requirements (optional and dev
   ones included) matches, transitively.  A name is new even when `<rev>` has its prefix directory.
   An added name with no `cabin.toml` under it is an error.
