@@ -8,13 +8,9 @@ strip-prefix = "libsigcplusplus-3.8.1"
 # 0001 fills in sigc++config.h as Meson, upstream's primary build, does
 # (meson.build:236-256): version 3.8.1, deprecated API kept.  The result is
 # byte-identical to the release's untracked/MSVC_NMake/sigc++config.h, so
-# it is upstream's generated header, not a modified file.  0002 adds
-# GPL-3.0, which LGPL-3.0 incorporates and recipients must receive with
-# it; the release ships only COPYING.  Its text is verbatim from
-# https://www.gnu.org/licenses/gpl-3.0.txt, as COPYING.GPL.
+# it is upstream's generated header, not a modified file.
 patches = [
   "patches/0001-configure-config-header.patch",
-  "patches/0002-add-gpl-3.0-license-text.patch",
 ]
 
 [[package.upstream.copy]]
@@ -25,7 +21,7 @@ to = "sigc++config.h"
 name = "cabin-ports/libsigcpp"
 version = "3.8.1"
 license = "LGPL-3.0-or-later"
-include = ["COPYING", "COPYING.GPL", "patches", "sigc++", "sigc++config.h"]
+include = ["COPYING", "patches", "sigc++", "sigc++config.h"]
 cxx-standard = "c++17"
 
 # The package is LGPL-3.0-or-later (meson.build:5, COPYING): most files are
