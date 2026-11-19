@@ -88,6 +88,7 @@ No other job has them, so such a probe package requires its port under `cfg(os =
 package's kernel runs, and the distribution's ICD loader with its development files
 (`ocl-icd-opencl-dev`), which the probe links.  No other job has an OpenCL device: the macOS
 image's OpenCL framework lists none, and the Windows image registers no OpenCL implementation.
+So a probe package that runs a kernel requires its port under `cfg(os = "linux")`.
 
 ### Selective dry-runs
 
