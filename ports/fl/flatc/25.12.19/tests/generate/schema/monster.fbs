@@ -1,0 +1,8 @@
+namespace demo;
+
+table Monster {
+  name: string;
+  hp: short = 100;
+}
+
+root_type Monster;

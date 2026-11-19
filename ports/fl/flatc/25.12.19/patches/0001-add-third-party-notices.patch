@@ -1,0 +1,33 @@
+--- /dev/null
++++ b/THIRD_PARTY_NOTICES
+@@ -0,0 +1,30 @@
++Third-party notices for cabin-ports/flatc
++
++grpc/src/compiler holds code that upstream's grpc/README.md says is copied
++from gRPC; flatc's own license is in LICENSE.
++
++========================================================================
++gRPC
++https://github.com/grpc/grpc
++grpc/src/compiler/cpp_generator.cc, cpp_generator.h, python_generator.cc,
++python_generator.h and schema_interface.h
++Copyright 2015 gRPC authors.
++SPDX-License-Identifier: Apache-2.0
++
++The Apache License 2.0 text is in LICENSE.
++
++gRPC's NOTICE.txt:
++
++Copyright 2014 gRPC authors.
++
++Licensed under the Apache License, Version 2.0 (the "License");
++you may not use this file except in compliance with the License.
++You may obtain a copy of the License at
++
++    http://www.apache.org/licenses/LICENSE-2.0
++
++Unless required by applicable law or agreed to in writing, software
++distributed under the License is distributed on an "AS IS" BASIS,
++WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
++See the License for the specific language governing permissions and
++limitations under the License.
