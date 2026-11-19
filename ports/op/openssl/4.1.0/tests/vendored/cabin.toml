@@ -1,0 +1,20 @@
+[package]
+name = "vendored"
+version = "0.0.0"
+c-standard = "c99"
+
+# The two sides of a diamond: `asks` requests the port's `vendored`
+# feature through a feature of its own, and `plain` requests nothing.
+[dependencies]
+asks = { path = "asks", features = ["vendored-openssl"] }
+plain = { path = "plain" }
+
+# Upstream's build for Windows runs nmake, whose commands need a command
+# interpreter that a build script cannot start.
+[target.'cfg(not(os = "windows"))'.dependencies]
+"cabin-ports/openssl" = "=4.1.0"
+
+[target.vendored]
+type = "executable"
+sources = ["src/main.c"]
+deps = ["asks", "plain", "cabin-ports/openssl:ssl"]
