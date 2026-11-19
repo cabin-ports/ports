@@ -326,7 +326,8 @@ $ cargo run --locked -- --dry-run --cabin target/pinned-cabin/bin/cabin
 
 The tests that drive `cabin` read it from `PORT_PUBLISH_CABIN` and fail without it.  The dry-run
 downloads each pinned upstream archive once into Cabin's cache (`<cache>/ports/archives/`; see
-`--help`).
+`--help`).  On Linux it also runs the probe packages that talk to a database server, which fail
+without the servers [CI](docs/maintaining.md#ci) starts on `127.0.0.1`.
 
 A change to `scripts/actions/` or `.github/workflows/` must also pass the `lint` job's
 `shellcheck`, `shfmt`, `actionlint`, and `check-inline-runs.sh` steps;
