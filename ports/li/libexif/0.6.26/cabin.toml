@@ -9,12 +9,7 @@ strip-prefix = "libexif-0.6.26"
 # adds a config.h without definitions under cabin/, outside the public
 # include directory, and the target and profiles below define what configure
 # finds.
-# Patch 0002 casts to long instead of ssize_t in exif-loader.c, which MSVC
-# lacks (vcpkg's fix-ssize.patch defines ssize_t there instead).
-patches = [
-  "patches/0001-add-a-config-h-for-the-cabin-profiles.patch",
-  "patches/0002-use-long-for-the-signed-sizes-in-exif-loader.patch",
-]
+patches = ["patches/0001-add-a-config-h-for-the-cabin-profiles.patch"]
 
 [package]
 name = "cabin-ports/libexif"
@@ -96,3 +91,9 @@ defines = ["_DEFAULT_SOURCE"]
 # const time_t *) that exif-entry.c calls.
 [target.'cfg(os = "windows")'.profile]
 defines = ["HAVE_LOCALTIME_S"]
+
+# MSVC lacks POSIX ssize_t, which exif-loader.c:311 casts to.  MinGW on a
+# Windows host without --target is env "msvc" too; its corecrt.h #undefs
+# ssize_t first.
+[target.'cfg(env = "msvc")'.profile]
+defines = ["ssize_t=long"]

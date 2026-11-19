@@ -1,0 +1,15 @@
+--- a/src/UriConfig.h
++++ b/src/UriConfig.h
+@@ -39,9 +39,9 @@
+ #if !defined(URI_CONFIG_H)
+ #  define URI_CONFIG_H 1
+ 
+-#  define PACKAGE_VERSION "@PROJECT_VERSION@"
++#  define PACKAGE_VERSION "1.0.3"
+ 
+-#cmakedefine HAVE_WPRINTF
+-#cmakedefine HAVE_REALLOCARRAY
++#define HAVE_WPRINTF
++/* #undef HAVE_REALLOCARRAY */
+ 
+ #endif /* !defined(URI_CONFIG_H) */

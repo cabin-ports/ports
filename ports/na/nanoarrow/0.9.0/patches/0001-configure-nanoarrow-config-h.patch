@@ -1,0 +1,25 @@
+--- a/src/nanoarrow/nanoarrow_config.h
++++ b/src/nanoarrow/nanoarrow_config.h
+@@ -18,16 +18,17 @@
+ #ifndef NANOARROW_CONFIG_H_INCLUDED
+ #define NANOARROW_CONFIG_H_INCLUDED
+ 
+-#define NANOARROW_VERSION_MAJOR @NANOARROW_VERSION_MAJOR@
+-#define NANOARROW_VERSION_MINOR @NANOARROW_VERSION_MINOR@
+-#define NANOARROW_VERSION_PATCH @NANOARROW_VERSION_PATCH@
+-#define NANOARROW_VERSION "@NANOARROW_VERSION@"
++// Changed for cabin-ports on 2026-11-19: configured from nanoarrow_config.h.in as CMake's configure_file would.
++#define NANOARROW_VERSION_MAJOR 0
++#define NANOARROW_VERSION_MINOR 9
++#define NANOARROW_VERSION_PATCH 0
++#define NANOARROW_VERSION "0.9.0"
+ 
+ #define NANOARROW_VERSION_INT                                        \
+   (NANOARROW_VERSION_MAJOR * 10000 + NANOARROW_VERSION_MINOR * 100 + \
+    NANOARROW_VERSION_PATCH)
+ 
+-@NANOARROW_NAMESPACE_DEFINE@
++// #define NANOARROW_NAMESPACE YourNamespaceHere
+ 
+ #if !defined(NANOARROW_CXX_NAMESPACE)
+ #define NANOARROW_CXX_NAMESPACE nanoarrow

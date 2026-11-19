@@ -6,18 +6,23 @@ checksum = "sha256:5c057929413b8664592fea67edea5c2c47b4ffb0bf5f4accb5164bc6acc69
 format = "tar.gz"
 strip-prefix = "harfbuzz-15.1.0"
 # meson configures and installs hb-features.h, which tells consumers the
-# library's optional parts.  Patch 0001 adds it to src/ as meson writes it
-# for this port: HB_HAS_FREETYPE is defined and every other HB_HAS_* is
-# #undef, since this port does not build those parts.
+# library's optional parts.  The copy step below copies its template to
+# that name in src/, and patch 0001 fills it in as meson writes it for this
+# port: HB_HAS_FREETYPE is defined and every other HB_HAS_* is #undef, since
+# this port does not build those parts.
 # Patch 0002 adds LICENSE.unicode for src/hb-unicode-emoji-table.hh, whose
 # quoted emoji-data.txt header points to unicode.org/terms_of_use.html;
 # those terms put Unicode Data Files under the Unicode License V3:
 # https://www.unicode.org/license.txt as fetched 2026-11-11 (sha256
 # e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96).
 patches = [
-  "patches/0001-add-the-generated-hb-features-h.patch",
+  "patches/0001-configure-hb-features-h.patch",
   "patches/0002-add-the-unicode-license-for-the-emoji-table.patch",
 ]
+
+[[package.upstream.copy]]
+from = "src/hb-features.h.in"
+to = "src/hb-features.h"
 
 [package]
 name = "cabin-ports/harfbuzz"

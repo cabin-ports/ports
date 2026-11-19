@@ -5,11 +5,15 @@ url = "https://github.com/apache/arrow-nanoarrow/releases/download/apache-arrow-
 checksum = "sha256:801200a0e95e869d5c4bdeb5b535dba58551482bb782b7dc8bd599c8b6e8cacf"
 format = "tar.gz"
 strip-prefix = "apache-arrow-nanoarrow-0.9.0"
-# The patch adds src/nanoarrow/nanoarrow_config.h, the public header
-# CMake configures from nanoarrow_config.h.in (CMakeLists.txt:138) with
-# version 0.9.0 and NANOARROW_NAMESPACE left unset, its default
-# (:33, :79-83).
-patches = ["patches/0001-add-the-generated-nanoarrow-config-h.patch"]
+# A copy step places src/nanoarrow/nanoarrow_config.h.in as
+# nanoarrow_config.h, the public header CMake configures from it
+# (CMakeLists.txt:138), and the patch fills in version 0.9.0 and leaves
+# NANOARROW_NAMESPACE unset, its default (:33, :79-83).
+patches = ["patches/0001-configure-nanoarrow-config-h.patch"]
+
+[[package.upstream.copy]]
+from = "src/nanoarrow/nanoarrow_config.h.in"
+to = "src/nanoarrow/nanoarrow_config.h"
 
 [package]
 name = "cabin-ports/nanoarrow"
