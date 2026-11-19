@@ -3,20 +3,22 @@ url = "https://github.com/seqan/seqan/releases/download/seqan-v2.5.3/seqan-libra
 checksum = "sha256:7da029319f0d0674f5aa1a3939b4e7b89d2a9a8e7a288a182492347ce3b5db3d"
 format = "zip"
 strip-prefix = "seqan-library-2.5.3"
-# Notices that the Boost- and zlib-derived headers lack are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/seqan"
 version = "2.5.3"
 # MIT: bam_io/bam_index_bai.h's samtools notice.  Zlib: the stream headers from
-# Jonathan de Halleux and the zlib copy.  LicenseRef-qsufsort: Larsson's terms in
-# index/index_sa_lss.h:43-54.  Boost and CC BY-SA terms: see THIRD_PARTY_NOTICES.
+# Jonathan de Halleux and the zlib copy.  LicenseRef-qsufsort: Larsson's terms
+# in index/index_sa_lss.h:43-54.  BSL-1.0: the Boost 1.47 code in
+# basic/boost_preprocessor_subset.h, basic/concept_checking.h,
+# basic/fundamental_concepts.h and math/math_operators.h.
+# LicenseRef-Boost-pre-BSL: math/math_rational.h and math/math_common_factor.h,
+# from Boost's rational.hpp and common_factor_rt.hpp.  CC-BY-SA-3.0:
+# random/random_beta.h's BetaDistribution, after Joseph Mansfield's Stack
+# Overflow answer 15166623.
 license = "BSD-3-Clause AND BSL-1.0 AND CC-BY-SA-3.0 AND LicenseRef-Boost-pre-BSL AND LicenseRef-qsufsort AND MIT AND Zlib"
 include = [
-  "THIRD_PARTY_NOTICES",
   "include",
-  "patches",
   "share/doc/seqan/CHANGELOG.md",
   "share/doc/seqan/LICENSE",
   "share/doc/seqan/README.md",

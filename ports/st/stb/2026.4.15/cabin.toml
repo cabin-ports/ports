@@ -4,15 +4,9 @@ checksum = "sha256:e4e3bba9c572a4a4148373a914d88ea0f0d11de8cc2c66739926e7eca0223
 format = "tar.gz"
 strip-prefix = "stb-31c1ad37456438565541f4919958214b6e762fb4"
 # deprecated/stb.h's stb_hash_fast and stb_hash_number (:3511-3569) are Paul
-# Hsieh's SuperFastHash, with his comments, and the release ships none of
-# his terms.  Of those he offers for the code
-# (http://www.azillionmonkeys.com/qed/hash.html), the package takes his
-# old-style BSD license, which requires its notice with every source copy.
-# The patch adds it as LICENSE.superfasthash, verbatim from Chromium's
-# base/third_party/superfasthash/LICENSE at e30e2947 (SHA-256
-# 90b2201c...7ae8), word for word the text at
-# http://www.azillionmonkeys.com/qed/license-oldbsd.html.
-patches = ["patches/0001-add-old-bsd-license-for-superfasthash-code.patch"]
+# Hsieh's SuperFastHash, with his comments.  Of the terms he offers for the
+# code (http://www.azillionmonkeys.com/qed/hash.html), the package takes his
+# old-style BSD license.
 [package]
 name = "cabin-ports/stb"
 version = "2026.4.15"
@@ -22,16 +16,14 @@ version = "2026.4.15"
 # the SuperFastHash license above.
 license = "(MIT OR Unlicense) AND LicenseRef-stbhw AND LicenseRef-Paul-Hsieh-OLD-BSD"
 # The libraries, deprecated/ (still part of the API: stb_image_resize2.h
-# points to its stb_image_resize.h) and the licenses.  tests/ and data/
+# points to its stb_image_resize.h) and LICENSE.  tests/ and data/
 # hold files that no grant covers (a packed Windows binary, renders of
 # commercial fonts, an Atari font image); the docs, tools and CI files
 # are not needed.
 include = [
   "LICENSE",
-  "LICENSE.superfasthash",
   "README.md",
   "deprecated",
-  "patches",
   "stb_c_lexer.h",
   "stb_connected_components.h",
   "stb_divide.h",

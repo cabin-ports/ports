@@ -3,14 +3,17 @@ url = "https://github.com/taskflow/taskflow/archive/refs/tags/v4.1.0.tar.gz"
 checksum = "sha256:2107f90e315e48a676922010b036357ff2b0c6b9160ce17fa9396e5860b1d715"
 format = "tar.gz"
 strip-prefix = "taskflow-4.1.0"
-# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/taskflow"
 version = "4.1.0"
 license = "MIT AND Zlib AND MPL-2.0 AND NCSA AND BSL-1.0"
-include = ["LICENSE", "THIRD_PARTY_NOTICES", "patches", "taskflow"]
+# LICENSE is MIT.  Zlib: taskflow/algorithm/sort.hpp:31-525, pdqsort.  MPL-2.0:
+# core/nonblocking_notifier.hpp:84-637 and utility/mpmc.hpp:294-504, from Eigen
+# 3.3.7's ThreadPool EventCount and RunQueue.  NCSA: utility/small_vector.hpp,
+# from LLVM's SmallVector as of 2016.  BSL-1.0: utility/uuid.hpp, from
+# Boost.UUID.
+include = ["LICENSE", "taskflow"]
 
 # The taskflow/ headers, which upstream installs whole (CMakeLists.txt:348);
 # consumers write `#include <taskflow/taskflow.hpp>`.

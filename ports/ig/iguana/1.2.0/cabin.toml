@@ -5,8 +5,6 @@ url = "https://github.com/qicosmos/iguana/archive/refs/tags/1.2.0.tar.gz"
 checksum = "sha256:29ad1ff853a278df0b1598db992e1507167bd4521b232a55e360928cf751a9af"
 format = "tar.gz"
 strip-prefix = "iguana-1.2.0"
-# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 # Apache-2.0: iguana's LICENSE.
 # MIT: detail/itoa.hpp, and code from RapidJSON, Bjoern Hoehrmann's UTF-8
@@ -24,7 +22,7 @@ patches = ["patches/0001-add-third-party-notices.patch"]
 name = "cabin-ports/iguana"
 version = "1.2.0"
 license = "Apache-2.0 AND MIT AND MIT WITH fmt-exception AND (Apache-2.0 WITH LLVM-exception OR BSL-1.0) AND BSD-3-Clause AND CC0-1.0 AND CC-BY-SA-3.0"
-include = ["LICENSE", "THIRD_PARTY_NOTICES", "iguana", "patches"]
+include = ["LICENSE", "iguana"]
 
 # The archive also vendors an older frozen (frozen/, reformatted, without
 # 1.2.0's bits/mpl.h) that the headers reach as "frozen/*.h" through the

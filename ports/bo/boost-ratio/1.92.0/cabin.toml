@@ -5,14 +5,7 @@ format = "tar.gz"
 strip-prefix = "ratio-boost-1.92.0"
 # include/boost/ratio/ratio.hpp:30 and ratio_fwd.hpp:30 take ratio_less's
 # overflow handling from libc++, and 23 tests adapt libc++ tests, under its MIT
-# and University of Illinois/NCSA dual licence, whose text the release does not
-# ship.  Patch 0001 adds libc++'s LICENSE.TXT, verbatim from llvm-project
-# llvmorg-8.0.1 libcxx/LICENSE.TXT
-# (sha256:c3b21ee90de785b9e45590253fd08fb22b269abccaadb175c4d96d7f420340cd), as
-# LICENSE.libcxx.txt.
-patches = [
-  "patches/0001-add-mit-and-ncsa-licenses-for-libcxx-code.patch",
-]
+# and University of Illinois/NCSA dual licence.
 
 [package]
 name = "cabin-ports/boost-ratio"
@@ -25,7 +18,6 @@ include = [
   ".github",
   ".travis.yml",
   "CMakeLists.txt",
-  "LICENSE.libcxx.txt",
   "README.md",
   "appveyor.yml",
   "build.jam",
@@ -33,7 +25,6 @@ include = [
   "include",
   "index.html",
   "meta",
-  "patches",
   "test",
 ]
 

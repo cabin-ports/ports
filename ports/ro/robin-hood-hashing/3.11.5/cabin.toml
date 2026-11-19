@@ -7,11 +7,7 @@ strip-prefix = "robin-hood-hashing-3.11.5"
 # library provides; without it the bitness test picks the 32-bit branch,
 # which then fails.  Patch 0001 adds just that include, as Conan Center and
 # vcpkg do; upstream is archived and takes no fix.
-# Third-party notices are in THIRD_PARTY_NOTICES (patch 0002).
-patches = [
-  "patches/0001-include-cstdint.patch",
-  "patches/0002-add-third-party-notices.patch",
-]
+patches = ["patches/0001-include-cstdint.patch"]
 
 [package]
 name = "cabin-ports/robin-hood-hashing"
@@ -22,7 +18,7 @@ license = "MIT AND CC-BY-SA-3.0"
 # credits (:96, :866, :906 as released) name techniques, not copied code;
 # hash_bytes() and hash_int() follow MurmurHash64A and MurmurHash3's
 # finalizer, which their author placed in the public domain.
-include = ["LICENSE", "THIRD_PARTY_NOTICES", "patches", "src/include/robin_hood.h"]
+include = ["LICENSE", "patches", "src/include/robin_hood.h"]
 
 # Upstream is archived and unmaintained; its README names
 # ankerl::unordered_dense as the successor.  Master's one unreleased header

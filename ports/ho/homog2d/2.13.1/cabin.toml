@@ -3,14 +3,10 @@ url = "https://github.com/skramm/homog2d/archive/refs/tags/v2.13.tar.gz"
 checksum = "sha256:3acc829fa9380edaecf211dff10121e529cdabe6be8479b94c6fbd75561bb7d6"
 format = "tar.gz"
 strip-prefix = "homog2d-2.13"
-# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
 # homog2d.hpp calls std::time without including <ctime>, so with LLVM 23's
 # libc++ it fails to compile (measured: "no member named 'time' in namespace
 # 'std'"); patch 0002 includes it.
-patches = [
-  "patches/0001-add-third-party-notices.patch",
-  "patches/0002-include-ctime.patch",
-]
+patches = ["patches/0002-include-ctime.patch"]
 
 [package]
 name = "cabin-ports/homog2d"
@@ -22,7 +18,6 @@ license = "MPL-2.0"
 include = [
   "LICENCE",
   "README.md",
-  "THIRD_PARTY_NOTICES",
   "homog2d.hpp",
   "patches",
 ]

@@ -4,8 +4,6 @@ url = "https://github.com/hoshimoe/NekoFunction/archive/refs/tags/v1.0.12.tar.gz
 checksum = "sha256:7e2fccac424a7a43165d587f1ecdb097750f8f5a78f7649bb7ba8e4cd6637983"
 format = "tar.gz"
 strip-prefix = "NekoFunction-1.0.12"
-# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/neko-function"
@@ -15,14 +13,12 @@ license = "(MIT OR Apache-2.0) AND CC-BY-SA-3.0"
 # the Stack Overflow code in include/neko/function/utilities.hpp.
 include = [
   "LICENSE",
-  "THIRD_PARTY_NOTICES",
   "include/neko/function/archive.hpp",
   "include/neko/function/detectFileType.hpp",
   "include/neko/function/hash.hpp",
   "include/neko/function/pattern.hpp",
   "include/neko/function/utilities.hpp",
   "include/neko/function/uuid.hpp",
-  "patches",
 ]
 
 [dependencies]

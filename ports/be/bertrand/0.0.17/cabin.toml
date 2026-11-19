@@ -3,8 +3,6 @@ url = "https://github.com/bernedom/bertrand/archive/refs/tags/0.0.17.tar.gz"
 checksum = "sha256:72e59971bd8ae48d95da9337ad78004b99ba4e8d0eeb3b613ce17b577ca41012"
 format = "tar.gz"
 strip-prefix = "bertrand-0.0.17"
-# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/bertrand"
@@ -14,9 +12,7 @@ include = [
   "CHANGELOG.md",
   "LICENSE",
   "README.md",
-  "THIRD_PARTY_NOTICES",
   "include",
-  "patches",
 ]
 
 # The unprefixed macros Require, Ensure and Invariant take those names with

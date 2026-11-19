@@ -15,13 +15,19 @@ strip-prefix = "geos-3.15.0"
 #   match upstream's per-TU flags.  MSVC's default /fp:precise is upstream's
 #   setting.  Unlike upstream, consumers' compiles do not get the setting,
 #   including geos's header-inline floating-point code compiled there.
-# - 0003 adds nlohmann/json 3.11.3's MIT license; see [package].
 # Every file 0001 and 0002 change opens with a dated notice saying so, as
 # LGPL-2.1 section 2(b) requires.
+# LGPL-2.1 section 1 notices of capi/geos_c.h.in and capi/CMakeLists.txt (0001):
+# Copyright (C) 2010 2011 Sandro Santilli <strk@kbt.io>
+# Copyright (C) 2005 Refractions Research Inc.
+# Copyright (C) 2018 Mateusz Loskot <mateusz@loskot.net>
+# This is free software; you can redistribute and/or modify it under
+# the terms of the GNU Lesser General Public Licence as published
+# by the Free Software Foundation.
+# See the COPYING file for more information.
 patches = [
   "patches/0001-add-the-generated-version-and-c-api-headers.patch",
   "patches/0002-reproduce-upstream-floating-point-flags.patch",
-  "patches/0003-add-mit-license-for-nlohmann-json.patch",
 ]
 
 [[package.upstream.copy]]
@@ -39,8 +45,8 @@ license = "LGPL-2.1-only AND (Apache-2.0 OR BSL-1.0) AND MIT AND Apache-2.0"
 # LGPL-2.1 (COPYING); distributing a binary that links geos statically
 # carries the obligations of LGPL-2.1 section 6.  Code from elsewhere:
 # - src/deps/ryu: Ulf Adams's Ryu, Apache-2.0 or BSL-1.0, both texts beside it.
-# - include/geos/vend/json.hpp: Niels Lohmann's nlohmann/json 3.11.3, MIT
-#   (LICENSE.nlohmann-json), which covers its Hoehrmann and Loitsch parts
+# - include/geos/vend/json.hpp: Niels Lohmann's nlohmann/json 3.11.3, MIT,
+#   which covers its Hoehrmann and Loitsch parts
 #   too; :3100-3201 are The Abseil Authors', Apache-2.0 (its text is
 #   src/deps/ryu/LICENSE-Apache2), and :330-2363 are Evan Nemerson's
 #   Hedley, CC0-1.0, which needs no notice.
@@ -55,7 +61,7 @@ license = "LGPL-2.1-only AND (Apache-2.0 OR BSL-1.0) AND MIT AND Apache-2.0"
 #   kdt, CC BY-SA 3.0; no terms ship, a length check and one compare call
 #   being too slight for copyright.
 # Line numbers are those of the patched files.
-include = ["COPYING", "LICENSE.nlohmann-json", "capi", "include", "patches", "src"]
+include = ["COPYING", "capi", "include", "patches", "src"]
 # Upstream builds Ryu as C99; C11 is the oldest Cabin can lower for MSVC.
 c-standard = "c11"
 cxx-standard = "c++17"

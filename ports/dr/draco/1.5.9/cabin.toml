@@ -10,20 +10,13 @@ strip-prefix = "draco-1.5.9"
 # one header serves every platform; that guard is this port's only
 # structural deviation from the generated file.  Like upstream's, the
 # pragmas also reach MSVC consumers that include the header.
-# Patch 0002 adds LICENSE.libvpx, libvpx's BSD-3-Clause terms, copyright
-# The WebM Project authors (LICENSE at
-# webmproject/libvpx v1.6.0, sha256
-# 8267348d5af1262c11d1a08de2f5afc77457755f1ac658627dd9acf71011d615), for
-# core/divide.h, core/divide.cc and compression/entropy/ans.h, which say
-# they are based off libvpx's.
-patches = [
-  "patches/0001-add-the-generated-draco-features-h.patch",
-  "patches/0002-add-the-libvpx-bsd-license.patch",
-]
+patches = ["patches/0001-add-the-generated-draco-features-h.patch"]
 
 [package]
 name = "cabin-ports/draco"
 version = "1.5.9"
+# BSD-3-Clause: core/divide.h, core/divide.cc and compression/entropy/ans.h,
+# which say they are based off libvpx's.
 license = "Apache-2.0 AND BSD-3-Clause"
 # The directories holding the default library's sources and headers,
 # with their tests and the transcoder's files, which nothing here
@@ -32,7 +25,6 @@ license = "Apache-2.0 AND BSD-3-Clause"
 # content is guarded by DRACO_TRANSCODER_SUPPORTED.
 include = [
   "LICENSE",
-  "LICENSE.libvpx",
   "patches",
   "src/draco/animation",
   "src/draco/attributes",

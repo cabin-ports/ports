@@ -6,14 +6,6 @@
 # version is its date.
 # vcpkg also applies FLTK's fork patch (nsvgRasterizeXY); this port packages
 # upstream unpatched.
-#
-# Patch 0001 adds the terms nanosvg omits for code it adapts:
-# LICENSE-AGG.txt, lines 1-10 of agg-src/examples/svg_viewer/agg_svg_parser.cpp
-# in ghaerr/agg-2.6 at commit 0a000a962a7e2ea0e5b1441424196adfa4250b35, and
-# LICENSE-bbox.txt, the MIT terms NISHIO Hirokazu published calc_box under
-# (archived at web.archive.org/web/20090618041529/http://blog.hackers-cafe.net
-# /2009/06/how-to-calculate-bezier-curves-bounding.html).
-patches = ["patches/0001-add-third-party-license-texts.patch"]
 url = "https://github.com/memononen/nanosvg/archive/93ce879dc4c04a3ef1758428ec80083c38610b1f.tar.gz"
 checksum = "sha256:259f5236843a2245fdfd92fddffcaf292ac1f46d24f94f38fa3a9b690501e7d2"
 format = "tar.gz"
@@ -38,7 +30,7 @@ license = "Zlib AND LicenseRef-Boost-pre-BSL AND MIT"
 # only the SVG 1.1 F.6.5 algorithm with canvg v1.0 and carries no term.
 # Not ported: example/ (its stb_image_write.h serves only the examples) and
 # the CMake and premake files.
-include = ["LICENSE-AGG.txt", "LICENSE-bbox.txt", "LICENSE.txt", "patches", "src"]
+include = ["LICENSE.txt", "src"]
 
 # Header-only, as README.md describes: one translation unit defines
 # NANOSVG_IMPLEMENTATION before including <nanosvg.h>, and

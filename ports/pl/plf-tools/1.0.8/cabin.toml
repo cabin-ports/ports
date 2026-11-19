@@ -6,11 +6,6 @@ url = "https://github.com/mattreecebentley/plf_tools/archive/6460c9d22ba67fe39bb
 checksum = "sha256:2c9181e2f18985ca6c4efedf1ee81253ea201b213db37f68a2547d1449b03907"
 format = "tar.gz"
 strip-prefix = "plf_tools-6460c9d22ba67fe39bb9203ffddc429b04fbeac1"
-# The patch adds LICENSE.bits_to_chars: lines 3-16 of plf_bitset.h at
-# github.com/mattreecebentley/plf_bitsets commit
-# 4080dd9f3d52b27c115bc6ca168944abac8f6d3d, with CRLF line endings made LF
-# (sha256 343798cfbce16d9d12f90a30b64405befc5fe8de54c8a358968b86ade996fecf).
-patches = ["patches/0001-add-the-bits-to-chars-licence.patch"]
 
 [package]
 name = "cabin-ports/plf-tools"
@@ -20,13 +15,11 @@ license = "Zlib AND LicenseRef-CFG-1.02"
 # plf_tools.h:577-621, bits_to_chars, which is by Michiel van Slobbe,
 # contributed as plf_bitsets PR #9 (merged as 4080dd9f3d) under that
 # repository's Computing For Good License; upstream moved it into this Zlib
-# file, but no source shows him granting Zlib for it.  LICENSE.bits_to_chars
-# is the v1.02 text from plf_bitset.h's header (the repository's LICENSE file
-# says v1.01); its section 4 field-of-use terms reach users of bits_to_chars.
+# file, but no source shows him granting Zlib for it.  LicenseRef-CFG-1.02 is
+# the v1.02 text in plf_bitset.h's header (the repository's LICENSE file says
+# v1.01); its section 4 field-of-use terms reach users of bits_to_chars.
 include = [
-  "LICENSE.bits_to_chars",
   "LICENSE.md",
-  "patches",
   "plf_tools.h",
   "plf_tools_undef.h",
 ]

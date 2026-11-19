@@ -6,15 +6,13 @@ url = "https://github.com/serge-sans-paille/frozen/archive/refs/tags/1.2.0.tar.g
 checksum = "sha256:ed8339c017d7c5fe019ac2c642477f435278f0dc643c1d69d3f3b1e95915e823"
 format = "tar.gz"
 strip-prefix = "frozen-1.2.0"
-# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/frozen"
 version = "1.2.0"
 license = "Apache-2.0 AND CC-BY-SA-3.0"
 # CC-BY-SA-3.0: the Wikipedia code in include/frozen/algorithm.h.
-include = ["LICENSE", "THIRD_PARTY_NOTICES", "include", "patches"]
+include = ["LICENSE", "include"]
 
 # Upstream's header-only frozen::frozen target (CMakeLists.txt:61-86):
 # consumers include <frozen/*.h> from include/, with C++14 or newer

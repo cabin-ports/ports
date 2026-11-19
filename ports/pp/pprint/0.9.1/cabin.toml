@@ -3,8 +3,6 @@ url = "https://github.com/p-ranav/pprint/archive/refs/tags/v0.9.1.tar.gz"
 checksum = "sha256:b9cc0d42f7be4abbb50b2e3b6a89589c5399201a3dc1fd7cfa72d412afdb2f86"
 format = "tar.gz"
 strip-prefix = "pprint-0.9.1"
-# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/pprint"
@@ -12,7 +10,7 @@ version = "0.9.1"
 # include/pprint.hpp:49 credits http://loungecpp.wikidot.com/tips-and-tricks:indices
 # for its index-sequence idiom; its copyright significance is uncertain.
 license = "MIT"
-include = ["LICENSE", "THIRD_PARTY_NOTICES", "include", "patches"]
+include = ["LICENSE", "include"]
 
 # Upstream's include/ layout: consumers write <pprint.hpp>.  C++17 is
 # README.md's stated standard.  The header keeps its bundled magic_enum.
