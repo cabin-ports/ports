@@ -80,6 +80,10 @@ that directory to a script only because the runner is an administrator
 the SDK out of `Program Files`.  The Windows job also puts that installation's `bin` first on
 `PATH`, where a probe finds the DLLs it runs with.  On Linux pkg-config finds the distribution's.
 
+`check-linux` also starts the image's MySQL server (user `root`, password `root`) and installs
+the distribution's Redis server, both on `127.0.0.1`, for probe packages that talk to a server.
+No other job has them, so such a probe package requires its port under `cfg(os = "linux")`.
+
 ### Selective dry-runs
 
 `--dry-run --changed-since <rev>` preflights only what the change since `<rev>` needs.  It compares
