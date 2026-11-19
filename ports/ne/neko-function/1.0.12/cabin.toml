@@ -4,29 +4,18 @@ url = "https://github.com/hoshimoe/NekoFunction/archive/refs/tags/v1.0.12.tar.gz
 checksum = "sha256:7e2fccac424a7a43165d587f1ecdb097750f8f5a78f7649bb7ba8e4cd6637983"
 format = "tar.gz"
 strip-prefix = "NekoFunction-1.0.12"
-# Patch 0001 adds the Creative Commons Attribution-ShareAlike 3.0 Unported
-# legal code, verbatim from
-# https://creativecommons.org/licenses/by-sa/3.0/legalcode.txt (sha256
-# 3f941b3b89cf7b8370ceb83cc76d2120d471b58735d8ca60238a751a48d7f72f), as
-# LICENSE.CC-BY-SA-3.0.
-patches = ["patches/0001-add-cc-by-sa-3.0-license-for-stack-overflow-code.patch"]
+# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/neko-function"
 version = "1.0.12"
 license = "(MIT OR Apache-2.0) AND CC-BY-SA-3.0"
-# (MIT OR Apache-2.0) AND CC-BY-SA-3.0.  LICENSE carries both texts of the
-# MIT OR Apache-2.0 choice.  include/neko/function/utilities.hpp:602-665
-# (base64Chars, base64Encode, base64Decode) is modified (identifiers
-# renamed, e.g. valb to bits, 0x3F named b63, and the alphabet hoisted into
-# base64Chars) from the answer to "Base64 decode snippet in C++",
-# https://stackoverflow.com/a/34571089 (revision 1, 2016-01-02), by Manuel
-# Martinez (https://stackoverflow.com/users/5739045), CC BY-SA 3.0; that
-# block is distributed under CC BY-SA 3.0 (LICENSE.CC-BY-SA-3.0), and the
-# rest of the package stays under MIT OR Apache-2.0.
+# LICENSE carries both texts of the MIT OR Apache-2.0 choice.  CC-BY-SA-3.0:
+# the Stack Overflow code in include/neko/function/utilities.hpp.
 include = [
   "LICENSE",
-  "LICENSE.CC-BY-SA-3.0",
+  "THIRD_PARTY_NOTICES",
   "include/neko/function/archive.hpp",
   "include/neko/function/detectFileType.hpp",
   "include/neko/function/hash.hpp",

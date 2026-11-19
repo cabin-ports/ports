@@ -1,0 +1,20 @@
+--- /dev/null
++++ b/THIRD_PARTY_NOTICES
+@@ -0,0 +1,17 @@
++Third-party notices for cabin-ports/boost-hana
++
++Boost.Hana's own license is in LICENSE.md.
++
++========================================================================
++cppreference.com: possible implementations of standard algorithms
++Titles: "std::reverse", "std::next_permutation",
++"std::lexicographical_compare", "std::equal", "std::find", "std::iota",
++"std::count", "std::accumulate" and "std::min_element"
++Author: cppreference.com contributors
++https://en.cppreference.com/w/cpp/algorithm/<name>, for each name above
++without std:: (for example https://en.cppreference.com/w/cpp/algorithm/reverse)
++include/boost/hana/detail/algorithm.hpp:31-104 and 126-183, credited at
++test/detail/algorithm.cpp:12
++Licensed under CC BY-SA 3.0, https://creativecommons.org/licenses/by-sa/3.0/
++Changed: edited into constexpr functions in namespace boost::hana::detail.
++SPDX-License-Identifier: CC-BY-SA-3.0

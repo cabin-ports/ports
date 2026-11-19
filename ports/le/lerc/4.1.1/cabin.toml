@@ -5,9 +5,8 @@ url = "https://github.com/Esri/lerc/archive/refs/tags/v4.1.1.tar.gz"
 checksum = "sha256:fe2860e10635166cd9f2144e429ec6b870d471e9957f5812ba2da0973770b022"
 format = "tar.gz"
 strip-prefix = "lerc-4.1.1"
-# Adds the CC BY-SA 3.0 text, verbatim from creativecommons.org, which the
-# Wikipedia code noted under [package] requires and the release lacks.
-patches = ["patches/0001-add-cc-by-sa-3.0-license-for-credited-code.patch"]
+# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/lerc"
@@ -15,8 +14,8 @@ version = "4.1.1"
 license = "Apache-2.0 AND CC-BY-SA-3.0"
 include = [
   "LICENSE",
-  "LICENSE.CC-BY-SA-3.0",
   "NOTICE",
+  "THIRD_PARTY_NOTICES",
   "patches",
   "src/LercLib",
 ]
@@ -26,9 +25,7 @@ interface-c-standard = "c99"
 interface-cxx-standard = "c++11"
 
 # LICENSE is Apache-2.0, and NOTICE records Esri's patent grant.
-# ComputeChecksumFletcher32 (src/LercLib/Lerc2.cpp:1000-1030) is adapted
-# from https://en.wikipedia.org/wiki/Fletcher's_checksum by Wikipedia
-# contributors and is under CC BY-SA 3.0 (LICENSE.CC-BY-SA-3.0).
+# CC-BY-SA-3.0: the Wikipedia code in src/LercLib/Lerc2.cpp.
 #
 # 4.2.0 and 4.3.0 add input size, overflow and decoder bounds checks that
 # this version lacks.

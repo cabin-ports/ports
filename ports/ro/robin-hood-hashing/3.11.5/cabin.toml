@@ -6,31 +6,23 @@ strip-prefix = "robin-hood-hashing-3.11.5"
 # robin_hood.h gets <cstdint> only transitively, which not every standard
 # library provides; without it the bitness test picks the 32-bit branch,
 # which then fails.  Patch 0001 adds just that include, as Conan Center and
-# vcpkg do; upstream is archived and takes no fix.  Patch 0002 adds the
-# Creative Commons Attribution-ShareAlike 3.0 Unported legal code,
-# verbatim from https://creativecommons.org/licenses/by-sa/3.0/legalcode.txt,
-# as LICENSE.CC-BY-SA-3.0.
+# vcpkg do; upstream is archived and takes no fix.
+# Third-party notices are in THIRD_PARTY_NOTICES (patch 0002).
 patches = [
   "patches/0001-include-cstdint.patch",
-  "patches/0002-add-cc-by-sa-3.0-license-for-stack-overflow-code.patch",
+  "patches/0002-add-third-party-notices.patch",
 ]
 
 [package]
 name = "cabin-ports/robin-hood-hashing"
 version = "3.11.5"
 license = "MIT AND CC-BY-SA-3.0"
-# LICENSE carries robin_hood.h's MIT terms.  ROBIN_HOOD_IS_TRIVIALLY_COPYABLE
-# (src/include/robin_hood.h:207-213 as released, :208-214 after patch
-# 0001) is modified from Stack Overflow answer
-# https://stackoverflow.com/a/31798726 by Kipton Barros
-# (https://stackoverflow.com/users/500314/kipton-barros), posted in 2015
-# under CC BY-SA 3.0: that block is distributed under CC BY-SA 3.0, whose
-# legal code LICENSE.CC-BY-SA-3.0 carries, and the rest of robin_hood.h
-# stays under MIT.  The header's other credits (:96, :866, :906) name
-# techniques, not copied code; hash_bytes() and hash_int() follow
-# MurmurHash64A and MurmurHash3's finalizer, which their author placed in
-# the public domain.
-include = ["LICENSE", "LICENSE.CC-BY-SA-3.0", "patches", "src/include/robin_hood.h"]
+# LICENSE carries robin_hood.h's MIT terms.  CC-BY-SA-3.0: the Stack
+# Overflow code in ROBIN_HOOD_IS_TRIVIALLY_COPYABLE.  The header's other
+# credits (:96, :866, :906 as released) name techniques, not copied code;
+# hash_bytes() and hash_int() follow MurmurHash64A and MurmurHash3's
+# finalizer, which their author placed in the public domain.
+include = ["LICENSE", "THIRD_PARTY_NOTICES", "patches", "src/include/robin_hood.h"]
 
 # Upstream is archived and unmaintained; its README names
 # ankerl::unordered_dense as the successor.  Master's one unreleased header

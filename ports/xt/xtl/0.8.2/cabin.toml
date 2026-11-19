@@ -5,58 +5,26 @@ url = "https://github.com/xtensor-stack/xtl/archive/refs/tags/0.8.2.tar.gz"
 checksum = "sha256:8fb38d6a5856aab5740d2ccb3d791d289f648d4cc506b94a1338fe5fce100c11"
 format = "tar.gz"
 strip-prefix = "xtl-0.8.2"
-# include/xtl/xspan_impl.hpp embeds tcb/span, "Distributed under the
-# Boost Software License, Version 1.0" with a pointer to an accompanying
-# LICENSE_1_0.txt (:9-12) that the archive does not ship, and that
-# license requires source copies to include it.  Patch 0001 adds the
-# license text, verbatim from https://www.boost.org/LICENSE_1_0.txt, as
-# LICENSE_1_0.txt.  Code from the Loki library and from a Stack Overflow
-# answer, listed under [package], ships without its terms: Loki's MIT
-# License requires its copyright and permission notice in all copies or
-# substantial portions, and CC BY-SA 3.0's sections 4(a) and 4(b) a copy of
-# that licence or its URI with every copy.  Patch 0002 adds Loki's notice,
-# verbatim from the header comment of Loki's include/loki/Visitor.h (:2-25,
-# without the comment markers), as LICENSE.Loki; patch 0003 adds the
-# CC BY-SA 3.0 text, verbatim from
-# https://creativecommons.org/licenses/by-sa/3.0/legalcode.txt, as
-# LICENSE.CC-BY-SA-3.0.
-patches = [
-  "patches/0001-add-boost-software-license-for-tcb-span.patch",
-  "patches/0002-add-mit-license-for-loki-code.patch",
-  "patches/0003-add-cc-by-sa-3.0-license-for-base64-code.patch",
-]
+# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/xtl"
 version = "0.8.2"
 license = "BSD-3-Clause AND BSL-1.0 AND MIT AND CC-BY-SA-3.0"
-# LICENSE is xtl's BSD-3-Clause license; LICENSE_1_0.txt, LICENSE.Loki and
-# LICENSE.CC-BY-SA-3.0 come from the patches above.  These blocks are
-# modified from the Loki library, Copyright (c) 2001 by Andrei Alexandrescu,
-# and its MIT License (LICENSE.Loki) applies to them:
-# - include/xtl/xvisitor.hpp:18-191 (base_visitor, visitor, the catch_all
-#   policies, base_visitable, cyclic_visitor and the XTL_DEFINE_*VISITABLE
-#   macros), ported to C++14 from Loki's Visitor.h,
-#   https://github.com/snaewe/loki-lib/blob/7c29d87ecdecd60e39db969125753f6a4f549131/include/loki/Visitor.h.
-# - include/xtl/xmultimethods.hpp:25-190 and :342-419 (static_dispatcher,
-#   basic_dispatcher, the casters and functor_dispatcher), ported and
-#   generalized to N arguments from Loki's MultiMethods.h,
-#   https://github.com/snaewe/loki-lib/blob/7c29d87ecdecd60e39db969125753f6a4f549131/include/loki/MultiMethods.h.
-#   basic_fast_dispatcher (:191-341) has no Loki counterpart; it is xtl's
-#   own N-argument form of the BasicFastDispatcher listing in Andrei
-#   Alexandrescu's book Modern C++ Design (2001), multimethods chapter.
-#   What follows that listing, the static per-class index of
-#   XTL_IMPLEMENT_INDEXABLE_CLASS (:195-204), the callback storage and
-#   next-index counter (:260-261, :321-324), and the lazy index assignment
-#   in resize_container (:263-276), is a few lines of a functional indexing
-#   pattern, too slight to carry copyright; this was compared against two
-#   third-party transcriptions of the listing, not the book itself.
-# include/xtl/xbase64.hpp:21-75 (base64decode, base64encode) is modified
-# from the answer to "Base64 decode snippet in C++",
-# https://stackoverflow.com/a/34571089 (revision 1, 2016), by Manuel
-# Martinez (https://stackoverflow.com/users/5739045), CC BY-SA 3.0; that
-# block is distributed under CC BY-SA 3.0 (LICENSE.CC-BY-SA-3.0), and the
-# rest of the package stays under the licenses above.
+# LICENSE is xtl's BSD-3-Clause license.  BSL-1.0, MIT and CC-BY-SA-3.0: the
+# tcb/span, Loki and Stack Overflow code in include/xtl; MIT also covers
+# include/xtl/xhalf_float_impl.hpp, Christian Rau's half library, whose notice
+# is in the file.
+# basic_fast_dispatcher (include/xtl/xmultimethods.hpp:191-341) has no Loki
+# counterpart; it is xtl's own N-argument form of the BasicFastDispatcher
+# listing in Andrei Alexandrescu's book Modern C++ Design (2001),
+# multimethods chapter.  What follows that listing, the static per-class
+# index of XTL_IMPLEMENT_INDEXABLE_CLASS (:195-204), the callback storage and
+# next-index counter (:260-261, :321-324), and the lazy index assignment in
+# resize_container (:263-276), is a few lines of a functional indexing
+# pattern, too slight to carry copyright; this was compared against two
+# third-party transcriptions of the listing, not the book itself.
 # include/xtl/xhash.hpp's dummy hash (:33-44), load_bytes (:96-105), and the
 # 64-bit murmur_hash's constant spelling and aligned-tail split (:107-140)
 # follow libstdc++'s libsupc++/hash_bytes.cc (gcc-7.1.0,
@@ -67,9 +35,7 @@ license = "BSD-3-Clause AND BSL-1.0 AND MIT AND CC-BY-SA-3.0"
 # from SMHasher, credited at :46.
 include = [
   "LICENSE",
-  "LICENSE_1_0.txt",
-  "LICENSE.Loki",
-  "LICENSE.CC-BY-SA-3.0",
+  "THIRD_PARTY_NOTICES",
   "include",
   "patches",
 ]

@@ -4,39 +4,20 @@ url = "https://github.com/greg7mdp/parallel-hashmap/archive/refs/tags/v2.0.0.tar
 checksum = "sha256:4f462f51a3468166ea4cf87c80e001dc1999093264cf55cbda3492ca39a7730b"
 format = "tar.gz"
 strip-prefix = "parallel-hashmap-2.0.0"
-# phmap_utils.h's hash combiners are Daniel James's code under the Boost
-# Software License 1.0 (phmap_utils.h:294-296, 317-319), whose terms must
-# accompany every source copy; the release ships only the Apache-2.0
-# LICENSE.  The patch adds the license text, verbatim from
-# https://www.boost.org/LICENSE_1_0.txt.  meminfo.h carries Stack Overflow
-# code, listed under [package], whose CC BY-SA 3.0 requires a copy of that
-# license or its URI with every copy (sections 4(a) and 4(b)); patch 0002
-# adds the license text, verbatim from
-# https://creativecommons.org/licenses/by-sa/3.0/legalcode.txt (SHA-256
-# 3f941b3b...f72f), as LICENSE.CC-BY-SA-3.0.
-patches = [
-  "patches/0001-add-bsl-1.0-license-for-hash-combiners.patch",
-  "patches/0002-add-cc-by-sa-3.0-license-for-meminfo-code.patch",
-]
+# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
+patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/parallel-hashmap"
 version = "2.0.0"
-# The Windows and Linux branches of parallel_hashmap/meminfo.h's
-# GetSystemMemory, GetTotalMemoryUsed, GetProcessMemoryUsed and
-# GetPhysicalMemory (:38-50, :77-90, :119-153, :168-180) are modified from
-# the answer to "How to determine CPU and memory consumption from inside a
-# process?", https://stackoverflow.com/a/64166 (revision 7, 2012), by
-# Lanzelot (https://stackoverflow.com/users/7381), CC BY-SA 3.0; that code
-# is distributed under CC BY-SA 3.0 (LICENSE.CC-BY-SA-3.0), the rest of the
-# package under the licenses above.
+# BSL-1.0: Daniel James's hash combiners in parallel_hashmap/phmap_utils.h.
+# CC-BY-SA-3.0: the Stack Overflow code in parallel_hashmap/meminfo.h.
 license = "Apache-2.0 AND BSL-1.0 AND CC-BY-SA-3.0"
 # parallel_hashmap/ is what upstream's CMake installs, whole (CMakeLists.txt:
 # 73-75), with the licenses above; upstream ships no NOTICE file.
 include = [
   "LICENSE",
-  "LICENSE.CC-BY-SA-3.0",
-  "LICENSE_1_0.txt",
+  "THIRD_PARTY_NOTICES",
   "parallel_hashmap",
   "patches",
 ]
