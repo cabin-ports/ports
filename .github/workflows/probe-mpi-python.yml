@@ -1,0 +1,95 @@
+name: probe-mpi-python
+
+on: pull_request
+
+permissions: {}
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Python
+        run: |
+          pkg-config --modversion python3-embed
+          pkg-config --cflags --libs python3-embed
+          ls -l /usr/lib/x86_64-linux-gnu/libpython3*.so* || true
+      - name: Open MPI
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends libopenmpi-dev openmpi-bin
+          pkg-config --list-all | grep -i -E 'mpi|pmix' || true
+          pkg-config --modversion ompi-c
+          pkg-config --cflags --libs ompi-c
+          mpiexec --version
+          printf '%s\n' '#include <mpi.h>' '#include <stdio.h>' \
+            'int main(int c, char **v) { int r, n, s = 0, t; MPI_Init(&c, &v);' \
+            '  MPI_Comm_rank(MPI_COMM_WORLD, &r); MPI_Comm_size(MPI_COMM_WORLD, &n);' \
+            '  t = r + 1; MPI_Allreduce(&t, &s, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);' \
+            '  printf("rank %d of %d: sum %d\n", r, n, s); MPI_Finalize(); return s != n * (n + 1) / 2; }' > hello.c
+          # shellcheck disable=SC2046
+          cc hello.c $(pkg-config --cflags --libs ompi-c) -o hello
+          mpiexec -n 2 ./hello
+
+  macos:
+    runs-on: macos-26
+    steps:
+      - name: Python
+        run: |
+          pkg-config --modversion python3-embed
+          pkg-config --cflags --libs python3-embed
+          pkg-config --variable=pcfiledir python3-embed
+      - name: Open MPI
+        run: |
+          brew install open-mpi
+          pkg-config --modversion ompi-c
+          pkg-config --cflags --libs ompi-c
+          mpiexec --version
+          printf '%s\n' '#include <mpi.h>' '#include <stdio.h>' \
+            'int main(int c, char **v) { int r, n, s = 0, t; MPI_Init(&c, &v);' \
+            '  MPI_Comm_rank(MPI_COMM_WORLD, &r); MPI_Comm_size(MPI_COMM_WORLD, &n);' \
+            '  t = r + 1; MPI_Allreduce(&t, &s, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);' \
+            '  printf("rank %d of %d: sum %d\n", r, n, s); MPI_Finalize(); return s != n * (n + 1) / 2; }' > hello.c
+          # shellcheck disable=SC2046
+          cc hello.c $(pkg-config --cflags --libs ompi-c) -o hello
+          mpiexec -n 2 ./hello
+
+  windows:
+    runs-on: windows-2025-vs2026
+    steps:
+      - name: Python
+        shell: pwsh
+        run: |
+          $prefix = python -c "import sys; print(sys.base_prefix)"
+          python -c "import sys, sysconfig; print(sys.version); print(sysconfig.get_paths()['include'])"
+          "base_prefix: $prefix"
+          Get-ChildItem "$prefix\include\Python.h", "$prefix\include\patchlevel.h", "$prefix\libs" | Format-Table FullName
+          Get-ChildItem "$prefix\python3*.dll" | Format-Table FullName
+          (Get-Command python).Source
+      - name: MS-MPI
+        shell: pwsh
+        run: |
+          Get-ChildItem 'C:\Program Files\Microsoft MPI', 'C:\Program Files (x86)\Microsoft SDKs\MPI' -ErrorAction SilentlyContinue | Format-Table FullName
+          $base = 'https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1'
+          Invoke-WebRequest "$base/msmpisetup.exe" -OutFile msmpisetup.exe
+          Invoke-WebRequest "$base/msmpisdk.msi" -OutFile msmpisdk.msi
+          Get-FileHash msmpisetup.exe, msmpisdk.msi -Algorithm SHA256 | Format-Table Hash, Path
+          Start-Process -FilePath .\msmpisetup.exe -ArgumentList '-unattend' -Wait
+          Start-Process -FilePath msiexec.exe -ArgumentList '/quiet', '/i', 'msmpisdk.msi' -Wait
+          Get-ChildItem -Recurse 'C:\Program Files (x86)\Microsoft SDKs\MPI' | Format-Table FullName
+          Get-ChildItem 'C:\Program Files\Microsoft MPI\Bin' | Format-Table FullName
+          [Environment]::GetEnvironmentVariable('MSMPI_INC', 'Machine')
+          [Environment]::GetEnvironmentVariable('MSMPI_LIB64', 'Machine')
+          [Environment]::GetEnvironmentVariable('MSMPI_BIN', 'Machine')
+          Get-ChildItem C:\Windows\System32\msmpi.dll | Format-Table FullName, Length
+          Set-Content hello.c -Value @(
+            '#include <mpi.h>', '#include <stdio.h>',
+            'int main(int c, char **v) { int r, n, s = 0, t, major, minor; MPI_Init(&c, &v);',
+            '  MPI_Comm_rank(MPI_COMM_WORLD, &r); MPI_Comm_size(MPI_COMM_WORLD, &n); MPI_Get_version(&major, &minor);',
+            '  t = r + 1; MPI_Allreduce(&t, &s, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);',
+            '  printf("rank %d of %d (MPI %d.%d): sum %d\n", r, n, major, minor, s); MPI_Finalize(); return s != n * (n + 1) / 2; }')
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath
+          $sdk = 'C:\Program Files (x86)\Microsoft SDKs\MPI'
+          cmd /c "`"$vs\VC\Auxiliary\Build\vcvars64.bat`" && cl /nologo hello.c /I`"$sdk\Include`" `"$sdk\Lib\x64\msmpi.lib`""
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+          & 'C:\Program Files\Microsoft MPI\Bin\mpiexec.exe' -n 2 .\hello.exe
+          if ($LASTEXITCODE -ne 0) { exit 1 }
