@@ -1,0 +1,13 @@
+[package]
+name = "server"
+version = "0.0.0"
+cxx-standard = "c++17"
+
+# CI's Linux check is where a server runs (docs/maintaining.md, "CI").
+[target.'cfg(os = "linux")'.dependencies]
+"cabin-ports/boost-redis" = "=1.92.0"
+
+[target.server]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/boost-redis"]
