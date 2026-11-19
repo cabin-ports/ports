@@ -38,11 +38,6 @@ A reinstated version that the receipts log already records as uploaded is not up
 `new` mode; publishing it is the operator's `all` dispatch
 ([Eligibility and holds](publishing.md#eligibility-and-holds)).
 
-## boost-log 1.92.0
-
-Removed on 2026-11-12 because it requires boost-asio and boost-interprocess.  Both have returned;
-it returns as [Reinstating a version](#reinstating-a-version) step 2 describes.
-
 ## Held on 2026-11-12
 
 The versions below were in the catalog without a `license` declaration.  Re-examine them in the
