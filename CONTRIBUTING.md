@@ -158,6 +158,17 @@ requires it build only
   upstream behavior.
   Upstream bugs and quality concerns are not a reason to patch; document a limitation instead
   when it matters to consumers.
+- **Keep the recipe minimal.**  A port is a thin layer over upstream's archive: each adaptation
+  takes the first of a manifest setting, a copy step ([Upstream sources](#upstream-sources)), a
+  patch, or a [build script](#build-scripts) that can express it, except where a script may run
+  upstream's own build.  A patch changes only what the build needs, besides the notices
+  [Licenses and notices](#licenses-and-notices) requires.  To fill in a template, a copy step
+  places it and the patch edits only what the fill-in changes, unless a patch that adds the
+  whole file is smaller.  A patch never carries an unchanged copy of upstream's files or of
+  another project's code.  A consumer test carries only the inputs it needs that the package
+  does not include, with their origin and notices.  Every patch has a purpose its `cabin.toml`
+  states, and a published version's manifest and patches stay as they are for a cosmetic change
+  such as rewording a comment.
 - Verify dependencies, public include paths, link requirements, platform assumptions, upstream
   checksums, and license obligations ([Licenses and notices](#licenses-and-notices)).
 

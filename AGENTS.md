@@ -28,6 +28,10 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   omit required sources, disable features, introduce stubs, or weaken
   tests merely to make a port pass CI. Explicitly document limitations;
   block a port when Cabin cannot represent its required build model.
+- Keep each port a minimal recipe: a manifest setting before a copy
+  step, a copy step before a patch, a patch before a build script, and
+  no copy of upstream or third-party code in a patch; CONTRIBUTING.md
+  ("Upstream fidelity") gives the rule.
 - Verify dependencies, public include paths, link requirements,
   platform assumptions, upstream checksums, and license obligations.
   Do not assume that a successful default-feature probe validates
@@ -68,9 +72,9 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   security, or publication safety. Avoid duplicating existing documentation.
 - Do not impose comment-count limits or remove useful context merely
   to reduce line counts. Preserve legally required notices.
-- A comment-only change to a published port changes its package bytes.
-  Treat such cleanup as a packaging change requiring appropriate review
-  and revision handling.
+- A comment-only change to a published port changes its package bytes,
+  so do not make one as cleanup alone; a comment that a correction
+  needs ships with it as a packaging revision.
 
 ## Cabin revision
 
