@@ -38,23 +38,15 @@ A reinstated version that the receipts log already records as uploaded is not up
 `new` mode; publishing it is the operator's `all` dispatch
 ([Eligibility and holds](publishing.md#eligibility-and-holds)).
 
+## boost-log 1.92.0
+
+Removed on 2026-11-12 because it requires boost-asio and boost-interprocess.  Both have returned;
+it returns as [Reinstating a version](#reinstating-a-version) step 2 describes.
+
 ## Held on 2026-11-12
 
 The versions below were in the catalog without a `license` declaration.  Re-examine them in the
 order listed, which is an order of investigation, not of risk.
-
-### boost-interprocess 1.92.0
-
-- **Code.**  `boost/interprocess/sync/detail/condition_algorithm_8a.hpp`, from line 36: about
-  120 comment lines of pseudo-code for Alexander Terekhov's condition-variable "Algorithm 8a".
-  The file says it comes from the pthreads-win32 discussion, and the same text documents
-  pthreads-win32's `pthread_cond_wait.c` (LGPL).  The C++ implementation is Ion Gaztañaga's.
-- **Question.**  Whether the pseudo-code is protected expression that needs further licensing
-  compliance, or only describes an algorithm.
-- **Recipe distribution.**  Settles the hold: the pseudo-code is comments, which no build
-  compiles.
-- **Removed with it.**  boost-flyweight 1.92.0 and boost-log 1.92.0, which require it.  boost-log
-  also requires boost-asio and returns only when both do.
 
 ### qhull 8.0.2
 
