@@ -115,6 +115,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends redis-server
 
+      # TEMPORARY probe, removed before merge.
+      - name: Probe MySQL and Redis
+        if: runner.os == 'Linux'
+        continue-on-error: true
+        run: scripts/actions/tmp-db-probe.sh
+
       # A probe finds OpenSSL's DLLs through PATH: these, before any
       # other program's copy.
       - name: Put the image's OpenSSL first on PATH
