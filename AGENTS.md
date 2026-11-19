@@ -36,21 +36,21 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   platform assumptions, upstream checksums, and license obligations.
   Do not assume that a successful default-feature probe validates
   non-default features or unsupported configurations.
-- Publish by default.  Resolve license, notice, and attribution gaps
-  through packaging, and never hold a version for an ordinary upstream
-  bug or an open question; CONTRIBUTING.md ("Upstream fidelity",
-  "Licenses and notices", and "Pull requests") gives the rules and the
-  grounds for a `publish-holds.txt` line.
+- Publish by default.  Never hold a version for an ordinary upstream
+  bug, a gap in upstream's notices, or an open question;
+  CONTRIBUTING.md ("Upstream fidelity", "Licenses and notices", and
+  "Pull requests") gives the rules and the grounds for a
+  `publish-holds.txt` line.
 - Ports are distributed as recipes: the manifest and its declared
   patches, from which the user's Cabin rebuilds the package out of the
-  pinned upstream archive.  Carry the license information the user's
-  tree needs and upstream's files lack, by the simplest means: no
-  license patch when upstream's files already carry it, otherwise one
-  patch that adds `THIRD_PARTY_NOTICES`.  Never add upstream's own
-  license text where it names no holder, one license file per
-  component, Creative Commons legal code, or `license` terms for code
-  the package does not contain; `license` states the library's terms,
-  never the recipe's own files.  Follow up the
+  pinned upstream archive.  Keep upstream's license files, notices,
+  and credits intact, and add no license text, notices file, or
+  attribution for upstream's code beyond what the recipe's own
+  contents require: a port does not repair upstream's notices, and
+  whoever redistributes sources or builds meets their licenses.
+  `license` states the terms of the package the user's Cabin rebuilds,
+  never the recipe's own files, and has no term for code the package
+  does not contain.  Follow up the
   third-party code upstream itself identifies; do not research the
   provenance of short functions and common idioms that upstream does
   not identify as copied, and never treat a copy as permitted because
@@ -63,8 +63,9 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   the code, configuration, or tests already make clear.
 - In `cabin.toml`, document non-obvious packaging decisions, patches,
   compatibility limitations, platform workarounds, and the reason for a
-  non-obvious `license` term. Third-party notices belong in the
-  package's notice files, not in comments. Avoid upstream API
+  non-obvious `license` term. Do not move upstream's notices into
+  comments, except one the recipe itself needs (CONTRIBUTING.md,
+  "Licenses and notices"). Avoid upstream API
   documentation, exhaustive bug or feature inventories, and lengthy
   source citations.
 - Apply the same principles to Rust, tests, scripts, and workflows.
