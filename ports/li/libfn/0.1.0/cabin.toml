@@ -14,9 +14,15 @@ include = ["LICENSE.md", "include"]
 # over include/.  C++20 is upstream's floor; it gives cl /std:c++20, which
 # implies the /permissive- upstream requires.  Upstream's opt-in fn_cxx26
 # entry (LIBFN_CXX26 with C++26 std::type_order) is not provided.
+#
+# Upstream's _HAS_CXX23 for cl is left out.  The MSVC STL reserves that macro,
+# and since Visual Studio 2026 18.12 its <charconv> does not compile with it
+# under /std:c++20 (upstream issue 473).  Upstream sets it to drop the global
+# `unexpected` that <eh.h> declares.  With cl, spell fn::unexpected and
+# pfn::unexpected qualified: a using-declaration for either at global scope,
+# or the unqualified name after a using-directive, collides with that
+# declaration.
 [target.libfn]
 type = "header-only"
 include-dirs = ["include"]
 interface-cxx-standard = "c++20"
-# Upstream sets it for cl; Cabin cannot gate it, and only the MSVC STL (clang-cl too) reads it.
-interface-defines = ["_HAS_CXX23"]
