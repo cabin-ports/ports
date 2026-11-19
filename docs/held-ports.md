@@ -56,26 +56,6 @@ order listed, which is an order of investigation, not of risk.
 - **Removed with it.**  boost-flyweight 1.92.0 and boost-log 1.92.0, which require it.  boost-log
   also requires boost-asio and returns only when both do.
 
-### asio 1.38.2 and boost-asio 1.92.0
-
-- **Code.**  `asio/detail/impl/socket_ops.ipp`, about 650 lines from line 3052, and the same code
-  in `boost/asio/detail/impl/socket_ops.ipp`: the `getaddrinfo` emulation, which appears to be a
-  C++ port of `libgai` from W. Richard Stevens's "UNIX Network Programming", volume 1, second
-  edition.  Functions, branch structure, and the order of literals correspond.  The book's source
-  distribution carries a warranty disclaimer and no grant to redistribute.  The code is compiled
-  only where the platform lacks `getaddrinfo`, but it was part of the published sources.
-- **Question.**  Whether protected implementation code was copied, or only unprotected algorithms
-  and ideas were used.
-- **Recipe distribution.**  Settles the hold: the emulation is a fallback for platforms without
-  `getaddrinfo`, compiled only where `ASIO_HAS_GETADDRINFO` (`BOOST_ASIO_HAS_GETADDRINFO`) is
-  undefined, and `asio/detail/config.hpp` defines it on Windows from `_WIN32_WINNT` 0x0501 (asio
-  assumes 0x0601 when no Windows version is set), on macOS, and on other POSIX systems.  Only a
-  consumer that defines `ASIO_DISABLE_GETADDRINFO` (`BOOST_ASIO_DISABLE_GETADDRINFO`), or targets
-  a Windows older than XP or a macOS older than 10.5, compiles it.
-- **Removed with boost-asio.**  boost-beast, boost-cobalt, boost-log, boost-mqtt5, and
-  boost-process 1.92.0, which require it.  boost-log also requires boost-interprocess, and
-  boost-mqtt5 requires boost-beast.
-
 ### qhull 8.0.2
 
 - **Code.**  `src/libqhullcpp/QhullIterator.h`: line 27 says "Derived from
