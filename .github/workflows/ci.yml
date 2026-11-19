@@ -105,6 +105,13 @@ jobs:
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1.13.0
 
+      # A probe finds OpenSSL's DLLs through PATH: these, before any
+      # other program's copy.
+      - name: Put the image's OpenSSL first on PATH
+        if: runner.os == 'Windows'
+        shell: bash
+        run: printf '%s\n' 'C:\Program Files\OpenSSL\bin' >> "$GITHUB_PATH"
+
       - name: Test the publisher
         run: cargo test --locked
         env:
@@ -130,14 +137,22 @@ jobs:
           TEMP: ${{ runner.temp }}
         run: cargo run --locked -- --dry-run --cabin "${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}"
 
+  # Which of the image's OpenSSL installations a build script links.
+  # On Linux pkg-config finds the distribution's.
   check-macos:
     needs: pin
     runs-on: macos-26
+    env:
+      CABIN_SDK_OPENSSL_DIR: /opt/homebrew/opt/openssl@3
     steps: *check
 
+  # Cabin opens a directory under Program Files to a build script only
+  # because the runner is an administrator.
   check-windows:
     needs: pin
     runs-on: windows-2025-vs2026
+    env:
+      CABIN_SDK_OPENSSL_DIR: C:\Program Files\OpenSSL
     steps: *check
 
   # The required check: green only when every job it needs succeeded.

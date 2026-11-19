@@ -71,6 +71,15 @@ moves to a new release by itself, with a toolchain no port was checked with, and
 change that dry-runs all ports then fails on the ports that do not build with it.  Moving to a
 newer image is a pull request of its own: it dry-runs every port.
 
+`check-macos` and `check-windows` set `CABIN_SDK_OPENSSL_DIR`, the OpenSSL installation a port's
+[build script](https://cabinpkg.com/docs/build-scripts/#a-package-for-a-system-library) links:
+Homebrew's `openssl@3` of the two the macOS image holds, and the image's
+`C:\Program Files\OpenSSL` on Windows, where an MSVC build finds OpenSSL no other way.  Cabin opens
+that directory to a script only because the runner is an administrator
+([Confinement](https://cabinpkg.com/docs/build-scripts/#confinement)); on another machine, copy
+the SDK out of `Program Files`.  The Windows job also puts that installation's `bin` first on
+`PATH`, where a probe finds the DLLs it runs with.  On Linux pkg-config finds the distribution's.
+
 ### Selective dry-runs
 
 `--dry-run --changed-since <rev>` preflights only what the change since `<rev>` needs.  It compares
