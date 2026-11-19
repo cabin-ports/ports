@@ -121,16 +121,6 @@ jobs:
           GROUP_HEAD: ${{ github.event.merge_group.head_sha }}
         run: scripts/actions/dry-run-base.sh
 
-      # TEMPORARY, removed before merge.
-      - name: Generate beside a decoy flatc
-        continue-on-error: true
-        shell: pwsh
-        env:
-          CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache
-          TMP: ${{ runner.temp }}
-          TEMP: ${{ runner.temp }}
-        run: scripts/actions/tmp-flatc-decoy.ps1 "${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}"
-
       - name: Run the publisher dry-run
         env:
           CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache
