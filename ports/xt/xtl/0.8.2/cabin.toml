@@ -5,8 +5,6 @@ url = "https://github.com/xtensor-stack/xtl/archive/refs/tags/0.8.2.tar.gz"
 checksum = "sha256:8fb38d6a5856aab5740d2ccb3d791d289f648d4cc506b94a1338fe5fce100c11"
 format = "tar.gz"
 strip-prefix = "xtl-0.8.2"
-# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/xtl"
@@ -35,9 +33,7 @@ license = "BSD-3-Clause AND BSL-1.0 AND MIT AND CC-BY-SA-3.0"
 # from SMHasher, credited at :46.
 include = [
   "LICENSE",
-  "THIRD_PARTY_NOTICES",
   "include",
-  "patches",
 ]
 
 [dependencies]

@@ -3,15 +3,11 @@ url = "https://github.com/niXman/yas/archive/refs/tags/7.1.0.tar.gz"
 checksum = "sha256:0317d4ec6fa507fe620d6281380822b6f0436d409a4e15be6add2e2e773b9d1f"
 format = "tar.gz"
 strip-prefix = "yas-7.1.0"
-# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
 # include/yas/detail/io/binary_streams.hpp:94 calls std::abs without including
 # <cstdlib>, which fails with "no member named 'abs' in namespace 'std'" on
 # Clang 23's libc++ at every standard and on Apple Clang's at C++23; patch 0002
 # includes it there.
-patches = [
-  "patches/0001-add-third-party-notices.patch",
-  "patches/0002-include-cstdlib.patch",
-]
+patches = ["patches/0002-include-cstdlib.patch"]
 
 # Upstream's, vcpkg's and ConanCenter's name.
 [package]
@@ -24,7 +20,7 @@ version = "7.1.0"
 # Avanesov Tigran for its UTF-8 conversion; their copyright significance is
 # uncertain.
 license = "BSL-1.0 AND MIT AND BSD-3-Clause"
-include = ["README.md", "THIRD_PARTY_NOTICES", "include", "patches"]
+include = ["README.md", "include", "patches"]
 
 # Consumers include <yas/serialize.hpp> and <yas/std_types.hpp>.  The Boost
 # and Abseil type support stays opt-in through YAS_SERIALIZE_BOOST_TYPES and

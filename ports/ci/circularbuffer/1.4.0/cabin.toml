@@ -3,8 +3,6 @@ url = "https://github.com/rlogiacco/CircularBuffer/archive/refs/tags/1.4.0.tar.g
 checksum = "sha256:e01a837d2fe46fea168e8d36e1a4225d9414a855484d55b5a240f239ab53fc0a"
 format = "tar.gz"
 strip-prefix = "CircularBuffer-1.4.0"
-# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/circularbuffer"
@@ -18,8 +16,6 @@ include = [
   "CircularBuffer.tpp",
   "LICENSE",
   "README.md",
-  "THIRD_PARTY_NOTICES",
-  "patches",
 ]
 
 # The headers sit at the archive root and include one another with angle

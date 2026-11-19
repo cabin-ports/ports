@@ -3,8 +3,6 @@ url = "https://github.com/RandyGaul/cute_headers/archive/476d688d8cdcaf1c3890a10
 checksum = "sha256:4b46039a56d24a622465458050822546a712653161c67d25949ad330d97deddd"
 format = "tar.gz"
 strip-prefix = "cute_headers-476d688d8cdcaf1c3890a106a6421849a29ed988"
-# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/cute_headers"
@@ -20,7 +18,6 @@ version = "2026.11.3"
 license = "Zlib AND ISC AND MIT"
 include = [
   "LICENSE",
-  "THIRD_PARTY_NOTICES",
   "cute_aseprite.h",
   "cute_c2.h",
   "cute_net.h",
@@ -30,7 +27,6 @@ include = [
   "cute_sync.h",
   "cute_tiled.h",
   "cute_tls.h",
-  "patches",
 ]
 
 # The nine headers at the archive root, as upstream and vcpkg ship them.

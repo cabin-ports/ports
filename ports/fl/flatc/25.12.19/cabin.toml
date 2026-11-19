@@ -5,19 +5,15 @@ url = "https://github.com/google/flatbuffers/archive/refs/tags/v25.12.19-2026-02
 checksum = "sha256:ccbce58684691de1e7d51f5e87786266b37d06ab66e9dfe2d0ec106fe50aace0"
 format = "tar.gz"
 strip-prefix = "flatbuffers-25.12.19-2026-02-06-03fffb2"
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/flatc"
 version = "25.12.19"
-# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
 license = "Apache-2.0"
 include = [
   "LICENSE",
-  "THIRD_PARTY_NOTICES",
   "grpc/src/compiler",
   "include/codegen",
-  "patches",
   "src/annotated_binary_text_gen.cpp",
   "src/annotated_binary_text_gen.h",
   "src/bfbs_gen.h",

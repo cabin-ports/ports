@@ -3,8 +3,6 @@ url = "https://github.com/abellgithub/delaunator-cpp/archive/refs/tags/v1.0.0.ta
 checksum = "sha256:27fdcbd92b3d0147a3952ee61fb34e86cfc3e87b7fb05afccca045582d0a83f4"
 format = "tar.gz"
 strip-prefix = "delaunator-cpp-1.0.0"
-# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/delaunator-cpp"
@@ -15,9 +13,7 @@ include = [
   "LICENSE",
   "README.md",
   "THIRD-PARTY-NOTICES",
-  "THIRD_PARTY_NOTICES",
   "include",
-  "patches",
 ]
 
 # Consumers include <delaunator.hpp>.

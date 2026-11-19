@@ -10,35 +10,7 @@ strip-prefix = "rapidjson-1.1.0"
 # and which GCC 16 and LLVM clang 23 reject even unused, so nothing that
 # includes document.h compiled there.  GenericStringRef stays
 # non-assignable, its members being const.
-# Patches 0002-0008 add the terms of code the headers take from elsewhere,
-# as new files:
-# - 0002, LICENSE.utf8-dfa: the license of Bjoern Hoehrmann's UTF-8
-#   decoder, verbatim from the "License" section of
-#   http://bjoern.hoehrmann.de/utf-8/decoder/dfa/, one paragraph per line.
-# - 0003, LICENSE.Boost: the Boost Software License 1.0, verbatim from
-#   https://www.boost.org/LICENSE_1_0.txt.
-# - 0004, NOTICE.Boost: the copyright notices, verbatim as of Boost 1.42.0
-#   (the version include/rapidjson/rapidjson.h:207 cites), of the Boost
-#   files that the headers follow.
-# - 0005, LICENSE.grisu: the LICENSE of Florian Loitsch's Grisu reference
-#   code as github.com/miloyip/dtoa-benchmark carries it (src/grisu, at
-#   bf1fb58), the same notice the code's own files open with.
-# - 0006, LICENSE.double-conversion: google/double-conversion v1.1.5's
-#   LICENSE.  0008, NOTICE.double-conversion: the copyright notices that
-#   the files the headers follow open with.
-# - 0007, LICENSE.nfa: the copyright line (:11) and permission notice
-#   (:398-418) of Russ Cox's https://swtch.com/~rsc/regexp/nfa.c.txt,
-#   without comment markers.
-patches = [
-  "patches/0001-remove-non-compiling-assignment-operator.patch",
-  "patches/0002-add-mit-license-for-utf-8-decoder-code.patch",
-  "patches/0003-add-boost-software-license.patch",
-  "patches/0004-add-copyright-notices-for-boost-code.patch",
-  "patches/0005-add-mit-license-for-grisu-code.patch",
-  "patches/0006-add-bsd-license-for-double-conversion-code.patch",
-  "patches/0007-add-mit-license-for-thompson-nfa-code.patch",
-  "patches/0008-add-copyright-notices-for-double-conversion-code.patch",
-]
+patches = ["patches/0001-remove-non-compiling-assignment-operator.patch"]
 
 [package]
 name = "cabin-ports/rapidjson"
@@ -51,12 +23,12 @@ license = "MIT AND BSD-3-Clause AND BSL-1.0 AND HPND-sell-variant"
 # - rapidjson/encodings.h:145-220 (UTF8::Decode, Validate and GetRange):
 #   Bjoern Hoehrmann's UTF-8 decoder, its character-class table (classes
 #   1, 7 and 9 renumbered) and its code point accumulation, Copyright (c)
-#   2008-2009 Bjoern Hoehrmann, MIT (LICENSE.utf8-dfa).
+#   2008-2009 Bjoern Hoehrmann, MIT.
 # - rapidjson/internal/diyfp.h:43-162 (DiyFp, but for ToDouble, :139-148,
 #   and kDpDenormalExponent, :155) and rapidjson/internal/dtoa.h
 #   (GrisuRound, DigitGen, Grisu2, WriteExponent and Prettify, :35-214):
 #   Florian Loitsch's Grisu2 reference code, Copyright (c) 2009 Florian
-#   Loitsch, MIT (LICENSE.grisu); GrisuRound and DiyFp's multiplication
+#   Loitsch, MIT; GrisuRound and DiyFp's multiplication
 #   keep its comments.
 # - rapidjson/internal/diyfp.h:139-148 and :155 (DiyFp::ToDouble and
 #   kDpDenormalExponent, after Double::DiyFpToUint64 and kDenormalExponent),
@@ -69,30 +41,22 @@ license = "MIT AND BSD-3-Clause AND BSL-1.0 AND HPND-sell-variant"
 #   steps) and rapidjson/internal/ieee754.h:51-58
 #   (EffectiveSignificandSize): google/double-conversion's
 #   cached-powers.cc, strtod.cc, bignum.cc and ieee.h, Copyright 2006-2012
-#   the V8 project authors, BSD-3-Clause (LICENSE.double-conversion, and
-#   the files' notices in NOTICE.double-conversion).
+#   the V8 project authors, BSD-3-Clause.
 # - rapidjson/internal/regex.h:146-158, :340-427 and :606-659 (State and
 #   the fragments, Append, Patch, the Thompson construction of Eval, and
 #   the simulation, SearchWithAnchoring and AddState): Russ Cox's nfa.c,
-#   Copyright (c) 2007 Russ Cox, MIT (LICENSE.nfa).
+#   Copyright (c) 2007 Russ Cox, MIT.
 # - rapidjson/rapidjson.h:219-238 (the endianness detection), :414-416 and
 #   :437-440 (RAPIDJSON_STATIC_ASSERT) and :419-421 (RAPIDJSON_JOIN), and
 #   rapidjson/internal/meta.h:104-126 (the pre-C++11 IsBaseOf): Boost's
 #   detail/endian.hpp, static_assert.hpp, config/suffix.hpp and
-#   type_traits/is_base_and_derived.hpp, Boost Software License 1.0
-#   (LICENSE.Boost), with their notices, Silicon Graphics' 1997
-#   permission notice in endian.hpp included, in NOTICE.Boost.
+#   type_traits/is_base_and_derived.hpp, Boost Software License 1.0, and
+#   Silicon Graphics' 1997 permission notice in endian.hpp
+#   (HPND-sell-variant).
 # The other credits name formulas, not code: rapidjson.h:481-483
 # ("adopted from Boost") is BOOST_VERSION's numbering, schema.h:238 the
 # FNV-1a hash, and internal/strtod.h:113 the decimal fast path.
 include = [
-  "LICENSE.Boost",
-  "LICENSE.double-conversion",
-  "LICENSE.grisu",
-  "LICENSE.nfa",
-  "LICENSE.utf8-dfa",
-  "NOTICE.Boost",
-  "NOTICE.double-conversion",
   "include",
   "license.txt",
   "patches",

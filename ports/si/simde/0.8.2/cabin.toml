@@ -3,11 +3,6 @@ url = "https://github.com/simd-everywhere/simde/archive/refs/tags/v0.8.2.tar.gz"
 checksum = "sha256:ed2a3268658f2f2a9b5367628a85ccd4cf9516460ed8604eed369653d49b25fb"
 format = "tar.gz"
 strip-prefix = "simde-0.8.2"
-# Patch 0001 adds LICENSE.dhuertas-aes, the MIT terms and copyright line of
-# Dani Huertas's AES code (github.com/dhuertas/AES, LICENSE at ebfea72),
-# which x86/aes.h:28-290 and simde-aes.h:38-261 adapt; simde ships only
-# its permission text.
-patches = ["patches/0001-add-mit-license-for-dhuertas-aes-code.patch"]
 
 # 0.8.4-rc3 is a pre-release.
 [package]
@@ -31,7 +26,9 @@ license = "MIT AND CC0-1.0"
 # and :443, shr_n.h:357 and :501, cle.h:350 and rbit.h:29-31, after blog
 # posts and a gist; and the reciprocal square-root seeds from two papers at
 # arm/neon/rsqrte.h:66, :110, :207, :264, :373 and :430 and x86/sse.h:3769.
-include = ["COPYING", "LICENSE.dhuertas-aes", "simde", "patches"]
+# x86/aes.h:28-290 and simde-aes.h:38-261 adapt Dani Huertas's MIT-licensed AES
+# code.
+include = ["COPYING", "simde"]
 
 # All of simde/, the headers meson.build:476-552 installs; consumers write
 # <simde/x86/sse2.h>.  Native paths follow the consumer's target, its -m,

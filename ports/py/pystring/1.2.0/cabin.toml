@@ -3,8 +3,6 @@ url = "https://github.com/imageworks/pystring/archive/refs/tags/v1.2.0.tar.gz"
 checksum = "sha256:020a603a757ba1e429f4b1ea6feb3afbe0fb34bcafa355032e1f1b8a0019d198"
 format = "tar.gz"
 strip-prefix = "pystring-1.2.0"
-# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 # The two headers upstream installs, in the pystring/ directory it installs
 # them in (CMakeLists.txt, meson.build).  Upstream's targets put the source
@@ -27,9 +25,7 @@ version = "1.2.0"
 license = "BSD-3-Clause AND Python-2.0.1"
 include = [
   "LICENSE",
-  "THIRD_PARTY_NOTICES",
   "include",
-  "patches",
   "pystring.cpp",
   "pystring.h",
   "pystring_impl.h",

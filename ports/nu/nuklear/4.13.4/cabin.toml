@@ -3,8 +3,6 @@ url = "https://github.com/Immediate-Mode-UI/Nuklear/archive/refs/tags/v4.13.4.ta
 checksum = "sha256:1ce8e78346017518810e3307d85e0b8f701e5ee2f5c34ab9203d99f2ab73ff77"
 format = "tar.gz"
 strip-prefix = "Nuklear-4.13.4"
-# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/nuklear"
@@ -17,7 +15,7 @@ version = "4.13.4"
 # nuklear.h:6529-6530 credits Wikipedia's fast inverse square root article for
 # nk_inv_sqrt; its copyright significance is uncertain.
 license = "MIT"
-include = ["LICENSE", "THIRD_PARTY_NOTICES", "nuklear.h", "patches"]
+include = ["LICENSE", "nuklear.h"]
 
 # The single-header library; consumers write `#include <nuklear.h>` and
 # define NK_IMPLEMENTATION in one C or C++ file (README.md:37-42), with the

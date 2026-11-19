@@ -7,12 +7,7 @@ strip-prefix = "libcbor-0.14.0"
 #   4.4.5 writes them for the default static library, with the values it
 #   writes for MSVC (CBOR_RESTRICT_SPECIFIER) and for Windows
 #   (CBOR_DEPRECATED) left to the preprocessor.
-# - 0002 and 0003 add the terms of code taken from elsewhere; see [package].
-patches = [
-  "patches/0001-add-the-generated-configuration-and-export-headers.patch",
-  "patches/0002-add-mit-license-for-utf-8-decoder-code.patch",
-  "patches/0003-add-bsd-license-for-rfc-7049-code.patch",
-]
+patches = ["patches/0001-add-the-generated-configuration-and-export-headers.patch"]
 
 [package]
 name = "cabin-ports/libcbor"
@@ -21,15 +16,14 @@ license = "MIT AND BSD-3-Clause"
 # MIT (LICENSE.md).  Code from elsewhere:
 # - src/cbor/internal/unicode.c:11-95: Bjoern Hoehrmann's UTF-8 decoder, its
 #   table, and a code point count after his example, Copyright (c) 2008-2009
-#   Bjoern Hoehrmann, MIT (LICENSE.utf8-dfa).
+#   Bjoern Hoehrmann, MIT.
 # - src/cbor/internal/loaders.c:52-78: adapted from the half-precision
 #   decoder of RFC 7049 Appendix D, Copyright (c) 2013 IETF Trust and the
-#   persons identified as authors of the code, Simplified BSD License
-#   (LICENSE.RFC7049), which the RFC requires its code components to carry.
+#   persons identified as authors of the code, Simplified BSD License.
 # - src/cbor/common.h:51-60 and :71-73: debug-print macros after Jonathan
 #   Leffler's Stack Overflow answer 1644898, CC BY-SA; no terms ship, a few
 #   lines of a standard do-while idiom being too slight for copyright.
-include = ["LICENSE.RFC7049", "LICENSE.md", "LICENSE.utf8-dfa", "patches", "src"]
+include = ["LICENSE.md", "patches", "src"]
 # Upstream builds as C23 where the compiler accepts C's [[nodiscard]], else
 # as C99, or MSVC's default; C11 is the oldest Cabin can lower for MSVC.
 c-standard = "c11"

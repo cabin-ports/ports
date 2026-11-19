@@ -13,22 +13,7 @@ strip-prefix = "jansson-2.15.1"
 # MSVC do not define, so they count without atomics, as cl must.  A C and a
 # C++ compiler that target two Windows environments, such as MinGW-w64 GCC
 # and Clang targeting MSVC, disagree and are not supported.
-# Patch 0002 adds LICENSE.python for jsonp_dtostr (src/strconv.c:69-168),
-# adapted from format_float_short() in CPython's Python/pystrtod.c at
-# commit 2cf18a44303b6d84faa8ecffaecc427b53ae121e, Copyright (c) 2001-2024
-# Python Software Foundation: the PSF License Agreement, lines 73-118 of
-# that commit's LICENSE (sha256
-# 78b12c3a81360b357002334f0e70ea0e92eebf7a9b358805c03c48484945f3bb).
-# The summary of changes its clause 3 asks for: jsonp_dtostr keeps the
-# repr layout (an exponent when decpt <= -4 or > 16, otherwise ".0" after
-# an integer) and a precision mode, writes into the caller's buffer instead
-# of allocating, calls dtoa_r instead of _Py_dg_dtoa, drops the format
-# codes and the inf/nan, "+" sign and alternate-form options, and prints
-# the exponent with "%d".
-patches = [
-  "patches/0001-configure-jansson-config-h.patch",
-  "patches/0002-add-the-psf-license-for-the-adapted-cpython-code.patch",
-]
+patches = ["patches/0001-configure-jansson-config-h.patch"]
 
 [[package.upstream.copy]]
 from = "cmake/jansson_config.h.cmake"
@@ -46,7 +31,9 @@ version = "2.15.1"
 license = "MIT AND dtoa AND FSFULLRWD AND PSF-2.0"
 # LICENSE carries the MIT terms and, as its exception, the notice
 # src/dtoa.c is distributed under.
-include = ["LICENSE", "LICENSE.python", "include", "patches", "src"]
+# PSF-2.0: jsonp_dtostr (src/strconv.c:69-168), adapted from
+# format_float_short() in CPython's Python/pystrtod.c.
+include = ["LICENSE", "include", "patches", "src"]
 # Upstream sets no standard; the code is C99.  C11 is the oldest
 # standard Cabin can lower for MSVC.
 c-standard = "c11"

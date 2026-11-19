@@ -3,8 +3,6 @@ url = "https://github.com/ktprime/emhash/archive/refs/tags/v1.3.0.tar.gz"
 checksum = "sha256:94327989a23eb6027d81b267c607a0a5c62d47deb0db3eb22cbdc580a165ba74"
 format = "tar.gz"
 strip-prefix = "emhash-1.3.0"
-# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/emhash"
@@ -13,7 +11,7 @@ version = "1.3.0"
 # wyhash in emhash/config.hpp (config.hpp:128-129); it also covers
 # emhash/lru_size.hpp and lru_time.hpp, which are Unlicense OR MIT-0.
 license = "MIT AND BSL-1.0 AND Unlicense"
-include = ["LICENSE", "README.md", "THIRD_PARTY_NOTICES", "include", "patches"]
+include = ["LICENSE", "README.md", "include"]
 
 # Consumers write <emhash/hash_table8.hpp> (README.md:94) or
 # <emilib/emihmap1.hpp>; sse2neon.h stays at include/ because the emilib

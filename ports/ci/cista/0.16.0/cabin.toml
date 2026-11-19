@@ -3,8 +3,6 @@ url = "https://github.com/felixguendling/cista/archive/refs/tags/v0.16.tar.gz"
 checksum = "sha256:55832c0e723568bd3abdfd70e7ba4dca777dfaada63f4da74f325f868f95694e"
 format = "tar.gz"
 strip-prefix = "cista-0.16"
-# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 # Upstream's tag v0.16 is 0.16.0.
 [package]
@@ -19,7 +17,7 @@ license = "MIT AND Apache-2.0"
 # Not ported: tools/ (the XXH3 and wyhash backends that CISTA_HASH selects,
 # the to_tuple.h generator, the single-header uniter, doctest and debugger
 # printers), the tests, fuzzers and CMake files.
-include = ["LICENSE", "README.md", "THIRD_PARTY_NOTICES", "include", "patches"]
+include = ["LICENSE", "README.md", "include"]
 
 # No defines: FNV-1a is the headers' default hash, and CISTA_FMT's fmt
 # formatters stay off, as upstream's CI builds them although its CMake
