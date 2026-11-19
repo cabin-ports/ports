@@ -85,8 +85,9 @@ the distribution's Redis server, both on `127.0.0.1`, for probe packages that ta
 No other job has them, so such a probe package requires its port under `cfg(os = "linux")`.
 
 `check-linux` installs PoCL (`pocl-opencl-icd`), a CPU OpenCL implementation, where a probe
-package's kernel runs; the macOS and Windows images hold no OpenCL implementation a probe can
-use.
+package's kernel runs, and the distribution's ICD loader with its development files
+(`ocl-icd-opencl-dev`), which the probe links.  No other job has an OpenCL device: the macOS
+image's OpenCL framework lists none, and the Windows image registers no OpenCL implementation.
 
 ### Selective dry-runs
 
