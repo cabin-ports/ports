@@ -7,14 +7,15 @@ strip-prefix = "mimalloc-3.5.3"
 # std::get_new_handler() fallback that a static C++ runtime replaces.
 # Upstream hides it with -fvisibility=hidden, a raw flag Cabin drops;
 # without it an ELF executable exports the fallback to libstdc++, whose
-# operator new then stops calling the program's new_handler.  The first
+# operator new then stops calling the program's new_handler.  The
 # patch gives the fallback hidden visibility in the source instead.  As with
 # upstream's static library, the fallback still answers a program's own
 # std::get_new_handler() calls with NULL when the C++ runtime is shared.
-patches = [
-  "patches/0001-hide-the-weak-get-new-handler-fallback.patch",
-  "patches/0002-add-a-c++-translation-unit-for-msvc.patch",
-]
+patches = ["patches/0001-hide-the-weak-get-new-handler-fallback.patch"]
+
+[[package.upstream.copy]]
+from = "src/static.c"
+to = "src/static-cxx.cpp"
 
 [package]
 name = "cabin-ports/mimalloc"
@@ -35,10 +36,10 @@ interface-cxx-standard = "c++11"
 #
 # With MSVC, upstream compiles those sources as C++ (MI_USE_CXX), so that
 # atomic.h uses the C++ atomics rather than its deprecated MSVC C wrapper.
-# Cabin picks a source's language by its extension, so the second patch adds
-# src/static-cxx.cpp, which includes upstream's single-translation-unit
-# src/static.c, and the MSVC environment (every compiler on a Windows host
-# without --target; CMake does this for MSVC and clang-cl, not MinGW)
+# Cabin picks a source's language by its extension, so the copy step above
+# places upstream's single-translation-unit src/static.c as
+# src/static-cxx.cpp, and the MSVC environment (every compiler on a Windows
+# host without --target; CMake does this for MSVC and clang-cl, not MinGW)
 # compiles that instead of the C sources.
 #
 # Cabin's release profile defines NDEBUG, from which types.h derives the

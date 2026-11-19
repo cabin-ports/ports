@@ -3,7 +3,8 @@ url = "https://github.com/akheron/jansson/releases/download/v2.15.1/jansson-2.15
 checksum = "sha256:0c7114dc0b2d22a670724a1f95922029d7077c19dbf79a584cb8084d2f267f2f"
 format = "tar.gz"
 strip-prefix = "jansson-2.15.1"
-# Patch 0001 adds include/jansson_config.h, which CMake configures, as a
+# A copy step places cmake/jansson_config.h.cmake, which CMake configures,
+# as include/jansson_config.h, and patch 0001 fills it in as a
 # macOS configure writes it, with the two values that differ elsewhere left
 # to the preprocessor: JSON_INTEGER_FORMAT ("I64d" on Windows) and the
 # atomic and sync builtins (found with GCC and Clang, not cl).
@@ -25,9 +26,13 @@ strip-prefix = "jansson-2.15.1"
 # codes and the inf/nan, "+" sign and alternate-form options, and prints
 # the exponent with "%d".
 patches = [
-  "patches/0001-add-the-generated-jansson-config-h.patch",
+  "patches/0001-configure-jansson-config-h.patch",
   "patches/0002-add-the-psf-license-for-the-adapted-cpython-code.patch",
 ]
+
+[[package.upstream.copy]]
+from = "cmake/jansson_config.h.cmake"
+to = "include/jansson_config.h"
 
 # jansson.h beside jansson_config.h, as CMake's build copies it, so that
 # src/ and its private headers stay off consumers' include path.

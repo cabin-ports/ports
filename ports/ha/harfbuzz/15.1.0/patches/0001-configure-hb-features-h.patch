@@ -1,0 +1,123 @@
+--- a/src/hb-features.h
++++ b/src/hb-features.h
+@@ -41,105 +41,105 @@
+  *
+  * Defined if Harfbuzz has been built with cairo support.
+  */
+-#mesondefine HB_HAS_CAIRO
++#undef HB_HAS_CAIRO
+ 
+ /**
+  * HB_HAS_CORETEXT:
+  *
+  * Defined if Harfbuzz has been built with CoreText support.
+  */
+-#mesondefine HB_HAS_CORETEXT
++#undef HB_HAS_CORETEXT
+ 
+ /**
+  * HB_HAS_DIRECTWRITE:
+  *
+  * Defined if Harfbuzz has been built with DirectWrite support.
+  */
+-#mesondefine HB_HAS_DIRECTWRITE
++#undef HB_HAS_DIRECTWRITE
+ 
+ /**
+  * HB_HAS_FREETYPE:
+  *
+  * Defined if Harfbuzz has been built with Freetype support.
+  */
+-#mesondefine HB_HAS_FREETYPE
++#define HB_HAS_FREETYPE 1
+ 
+ /**
+  * HB_HAS_GDI:
+  *
+  * Defined if Harfbuzz has been built with GDI support.
+  */
+-#mesondefine HB_HAS_GDI
++#undef HB_HAS_GDI
+ 
+ /**
+  * HB_HAS_GLIB:
+  *
+  * Defined if Harfbuzz has been built with GLib support.
+  */
+-#mesondefine HB_HAS_GLIB
++#undef HB_HAS_GLIB
+ 
+ /**
+  * HB_HAS_GOBJECT:
+  *
+  * Defined if Harfbuzz has been built with GObject support.
+  */
+-#mesondefine HB_HAS_GOBJECT
++#undef HB_HAS_GOBJECT
+ 
+ /**
+  * HB_HAS_GRAPHITE:
+  *
+  * Defined if Harfbuzz has been built with Graphite support.
+  */
+-#mesondefine HB_HAS_GRAPHITE
++#undef HB_HAS_GRAPHITE
+ 
+ /**
+  * HB_HAS_GPU:
+  *
+  * Defined if Harfbuzz has been built with the GPU library.
+  */
+-#mesondefine HB_HAS_GPU
++#undef HB_HAS_GPU
+ 
+ /**
+  * HB_HAS_ICU:
+  *
+  * Defined if Harfbuzz has been built with ICU support.
+  */
+-#mesondefine HB_HAS_ICU
++#undef HB_HAS_ICU
+ 
+ /**
+  * HB_HAS_RASTER:
+  *
+  * Defined if Harfbuzz has been built with the raster library.
+  */
+-#mesondefine HB_HAS_RASTER
++#undef HB_HAS_RASTER
+ 
+ /**
+  * HB_HAS_SUBSET:
+  *
+  * Defined if Harfbuzz has been built with the subset library.
+  */
+-#mesondefine HB_HAS_SUBSET
++#undef HB_HAS_SUBSET
+ 
+ /**
+  * HB_HAS_UNISCRIBE:
+  *
+  * Defined if Harfbuzz has been built with Uniscribe support.
+  */
+-#mesondefine HB_HAS_UNISCRIBE
++#undef HB_HAS_UNISCRIBE
+ 
+ /**
+  * HB_HAS_VECTOR:
+  *
+  * Defined if Harfbuzz has been built with the vector library.
+  */
+-#mesondefine HB_HAS_VECTOR
++#undef HB_HAS_VECTOR
+ 
+ /**
+  * HB_HAS_WASM:
+  *
+  * Defined if Harfbuzz has been built with WebAssembly support.
+  */
+-#mesondefine HB_HAS_WASM
++#undef HB_HAS_WASM
+ 
+ 
+ HB_END_DECLS

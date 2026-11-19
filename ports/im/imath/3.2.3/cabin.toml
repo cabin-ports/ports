@@ -5,8 +5,9 @@ format = "tar.gz"
 strip-prefix = "Imath-3.2.3"
 # Every Imath header includes ImathConfig.h, which upstream's CMake
 # build generates from config/ImathConfig.h.in (config/CMakeLists.txt:13)
-# and installs beside the other headers in include/Imath.  The patch adds
-# it to src/Imath exactly as a default configure writes it: the half
+# and installs beside the other headers in include/Imath.  The copy step
+# below places the template in src/Imath, and the patch fills it in
+# exactly as a default configure writes it: the half
 # lookup table on, no large stack, the Imath_3_2 internal namespace
 # under Imath, noexcept on, and API visibility tagging on
 # (config/ImathSetup.cmake:12-36, config/CMakeLists.txt:4-11).  Its
@@ -14,7 +15,11 @@ strip-prefix = "Imath-3.2.3"
 # version from IMATH_VERSION_MAJOR, _MINOR, _PATCH or
 # IMATH_VERSION_STRING; upstream's C interface is half.h's float
 # conversions (src/ImathTest/half_c_main.c:6-9).
-patches = ["patches/0001-add-the-generated-imathconfig-h.patch"]
+patches = ["patches/0001-configure-imathconfig-h.patch"]
+
+[[package.upstream.copy]]
+from = "config/ImathConfig.h.in"
+to = "src/Imath/ImathConfig.h"
 
 [package]
 name = "cabin-ports/imath"

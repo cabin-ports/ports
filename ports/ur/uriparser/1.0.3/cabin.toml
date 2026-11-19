@@ -7,7 +7,8 @@ format = "tar.gz"
 strip-prefix = "uriparser-1.0.3"
 # CMake generates UriConfig.h from src/UriConfig.h.in
 # (CMakeLists.txt:141-183); of the shipped sources only src/UriMemory.c
-# includes it.  The patch adds it to src/ as configure writes it, except
+# includes it.  A copy step places the template as src/UriConfig.h, and
+# the patch fills it in as configure writes it, except
 # that HAVE_REALLOCARRAY stays undefined everywhere: CMake sets it where a
 # program calling reallocarray() compiles and links (:145-181), a
 # property of the C library (glibc 2.26 and later have it, macOS and
@@ -16,7 +17,11 @@ strip-prefix = "uriparser-1.0.3"
 # overflow check before realloc() (src/UriMemory.c:113-123).
 # PACKAGE_VERSION and HAVE_WPRINTF (ISO C's wprintf, :143) are as
 # configure sets them; no shipped source reads either.
-patches = ["patches/0001-add-the-generated-uriconfig-h.patch"]
+patches = ["patches/0001-configure-uriconfig-h.patch"]
+
+[[package.upstream.copy]]
+from = "src/UriConfig.h.in"
+to = "src/UriConfig.h"
 
 [package]
 name = "cabin-ports/uriparser"
