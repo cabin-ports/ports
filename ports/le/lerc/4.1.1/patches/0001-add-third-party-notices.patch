@@ -1,0 +1,18 @@
+--- /dev/null
++++ b/THIRD_PARTY_NOTICES
+@@ -0,0 +1,15 @@
++Third-party notices for cabin-ports/lerc
++
++LERC's own license is in LICENSE and NOTICE.
++
++========================================================================
++Wikipedia: Fletcher's checksum
++Title: "Fletcher's checksum"
++Author: Wikipedia contributors,
++https://en.wikipedia.org/w/index.php?title=Fletcher%27s_checksum&action=history
++https://en.wikipedia.org/wiki/Fletcher's_checksum
++src/LercLib/Lerc2.cpp:1000-1030: ComputeChecksumFletcher32
++Licensed under CC BY-SA 3.0, https://creativecommons.org/licenses/by-sa/3.0/
++Changed: modified from 16-bit words to bytes by Lucian Plesea
++(Lerc2.cpp:1001).
++SPDX-License-Identifier: CC-BY-SA-3.0
