@@ -13,6 +13,9 @@ patches = ["patches/0001-include-algorithm.patch"]
 name = "cabin-ports/platform-delegates"
 version = "0.3.7"
 # The nuspec and ConanCenter say MIT; LICENSE, the only licence text, decides.
+# cpp/Platform.Delegates/Platform.Delegates.Delegate.h:3 and
+# MulticastDelegate.h:3 credit Stack Overflow answers 23974539 and 35920804;
+# their copyright significance is uncertain.
 license = "Unlicense"
 include = [
   "LICENSE",

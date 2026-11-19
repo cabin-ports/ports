@@ -1,6 +1,7 @@
 --- /dev/null
 +++ b/wolfssl/options.h
-@@ -0,0 +1,15 @@
+@@ -0,0 +1,16 @@
++/* Added for cabin-ports on 2026-11-12. */
 +/* Stands in for the options.h configure generates (configure.ac:14087-14171)
 +   for applications that include it first: it loads the same configuration,
 +   from wolfssl/wolfcrypt/user_settings.h, which settings.h also includes when
