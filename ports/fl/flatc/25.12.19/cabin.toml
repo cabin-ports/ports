@@ -1,0 +1,123 @@
+# The archive of cabin-ports/flatbuffers 25.12.19, whose manifest says why
+# this tag of the two upstream released as 25.12.19.
+[package.upstream]
+url = "https://github.com/google/flatbuffers/archive/refs/tags/v25.12.19-2026-02-06-03fffb2.tar.gz"
+checksum = "sha256:ccbce58684691de1e7d51f5e87786266b37d06ab66e9dfe2d0ec106fe50aace0"
+format = "tar.gz"
+strip-prefix = "flatbuffers-25.12.19-2026-02-06-03fffb2"
+patches = ["patches/0001-add-third-party-notices.patch"]
+
+[package]
+name = "cabin-ports/flatc"
+version = "25.12.19"
+# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
+license = "Apache-2.0"
+include = [
+  "LICENSE",
+  "THIRD_PARTY_NOTICES",
+  "grpc/src/compiler",
+  "include/codegen",
+  "patches",
+  "src/annotated_binary_text_gen.cpp",
+  "src/annotated_binary_text_gen.h",
+  "src/bfbs_gen.h",
+  "src/bfbs_gen_lua.cpp",
+  "src/bfbs_gen_lua.h",
+  "src/bfbs_gen_nim.cpp",
+  "src/bfbs_gen_nim.h",
+  "src/bfbs_namer.h",
+  "src/binary_annotator.cpp",
+  "src/binary_annotator.h",
+  "src/code_generators.cpp",
+  "src/flatc.cpp",
+  "src/flatc_main.cpp",
+  "src/idl_gen_binary.cpp",
+  "src/idl_gen_binary.h",
+  "src/idl_gen_cpp.cpp",
+  "src/idl_gen_cpp.h",
+  "src/idl_gen_csharp.cpp",
+  "src/idl_gen_csharp.h",
+  "src/idl_gen_dart.cpp",
+  "src/idl_gen_dart.h",
+  "src/idl_gen_fbs.cpp",
+  "src/idl_gen_fbs.h",
+  "src/idl_gen_go.cpp",
+  "src/idl_gen_go.h",
+  "src/idl_gen_grpc.cpp",
+  "src/idl_gen_java.cpp",
+  "src/idl_gen_java.h",
+  "src/idl_gen_json_schema.cpp",
+  "src/idl_gen_json_schema.h",
+  "src/idl_gen_kotlin.cpp",
+  "src/idl_gen_kotlin.h",
+  "src/idl_gen_kotlin_kmp.cpp",
+  "src/idl_gen_lobster.cpp",
+  "src/idl_gen_lobster.h",
+  "src/idl_gen_php.cpp",
+  "src/idl_gen_php.h",
+  "src/idl_gen_python.cpp",
+  "src/idl_gen_python.h",
+  "src/idl_gen_rust.cpp",
+  "src/idl_gen_rust.h",
+  "src/idl_gen_swift.cpp",
+  "src/idl_gen_swift.h",
+  "src/idl_gen_text.h",
+  "src/idl_gen_ts.cpp",
+  "src/idl_gen_ts.h",
+  "src/idl_namer.h",
+  "src/namer.h",
+]
+
+# The headers and the library flatc is built from: the same sources, so
+# no other version fits.
+[dependencies]
+"cabin-ports/flatbuffers" = "=25.12.19"
+
+# The schema compiler upstream's CMake builds (FLATBUFFERS_BUILD_FLATC):
+# FlatBuffers_Compiler_SRCS without the library's sources, which the
+# flatbuffers package compiles.  A package runs it from a build script by
+# naming this one in [build-dependencies]; `cabin install` installs it.
+# Not reproduced: /MT for an MSVC release build, FLATBUFFERS_STATIC_FLATC,
+# the precompiled header, and, as in the flatbuffers package and for the
+# reasons its manifest gives, -fsigned-char and CMake's own
+# FLATBUFFERS_LOCALE_INDEPENDENT.
+[target.flatc]
+type = "executable"
+sources = [
+  "grpc/src/compiler/cpp_generator.cc",
+  "grpc/src/compiler/go_generator.cc",
+  "grpc/src/compiler/java_generator.cc",
+  "grpc/src/compiler/python_generator.cc",
+  "grpc/src/compiler/swift_generator.cc",
+  "grpc/src/compiler/ts_generator.cc",
+  "include/codegen/python.cc",
+  "src/annotated_binary_text_gen.cpp",
+  "src/bfbs_gen_lua.cpp",
+  "src/bfbs_gen_nim.cpp",
+  "src/binary_annotator.cpp",
+  "src/code_generators.cpp",
+  "src/flatc.cpp",
+  "src/flatc_main.cpp",
+  "src/idl_gen_binary.cpp",
+  "src/idl_gen_cpp.cpp",
+  "src/idl_gen_csharp.cpp",
+  "src/idl_gen_dart.cpp",
+  "src/idl_gen_fbs.cpp",
+  "src/idl_gen_go.cpp",
+  "src/idl_gen_grpc.cpp",
+  "src/idl_gen_java.cpp",
+  "src/idl_gen_json_schema.cpp",
+  "src/idl_gen_kotlin.cpp",
+  "src/idl_gen_kotlin_kmp.cpp",
+  "src/idl_gen_lobster.cpp",
+  "src/idl_gen_php.cpp",
+  "src/idl_gen_python.cpp",
+  "src/idl_gen_rust.cpp",
+  "src/idl_gen_swift.cpp",
+  "src/idl_gen_ts.cpp",
+]
+include-dirs = ["include", "grpc"]
+deps = ["cabin-ports/flatbuffers"]
+# As for the library: upstream requires C++11, and c++14 is the lowest
+# implementation standard Cabin accepts on MSVC.
+cxx-standard = "c++14"

@@ -1,0 +1,17 @@
+[package]
+name = "generate"
+version = "0.0.0"
+
+[dependencies]
+"cabin-ports/flatbuffers" = "=25.12.19"
+
+# Built for the machine the build runs on; `build.c` runs its executable.
+[build-dependencies]
+"cabin-ports/flatc" = "=25.12.19"
+
+[target.generate]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/flatbuffers"]
+# The lowest C++ standard an MSVC build accepts.
+cxx-standard = "c++14"

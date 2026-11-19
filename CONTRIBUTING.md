@@ -240,6 +240,7 @@ compile-only smoke test is not sufficient evidence of correctness.
 The probe links libraries.  A port whose default features build an `executable` target is also
 installed from the staged port with `cabin install`.  That builds the program and does not run
 it: a [probe package](#probe-packages) does, as one that requires the port as a build dependency.
+A port that builds no library has that probe package for its consumer test, and no `tests/main.cc`.
 
 `tests/main.cc` is the C++ consumer.  `tests/main.c` is the C consumer, which a port has when a
 library target that its default features enable declares, itself or through the package, an
@@ -276,8 +277,8 @@ requires exactly the port's version, as above, and it has at least one; the publ
 other, because a newer version staged beside the port would be built in its place.  Beside its
 port, a probe package requires only what the port requires with its default features: nothing else
 is sure to be staged when it builds, a dependency that only a non-default feature of the port
-brings in included.  Like a consumer test, it must check behavior, and it adds to the port's
-`tests/main.cc` or `tests/main.c` without replacing it.
+brings in included.  Like a consumer test, it must check behavior.  For a port that builds a
+library it adds to `tests/main.cc` or `tests/main.c` without replacing it.
 
 Where what a probe package tests does not exist on a platform, its entry on the port goes in a
 `[target.'cfg(...)'.dependencies]` table.  The dry-run does not build a probe package on a machine

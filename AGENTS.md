@@ -20,7 +20,8 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   normalize, re-wrap, or re-generate a committed patch.
 - Keep C first-class alongside C++: probes and consumer tests cover both languages.
 - New ports must include a meaningful consumer test (`tests/main.c`
-  or `tests/main.cc`) that exercises a real public API and checks its
+  or `tests/main.cc`; a probe package for a port that builds no
+  library) that exercises a real public API and checks its
   behavior. An empty `main` or a compile-only smoke test is not
   sufficient evidence of correctness.
 - Preserve upstream functionality and intended build semantics. Never
