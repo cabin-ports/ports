@@ -102,10 +102,8 @@ pub fn run(options: &Options) -> Result<()> {
             .join(", ")
     );
 
-    // Cheap and catalog-wide whatever a dry-run selects; every mode
-    // validates the hold list, so none merges that --publish-new refuses.
+    // Cheap and catalog-wide whatever a dry-run selects.
     preflight::ensure_consumer_tests_used(&conversions)?;
-    let holds = batch::load_holds(&options.ports_dir, &conversions)?;
     let total = conversions.len();
     let conversions = match &options.mode {
         Mode::DryRun(selection) => select::select(conversions, selection, &options.ports_dir)?,
@@ -123,7 +121,7 @@ pub fn run(options: &Options) -> Result<()> {
             }
             conversions
         }
-        Mode::New(new) => return batch::run(new, &conversions, &holds, options),
+        Mode::New(new) => return batch::run(new, &conversions, options),
     };
 
     let report = preflight::preflight(&preflight::PreflightRequest {

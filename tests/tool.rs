@@ -1915,19 +1915,19 @@ fn puts(registry: &FakeRegistry) -> Vec<String> {
         .collect()
 }
 
-/// `--publish-new` uploads only what has no receipt, skips a held
-/// version, never asks for a packaging revision, and resumes a partial
-/// failure from its receipts, resubmitting the failed upload only on
-/// --retry-failed.  The preview makes no request at all.
+/// `--publish-new` uploads only what has no receipt, never asks for a
+/// packaging revision, and resumes a partial failure from its receipts,
+/// resubmitting the failed upload only on --retry-failed.  The preview
+/// makes no request at all.
 #[test]
 #[allow(clippy::too_many_lines)] // one resumable scenario, run by run
 fn publish_new_uploads_each_version_once_and_resumes_from_its_receipts() {
     require_build_tools();
     let dir = TempDir::new().unwrap();
-    let (ports, cache, head) = committed_fake_ports(&dir);
-    dir.child("publish-holds.txt")
-        .write_str("# held for the test\nfastlz 0.5.0 awaiting a decision\n")
-        .unwrap();
+    let (ports, cache) = fake_ports(&dir);
+    // zlib and libpng: the scenario needs no third version.
+    fs::remove_dir_all(ports.join("fa")).unwrap();
+    let head = commit_ports(dir.path());
     let snapshot = (ports.as_path(), cache.as_path(), head.as_str());
     let log = dir.child("receipts.jsonl");
     // The second upload, libpng's, answers 500.
@@ -1944,14 +1944,9 @@ fn publish_new_uploads_each_version_once_and_resumes_from_its_receipts() {
         "{stdout}"
     );
     assert!(
-        stdout.contains("not uploading cabin-ports/fastlz 0.5.0: held: awaiting a decision"),
-        "{stdout}"
-    );
-    assert!(
         stdout.contains("plan complete: 2 versions to upload"),
         "{stdout}"
     );
-    assert!(!stdout.contains("staged cabin-ports/fastlz"), "{stdout}");
     assert!(registry.requests().is_empty(), "{:?}", registry.requests());
     assert_eq!(receipt_lines(log.path()), Vec::<String>::new());
 
@@ -2155,15 +2150,13 @@ fn list_new(
     (output, fs::read_to_string(list.path()).ok())
 }
 
-/// `--list-new` writes what `--publish-new` would upload, one version
-/// per line in upload order and without what requires a held version,
-/// staging nothing, and only once the hold list is valid.
+/// `--list-new` writes what `--publish-new` would upload, every catalog
+/// version without a receipt, one per line in upload order, staging
+/// nothing.
 #[test]
 fn list_new_lists_the_candidates_without_staging() {
     let dir = TempDir::new().unwrap();
     let (ports, cache) = fake_ports(&dir);
-    let holds = dir.child("publish-holds.txt");
-    holds.write_str("zlib 1.3.1 awaiting a decision\n").unwrap();
     let (output, list) = list_new(&dir, (&ports, &cache), "", None);
     let stdout = String::from_utf8_lossy(&output.stdout);
     assert!(
@@ -2173,14 +2166,10 @@ fn list_new_lists_the_candidates_without_staging() {
     );
     assert!(!stdout.contains("preflight:"), "{stdout}");
     assert!(!stdout.contains("upload, in order"), "{stdout}");
-    assert_eq!(list.as_deref(), Some("cabin-ports/fastlz 0.5.0\n"));
-
-    holds.write_str("zlib 9.9.9 awaiting a decision\n").unwrap();
-    let (output, list) = list_new(&dir, (&ports, &cache), "", None);
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(!output.status.success(), "{stderr}");
-    assert!(stderr.contains("not a committed port version"), "{stderr}");
-    assert_eq!(list, None);
+    assert_eq!(
+        list.as_deref(),
+        Some("cabin-ports/fastlz 0.5.0\ncabin-ports/zlib 1.3.1\ncabin-ports/libpng 1.6.50\n")
+    );
 }
 
 /// `PORT_PUBLISH_RETRY_FAILED` carries a workflow input that is empty

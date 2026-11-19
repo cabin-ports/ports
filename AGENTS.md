@@ -36,11 +36,11 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   platform assumptions, upstream checksums, and license obligations.
   Do not assume that a successful default-feature probe validates
   non-default features or unsupported configurations.
-- Publish by default.  Never hold a version for an ordinary upstream
-  bug, a gap in upstream's notices, or an open question;
-  CONTRIBUTING.md ("Upstream fidelity", "Licenses and notices", and
-  "Pull requests") gives the rules and the grounds for a
-  `publish-holds.txt` line.
+- Publish by default.  Never keep a version out of the catalog for an
+  ordinary upstream bug, a gap in upstream's notices, or an open
+  question; CONTRIBUTING.md ("Upstream fidelity", "Licenses and
+  notices", and "Pull requests") gives the rules and the grounds for
+  declining a version.
 - Ports are distributed as recipes: the manifest and its declared
   patches, from which the user's Cabin rebuilds the package out of the
   pinned upstream archive.  Keep upstream's license files, notices,
@@ -99,12 +99,14 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   nothing of it executed.  Only the `lock` and `record` jobs request `contents: write`; they run
   only `scripts/actions/receipts.sh` (`git`, `gh`, and `jq`), checked out sparsely at the
   workflow's own commit, and push only the receipts branch.
-- The schedule uploads only while the `PORTS_AUTO_PUBLISH` variable is exactly `true`.  Setting
-  it, initializing or editing the receipts log, and dispatching an upload are operator decisions,
-  never part of routine work, and so are deleting the receipts log's lock and retrying a failed
-  upload.  `--publish-new` never passes `--new-revision`: a correction to an uploaded version
-  ships only through an `all` dispatch.  While the variable is `true`, a merged port publishes
-  on the next run, so a hold lands in its pull request.
+- Every upload requires the `PORTS_PUBLISH_ENABLED` variable to be exactly `true`, checked by
+  `gate` and again by `publish` right before uploading; the schedule also needs
+  `PORTS_AUTO_PUBLISH`.  Setting either, initializing or editing the receipts log, and
+  dispatching an upload are operator decisions, never part of routine work, and so are deleting
+  the receipts log's lock and retrying a failed upload.  `--publish-new` never passes
+  `--new-revision`: a correction to an uploaded version ships only through an `all` dispatch.
+  While both are `true`, a merged port publishes on the next run, so a version that must not be
+  distributed never enters the catalog.
 - `ci.yml` runs on `pull_request` and `merge_group`.  Its `required` job is the only required
   check and must fail unless every job it gates succeeded: every gated job is a job of its own,
   never a matrix leg, and no step of `required` carries an `if:` (docs/maintaining.md, "CI").  Its
@@ -120,7 +122,7 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
 - Workflows are declarative orchestration: triggers, `needs`, permissions, concurrency, runners,
   `uses:` steps, artifacts, environment wiring, and `if:` expressions.  Prefer a native Actions
   feature or an established action to a script.  Keep publication policy, receipts and lock
-  state, and substantial data processing out of YAML: selection, eligibility, holds, and receipts
+  state, and substantial data processing out of YAML: selection, eligibility, and receipts
   parsing belong in `port-publish` (`src/`, extending `batch.rs`, `select.rs`, or `plan.rs`), and
   Git and GitHub glue in small single-purpose scripts under `scripts/actions/`.  Before adding
   workflow logic, extend the CLI or script that already owns the responsibility; never implement
@@ -147,7 +149,7 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   `publish` runs the `build` job's binaries.  `exchange-check` stays curl-only with no checkout.
 - Preserve the receipts protocol and publication semantics: only fast-forward pushes to the
   receipts branch, the `lock` file naming run and attempt, `record`'s release rules, the modes,
-  holds, `retry-failed`, and packaging revisions; change them only as a reviewed policy change.
+  `retry-failed`, and packaging revisions; change them only as a reviewed policy change.
 
 ## Checks and pull requests
 

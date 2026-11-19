@@ -1,9 +1,9 @@
 name: Publish
 
 # Publishes ports/ as `cabin-ports/*` registry packages (docs/publishing.md,
-# "Publishing"). Only main publishes: a manual dispatch, or the
-# schedule once the PORTS_AUTO_PUBLISH repository variable is exactly
-# `true`.
+# "Publishing"). Only main publishes, only while the PORTS_PUBLISH_ENABLED
+# repository variable is exactly `true`: a manual dispatch, or the
+# schedule once PORTS_AUTO_PUBLISH is exactly `true` too.
 on:
   workflow_dispatch:
     inputs:
@@ -49,7 +49,7 @@ env:
 jobs:
   # Resolves the mode, requires CI for `new`, and finds the receipts log
   # before anything is built. A scheduled run starts no job at all
-  # unless the variable is `true`; expressions compare
+  # unless PORTS_AUTO_PUBLISH is `true`; expressions compare
   # case-insensitively, so the step insists on the exact bytes.
   gate:
     if: >-
@@ -72,6 +72,7 @@ jobs:
         name: Resolve the mode
         env:
           ENABLED: ${{ vars.PORTS_AUTO_PUBLISH }}
+          PUBLISH: ${{ vars.PORTS_PUBLISH_ENABLED }}
           INPUT: ${{ inputs.mode }}
         run: scripts/actions/publish-mode.sh
 
@@ -315,6 +316,17 @@ jobs:
           RECEIPTS: ${{ needs.gate.outputs.receipts }}
         run: scripts/actions/receipts.sh held "$RUNNER_TEMP/receipts.jsonl"
 
+      # Rereads both variables as of this job's start: turning either off
+      # before then stops a scheduled run here; only PORTS_PUBLISH_ENABLED
+      # fails a dispatch.
+      - id: mode
+        name: Recheck the mode
+        env:
+          ENABLED: ${{ vars.PORTS_AUTO_PUBLISH }}
+          PUBLISH: ${{ vars.PORTS_PUBLISH_ENABLED }}
+          INPUT: ${{ inputs.mode }}
+        run: scripts/actions/publish-mode.sh
+
       # A stale run would publish an intermediate state of a version as
       # an otherwise unnecessary packaging revision, so --main uploads
       # nothing, with a warning, unless this commit is still main's head;
@@ -324,7 +336,7 @@ jobs:
       # detected; the next dispatch's upload supersedes what it
       # published.
       - name: Publish to registry.cabinpkg.com
-        if: needs.gate.outputs.mode == 'all'
+        if: steps.mode.outputs.mode == 'all'
         run: |
           git fetch --no-tags --depth=1 origin "+refs/heads/main:refs/remotes/origin/main"
           "$RUNNER_TEMP/tools/port-publish" --publish \
@@ -335,16 +347,6 @@ jobs:
             --ports-dir ports \
             --cabin "$RUNNER_TEMP/tools/cabin" \
             --cache-dir "$RUNNER_TEMP/cabin-cache"
-
-      # A scheduled run rechecks the switch: turning it off stops queued
-      # runs here.
-      - id: mode
-        name: Recheck the mode
-        if: needs.gate.outputs.mode == 'new'
-        env:
-          ENABLED: ${{ vars.PORTS_AUTO_PUBLISH }}
-          INPUT: ${{ inputs.mode }}
-        run: scripts/actions/publish-mode.sh
 
       # Under the lock, so the log `held` wrote holds every earlier run's
       # receipts. A moved main does not stop the run: --publish-new
