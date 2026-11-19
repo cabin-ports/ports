@@ -91,11 +91,11 @@ order listed, which is an order of investigation, not of risk.
 
 ## Moved from `publish-holds.txt` on 2026-11-12
 
-The versions below declared a `license` and were held by a `publish-holds.txt` line.  A hold binds
-only the `new` mode, so an `all` dispatch could still have uploaded them; they left the catalog so
-that no mode can.  No version in the catalog required either.  A version that returns records the
-grant, the ruling, or why recipe distribution settles the hold in its restored `cabin.toml` and
-drops what that file says about the hold.
+The version below declared a `license` and was held by a `publish-holds.txt` line.  A hold binds
+only the `new` mode, so an `all` dispatch could still have uploaded it; it left the catalog so that
+no mode can.  No version in the catalog required it.  A version that returns records the grant,
+the ruling, or why recipe distribution settles the hold in its restored `cabin.toml` and drops
+what that file says about the hold.
 
 ### async-simple 1.4.0
 
@@ -116,19 +116,6 @@ drops what that file says about the hold.
   maintainers rule on it.
 - **Recipe distribution.**  Does not settle it: every consumer of `Lazy` compiles the allocator
   code.
-
-### json-schema-validator 2.4.1
-
-- **Code.**  `src/string-format-check.cpp:209-288` quotes all of RFC 3986 Appendix A's ABNF (60
-  non-blank lines) in comments.  RFC 3986 (2005) is subject to BCP 78 (RFC 3667, then RFC 3978),
-  whose section 3.3 grants rights only to the ISOC and the IETF.  The IETF Trust Legal Provisions
-  license only documents published after they took effect (section 2.b-c); other rights come, in
-  most cases, only from the authors (section 2.d).  The removed port shipped RFC 3986's Full
-  Copyright Statement in `NOTICE.RFC`.
-- **Question.**  Whether the quoted grammar may be redistributed, or is not protected expression.
-  The version returns when a grant is found or the maintainers rule the grammar unprotected.
-- **Recipe distribution.**  Settles the hold: the grammar is in comments, which no build
-  compiles.
 
 ## Held before entering the catalog
 

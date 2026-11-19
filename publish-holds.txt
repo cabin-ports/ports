@@ -6,3 +6,4 @@
 # through a pull request once the blocker is resolved.
 asio 1.38.2 returned for recipe distribution; the full-source publisher must not upload it
 boost-asio 1.92.0 returned for recipe distribution; the full-source publisher must not upload it
+json-schema-validator 2.4.1 returned for recipe distribution; the full-source publisher must not upload it
