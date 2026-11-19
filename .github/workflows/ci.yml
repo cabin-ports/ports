@@ -123,6 +123,12 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends pocl-opencl-icd
 
+      # TEMPORARY probe, removed before merge.
+      - name: Probe OpenCL
+        continue-on-error: true
+        shell: bash
+        run: scripts/actions/tmp-opencl-probe.sh
+
       # A probe finds OpenSSL's DLLs through PATH: these, before any
       # other program's copy.
       - name: Put the image's OpenSSL first on PATH
