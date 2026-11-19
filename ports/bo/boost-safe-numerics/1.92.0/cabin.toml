@@ -3,6 +3,9 @@ url = "https://github.com/boostorg/safe_numerics/archive/refs/tags/boost-1.92.0.
 checksum = "sha256:dc7cd0e8538ddac4844a1ed77cff839123a08a5af8f833ebfe22ffca4ec41718"
 format = "tar.gz"
 strip-prefix = "safe_numerics-boost-1.92.0"
+# checked_result_operations.hpp calls std::terminate without including
+# <exception>; whether it compiles depends on the standard library's
+# transitive includes.  Patch 0001 adds the include.
 patches = ["patches/0001-include-exception.patch"]
 
 [package]
