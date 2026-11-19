@@ -9,12 +9,8 @@ strip-prefix = "thread-boost-1.92.0"
 # LICENSE.TXT, verbatim from llvm-project llvmorg-8.0.1 libcxx/LICENSE.TXT
 # (sha256:c3b21ee90de785b9e45590253fd08fb22b269abccaadb175c4d96d7f420340cd), as
 # LICENSE.libcxx.txt.
-# The BSL patch adds LICENSE_1_0.txt, the Boost Software License text the
-# sources cite, from boostorg/boost at tag boost-1.92.0
-# (sha256:c9bff75738922193e67fa726fa225535870d2aa1059f91452c411736284ad566).
 patches = [
   "patches/0001-add-mit-and-ncsa-licenses-for-libcxx-code.patch",
-  "patches/0002-add-the-boost-software-license-text.patch",
 ]
 
 [package]
@@ -31,7 +27,6 @@ include = [
   ".travis.yml",
   "CMakeLists.txt",
   "LICENSE.libcxx.txt",
-  "LICENSE_1_0.txt",
   "README.md",
   "appveyor.yml",
   "build.jam",

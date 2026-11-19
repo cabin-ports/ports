@@ -8,22 +8,18 @@ url = "https://github.com/KhronosGroup/EGL-Registry/archive/3ae2b7c48690d2ce13cc
 checksum = "sha256:00f6d5656d8a075ee72ec2ccbe9b803d29bb56695b05622ac4cde95d760a1528"
 format = "tar.gz"
 strip-prefix = "EGL-Registry-3ae2b7c48690d2ce13cc6db3db02dfc0572be65e"
-# The repository has no licence file.  The patch adds LICENSE.Apache-2.0,
-# https://www.apache.org/licenses/LICENSE-2.0.txt (sha256
-# cfc7749b96f63bd31c3c42b5c471bf756814053e847c10f3eb003417bc523d30).
-patches = ["patches/0001-add-the-apache-2.0-license.patch"]
 
 [package]
 name = "cabin-ports/egl-registry"
 version = "2024.9.9"
 license = "Apache-2.0 AND LicenseRef-khrplatform"
 # Licence: Apache-2.0 AND LicenseRef-khrplatform.  EGL/egl.h, eglext.h and
-# eglplatform.h are Apache-2.0 (their SPDX lines; LICENSE.Apache-2.0).
+# eglplatform.h are Apache-2.0 (their SPDX lines).
 # KHR/khrplatform.h carries its own MIT-style grant for "the Materials" in its
 # header comment (:4-24), which ships with it.  No SPDX id matches: the grant
 # says "this software and/or associated documentation files", which MIT's
 # template does not accept, and lacks MIT-Khronos-old's further paragraph.
-include = ["LICENSE.Apache-2.0", "api/EGL", "api/KHR", "patches"]
+include = ["api/EGL", "api/KHR"]
 
 # The two header directories vcpkg installs.  Not ported: api/egl.xml, the
 # registry data that generators read, which vcpkg installs under
