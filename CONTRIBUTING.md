@@ -153,7 +153,7 @@ requires it build only
   model Cabin cannot represent is not ported.
 - Patches under `patches/` (if any) should be limited to what is strictly required to make a port
   build through Cabin - build-system fixes, portability tweaks, and a
-  [build script](#build-scripts) - or to add the one notices file a package may need
+  [build script](#build-scripts) - and the notices the recipe itself requires
   ([Licenses and notices](#licenses-and-notices)), never feature changes or divergence from
   upstream behavior.
   Upstream bugs and quality concerns are not a reason to patch; document a limitation instead
@@ -161,10 +161,10 @@ requires it build only
 - **Keep the recipe minimal.**  A port is a thin layer over upstream's archive: each adaptation
   takes the first of a manifest setting, a copy step ([Upstream sources](#upstream-sources)), a
   patch, or a [build script](#build-scripts) that can express it, except where a script may run
-  upstream's own build.  A patch changes only what the build needs, besides the notices
-  [Licenses and notices](#licenses-and-notices) requires.  To fill in a template, a copy step
-  places it and the patch edits only what the fill-in changes, unless a patch that adds the
-  whole file is smaller.  A patch never carries an unchanged copy of upstream's files or of
+  upstream's own build.  A patch changes only what the build needs, besides the notices a
+  license requires of the recipe ([Licenses and notices](#licenses-and-notices)).  To fill in a
+  template, a copy step places it and the patch edits only what the fill-in changes, unless a
+  patch that adds the whole file is smaller.  A patch never carries an unchanged copy of upstream's files or of
   another project's code.  A consumer test carries only the inputs it needs that the package
   does not include, with their origin and notices.  Every patch has a purpose its `cabin.toml`
   states, and a published version's manifest and patches stay as they are for a cosmetic change
@@ -174,51 +174,27 @@ requires it build only
 
 ## Licenses and notices
 
-Under recipe distribution ([Upstream sources](#upstream-sources)) Cabin passes on none of
-upstream's files; a user who ships what they build, or publishes a vendor directory, does.  So a
-port carries the license information that the user's tree needs and upstream's files lack, and
-nothing that only a redistribution of upstream's archive needed.  Simplifying a port never means
-dropping a notice that a license requires.
+What a port distributes is its recipe ([Upstream sources](#upstream-sources)): the manifest and
+the declared patches.  Upstream's files reach the user from upstream's archive, with upstream's
+own license files and notices, and the user's Cabin copies and patches them in the user's tree.
+A port keeps those notices intact and describes the package's terms accurately.  It does not
+repair gaps in upstream's notices, and it does not make sources or builds ready for
+redistribution: a user who redistributes sources, a vendor directory, or what they build meets
+the licenses of what they redistribute.
 
 - **Keep what upstream ships.**  The package keeps upstream's license and notice files; when
   `[package] include` narrows the package's files, keep those files among them.
   Never edit an upstream file to move or tidy its license information, and never remove a
-  copyright line.  One edit stays because licenses require it: a patch that changes a file whose
-  license makes changed files say so (Apache-2.0, the GPL family) adds that statement, with the
-  date of the change, to the file as one comment line.
-- **Check before adding.**  For each third-party component whose code is in the package,
-  establish what its license requires of whoever passes the code on:
-  - the complete license text (Apache-2.0, together with the component's `NOTICE` file if it has
-    one; BSL-1.0; the GPL family);
-  - the copyright notice with the license's own text, including its conditions and disclaimer
-    (MIT, BSD, ISC, Zlib);
-  - the attribution its version asks for and the license's URI (Creative Commons BY and BY-SA);
-  - nothing (public domain, CC0).
-
-  Then check whether upstream's files already carry it: in the source file's header, in an
-  upstream license or notice file, or, for a text that names no holder (Apache-2.0, BSL-1.0, the
-  GPL family), as the copy that ships for another component.  When they do, add nothing; most
-  ports need no license patch.  A URL alone does not satisfy a license that requires its text or
-  notice, such as MIT, BSD, Apache-2.0, or BSL-1.0.  When the archive lacks upstream's own
-  license text, add it only if it names a holder (MIT, BSD), under the name upstream's notices
-  refer to and in the notices patch below; a text that names no holder is not added, since
-  `license` identifies it.
-- **One notices file, one patch.**  When a required notice or text is missing, add a single
-  patch that only creates `THIRD_PARTY_NOTICES` at the archive root, and keep that file among the
-  package's files.  A port has at most one such patch, never one license file per component.  The
-  file holds only what is missing:
-  - for each component, its name, origin, the files that contain it, its copyright lines, and its
-    SPDX identifier;
-  - each distinct license text once, verbatim from the component's origin (from the license's
-    canonical source only for a text that names no holder); components under the same text share
-    one copy, each with its own copyright lines;
-  - for Creative Commons material, the author, the work's title and URL, the license's name,
-    version, and URI, and whether the code was changed, in place of the legal code.
-
-  Where a component offers a choice of licenses, take an alternative that is compatible with the
-  rest of the package, preferring one whose text the package already ships.  The notices file has
-  no creation date and no tool output; copyright years stay as written.  `cabin.toml` points to
-  the file in one comment line and does not repeat the provenance.
+  copyright line or credit.  One edit stays because licenses require it: a patch that changes a
+  file whose license makes changed files say so (such as Apache-2.0, the GPL family, Zlib, and
+  Creative Commons BY) adds that statement, with the date of the change, to the file as one
+  comment line.
+- **Add no notices for upstream's archive.**  A port adds no license text, notices file, or
+  attribution for code in upstream's archive, even where upstream's own files lack one.  The
+  recipe's own contents are the exception: where the manifest, a patch (its added, context, or
+  removed lines), or a build script carries code whose license asks for a notice with a copy of
+  it, `cabin.toml` keeps that notice in comments, under a line that names the file, the code,
+  and the license clause.
 - **`license` is metadata.**  The `[package] license` SPDX expression describes the package the
   user's Cabin rebuilds - upstream's files as `include` selects them, with the port's patches
   applied - never the recipe's own files: `AND` between components under different terms, `OR`
@@ -227,34 +203,31 @@ dropping a notice that a license requires.
   `[package] include` to declaring them.  Generated build-system files that ship beside the
   sources but that the port does not compile (`Makefile.in`, `configure`) keep their notices and
   add no term.  Do not repeat a term, and drop an `OR` group when one of its alternatives is
-  already required: `MIT AND (BSL-1.0 OR MIT)` is `MIT`.  The expression replaces no notice and
-  resolves no incompatibility.
+  already required: `MIT AND (BSL-1.0 OR MIT)` is `MIT`.  The expression stands in for no
+  notice that a license requires, and resolves no incompatibility.
 - **Be proportional about copied code.**  Follow up what upstream itself identifies: its license
   and notice files, file headers, credit comments, and vendored directories.  A vendored
-  component, or a substantial, identifiable copy, gets the treatment above once a look at the
+  component, or a substantial, identifiable copy, gets its term in `license` once a look at the
   original confirms the copy and its license.  Do not research the provenance of short
   functions, standard algorithms, or common idioms that upstream does not identify as copied.
   Where upstream credits a short snippet whose copyright significance is uncertain, keep the
-  credit, state the doubt in one `cabin.toml` comment line, and add no license file for it.
-  Size alone never shows that a copy is permitted, and no attribution is dropped and no code
-  relabeled to avoid a hold.
+  credit and state the doubt in one `cabin.toml` comment line.  Size alone never shows that a
+  copy is permitted, and no code is relabeled to avoid a hold.
 - **Creative Commons code.**  For code copied from Stack Overflow, cppreference, or a similar
   site, confirm the post, the license version that applies to it, and whether the code is a
-  genuine, substantial copy.  If it is, attribute it in `THIRD_PARTY_NOTICES` as above and add
-  its term to `license`: the code stays under that license.  A notice does not settle whether
-  ShareAlike reaches the code around it; raise a substantial BY-SA block with the maintainers in
-  the pull request.
+  genuine, substantial copy.  If it is, add its term to `license`: the code stays under that
+  license.  Raise a substantial BY-SA block with the maintainers in the pull request, since
+  whether ShareAlike reaches the code around it is not settled.
 - **Hold only for a real problem.**  Never claim a permission that no source grants.
   Substantial code whose source grants no permission to use or redistribute it, or a verified
   incompatibility between the licenses of code that must ship together, holds the version when
   the package's builds on targets Cabin supports compile it: every user who ships what they
-  build then passes it on ([Pull requests](#pull-requests)).  Adding a license text resolves
-  neither.  Material that such builds do not compile - comments, or a fallback for platforms
-  Cabin does not support - stays in upstream's sources, which Cabin does not pass on, and holds
-  nothing; the version's `cabin.toml` names any setting with which a consumer could still
-  compile it.
-- **Older layouts.**  A version that predates the one-patch rule keeps its per-component license
-  files until its notices next change.
+  build then passes it on ([Pull requests](#pull-requests)).  Adding or removing a notice
+  resolves neither, and a gap in upstream's notices alone holds nothing.  Material that such
+  builds do not compile - comments, or a fallback for platforms Cabin does not support - stays
+  in upstream's sources, which Cabin does not pass on, and holds nothing unless the recipe
+  itself carries it; the version's
+  `cabin.toml` names any setting with which a consumer could still compile it.
 
 ## Consumer tests
 
