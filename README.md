@@ -59,8 +59,9 @@ Maintainers will find the CI and Cabin-revision procedures in
   missing, one file of third-party notices, never feature changes.
 - **Pin every source.**  Each port names its upstream archive by URL and SHA-256 checksum; floating
   references such as branches or `latest` are rejected.
-- **Respect upstream licenses.**  A port keeps every license and attribution notice that
-  redistribution requires, and adds one only where the package would otherwise lack it.
+- **Respect upstream licenses.**  A port is distributed as a recipe, and Cabin rebuilds the
+  library from upstream's own archive.  `license` declares the library's terms, and a port adds
+  only the notices and attributions that upstream's files lack and `license` cannot convey.
 - **Prefer native support.**  A port is retired once its upstream project ships and maintains its
   own `cabin.toml`.
 

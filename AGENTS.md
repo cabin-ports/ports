@@ -37,12 +37,16 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   bug or an open question; CONTRIBUTING.md ("Upstream fidelity",
   "Licenses and notices", and "Pull requests") gives the rules and the
   grounds for a `publish-holds.txt` line.
-- Preserve the license information redistribution requires, by the
-  simplest means that complies: no license patch when the published
-  package already carries it, otherwise one patch that adds
-  `THIRD_PARTY_NOTICES`.  Never add one license file per component,
-  Creative Commons legal code where the license's URI suffices, or
-  `license` terms for code the package does not contain.  Follow up the
+- Ports are distributed as recipes: the manifest and its declared
+  patches, from which the user's Cabin rebuilds the package out of the
+  pinned upstream archive.  Carry the license information the user's
+  tree needs and upstream's files lack, by the simplest means: no
+  license patch when upstream's files already carry it, otherwise one
+  patch that adds `THIRD_PARTY_NOTICES`.  Never add upstream's own
+  license text where it names no holder, one license file per
+  component, Creative Commons legal code, or `license` terms for code
+  the package does not contain; `license` states the library's terms,
+  never the recipe's own files.  Follow up the
   third-party code upstream itself identifies; do not research the
   provenance of short functions and common idioms that upstream does
   not identify as copied, and never treat a copy as permitted because
