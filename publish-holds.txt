@@ -4,3 +4,5 @@
 # dispatch - and versions that require a held version wait with it.
 # Hold only a genuine blocker (CONTRIBUTING.md, "Pull requests"); remove its line
 # through a pull request once the blocker is resolved.
+asio 1.38.2 returned for recipe distribution; the full-source publisher must not upload it
+boost-asio 1.92.0 returned for recipe distribution; the full-source publisher must not upload it
