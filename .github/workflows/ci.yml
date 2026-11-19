@@ -105,6 +105,16 @@ jobs:
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1.13.0
 
+      # The servers the probe packages of boost-mysql and boost-redis talk
+      # to: the image's MySQL, whose root password is root, and the
+      # distribution's Redis, which starts once installed.
+      - name: Start MySQL and Redis
+        if: runner.os == 'Linux'
+        run: |
+          sudo systemctl start mysql.service
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends redis-server
+
       # A probe finds OpenSSL's DLLs through PATH: these, before any
       # other program's copy.
       - name: Put the image's OpenSSL first on PATH
