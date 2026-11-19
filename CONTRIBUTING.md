@@ -55,9 +55,14 @@ own symbol namespace claims its own identity (`miniz` claims `"miniz"`, not `"z"
 ## Upstream sources
 
 Ports reach consumers as published `cabin-ports/*` registry packages; nothing here is consumed from
-a user's manifest directly.  To stage one, the publisher downloads the archive, verifies its pinned
-checksum, safely extracts it, applies the declared `[[package.upstream.copy]]` steps and then the
-declared `[package.upstream].patches` as byte-exact unified diffs.
+a user's manifest directly.  A port is distributed as a recipe: its manifest and declared patches,
+from which the user's Cabin rebuilds the package out of the pinned upstream archive.  Until the
+pinned Cabin publishes recipes, the publisher uploads the staged sources, so publishing stays
+stopped ([Recipe distribution](docs/publishing.md#recipe-distribution)).
+
+To stage a port, the publisher downloads the archive, verifies its pinned checksum, safely extracts
+it, applies the declared `[[package.upstream.copy]]` steps and then the declared
+`[package.upstream].patches` as byte-exact unified diffs.
 
 - Sources must be pinned by URL and SHA-256.  Floating references (`latest`, branches, tag-only
   without integrity) are rejected.
@@ -158,17 +163,20 @@ requires it build only
 
 ## Licenses and notices
 
-Preserve the license information that redistribution requires, and add nothing beyond it.
-Simplifying a port never means dropping a notice that a license requires.
+Under recipe distribution ([Upstream sources](#upstream-sources)) Cabin passes on none of
+upstream's files; a user who ships what they build, or publishes a vendor directory, does.  So a
+port carries the license information that the user's tree needs and upstream's files lack, and
+nothing that only a redistribution of upstream's archive needed.  Simplifying a port never means
+dropping a notice that a license requires.
 
-- **Keep what upstream ships.**  The published package keeps upstream's license and notice
-  files; when `[package] include` narrows the published files, keep those files among them.
+- **Keep what upstream ships.**  The package keeps upstream's license and notice files; when
+  `[package] include` narrows the package's files, keep those files among them.
   Never edit an upstream file to move or tidy its license information, and never remove a
   copyright line.  One edit stays because licenses require it: a patch that changes a file whose
   license makes changed files say so (Apache-2.0, the GPL family) adds that statement, with the
   date of the change, to the file as one comment line.
-- **Check before adding.**  For each third-party component whose code is in the published
-  package, establish what its license requires of a redistribution:
+- **Check before adding.**  For each third-party component whose code is in the package,
+  establish what its license requires of whoever passes the code on:
   - the complete license text (Apache-2.0, together with the component's `NOTICE` file if it has
     one; BSL-1.0; the GPL family);
   - the copyright notice with the license's own text, including its conditions and disclaimer
@@ -176,14 +184,17 @@ Simplifying a port never means dropping a notice that a license requires.
   - the attribution its version asks for and the license's URI (Creative Commons BY and BY-SA);
   - nothing (public domain, CC0).
 
-  Then check whether the package already carries it: in the source file's header, in an upstream
-  license or notice file, or, for a text that names no holder (Apache-2.0, BSL-1.0, the GPL
-  family), as the copy that ships for another component.  When it does, add nothing; most ports
-  need no license patch.  A URL alone does not satisfy a license that requires its text or
-  notice, such as MIT, BSD, Apache-2.0, or BSL-1.0.
+  Then check whether upstream's files already carry it: in the source file's header, in an
+  upstream license or notice file, or, for a text that names no holder (Apache-2.0, BSL-1.0, the
+  GPL family), as the copy that ships for another component.  When they do, add nothing; most
+  ports need no license patch.  A URL alone does not satisfy a license that requires its text or
+  notice, such as MIT, BSD, Apache-2.0, or BSL-1.0.  When the archive lacks upstream's own
+  license text, add it only if it names a holder (MIT, BSD), under the name upstream's notices
+  refer to and in the notices patch below; a text that names no holder is not added, since
+  `license` identifies it.
 - **One notices file, one patch.**  When a required notice or text is missing, add a single
   patch that only creates `THIRD_PARTY_NOTICES` at the archive root, and keep that file among the
-  published files.  A port has at most one such patch, never one license file per component.  The
+  package's files.  A port has at most one such patch, never one license file per component.  The
   file holds only what is missing:
   - for each component, its name, origin, the files that contain it, its copyright lines, and its
     SPDX identifier;
@@ -194,20 +205,19 @@ Simplifying a port never means dropping a notice that a license requires.
     version, and URI, and whether the code was changed, in place of the legal code.
 
   Where a component offers a choice of licenses, take an alternative that is compatible with the
-  rest of the package, preferring one whose text the package already ships.  When the archive
-  lacks upstream's own license text, the same patch adds it as a file under the name upstream's
-  notices refer to.  The notices file has no creation date and no tool output; copyright years
-  stay as written.  `cabin.toml` points to the file in one comment line and does not repeat the
-  provenance.
-- **`license` is metadata.**  The `[package] license` SPDX expression describes what the
-  published package ships: `AND` between components under different terms, `OR` where upstream
-  offers a choice, `WITH` for an exception.  It has no term for a file the package does not ship;
-  where tests, docs, or tools carry other terms, prefer narrowing `[package] include` to
-  declaring them.  Generated build-system files that ship beside the sources but that the port
-  does not compile (`Makefile.in`, `configure`) keep their notices and add no term.  Do not
-  repeat a term, and drop an `OR` group when one of its alternatives is already required:
-  `MIT AND (BSL-1.0 OR MIT)` is `MIT`.  The expression replaces no notice and resolves no
-  incompatibility.
+  rest of the package, preferring one whose text the package already ships.  The notices file has
+  no creation date and no tool output; copyright years stay as written.  `cabin.toml` points to
+  the file in one comment line and does not repeat the provenance.
+- **`license` is metadata.**  The `[package] license` SPDX expression describes the package the
+  user's Cabin rebuilds - upstream's files as `include` selects them, with the port's patches
+  applied - never the recipe's own files: `AND` between components under different terms, `OR`
+  where upstream offers a choice, `WITH` for an exception.  It has no term for a file the package
+  does not include; where tests, docs, or tools carry other terms, prefer narrowing
+  `[package] include` to declaring them.  Generated build-system files that ship beside the
+  sources but that the port does not compile (`Makefile.in`, `configure`) keep their notices and
+  add no term.  Do not repeat a term, and drop an `OR` group when one of its alternatives is
+  already required: `MIT AND (BSL-1.0 OR MIT)` is `MIT`.  The expression replaces no notice and
+  resolves no incompatibility.
 - **Be proportional about copied code.**  Follow up what upstream itself identifies: its license
   and notice files, file headers, credit comments, and vendored directories.  A vendored
   component, or a substantial, identifiable copy, gets the treatment above once a look at the
@@ -224,11 +234,16 @@ Simplifying a port never means dropping a notice that a license requires.
   ShareAlike reaches the code around it; raise a substantial BY-SA block with the maintainers in
   the pull request.
 - **Hold only for a real problem.**  Never claim a permission that no source grants.
-  Substantial code whose source grants no permission to redistribute it, or a verified
-  incompatibility between the licenses of code that must ship together, is a legal restriction
-  on redistribution ([Pull requests](#pull-requests)).  Adding a license text resolves neither.
-- **Leave published versions alone.**  Do not revise a published port only to rearrange its
-  license files; a new version follows these rules.
+  Substantial code whose source grants no permission to use or redistribute it, or a verified
+  incompatibility between the licenses of code that must ship together, holds the version when
+  the package's builds on targets Cabin supports compile it: every user who ships what they
+  build then passes it on ([Pull requests](#pull-requests)).  Adding a license text resolves
+  neither.  Material that such builds do not compile - comments, or a fallback for platforms
+  Cabin does not support - stays in upstream's sources, which Cabin does not pass on, and holds
+  nothing; the version's `cabin.toml` names any setting with which a consumer could still
+  compile it.
+- **Older layouts.**  A version that predates the one-patch rule keeps its per-component license
+  files until its notices next change.
 
 ## Consumer tests
 
@@ -336,10 +351,13 @@ and [CI](docs/maintaining.md#ci) what pull-request CI runs.
   vulnerabilities short of a concrete critical security risk, quality concerns, and open
   questions are not holds: investigate, decide, and fix packaging gaps as above.  Add a
   `publish-holds.txt` line, in the same pull request, only for a blocker packaging cannot
-  resolve: a concrete critical security risk or a failure to produce a valid package.  The line
-  states the evidence, the remediation attempted, and the exact blocking condition.  A legal
-  restriction on redistribution takes no such line, which binds only the `new` mode: the version
-  stays out of the catalog ([Published versions](#published-versions)).  The operator's hold for
+  resolve: a concrete critical security risk, a failure to produce a valid package, or, until
+  recipes publish, a version that returned to the catalog because of recipe distribution
+  ([Recipe distribution](docs/publishing.md#recipe-distribution)).  The line states the evidence,
+  the remediation attempted, and the exact blocking condition.  A version held under
+  [Licenses and notices](#licenses-and-notices) takes no such line, which binds only the `new`
+  mode: the version stays out of the catalog ([Published versions](#published-versions)).  The
+  operator's hold for
   a version with a rejected revision ([Failures](docs/publishing.md#failures)) is separate.
 
 ## Published versions
@@ -353,7 +371,7 @@ merging it publishes nothing by itself, since only a full `all` publish uploads 
 Retiring a specific *version* of a foundation port removes `ports/<prefix>/<name>/<version>/`;
 retiring an entire port removes the whole `ports/<prefix>/<name>/` directory.
 
-A version that the maintainers hold until a redistribution question is settled leaves the catalog
-the same way, together with the versions that require it.  [Held ports](docs/held-ports.md)
+A version that the maintainers hold under [Licenses and notices](#licenses-and-notices) leaves the
+catalog the same way, together with the versions that require it.  [Held ports](docs/held-ports.md)
 records each one, its open question, and how it returns.  Only the maintainers decide such a
 removal; a pull request that finds a restriction states the evidence and waits for their decision.

@@ -1,28 +1,38 @@
 # Held ports
 
-Port versions that the maintainers took out of the catalog until a redistribution question is
-settled.  A held version has no directory under `ports/`, so no dry-run, no mode of
-`port-publish`, and no consumer of the catalog stages or publishes it.  `publish-holds.txt` does
-not list these versions: it names only versions in the catalog and binds only the `new` mode
-([Eligibility and holds](publishing.md#eligibility-and-holds)).  Removal stops new uploads only:
-it retracts nothing a registry already has, which is the operator's separate decision.
+Port versions that the maintainers took out of the catalog, or kept out of it, until a license
+question about their code is settled.  A held version has no directory under `ports/`, so no
+dry-run, no mode of `port-publish`, and no consumer of the catalog stages or publishes it.
+`publish-holds.txt` does not list these versions: it names only versions in the catalog and binds
+only the `new` mode ([Eligibility and holds](publishing.md#eligibility-and-holds)).  Removal stops
+new uploads only: it retracts nothing a registry already has, which is the operator's separate
+decision.
 
 A hold here is precautionary.  It is not a finding of infringement, and the version is not
-rejected for good.  It returns when the evidence is sufficient to justify redistribution and
-every licensing obligation that applies can be met.  Declaring upstream's advertised license does
-not settle the question: a license declaration establishes no redistribution right for
-third-party code.
+rejected for good.  It returns when the evidence is sufficient and every licensing obligation
+that applies can be met, or when recipe distribution settles it.  Declaring upstream's advertised
+license does not settle the question: a license declaration establishes no right for third-party
+code.
+
+Under recipe distribution ([Licenses and notices](../CONTRIBUTING.md#licenses-and-notices)),
+Cabin does not pass on the code in question.  That settles a hold only for material that the
+package's builds on targets Cabin supports do not compile: code they compile reaches everything
+their users ship.  Each section says which applies.
 
 ## Reinstating a version
 
-1. Settle the question recorded below, and give the evidence in the pull request.
+1. Settle the question recorded below, or confirm that recipe distribution settles the hold, and
+   give the evidence in the pull request.
 2. Restore the version's directory from the parent of the commit that removed it
    (`git log --diff-filter=D -- ports/<prefix>/<name>/<version>/cabin.toml` finds that commit;
    `git restore --source=<commit>~1 -- ports/<prefix>/<name>/<version>` restores the directory),
    and each version removed with it once every version it requires is in the catalog.
-3. Declare `[package] license` and add any notice the result requires
-   ([Licenses and notices](../CONTRIBUTING.md#licenses-and-notices)).
-4. Remove the version's section from this file.
+3. Bring the restored files under today's rules: declare `[package] license`, drop the patches
+   and `include` entries [Licenses and notices](../CONTRIBUTING.md#licenses-and-notices) no longer
+   allows, and add any notice the result requires.
+4. Remove the version's section from this file.  A version that returns because of recipe
+   distribution records why in its `cabin.toml` and has a `publish-holds.txt` line until recipes
+   publish ([Recipe distribution](publishing.md#recipe-distribution)).
 
 A reinstated version that the receipts log already records as uploaded is not uploaded by the
 `new` mode; publishing it is the operator's `all` dispatch
@@ -41,6 +51,8 @@ order listed, which is an order of investigation, not of risk.
   pthreads-win32's `pthread_cond_wait.c` (LGPL).  The C++ implementation is Ion Gaztañaga's.
 - **Question.**  Whether the pseudo-code is protected expression that needs further licensing
   compliance, or only describes an algorithm.
+- **Recipe distribution.**  Settles the hold: the pseudo-code is comments, which no build
+  compiles.
 - **Removed with it.**  boost-flyweight 1.92.0 and boost-log 1.92.0, which require it.  boost-log
   also requires boost-asio and returns only when both do.
 
@@ -51,9 +63,15 @@ order listed, which is an order of investigation, not of risk.
   C++ port of `libgai` from W. Richard Stevens's "UNIX Network Programming", volume 1, second
   edition.  Functions, branch structure, and the order of literals correspond.  The book's source
   distribution carries a warranty disclaimer and no grant to redistribute.  The code is compiled
-  only where the platform lacks `getaddrinfo`, but it is part of the published sources.
+  only where the platform lacks `getaddrinfo`, but it was part of the published sources.
 - **Question.**  Whether protected implementation code was copied, or only unprotected algorithms
   and ideas were used.
+- **Recipe distribution.**  Settles the hold: the emulation is a fallback for platforms without
+  `getaddrinfo`, compiled only where `ASIO_HAS_GETADDRINFO` (`BOOST_ASIO_HAS_GETADDRINFO`) is
+  undefined, and `asio/detail/config.hpp` defines it on Windows from `_WIN32_WINNT` 0x0501 (asio
+  assumes 0x0601 when no Windows version is set), on macOS, and on other POSIX systems.  Only a
+  consumer that defines `ASIO_DISABLE_GETADDRINFO` (`BOOST_ASIO_DISABLE_GETADDRINFO`), or targets
+  a Windows older than XP or a macOS older than 10.5, compiles it.
 - **Removed with boost-asio.**  boost-beast, boost-cobalt, boost-log, boost-mqtt5, and
   boost-process 1.92.0, which require it.  boost-log also requires boost-interprocess, and
   boost-mqtt5 requires boost-beast.
@@ -64,6 +82,8 @@ order listed, which is an order of investigation, not of risk.
   Qt/core/tools/qiterator.h", and about 120 lines of macros expand Qt 4's Java-style iterators in
   a public header.  Qt 4 is under the GPL and the LGPL.
 - **Question.**  Which Qt terms apply to the macros, and whether the package can meet them.
+- **Recipe distribution.**  Does not settle it: every consumer of libqhullcpp compiles the
+  macros.
 
 ### plutovg 1.3.3
 
@@ -72,6 +92,7 @@ order listed, which is an order of investigation, not of risk.
   `INTERPOLATE_PIXEL_255`, `INTERPOLATE_PIXEL_256`, and `BYTE_MUL` match qtbase v5.15.2
   `qdrawhelper_p.h:609-660`, and the radial gradient uses Qt's variable names.
 - **Question.**  Which copyright and license obligations apply to the reproduced code.
+- **Recipe distribution.**  Does not settle it: the library compiles the code.
 - **Removed with it.**  lunasvg 3.5.0 and plutosvg 0.0.8, which require it.
 
 ### glm 1.0.3
@@ -85,13 +106,16 @@ order listed, which is an order of investigation, not of risk.
 - **Question.**  The provenance of both blocks and the permission to redistribute them.  The
   version returns on sufficient evidence of lawful redistribution or of independent
   implementation, or on another legitimate resolution.
+- **Recipe distribution.**  Does not settle it: a consumer that calls these `gtx` functions
+  compiles both blocks.
 
 ## Moved from `publish-holds.txt` on 2026-11-12
 
 The versions below declared a `license` and were held by a `publish-holds.txt` line.  A hold binds
 only the `new` mode, so an `all` dispatch could still have uploaded them; they left the catalog so
 that no mode can.  No version in the catalog required either.  A version that returns records the
-grant or the ruling in its restored `cabin.toml` and drops what that file says about the hold.
+grant, the ruling, or why recipe distribution settles the hold in its restored `cabin.toml` and
+drops what that file says about the hold.
 
 ### async-simple 1.4.0
 
@@ -110,6 +134,8 @@ grant or the ruling in its restored `cabin.toml` and drops what that file says a
 - **Question.**  Whether the authors of the reference implementation grant the right to
   redistribute the code and the prose.  The version returns when such a grant is found or the
   maintainers rule on it.
+- **Recipe distribution.**  Does not settle it: every consumer of `Lazy` compiles the allocator
+  code.
 
 ### json-schema-validator 2.4.1
 
@@ -121,11 +147,13 @@ grant or the ruling in its restored `cabin.toml` and drops what that file says a
   Copyright Statement in `NOTICE.RFC`.
 - **Question.**  Whether the quoted grammar may be redistributed, or is not protected expression.
   The version returns when a grant is found or the maintainers rule the grammar unprotected.
+- **Recipe distribution.**  Settles the hold: the grammar is in comments, which no build
+  compiles.
 
 ## Held before entering the catalog
 
-The version below was proposed and held before it merged, so no commit removed it: reinstating
-it starts from the pull request its section names.
+The versions below were held before they merged, so no commit removed them: reinstating one
+starts from the pull request its section names, or from a new port.
 
 ### fcl 0.7.0
 
@@ -153,3 +181,20 @@ Proposed in #309 (head `5f9c47a`) and held awaiting confirmation of license and 
   right holder, another license that applies, or evidence that the code is not what this
   comparison assumes.  Adding PQP's notice does not lift its purpose restriction, and upstream's
   BSD-3-Clause declaration does not settle the question.
+- **Recipe distribution.**  Does not settle it: fcl's distance queries and bounding-volume fitting
+  compile both blocks, and PQP's terms restrict use as well as redistribution.
+
+### hlslpp 3.9
+
+Held before a pull request opened.
+
+- **Code.**  `matrix_float.h:175-224` (`_hlslpp_inv_4x4_ps`) of hlslpp 3.9 (tag `3.9`, commit
+  `3a5b1cf0d807f945ec861201b316c425e9cf5061`) matches, statement for statement and with two
+  comments verbatim, `inverse_stubbe` in Rune Stubbe's unlisted gist `matrix_inverse_test.cpp`
+  (one revision, 2018-06-21), which states no license or permission.  hlslpp took it in with
+  commit `bce100a` ("Replaced 4x4 matrix inverse with much faster alternative"), citing only the
+  gist's URL; `_hlslpp_adjoint_4x4_ps` (`:89-135`) is the same code without the division.
+- **Question.**  Under which terms the code may be used and redistributed.  The version returns on
+  a license or permission from the gist's author that covers the code, or with an hlslpp release
+  whose inverse does not derive from the gist; a port does not patch the code out.
+- **Recipe distribution.**  Does not settle it: every 4x4 matrix inverse compiles the code.

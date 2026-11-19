@@ -16,6 +16,19 @@ A published version is immutable, so a correction to a published port reaches th
 as a [packaging revision](https://cabinpkg.com/docs/foundation-ports/#packaging-revisions) of the
 same upstream version, which only an `all` dispatch publishes.
 
+## Recipe distribution
+
+Foundation ports are distributed as recipes
+([Licenses and notices](../CONTRIBUTING.md#licenses-and-notices)): the registry is to hold each
+version's manifest and declared patches, and the user's Cabin rebuilds the package from the
+pinned upstream archive.  The pinned Cabin cannot publish a recipe yet, and this workflow uploads
+the staged sources, which the ports' license information no longer covers.  So publishing stays
+stopped until the pin moves to a Cabin that publishes recipes.  Recipe publishing then starts
+from a new log, as for a new registry ([Registry wipe](#registry-wipe)): a log that records the
+staged-source uploads would keep `new` from uploading their recipes.  Until then, a version that
+returned to the catalog because of recipe distribution ([Held ports](held-ports.md)) also has a
+`publish-holds.txt` line, which the pin move removes.
+
 ## Execution boundaries
 
 - **Credential boundary.**  The `build` job installs the pinned `cabin` and builds `port-publish`
@@ -158,9 +171,10 @@ loses nothing, because each run starts from the log, not from the previous run.
 
 ### Enabling and disabling
 
-- **Enable**, with the operator's approval: initialize the log (below), review a `plan` dispatch,
-  then set `PORTS_AUTO_PUBLISH` to `true` (repository variables; needs admin).  Once it is on, a
-  merged port is distribution-ready and publishes by default.  A hold
+- **Enable**, with the operator's approval and not before recipes publish
+  ([Recipe distribution](#recipe-distribution)): initialize the log (below), review a `plan`
+  dispatch, then set `PORTS_AUTO_PUBLISH` to `true` (repository variables; needs admin).  Once
+  it is on, a merged port is distribution-ready and publishes by default.  A hold
   ([CONTRIBUTING.md](../CONTRIBUTING.md#pull-requests)) lands in the port's own pull request (a
   hold must name a committed version, and a later pull request can lose the race with a scheduled
   run).
