@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/beached/header_libraries/archive/refs/tags/v2.136.0.tar.gz"
+checksum = "sha256:b219dddac0e66700b4e62ba3f531d6c7a5d1208c46494e0b28bd85e1c657f530"
+format = "tar.gz"
+strip-prefix = "header_libraries-2.136.0"
+
+[package]
+name = "cabin-ports/daw-header-libraries"
+version = "2.136.0"
+# Apache-2.0 WITH LLVM-exception covers the LLVM-derived compressed_pair.h,
+# split_buffer.h, vector.h and wrap_iter.h; MIT covers deprecated/not_null.h,
+# adapted from GSL.
+license = "BSL-1.0 AND Apache-2.0 WITH LLVM-exception AND MIT"
+include = ["LICENSE.md", "readme.md", "include"]
+
+# Consumers include <daw/daw_string_view.h> and so on.
+[target.daw-header-libraries]
+type = "header-only"
+include-dirs = ["include"]
+# CMakeLists.txt:42, target_compile_features(INTERFACE cxx_std_17).
+interface-cxx-standard = "c++17"
