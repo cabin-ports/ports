@@ -1,0 +1,50 @@
+[package.upstream]
+url = "https://github.com/ned14/quickcpplib/archive/11190d4ee2d8c1f13fe4a60cfbfb9350e121b4ec.tar.gz"
+checksum = "sha256:769715373d3043365ee0705b0fa5f7293b58da13355418df265a679f79a9c066"
+format = "tar.gz"
+strip-prefix = "quickcpplib-11190d4ee2d8c1f13fe4a60cfbfb9350e121b4ec"
+
+[package]
+name = "cabin-ports/quickcpplib"
+version = "2026.11.13"
+# Upstream has no releases or tags; 2026.11.13 is the date of commit
+# 11190d4ee2d8c1f13fe4a60cfbfb9350e121b4ec on master.
+# CC-BY-SA-3.0: Stack Overflow answer 12942652's allocator in
+# include/quickcpplib/aligned_allocator.hpp.
+license = "BSL-1.0 AND bzip2-1.0.6 AND CC-BY-SA-3.0"
+include = ["Licence.txt", "include"]
+
+# The archive lacks upstream's span-lite submodule, so span.hpp includes
+# <nonstd/span.hpp> from the span-lite port, as upstream's
+# QUICKCPPLIB_USE_SYSTEM_SPAN_LITE=ON build does (CMakeLists.txt:104-106,
+# 112).
+[dependencies]
+"cabin-ports/span-lite" = "=0.11.0"
+
+# CMakeLists.txt:23 and :42, "quickcpplib defaults to C++17 and later".
+# Not offered: upstream's opt-in C++14 mode.
+[target.quickcpplib]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+# Upstream defines both publicly (CMakeLists.txt:109-112); 201703L is its
+# default build.
+interface-defines = [
+  "QUICKCPPLIB_REQUIRE_CXX_STANDARD=201703L",
+  "QUICKCPPLIB_USE_SYSTEM_SPAN_LITE=1",
+]
+deps = [{ name = "cabin-ports/span-lite", public = true }]
+
+# ringbuffer_log.hpp:310 calls dladdr (CMakeLists.txt:116-118); :123-131
+# link librt on Linux only.
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["dl", "rt"]
+
+# backtrace() (CMakeLists.txt:120-122).
+[target.'cfg(os = "freebsd")'.profile]
+link-libs = ["execinfo"]
+
+# ringbuffer_log.hpp:351-361 calls pthread_sigmask and pthread_kill; Android's
+# libc provides them and upstream's CMake excludes Android (:123).
+[target.'cfg(all(family = "unix", not(os = "android")))'.profile]
+link-libs = ["pthread"]
