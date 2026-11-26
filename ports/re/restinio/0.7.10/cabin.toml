@@ -1,0 +1,39 @@
+[package.upstream]
+url = "https://github.com/Stiffstream/restinio/archive/refs/tags/v0.7.10.tar.gz"
+checksum = "sha256:f680281dfdf211172746869e6b975ba7a417c0ab659611dfc28483af30d64d6c"
+format = "tar.gz"
+strip-prefix = "restinio-0.7.10"
+
+[package]
+name = "cabin-ports/restinio"
+version = "0.7.10"
+# path2regex/path2regex.hpp is adopted from pillarjs/path-to-regexp (MIT).
+license = "BSD-3-Clause AND MIT"
+include = ["LICENSE", "dev/restinio"]
+
+[dependencies]
+"cabin-ports/asio" = "=1.38.2"
+"cabin-ports/expected-lite" = "=0.10.0"
+"cabin-ports/fmt" = "=12.2.0"
+"cabin-ports/llhttp" = "=9.3.1"
+
+# Header-only, standalone Asio as upstream's default (asio_include.hpp).
+# Not ported: the Boost.Asio mode (RESTINIO_USE_BOOST_ASIO), the SObjectizer
+# timer manager (so5/), and the OpenSSL, zlib, PCRE, PCRE2 and Boost.Regex
+# integrations, whose libraries a consumer adds itself.
+[target.restinio]
+type = "header-only"
+include-dirs = ["dev"]
+# README.md:3 states C++17.
+interface-cxx-standard = "c++17"
+deps = [
+  { name = "cabin-ports/asio", public = true },
+  { name = "cabin-ports/expected-lite", public = true },
+  { name = "cabin-ports/fmt", public = true },
+  { name = "cabin-ports/llhttp", public = true },
+]
+
+# impl/ioctx_on_thread_pool.hpp starts std::thread pools; upstream's library
+# target does not propagate a threads library.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
