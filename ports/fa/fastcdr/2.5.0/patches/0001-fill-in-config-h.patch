@@ -1,0 +1,56 @@
+--- a/include/fastcdr/config.h
++++ b/include/fastcdr/config.h
+@@ -15,31 +15,44 @@
+ #ifndef _FASTCDR_CONFIG_H_
+ #define _FASTCDR_CONFIG_H_
+ 
+-#define FASTCDR_VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+-#define FASTCDR_VERSION_MINOR @PROJECT_VERSION_MINOR@
+-#define FASTCDR_VERSION_MICRO @PROJECT_VERSION_PATCH@
+-#define FASTCDR_VERSION_STR "@PROJECT_VERSION@"
++// Changed for cabin-ports on 2026-11-26: filled in as a default CMake configure writes it, with the platform values from compiler-predefined macros.
++#define FASTCDR_VERSION_MAJOR 2
++#define FASTCDR_VERSION_MINOR 5
++#define FASTCDR_VERSION_MICRO 0
++#define FASTCDR_VERSION_STR "2.5.0"
+ 
+ // C++11 support defines
+ #ifndef HAVE_CXX11
+-#define HAVE_CXX11 @HAVE_CXX11@
++#define HAVE_CXX11 1
+ #endif // ifndef HAVE_CXX11
+ 
+ // Endianness defines
+ #ifndef FASTCDR_IS_BIG_ENDIAN_TARGET
+-#define FASTCDR_IS_BIG_ENDIAN_TARGET @FASTCDR_IS_BIG_ENDIAN_TARGET@
++#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
++#define FASTCDR_IS_BIG_ENDIAN_TARGET 1
++#elif defined(__BYTE_ORDER__) || defined(_MSC_VER)
++#define FASTCDR_IS_BIG_ENDIAN_TARGET 0
++#endif
+ #endif // ifndef FASTCDR_IS_BIG_ENDIAN_TARGET
+ 
+ #ifndef FASTCDR_HAVE_FLOAT128
+-#define FASTCDR_HAVE_FLOAT128 @FASTCDR_HAVE_FLOAT128@
++#if defined(__SIZEOF_FLOAT128__)
++#define FASTCDR_HAVE_FLOAT128 1
++#else
++#define FASTCDR_HAVE_FLOAT128 0
++#endif
+ #endif // ifndef FASTCDR_HAVE_FLOAT128
+ 
+ #ifndef FASTCDR_SIZEOF_LONG_DOUBLE
+-#define FASTCDR_SIZEOF_LONG_DOUBLE @FASTCDR_SIZEOF_LONG_DOUBLE@
++#if defined(__SIZEOF_LONG_DOUBLE__)
++#define FASTCDR_SIZEOF_LONG_DOUBLE __SIZEOF_LONG_DOUBLE__
++#elif defined(_MSC_VER)
++#define FASTCDR_SIZEOF_LONG_DOUBLE 8
++#endif
+ #endif // ifndef FASTCDR_SIZEOF_LONG_DOUBLE
+ 
+ // Wide characters and strings (wchar_t, std::wstring) left out of the API
+-#cmakedefine01 FASTCDR_DISABLE_WSTRINGS
++#define FASTCDR_DISABLE_WSTRINGS 0
+ 
+ #if defined(__ARM_ARCH) && __ARM_ARCH <= 7
+ #define FASTCDR_ARM32

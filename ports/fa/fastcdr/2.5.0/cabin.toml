@@ -1,0 +1,53 @@
+[package.upstream]
+url = "https://github.com/eProsima/Fast-CDR/archive/refs/tags/v2.5.0.tar.gz"
+checksum = "sha256:6a249c1d3aad7ecb098edd118d0f592b1f904363655a4a7ffafd933dd082317c"
+format = "tar.gz"
+strip-prefix = "Fast-CDR-2.5.0"
+# CMake configures include/fastcdr/config.h from config.h.in
+# (src/cpp/CMakeLists.txt:39-40).  The copy step places the template and
+# the patch fills it in as a default configure writes it, except that the
+# byte order, __float128 and sizeof(long double), which CMake measures
+# (cmake/common/check_configuration.cmake:129-154), come from the
+# compiler's __BYTE_ORDER__, __SIZEOF_FLOAT128__ and __SIZEOF_LONG_DOUBLE__,
+# or for cl little-endian, no __float128 and 8.
+patches = ["patches/0001-fill-in-config-h.patch"]
+
+[[package.upstream.copy]]
+from = "include/fastcdr/config.h.in"
+to = "include/fastcdr/config.h"
+
+[package]
+name = "cabin-ports/fastcdr"
+version = "2.5.0"
+license = "Apache-2.0"
+include = ["LICENSE", "include", "patches", "src/cpp"]
+
+# Upstream's library (src/cpp/CMakeLists.txt:23-66) with its CMake
+# defaults, STRICT_BOOL and FASTCDR_DISABLE_WSTRINGS off.  Not ported: the
+# shared library upstream builds by default (CMakeLists.txt:64) and
+# FastCdr.rc, the Windows version resource that labels it.
+[target.fastcdr]
+type = "library"
+sources = [
+  "src/cpp/Cdr.cpp",
+  "src/cpp/CdrSizeCalculator.cpp",
+  "src/cpp/FastBuffer.cpp",
+  "src/cpp/FastCdr.cpp",
+  "src/cpp/exceptions/BadOptionalAccessException.cpp",
+  "src/cpp/exceptions/BadParamException.cpp",
+  "src/cpp/exceptions/Exception.cpp",
+  "src/cpp/exceptions/LockedExternalAccessException.cpp",
+  "src/cpp/exceptions/NotEnoughMemoryException.cpp",
+  "src/cpp/helpers/memory_helpers.cpp",
+]
+include-dirs = ["include"]
+# Upstream requires C++11 (CMakeLists.txt:81-82); C++14 is the oldest
+# standard Cabin can request from cl.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+# Upstream gives consumers FASTCDR_NO_LIB on WIN32 only
+# (src/cpp/CMakeLists.txt:63); it only turns off eProsima_auto_link.h's
+# _MSC_VER auto-linking, so it is harmless elsewhere.
+defines = ["FASTCDR_SOURCE"]
+interface-defines = ["FASTCDR_NO_LIB"]
+links = "fastcdr"
