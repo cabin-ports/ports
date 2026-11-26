@@ -14,7 +14,7 @@ license = "MIT AND LicenseRef-PublicDomain"
 include = ["LICENSE", "include"]
 
 [dependencies]
-"cabin-ports/openssl" = "=4.1.0"
+"cabin-ports/openssl" = { version = "=4.1.0", optional = true }
 
 # Upstream's CMakeLists.txt defines BRYNET_USE_OPENSSL where it finds OpenSSL;
 # the brynet_openssl target is that build, and the default brynet target is
@@ -22,7 +22,7 @@ include = ["LICENSE", "include"]
 # vendored-openssl is not supported on Windows, as the openssl port's is not.
 [features]
 default = []
-openssl = []
+openssl = ["dep:cabin-ports/openssl"]
 vendored-openssl = ["openssl", "cabin-ports/openssl/vendored"]
 
 # Upstream's installed headers (CMakeLists.txt installs include/brynet), without
