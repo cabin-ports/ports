@@ -38,12 +38,15 @@ fn run(name: &str, args: &[&str], cwd: &Path, dir: &TempDir, env: &[(&str, &str)
         .current_dir(cwd)
         .env("PATH", path);
     for var in [
+        "ENABLED",
         "GITHUB_ENV",
         "GITHUB_EVENT_NAME",
         "GITHUB_OUTPUT",
         "GROUP_BASE",
         "GROUP_HEAD",
+        "INPUT",
         "PR_HEAD",
+        "PUBLISH",
     ] {
         command.env_remove(var);
     }
@@ -425,16 +428,22 @@ fn publish_mode(event: &str, env: &[(&str, &str)]) -> (Output, String) {
     (output, read(&output_file))
 }
 
-/// A scheduled run is `new` only while the variable is exactly `true`
-/// (expressions compare case-insensitively); any other value turns it
-/// off with a notice, which is no failure.
+/// A scheduled run is `new` only while both variables are exactly
+/// `true` (expressions compare case-insensitively); any other value
+/// turns it off with a notice, which is no failure.
 #[test]
 fn publish_mode_schedules_new_only_while_exactly_enabled() {
-    let (output, written) = publish_mode("schedule", &[("ENABLED", "true"), ("INPUT", "")]);
+    let (output, written) = publish_mode(
+        "schedule",
+        &[("ENABLED", "true"), ("PUBLISH", "true"), ("INPUT", "")],
+    );
     assert!(output.status.success(), "{}", stderr(&output));
     assert_eq!(written, "mode=new\n");
     for enabled in ["TRUE", " true", "", "false"] {
-        let (output, written) = publish_mode("schedule", &[("ENABLED", enabled), ("INPUT", "all")]);
+        let (output, written) = publish_mode(
+            "schedule",
+            &[("ENABLED", enabled), ("PUBLISH", "true"), ("INPUT", "all")],
+        );
         assert!(output.status.success(), "{enabled:?}: {}", stderr(&output));
         assert_eq!(written, "mode=off\n", "{enabled:?}");
         assert!(
@@ -443,15 +452,49 @@ fn publish_mode_schedules_new_only_while_exactly_enabled() {
             stdout(&output)
         );
     }
+    let (output, written) = publish_mode("schedule", &[("ENABLED", "true"), ("INPUT", "")]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(written, "mode=off\n");
+    assert!(
+        stdout(&output).contains("::notice::PORTS_PUBLISH_ENABLED is not exactly 'true'"),
+        "{}",
+        stdout(&output)
+    );
 }
 
-/// A dispatch runs the mode it names, whatever the variable says, and
-/// fails on anything else.
+/// A dispatch of `all` or `new` fails, uploading nothing, unless
+/// `PORTS_PUBLISH_ENABLED` is exactly `true`; `plan` uploads nothing and
+/// needs no variable.
+#[test]
+fn publish_mode_uploads_only_while_publishing_is_exactly_enabled() {
+    for mode in ["all", "new"] {
+        for publish in [None, Some(""), Some("True"), Some(" true"), Some("false")] {
+            let mut env = vec![("ENABLED", "true"), ("INPUT", mode)];
+            env.extend(publish.map(|value| ("PUBLISH", value)));
+            let (output, written) = publish_mode("workflow_dispatch", &env);
+            assert_eq!(output.status.code(), Some(1), "{mode} {publish:?}");
+            assert_eq!(written, "", "{mode} {publish:?}");
+            assert!(
+                stdout(&output).contains("::error::PORTS_PUBLISH_ENABLED is not exactly 'true'"),
+                "{mode} {publish:?}: {}",
+                stdout(&output)
+            );
+        }
+    }
+    let (output, written) = publish_mode("workflow_dispatch", &[("INPUT", "plan")]);
+    assert!(output.status.success(), "{}", stderr(&output));
+    assert_eq!(written, "mode=plan\n");
+}
+
+/// A dispatch runs the mode it names, whatever `PORTS_AUTO_PUBLISH`
+/// says, and fails on anything else.
 #[test]
 fn publish_mode_dispatches_the_named_mode() {
     for mode in ["all", "new", "plan"] {
-        let (output, written) =
-            publish_mode("workflow_dispatch", &[("ENABLED", ""), ("INPUT", mode)]);
+        let (output, written) = publish_mode(
+            "workflow_dispatch",
+            &[("ENABLED", ""), ("PUBLISH", "true"), ("INPUT", mode)],
+        );
         assert!(output.status.success(), "{mode}: {}", stderr(&output));
         assert_eq!(written, format!("mode={mode}\n"));
     }

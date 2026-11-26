@@ -9,8 +9,10 @@ It has two upload modes:
 - **`new`** (the schedule, or a manual dispatch): only the versions the registry has no upload
   receipt for, never a packaging revision ([Automatic publishing](#automatic-publishing)).
 
-A third dispatch mode, **`plan`**, previews `new` without uploading anything.  Merging a pull
-request publishes nothing until automatic publishing is switched on.
+A third dispatch mode, **`plan`**, previews `new` without uploading anything.  Neither upload mode
+runs unless the repository variable `PORTS_PUBLISH_ENABLED` is exactly `true`
+([Enabling and disabling](#enabling-and-disabling)), and merging a pull request publishes nothing
+until automatic publishing is switched on as well.
 
 A published version is immutable, so a correction to a published port reaches the registry only
 as a [packaging revision](https://cabinpkg.com/docs/foundation-ports/#packaging-revisions) of the
@@ -22,12 +24,11 @@ Foundation ports are distributed as recipes
 ([Licenses and notices](../CONTRIBUTING.md#licenses-and-notices)): the registry is to hold each
 version's manifest and declared patches, and the user's Cabin rebuilds the package from the
 pinned upstream archive.  The pinned Cabin cannot publish a recipe yet, and this workflow uploads
-the staged sources, which the ports' license information no longer covers.  So publishing stays
-stopped until the pin moves to a Cabin that publishes recipes.  Recipe publishing then starts
-from a new log, as for a new registry ([Registry wipe](#registry-wipe)): a log that records the
-staged-source uploads would keep `new` from uploading their recipes.  Until then, a version that
-returned to the catalog because of recipe distribution ([Held ports](held-ports.md)) also has a
-`publish-holds.txt` line, which the pin move removes.
+the staged sources, which the ports' license information no longer covers.  So
+`PORTS_PUBLISH_ENABLED` stays unset until the maintainer authorizes publishing, after Cabin and
+the registry support recipe-only publication.  Recipe publishing then starts from a new log, as for
+a new registry ([Registry wipe](#registry-wipe)): a log that records the staged-source uploads
+would keep `new` from uploading their recipes.
 
 ## Execution boundaries
 
@@ -90,19 +91,21 @@ revision, and `run` URL), and a `"outcome": "failed"` line for the version an up
 stopped at, whose upload may have landed.  Uploaded is not verified: the log never records
 verdicts.
 
-### Eligibility and holds
+### Eligibility
 
-A version is uploaded when the log has no `uploaded` line for it, the reviewed hold list
-`publish-holds.txt` (`<name> <version> <reason>` per line, validated by every mode) does not name
-it, and every version its declared requirements match is uploaded or uploads in the same run.  A
+A port version in the catalog that passes validation is eligible for publication.  A version that
+must not be distributed, for an unresolved licensing or other substantive problem, stays out of the
+catalog or is removed from it, and the pull request that declines or removes it states why
+([Published versions](../CONTRIBUTING.md#published-versions)).
+
+A version is uploaded when the log has no `uploaded` line for it and every version its declared
+requirements match is uploaded or uploads in the same run.  A
 version with an `uploaded` line is never uploaded again, whatever its recipe now stages, so a
 rejected upload is never revived and a correction ships only as an `all` dispatch.  Without
 `--new-revision`, the registry refuses different bytes for a version it already has (`409`) and
 answers identical bytes as a no-op, but once every revision of a version is rejected it revives
 identical bytes and accepts different ones.  So a version whose upload may have landed without its
-receipt is never resubmitted unattended ([Failures](#failures) and [The lock](#the-lock)).  Holds
-bind `new` only; a version that no mode may upload is removed from the catalog instead
-([Held ports](held-ports.md)).
+receipt is never resubmitted unattended ([Failures](#failures) and [The lock](#the-lock)).
 
 ### What it builds
 
@@ -111,8 +114,8 @@ them without running a probe, and the `publish` job stages them again and builds
 ([Execution boundaries](#execution-boundaries)); both run under the lock, so they read the same
 log.  An uploaded requirement must stage exactly the
 bytes of its last receipt; otherwise the candidates that need it wait for its packaging revision.
-A run in which every version has an upload receipt, a `failed` line, or a hold, or requires a
-version with a `failed` line or a hold, stops after the `build` job, before taking the lock; a
+A run in which every version has an upload receipt or a `failed` line, or requires a version
+with a `failed` line, stops after the `build` job, before taking the lock; a
 `new` run whose candidates all wait on a requirement's packaging revision still takes the lock and
 stages them to find that out.
 
@@ -121,13 +124,13 @@ stages them to find that out.
 A failed upload fails the run, after the receipts of the uploads before it and a `failed` line for
 the version it stopped at.  That upload may have landed with its response lost, so the version, and
 what requires it, waits for a dispatch with `retry-failed`, which an operator starts only after
-checking the registry's admin listings: a version with a rejected revision gets a hold instead,
-since resubmitting would revive it, and a `409` means the registry has other bytes for it, which
-need a packaging revision.
+checking the registry's admin listings: a version with a rejected revision gets its `uploaded`
+line instead ([Reconciling the log](#reconciling-the-log)), since resubmitting would revive it,
+and a `409` means the registry has other bytes for it, which need a packaging revision.
 
 A port that does not build fails the `prepare` job.  Nothing was uploaded, so the `publish` job is
 skipped and the `record` job releases the lock; every later run fails the same way, uploading
-nothing, until the port is fixed or held.
+nothing, until the port is fixed or removed from the catalog.
 
 ### The lock
 
@@ -149,8 +152,8 @@ of either mode fails until an operator reconciles the log
 ### Freshness
 
 A scheduled run uploads its own commit, which must have passed the merge queue's `required` check.
-Under the lock it re-reads the log and compares its commit with `main`: a candidate whose ports,
-requirements, or hold main has since changed waits for a later run, and every candidate does when
+Under the lock it re-reads the log and compares its commit with `main`: a candidate whose ports or
+requirements main has since changed waits for a later run, and every candidate does when
 main changed any other file outside `ports/` except the documentation files `README.md`,
 `AGENTS.md`, `CONTRIBUTING.md`, `docs/maintaining.md`, and `docs/publishing.md`.  Unrelated port
 merges never stop it.  This is a last check, not a transaction with later merges.
@@ -164,31 +167,38 @@ nothing here renders or waits for a verdict.
 
 ### Schedule
 
-The schedule (`17,47 * * * *`) runs `new` only while the repository variable `PORTS_AUTO_PUBLISH`
-is exactly `true`.  Unset, empty, or `false` starts no job; another spelling such as `TRUE` starts
-only the `gate` job, which stops before anything is built.  A scheduled run that is late or skipped
-loses nothing, because each run starts from the log, not from the previous run.
+The schedule (`17,47 * * * *`) runs `new` only while the repository variables `PORTS_AUTO_PUBLISH`
+and `PORTS_PUBLISH_ENABLED` are both exactly `true`.  `PORTS_AUTO_PUBLISH` unset, empty, or
+`false` starts no job; any other combination, such as `TRUE` or an unset `PORTS_PUBLISH_ENABLED`,
+starts only the `gate` job, which stops before anything is built.  A scheduled run that is late or
+skipped loses nothing, because each run starts from the log, not from the previous run.
 
 ### Enabling and disabling
 
-- **Enable**, with the operator's approval and not before recipes publish
-  ([Recipe distribution](#recipe-distribution)): initialize the log (below), review a `plan`
-  dispatch, then set `PORTS_AUTO_PUBLISH` to `true` (repository variables; needs admin).  Once
-  it is on, a merged port is distribution-ready and publishes by default.  A hold
-  ([CONTRIBUTING.md](../CONTRIBUTING.md#pull-requests)) lands in the port's own pull request (a
-  hold must name a committed version, and a later pull request can lose the race with a scheduled
-  run).
-- **Disable**: set it to anything else or delete it.  Queued runs then upload nothing; a running
-  upload finishes its batch unless the run is cancelled (which keeps the lock), and everything a
-  stopped run uploaded stays in the registry.  Turning it off never retracts an accepted package.
+Every upload, dispatched or scheduled, requires `PORTS_PUBLISH_ENABLED` to be exactly `true`:
+while it is not, an `all` or `new` dispatch fails before anything is built, and the `publish` job
+checks it again right before uploading.  It stays unset until the maintainer authorizes publishing
+([Recipe distribution](#recipe-distribution)).
+
+- **Enable**, only then: initialize the log (below), review a `plan` dispatch, set
+  `PORTS_PUBLISH_ENABLED` to `true`, and set `PORTS_AUTO_PUBLISH` to `true` for the schedule
+  (repository variables; needs admin).  Once both are on, a merged port is ready to publish and
+  publishes by default.
+- **Disable**: set `PORTS_PUBLISH_ENABLED`, or `PORTS_AUTO_PUBLISH` for the schedule alone, to
+  anything else or delete it.  A run whose `publish` job has not started then uploads nothing;
+  without `PORTS_PUBLISH_ENABLED`, such a dispatch fails before uploading and keeps the lock
+  ([Reconciling the log](#reconciling-the-log)).  A `publish` job reads the variables as they
+  were when it started, so a started one finishes its batch unless the run is cancelled (which
+  keeps the lock), and everything a stopped run uploaded stays in the registry.  Turning either
+  off never retracts an accepted package.
 
 ### Initializing the log
 
 Initialize the log while no run is publishing: create the `publish-receipts` branch holding
 `receipts.jsonl`, seeded with an `uploaded` line for every revision the registry already holds,
 from the operator's `GET /api/v1/admin/versions?status=` listings (`pending`, `verified`, and
-`rejected`), so the first run neither resubmits nor revives one.  The log, the lock, and the holds
-are trusted at write-access level: protect the branch from deletion and force pushes, and restrict
+`rejected`), so the first run neither resubmits nor revives one.  The log and the lock are trusted
+at write-access level: protect the branch from deletion and force pushes, and restrict
 who may push it.  `new` fails without the branch; `all` then records nothing, and an `all` run that
 started before the branch existed uploads nothing once it does.
 
@@ -202,8 +212,8 @@ itself.
 
 After a run that kept the lock (its `record` job says why): if only its push failed, rerun that job
 alone.  Otherwise compare the run's `receipts-*` artifacts (kept 30 days) and its log with the admin
-listings, append an `uploaded` line for each upload that landed without one, add a hold for any
-version with a rejected revision, and delete `lock` in the same commit; then dispatch again.
+listings, append an `uploaded` line for each upload that landed without one, a rejected one
+included, and delete `lock` in the same commit; then dispatch again.
 Rerunning the run's other jobs uploads nothing, and a rerun `publish` job leaves the `record` job
 nothing to record: it takes the receipts of the latest `publish` job only.  A `plan` dispatch, or
 `port-publish --plan-new --index-url https://registry.cabinpkg.com --receipts receipts.jsonl --cabin <cabin>`

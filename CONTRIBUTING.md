@@ -212,22 +212,22 @@ the licenses of what they redistribute.
   functions, standard algorithms, or common idioms that upstream does not identify as copied.
   Where upstream credits a short snippet whose copyright significance is uncertain, keep the
   credit and state the doubt in one `cabin.toml` comment line.  Size alone never shows that a
-  copy is permitted, and no code is relabeled to avoid a hold.
+  copy is permitted, and no code is relabeled to keep a version in the catalog.
 - **Creative Commons code.**  For code copied from Stack Overflow, cppreference, or a similar
   site, confirm the post, the license version that applies to it, and whether the code is a
   genuine, substantial copy.  If it is, add its term to `license`: the code stays under that
   license.  Raise a substantial BY-SA block with the maintainers in the pull request, since
   whether ShareAlike reaches the code around it is not settled.
-- **Hold only for a real problem.**  Never claim a permission that no source grants.
+- **Exclude only for a real problem.**  Never claim a permission that no source grants.
   Substantial code whose source grants no permission to use or redistribute it, or a verified
-  incompatibility between the licenses of code that must ship together, holds the version when
-  the package's builds on targets Cabin supports compile it: every user who ships what they
-  build then passes it on ([Pull requests](#pull-requests)).  Adding or removing a notice
-  resolves neither, and a gap in upstream's notices alone holds nothing.  Material that such
-  builds do not compile - comments, or a fallback for platforms Cabin does not support - stays
-  in upstream's sources, which Cabin does not pass on, and holds nothing unless the recipe
-  itself carries it; the version's
-  `cabin.toml` names any setting with which a consumer could still compile it.
+  incompatibility between the licenses of code that must ship together, keeps the version out of
+  the catalog when the package's builds on targets Cabin supports compile it: every user who
+  ships what they build then passes it on ([Published versions](#published-versions)).  Adding or
+  removing a notice resolves neither, and a gap in upstream's notices alone excludes nothing.
+  Material that such builds do not compile - comments, or a fallback for platforms Cabin does not
+  support - stays in upstream's sources, which Cabin does not pass on, and excludes nothing
+  unless the recipe itself carries it; the version's `cabin.toml` names any setting with which a
+  consumer could still compile it.
 
 ## Consumer tests
 
@@ -331,19 +331,17 @@ and [CI](docs/maintaining.md#ci) what pull-request CI runs.
   `feat(ports): add zlib 1.3.1`).
 - A pull request merges only once CI passes on Linux, macOS, and Windows and review approves it.
   Never weaken a check to make a port mergeable.
-- While automatic publishing is on, a merged port is distribution-ready and publishes by default
+- A port version in the catalog that passes validation is eligible for publication, and while
+  automatic publishing is on, a merged port publishes by default
   ([Enabling and disabling](docs/publishing.md#enabling-and-disabling)).  Upstream bugs and
-  vulnerabilities short of a concrete critical security risk, quality concerns, and open
-  questions are not holds: investigate, decide, and fix packaging gaps as above.  Add a
-  `publish-holds.txt` line, in the same pull request, only for a blocker packaging cannot
-  resolve: a concrete critical security risk, a failure to produce a valid package, or, until
-  recipes publish, a version that returned to the catalog because of recipe distribution
-  ([Recipe distribution](docs/publishing.md#recipe-distribution)).  The line states the evidence,
-  the remediation attempted, and the exact blocking condition.  A version held under
-  [Licenses and notices](#licenses-and-notices) takes no such line, which binds only the `new`
-  mode: the version stays out of the catalog ([Published versions](#published-versions)).  The
-  operator's hold for
-  a version with a rejected revision ([Failures](docs/publishing.md#failures)) is separate.
+  vulnerabilities short of a concrete critical security risk, quality concerns, gaps in
+  upstream's notices, and open questions keep no version out: investigate, decide, and fix
+  packaging problems as above.  Only a
+  blocker packaging cannot resolve - a concrete critical security risk, a failure to produce a
+  valid package, or a problem under [Licenses and notices](#licenses-and-notices) - keeps a
+  version out of the catalog ([Published versions](#published-versions)), and the pull request
+  that declines or removes it states the evidence, the remediation attempted, and the exact
+  blocking condition.
 
 ## Published versions
 
@@ -356,7 +354,7 @@ merging it publishes nothing by itself, since only a full `all` publish uploads 
 Retiring a specific *version* of a foundation port removes `ports/<prefix>/<name>/<version>/`;
 retiring an entire port removes the whole `ports/<prefix>/<name>/` directory.
 
-A version that the maintainers hold under [Licenses and notices](#licenses-and-notices) leaves the
-catalog the same way, together with the versions that require it.  [Held ports](docs/held-ports.md)
-records each one, its open question, and how it returns.  Only the maintainers decide such a
-removal; a pull request that finds a restriction states the evidence and waits for their decision.
+A version that must not be distributed, for an unresolved licensing or other substantive problem,
+leaves the catalog the same way, together with the versions that require it, and the pull request
+that removes it states why.  Only the maintainers decide such a removal; a pull request that finds
+a restriction states the evidence and waits for their decision.
