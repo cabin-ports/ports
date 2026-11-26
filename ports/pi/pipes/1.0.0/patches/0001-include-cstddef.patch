@@ -1,0 +1,10 @@
+--- a/include/pipes/send.hpp
++++ b/include/pipes/send.hpp
+@@ -3,6 +3,7 @@
+ 
+ #include "pipes/helpers/FWD.hpp"
+ 
++#include <cstddef>
+ #include <tuple>
+ 
+ namespace pipes
