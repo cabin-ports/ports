@@ -1,0 +1,92 @@
+[package.upstream]
+url = "https://github.com/apple-oss-distributions/mDNSResponder/archive/refs/tags/mDNSResponder-2881.120.11.tar.gz"
+checksum = "sha256:f665cf02b5c930f9b70fb39b7567f03dd821997594c56ce399098eaa0372fb15"
+format = "tar.gz"
+strip-prefix = "mDNSResponder-mDNSResponder-2881.120.11"
+
+# dns_sd.h is the one header upstream installs (mDNSPosix/Makefile:302);
+# mDNSShared also holds private headers such as general.h, so it stays off
+# the consumer include path.
+[[package.upstream.copy]]
+from = "mDNSShared/dns_sd.h"
+to = "include/dns_sd.h"
+
+[package]
+name = "cabin-ports/mdnsresponder"
+version = "2881.120.11"
+license = "BSD-3-Clause AND Apache-2.0"
+include = [
+  "LICENSE",
+  "include",
+  "mDNSCore/mdns_strict.h",
+  "mDNSShared/CommonServices.h",
+  "mDNSShared/DebugServices.c",
+  "mDNSShared/DebugServices.h",
+  "mDNSShared/GenLinkedList.c",
+  "mDNSShared/GenLinkedList.h",
+  "mDNSShared/SCCSVersioning.h",
+  "mDNSShared/dns_sd.h",
+  "mDNSShared/dns_sd_private.h",
+  "mDNSShared/dnssd_clientlib.c",
+  "mDNSShared/dnssd_clientstub.c",
+  "mDNSShared/dnssd_clientstub.h",
+  "mDNSShared/dnssd_errstring.c",
+  "mDNSShared/dnssd_ipc.c",
+  "mDNSShared/dnssd_ipc.h",
+  "mDNSShared/general.h",
+  "mDNSWindows/DLL/dllmain.c",
+  "mDNSWindows/VisualStudioSupport.h",
+]
+
+# Only the client library is ported, as mDNSPosix/Makefile (libdns_sd) and
+# mDNSWindows/DLL/dnssd.vcxproj build it.  Not ported: the daemons, dns-sd
+# and the other clients, the NSS module, and the Java and .NET bindings.  On
+# macOS the library's DNSService* functions take the place of libSystem's
+# (measured).
+# Upstream states no C standard.  dns_sd.h needs C99 and compiles as C++98
+# (measured); C11 is the lowest Cabin accepts for MSVC.
+[target.dns_sd]
+type = "library"
+sources = [
+  "mDNSShared/dnssd_clientlib.c",
+  "mDNSShared/dnssd_clientstub.c",
+  "mDNSShared/dnssd_ipc.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+links = "dns_sd"
+
+[target.'cfg(family = "unix")'.sources]
+dns_sd = ["mDNSShared/dnssd_errstring.c"]
+
+[target.'cfg(os = "windows")'.sources]
+dns_sd = [
+  "mDNSShared/DebugServices.c",
+  "mDNSShared/GenLinkedList.c",
+  "mDNSWindows/DLL/dllmain.c",
+]
+
+[profile]
+include-dirs = ["mDNSCore", "mDNSShared"]
+
+[target.'cfg(family = "unix")'.profile]
+defines = ["MDNS_NO_STRICT=1", "MDNS_UDS_SERVERPATH=\"/var/run/mdnsd\""]
+
+[target.'cfg(os = "linux")'.profile]
+defines = ["NOT_HAVE_SA_LEN"]
+
+[target.'cfg(os = "windows")'.profile]
+defines = [
+  "MDNS_DEBUGMSGS=0",
+  "NOT_HAVE_SA_LEN",
+  "USE_TCP_LOOPBACK",
+  "WIN32",
+  "WIN32_CENTENNIAL",
+  "WIN32_LEAN_AND_MEAN",
+  "_CRT_SECURE_NO_DEPRECATE",
+  "_WINSOCK_DEPRECATED_NO_WARNINGS",
+]
+include-dirs = ["mDNSWindows"]
+link-libs = ["ws2_32", "iphlpapi", "advapi32"]
