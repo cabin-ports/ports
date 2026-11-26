@@ -5,8 +5,8 @@
  
  #ifdef RUAPU_IMPLEMENTATION
 +
-+#if defined __linux__ && !defined _POSIX_C_SOURCE
-+#define _POSIX_C_SOURCE 200809L
++#if defined __linux__ && !defined _DEFAULT_SOURCE
++#define _DEFAULT_SOURCE 1
 +#endif
  
  #include <setjmp.h>

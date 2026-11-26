@@ -6,7 +6,7 @@ strip-prefix = "ruapu-0.1.0"
 # Patch 0001 spells the inline-assembly keyword __asm__: the header writes asm,
 # which a strict -std=c99 compile rejects (measured on macOS arm64: use of
 # undeclared identifier 'asm').
-# Patch 0002 defines _POSIX_C_SOURCE on Linux ahead of the header's libc includes
+# Patch 0002 defines _DEFAULT_SOURCE on Linux ahead of the header's libc includes
 # (measured: check-linux, "unknown type name 'sigjmp_buf'" under -std=c99); a
 # consumer must include ruapu.h in the implementation file before any libc header.
 patches = [
