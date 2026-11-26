@@ -45,4 +45,6 @@ c-standard = "c11"
 # Upstream states no C standard; c89 is the measured floor of aes.h (clang
 # -fsyntax-only -std=c89 -pedantic-errors passes).
 interface-c-standard = "c89"
-interface-cxx-standard = "c++11"
+# Upstream states no C++ standard; c++98 is the measured floor of aescpp.h (clang++
+# -fsyntax-only -std=c++98 -pedantic-errors passes).
+interface-cxx-standard = "c++98"
