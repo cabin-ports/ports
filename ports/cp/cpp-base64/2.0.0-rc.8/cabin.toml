@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/ReneNyffenegger/cpp-base64/archive/refs/tags/V2.rc.08.tar.gz"
+checksum = "sha256:0a7ada789a99c2664437f1db8c38b60fe5815cf82b75bea0f0c08933c1317828"
+format = "tar.gz"
+strip-prefix = "cpp-base64-2.rc.08"
+
+# Version 2.0.0-rc.8 is upstream's tag V2.rc.08, a release candidate; upstream has no X.Y.Z tag.
+[package]
+name = "cabin-ports/cpp-base64"
+version = "2.0.0-rc.8"
+license = "Zlib"
+include = ["LICENSE", "base64.h", "base64.cpp"]
+
+# Upstream's Makefile builds base64.cpp at c++11 and c++17 (lines 40, 43).  base64.h declares
+# the std::string_view overloads only when __cplusplus >= 201703L, and base64.cpp defines them
+# under the same test.  Compiled at c++11, the library leaves a c++17 consumer's string_view
+# overloads undefined (link error; measured), so it is compiled at c++17 for every consumer.
+[target.cpp-base64]
+type = "library"
+sources = ["base64.cpp"]
+include-dirs = ["."]
+cxx-standard = "c++17"
+interface-cxx-standard = "c++11"
