@@ -1,0 +1,10 @@
+--- a/include/lazycsv.hpp
++++ b/include/lazycsv.hpp
+@@ -8,6 +8,7 @@
+ #include <stdexcept>
+ #include <string>
+ #include <string_view>
++#include <system_error>
+ 
+ #if defined(_WIN32)
+ #include <windows.h>
