@@ -26,7 +26,7 @@ static int release;
 
 static void dtor(void *p) {
   free(p);
-  mtx_lock(&m);
+  CHECK(mtx_lock(&m) == thrd_success);
   dtor_count++;
   mtx_unlock(&m);
 }
@@ -34,7 +34,7 @@ static void dtor(void *p) {
 static int worker(void *arg) {
   int i;
   for (i = 0; i < NITER; i++) {
-    mtx_lock(&m);
+    CHECK(mtx_lock(&m) == thrd_success);
     counter++;
     mtx_unlock(&m);
   }
@@ -47,11 +47,11 @@ static void init(void) { init_count++; }
 /* Holds the timed mutex tm until main releases it. */
 static int holder(void *arg) {
   (void)arg;
-  mtx_lock(&tm);
-  mtx_lock(&m);
+  CHECK(mtx_lock(&tm) == thrd_success);
+  CHECK(mtx_lock(&m) == thrd_success);
   held = 1;
-  cnd_broadcast(&cv);
-  while (!release) cnd_wait(&cv, &m);
+  CHECK(cnd_broadcast(&cv) == thrd_success);
+  while (!release) CHECK(cnd_wait(&cv, &m) == thrd_success);
   mtx_unlock(&m);
   mtx_unlock(&tm);
   return 0;
@@ -85,8 +85,8 @@ int main(void) {
   CHECK(init_count == 1);
 
   CHECK(thrd_create(&h, holder, NULL) == thrd_success);
-  mtx_lock(&m);
-  while (!held) cnd_wait(&cv, &m);
+  CHECK(mtx_lock(&m) == thrd_success);
+  while (!held) CHECK(cnd_wait(&cv, &m) == thrd_success);
   mtx_unlock(&m);
   CHECK(mtx_trylock(&tm) == thrd_busy);
   CHECK(timespec_get(&ts, TIME_UTC) == TIME_UTC);
@@ -96,9 +96,9 @@ int main(void) {
     ts.tv_nsec -= 1000000000;
   }
   CHECK(mtx_timedlock(&tm, &ts) == thrd_timedout);
-  mtx_lock(&m);
+  CHECK(mtx_lock(&m) == thrd_success);
   release = 1;
-  cnd_broadcast(&cv);
+  CHECK(cnd_broadcast(&cv) == thrd_success);
   mtx_unlock(&m);
   CHECK(thrd_join(h, &res) == thrd_success);
   CHECK(res == 0);
