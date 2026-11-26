@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/Chylynsky/rc_ptr/archive/refs/tags/v0.0.2.tar.gz"
+checksum = "sha256:4682e0235b6def843b52e9327c7f1f87c98998b58c1b39a27cbf13dae27f7977"
+format = "tar.gz"
+strip-prefix = "rc_ptr-0.0.2"
+
+[package]
+name = "cabin-ports/rc-ptr"
+version = "0.0.2"
+license = "BSL-1.0"
+include = ["LICENSE_1_0.txt", "include"]
+
+# rc_ptr's copy and move assignment onto a pointer that already owns
+# something do not release the old reference, so that object leaks (measured:
+# `a = b` of two live rc_ptr<T> destroys one T of two).
+[target.rc-ptr]
+type = "header-only"
+include-dirs = ["include"]
+# README.md ("Requires C++17") and CMakeLists.txt.
+interface-cxx-standard = "c++17"
