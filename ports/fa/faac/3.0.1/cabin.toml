@@ -63,3 +63,8 @@ defines = ["HAVE_SSE2"]
 
 [target.'cfg(family = "unix")'.profile]
 link-libs = ["m"]
+
+# Upstream prefers gnu11 (meson.build:7), where glibc exposes M_PI and
+# M_SQRT2; strict c11 hides them.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_DEFAULT_SOURCE"]
