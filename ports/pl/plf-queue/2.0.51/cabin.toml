@@ -1,0 +1,25 @@
+[package.upstream]
+# Upstream tags no releases; this is main on 2026-11-23, whose subject is
+# "tools v1.0.18".  plf_queue.h is last changed by the commit "v2.0.51".
+url = "https://github.com/mattreecebentley/plf_queue/archive/008ac08e8240664863b35b4c198261fe5c989664.tar.gz"
+checksum = "sha256:62669d15c679ecfe839f90feaf183198f6ae875dd39201d5c18d631c874286bd"
+format = "tar.gz"
+strip-prefix = "plf_queue-008ac08e8240664863b35b4c198261fe5c989664"
+
+[package]
+name = "cabin-ports/plf-queue"
+version = "2.0.51"
+license = "Zlib"
+# The archive's own plf_tools.h and plf_tools_undef.h (v1.0.18) are left out:
+# the plf-tools package provides them, byte-identical.
+include = ["LICENSE", "plf_queue.h"]
+
+[dependencies]
+"cabin-ports/plf-tools" = "^1.0.18"
+
+# README.md: "C++98/03/11/14/etc-compatible".
+[target.plf-queue]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++98"
+deps = [{ name = "cabin-ports/plf-tools", public = true }]
