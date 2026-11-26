@@ -3,12 +3,17 @@ url = "https://github.com/mapbox/eternal/archive/refs/tags/v1.0.1.tar.gz"
 checksum = "sha256:7d799381b3786d0bd987eea75df2a81f581a64ee962e922a2f7a7d3d0c3d0421"
 format = "tar.gz"
 strip-prefix = "eternal-1.0.1"
+# eternal.hpp uses std::uint32_t and std::uint64_t without <cstdint>, which
+# libstdc++ does not provide transitively (measured: check-linux,
+# "'uint32_t' is not a member of 'std'").  Master fixed this in 756ff2e0
+# after the last release.
+patches = ["patches/0001-include-cstdint.patch"]
 
 [package]
 name = "cabin-ports/eternal"
 version = "1.0.1"
 license = "ISC"
-include = ["LICENSE.md", "README.md", "include"]
+include = ["LICENSE.md", "README.md", "include", "patches"]
 
 # Upstream is archived; v1.0.1 is its last release.
 [target.eternal]
