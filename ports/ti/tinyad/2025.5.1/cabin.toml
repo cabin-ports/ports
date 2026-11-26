@@ -1,0 +1,30 @@
+[package.upstream]
+url = "https://github.com/patr-schm/TinyAD/archive/4b48d1a1a588874556a692a3abbdecd0db4c23e1.tar.gz"
+checksum = "sha256:8eb26aebc64b1357ce6c62ee35d43b3df86b5494b2061433801b4e9c1cbd670b"
+format = "tar.gz"
+strip-prefix = "TinyAD-4b48d1a1a588874556a692a3abbdecd0db4c23e1"
+
+[package]
+name = "cabin-ports/tinyad"
+# Upstream has no tags or releases; the version is YYYY.M.D of the commit date
+# (2025-05-01) of the archived commit.
+version = "2025.5.1"
+# Detail/EigenVectorTypedefs.hh:7 credits Eigen's Matrix.h (MPL-2.0) for its
+# typedefs, and Operations/SVD.hh:33,73 credit a lucidar.me page for its 2x2 SVD;
+# their copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "include"]
+
+[dependencies]
+"cabin-ports/eigen3" = "^5.0.1"
+
+# C++17 is upstream's stated standard (README.md, CMakeLists.txt:9).  Upstream
+# links OpenMP when found; without it evaluation runs serially, which is how this
+# port builds.  The Support/ mesh adapters (OpenMesh.hh, PMP.hh, GeometryCentral.hh,
+# Polymesh.hh) include OpenMesh, pmp, geometry-central or polymesh, which this port
+# does not provide; a consumer using one supplies that library itself.
+[target.tinyad]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+deps = [{ name = "cabin-ports/eigen3", public = true }]
