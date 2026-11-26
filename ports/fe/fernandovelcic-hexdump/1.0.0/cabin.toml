@@ -5,15 +5,15 @@ format = "tar.gz"
 strip-prefix = "hexdump-1.0.0"
 
 [package]
-name = "cabin-ports/hexdump"
+name = "cabin-ports/fernandovelcic-hexdump"
 version = "1.0.0"
 license = "BSD-3-Clause"
 include = ["COPYING", "README.md", "hexdump.hpp"]
 
-# Upstream states no standard; its Makefile builds with -std=c++14 and
-# ConanCenter requires C++11.  operator<< leaves the caller's stream in hex
-# with fill '0' (measured by the consumer test).
-[target.hexdump]
+# A fork of zmb3/hexdump whose 1.0.0 tag ConanCenter packages under this name.
+# Upstream states no standard; c++11 is measured.  operator<< leaves the
+# caller's stream in hex with fill '0' (measured by the consumer test).
+[target.fernandovelcic-hexdump]
 type = "header-only"
 include-dirs = ["."]
 interface-cxx-standard = "c++11"
