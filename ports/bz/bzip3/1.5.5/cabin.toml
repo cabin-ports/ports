@@ -1,0 +1,43 @@
+[package.upstream]
+url = "https://github.com/iczelia/bzip3/releases/download/1.5.5/bzip3-1.5.5.tar.gz"
+checksum = "sha256:dc3bd8237178e1a2b99d8dcf1f4aeb3593c723788a9863606e121b40784e596d"
+format = "tar.gz"
+strip-prefix = "bzip3-1.5.5"
+
+[package]
+name = "cabin-ports/bzip3"
+version = "1.5.5"
+# The files' LGPL-3.0-or-later headers (README.md says "LGPLv3 only")
+# and the Apache-2.0 libsais.h and 3rdparty/libsais-LICENSE.
+license = "LGPL-3.0-or-later AND Apache-2.0"
+include = [
+  "LICENSE",
+  "README.md",
+  "3rdparty",
+  "include",
+  "src/libbz3.c",
+]
+
+# libbz3 as upstream's CMakeLists.txt builds it, with its VERSION
+# definition (CMakeLists.txt:5, :60).  Not ported: the bzip3 program
+# and its shell wrappers.  Upstream's CMake build leaves out
+# -march=native by default (BZIP3_ENABLE_ARCH_NATIVE).  bz3_compress
+# writes past an output buffer of exactly bz3_bound(n) bytes for small
+# incompressible inputs (measured with AddressSanitizer); allocate more.
+[target.bzip3]
+type = "library"
+sources = ["src/libbz3.c"]
+include-dirs = ["include"]
+defines = ["VERSION=\"1.5.5\""]
+# Upstream builds C99 (CMakeLists.txt:10); c11 is the floor Cabin passes cl.
+c-standard = "c11"
+# CMakeLists.txt:10 (CMAKE_C_STANDARD 99); strict C99 is not passed to cl.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+links = "bzip3"
+
+# CMakeLists.txt:13-18 enables pthread on every platform but MSVC; it
+# provides bz3_encode_blocks and bz3_decode_blocks.
+[target.'cfg(family = "unix")'.profile]
+defines = ["PTHREAD"]
+link-libs = ["pthread"]
