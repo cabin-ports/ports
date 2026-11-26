@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/commschamp/comms/archive/refs/tags/v5.5.3.tar.gz"
+checksum = "sha256:7be068c76d0b3651aa663c10f88873eb6f83cb2744579be1005d56679e72c1fb"
+format = "tar.gz"
+strip-prefix = "comms-5.5.3"
+
+[package]
+name = "cabin-ports/comms"
+version = "5.5.3"
+license = "MPL-2.0"
+include = ["LICENSE", "include"]
+
+# C++11 is upstream's floor (README.md, "Supported Compilers").
+[target.comms]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
