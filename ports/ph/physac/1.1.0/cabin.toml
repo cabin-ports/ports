@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/victorfisac/Physac/archive/refs/tags/1.1.tar.gz"
+checksum = "sha256:7def4e93a33862d051a912f5be7d55aca51aef5f6572f50eb3a51f1e57f3d8cb"
+format = "tar.gz"
+strip-prefix = "Physac-1.1"
+
+[package]
+name = "cabin-ports/physac"
+# Upstream's version is two-part (1.1); Cabin versions are SemVer.
+version = "1.1.0"
+# The 1.1 tag has no LICENSE file; the zlib/libpng terms are the header
+# comment of src/physac.h (lines 61-77).
+license = "Zlib"
+include = ["src"]
+
+# Upstream compiles with -std=c99 (src/physac.h, line 46).
+# Measured limitations: with PHYSAC_STANDALONE on macOS (clang, SDK 27.2,
+# -std=c99), <mach/mach_time.h> pulls in stdbool after physac.h's own
+# "enum bool", failing with "conflicting types for 'IsPhysicsEnabled'" unless
+# the consumer includes <stdbool.h> and defines _STDBOOL_H before physac.h.
+# The implementation does not compile as C++ (clang -std=c++11: narrowing
+# errors at src/physac.h:1682), so PHYSAC_IMPLEMENTATION belongs in a C file.
+[target.physac]
+type = "header-only"
+include-dirs = ["src"]
+interface-c-standard = "c99"
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m", "pthread"]
