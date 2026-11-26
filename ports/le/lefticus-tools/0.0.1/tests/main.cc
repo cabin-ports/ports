@@ -1,6 +1,15 @@
+// forwarding_ref.hpp and moving_ref.hpp need C++26 deleted-function reasons.
+#if !defined(_MSC_VER) && (defined(__clang__) || (defined(__GNUC__) && __GNUC__ >= 15))
+#define HAS_DELETE_REASON 1
+#else
+#define HAS_DELETE_REASON 0
+#endif
+
 #include <lefticus/tools/curry.hpp>
+#if HAS_DELETE_REASON
 #include <lefticus/tools/forwarding_ref.hpp>
 #include <lefticus/tools/moving_ref.hpp>
+#endif
 #include <lefticus/tools/simple_stack_flat_map.hpp>
 #include <lefticus/tools/simple_stack_vector.hpp>
 #include <lefticus/tools/type_lists.hpp>
@@ -35,6 +44,7 @@ static_assert(std::is_same_v<tools::split_n_t<1, list>,
 static_assert(std::is_same_v<tools::join_t<tools::type_list<float>, tools::type_list<double, int>>, list>);
 static_assert(std::is_same_v<tools::sub_t<1, 1, list>, tools::type_list<double>>);
 
+#if HAS_DELETE_REASON
 struct CountsMovesCopies {
   CountsMovesCopies() = default;
   CountsMovesCopies(CountsMovesCopies &&other) noexcept { ++other.moved_from; }
@@ -69,7 +79,7 @@ template <typename T> constexpr bool can_make_moving_ref_from_const() {
 static_assert(can_make_moving_ref<CountsMovesCopies>());
 static_assert(!can_make_moving_ref_from_const<CountsMovesCopies>());
 static_assert(!can_make_moving_ref<CopyOnly>());
-
+#endif
 }  // namespace
 
 int main() {
@@ -78,6 +88,7 @@ int main() {
   check(tools::curry(sum3, 10)(20)(30) == 60, "curry one at a time");
   check(tools::curry(sum3, 1, 2)(4) == 7, "curry two then one");
 
+#if HAS_DELETE_REASON
   // forwarding_ref: converting back to a value copies from an lvalue and moves from an rvalue
   {
     CountsMovesCopies lvalue;
@@ -104,6 +115,7 @@ int main() {
     target = ref2;
     check(source2.move_assigned_from == 1 && source2.copy_assigned_from == 0, "moving_ref move assign");
   }
+#endif
 
   // simple_stack_vector
   tools::simple_stack_vector<int, 3> vec{1, 2};

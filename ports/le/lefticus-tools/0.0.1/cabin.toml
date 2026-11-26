@@ -15,6 +15,9 @@ include = ["LICENSE", "include"]
 
 # Upstream states no standard (CMakeLists.txt:8 only sets a C++26 default).  C++20 is
 # measured: curry.hpp:35 (auto parameters) and has_move_ctor.hpp:43 (a concept) fail at c++17.
+# forwarding_ref.hpp and moving_ref.hpp use C++26's = delete("reason"), which cl and
+# check-linux's GCC reject at c++20 (measured: check-windows C2059, check-linux "expected ';' at
+# end of member declaration").
 [target.lefticus-tools]
 type = "header-only"
 include-dirs = ["include"]
