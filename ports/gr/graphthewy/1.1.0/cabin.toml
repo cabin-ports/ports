@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/alex-87/graphthewy/archive/refs/tags/v1.1.tar.gz"
+checksum = "sha256:a47aede1e96d696d3fd33096b477eae7b6b87736f26581b5a6116f16a1374f8c"
+format = "tar.gz"
+strip-prefix = "graphthewy-1.1"
+
+# The headers under include/graphthewy/, where upstream's install rule places
+# them (CMakeLists.txt:31), so consumers write <graphthewy/GraphthewyModel.hpp>
+# as README.md does.
+[[package.upstream.copy]]
+from = "src/include/GraphthewyModel.hpp"
+to = "include/graphthewy/GraphthewyModel.hpp"
+
+[[package.upstream.copy]]
+from = "src/include/GraphthewyCycle.hpp"
+to = "include/graphthewy/GraphthewyCycle.hpp"
+
+# The release tag is v1.1; CMakeLists.txt declares 1.0.
+[package]
+name = "cabin-ports/graphthewy"
+version = "1.1.0"
+license = "EUPL-1.2"
+include = ["LICENSE", "README.md", "include"]
+
+[target.graphthewy]
+type = "header-only"
+include-dirs = ["include"]
+# CMakeLists.txt:14 sets CMAKE_CXX_STANDARD 17 as required.
+interface-cxx-standard = "c++17"
