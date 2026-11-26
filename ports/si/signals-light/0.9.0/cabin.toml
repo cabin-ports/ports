@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/a-n-t-h-o-n-y/signals-light/archive/refs/tags/v0.9.tar.gz"
+checksum = "sha256:a49194312ba74f7f79669aa74fcabdccb0402cf21ad29a6582fe48126e0f4dd6"
+format = "tar.gz"
+strip-prefix = "signals-light-0.9"
+
+[package]
+name = "cabin-ports/signals-light"
+version = "0.9.0"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+[target.signals-light]
+type = "header-only"
+include-dirs = ["include"]
+# CMakeLists.txt: cxx_std_17.
+interface-cxx-standard = "c++17"
