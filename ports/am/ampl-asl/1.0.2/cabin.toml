@@ -91,6 +91,8 @@ asl2 = []
 # so it compiles in the compiler's default GNU dialect, where glibc exposes
 # ssize_t, fdopen, fileno, popen and tempnam (asl.h, func_add.c, printf.c);
 # Cabin's strict -std=c11 hides them without _DEFAULT_SOURCE.
+# Consumers need it too, for asl.h's ssize_t (measured: check-linux, C probe
+# at c89, "asl.h:108:9: error: unknown type name 'ssize_t'").
 [target.asl]
 type = "library"
 sources = [
@@ -185,6 +187,7 @@ sources = [
 ]
 include-dirs = ["include", "src/solvers"]
 defines = ["_DEFAULT_SOURCE"]
+interface-defines = ["_DEFAULT_SOURCE"]
 links = "asl"
 
 [target.asl2]
@@ -270,6 +273,7 @@ sources = [
 ]
 include-dirs = ["include", "src/solvers2"]
 defines = ["_DEFAULT_SOURCE"]
+interface-defines = ["_DEFAULT_SOURCE"]
 links = "asl2"
 required-features = ["asl2"]
 
