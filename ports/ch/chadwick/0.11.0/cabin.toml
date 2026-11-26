@@ -6,7 +6,17 @@ strip-prefix = "chadwick-0.11.0"
 # Patch 0001 includes <stdio.h> in the five installed headers that use FILE
 # without it (book.h, file.h, game.h, league.h, roster.h); <chadwick/chadwick.h>
 # included first failed with "unknown type name 'FILE'" (measured).
-patches = ["patches/0001-include-stdio-h-for-file.patch"]
+# Patch 0002 defines ssize_t for cl in src/cwlib/file.c, which uses it without
+# a definition; check-windows failed with "file.c(36): error C2061: syntax
+# error: identifier 'cw_getline'" (measured).
+patches = [
+  "patches/0001-include-stdio-h-for-file.patch",
+  "patches/0002-define-ssize-t-for-msvc.patch",
+]
+
+# The headers have no extern "C" guards: a C++ consumer must wrap the include
+# in extern "C"; without it the link fails with undefined symbol
+# cw_event_is_batter(cw_parsed_event_struct*) (measured).
 
 # The ten headers upstream's cwlib/Makefile.am installs under include/chadwick/
 # (pkginclude_HEADERS), so consumers write <chadwick/chadwick.h>.
