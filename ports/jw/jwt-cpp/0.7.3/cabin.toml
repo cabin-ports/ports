@@ -16,6 +16,10 @@ include = ["LICENSE", "README.md", "include"]
 [dependencies]
 "cabin-ports/openssl" = "=4.1.0"
 
+# Requests the openssl port's own build of OpenSSL in place of the system's.
+[features]
+vendored-openssl = ["cabin-ports/openssl/vendored"]
+
 # Upstream's CMake jwt-cpp: header-only, C++11 (README.md:135,
 # CMakeLists.txt:106), linking OpenSSL's ssl and crypto libraries.  The
 # bundled include/picojson/picojson.h (BSD-2-Clause) ships as upstream
