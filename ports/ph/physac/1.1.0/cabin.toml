@@ -3,6 +3,8 @@ url = "https://github.com/victorfisac/Physac/archive/refs/tags/1.1.tar.gz"
 checksum = "sha256:7def4e93a33862d051a912f5be7d55aca51aef5f6572f50eb3a51f1e57f3d8cb"
 format = "tar.gz"
 strip-prefix = "Physac-1.1"
+# physac.h defines _POSIX_C_SOURCE after its libc includes (measured: check-linux, "'CLOCK_MONOTONIC' undeclared").
+patches = ["patches/0001-define-posix-c-source-early.patch"]
 
 [package]
 name = "cabin-ports/physac"
@@ -11,7 +13,7 @@ version = "1.1.0"
 # The 1.1 tag has no LICENSE file; the zlib/libpng terms are the header
 # comment of src/physac.h (lines 61-77).
 license = "Zlib"
-include = ["src"]
+include = ["patches", "src"]
 
 # Upstream compiles with -std=c99 (src/physac.h, line 46).
 # Measured limitations: with PHYSAC_STANDALONE on macOS (clang, SDK 27.2,
