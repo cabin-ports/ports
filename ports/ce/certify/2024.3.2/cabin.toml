@@ -1,0 +1,55 @@
+[package.upstream]
+url = "https://github.com/djarek/certify/archive/b74d50d6d91d460f92defb33f32baf302ce82986.tar.gz"
+checksum = "sha256:1cfca816c51ffee84b1a66a3698f2a6ef5536914cb5d36829d81c3dd7ffa70de"
+format = "tar.gz"
+strip-prefix = "certify-b74d50d6d91d460f92defb33f32baf302ce82986"
+
+[package]
+name = "cabin-ports/certify"
+# Upstream has no tags or releases and its CMake version (0.1) has not
+# changed since 2020, so the version is the date of the archived master
+# commit b74d50d6 (2024-03-02).
+version = "2024.3.2"
+license = "BSL-1.0"
+
+[dependencies]
+"cabin-ports/boost-asio" = "=1.92.0"
+"cabin-ports/boost-assert" = "=1.92.0"
+"cabin-ports/boost-config" = "=1.92.0"
+"cabin-ports/boost-endian" = "=1.92.0"
+"cabin-ports/boost-smart-ptr" = "=1.92.0"
+"cabin-ports/boost-system" = "=1.92.0"
+"cabin-ports/boost-throw-exception" = "=1.92.0"
+"cabin-ports/boost-utility" = "=1.92.0"
+"cabin-ports/openssl" = "=4.1.0"
+
+# Requests the openssl port's own build of OpenSSL in place of the system's.
+[features]
+vendored-openssl = ["cabin-ports/openssl/vendored"]
+
+# CMakeLists.txt:47-53 links Crypt32 under MSVC and CoreFoundation and
+# Security on Apple.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["crypt32"]
+
+[target.'cfg(any(os = "macos", os = "ios"))'.profile]
+frameworks = ["CoreFoundation", "Security"]
+
+# Upstream's CMake certify::core: header-only, with C++11 from
+# CMakeLists.txt:35; c++14 is the standard of the boost-asio port it needs.
+[target.certify]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+deps = [
+  { name = "cabin-ports/boost-asio", public = true },
+  { name = "cabin-ports/boost-assert", public = true },
+  { name = "cabin-ports/boost-config", public = true },
+  { name = "cabin-ports/boost-endian", public = true },
+  { name = "cabin-ports/boost-smart-ptr", public = true },
+  { name = "cabin-ports/boost-system", public = true },
+  { name = "cabin-ports/boost-throw-exception", public = true },
+  { name = "cabin-ports/boost-utility", public = true },
+  { name = "cabin-ports/openssl:ssl", public = true },
+  { name = "cabin-ports/openssl:crypto", public = true },
+]
