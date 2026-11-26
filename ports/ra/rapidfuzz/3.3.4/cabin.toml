@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/rapidfuzz/rapidfuzz-cpp/archive/refs/tags/v3.3.4.tar.gz"
+checksum = "sha256:a0dd2ef361cac165e12076696e7c7e8d069a2908abd9599ad4bd190de33f9881"
+format = "tar.gz"
+strip-prefix = "rapidfuzz-cpp-3.3.4"
+
+[package]
+name = "cabin-ports/rapidfuzz"
+version = "3.3.4"
+# rapidfuzz/details/CharSet.hpp:16, type_traits.hpp:30 and simd_avx2.hpp:600,
+# :623 credit Stack Overflow answers for snippets of a few lines each; their
+# copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "rapidfuzz"]
+
+# Upstream's minimum is C++11 (CMakeLists.txt:53).
+[target.rapidfuzz]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
