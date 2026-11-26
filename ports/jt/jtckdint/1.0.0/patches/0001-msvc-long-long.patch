@@ -1,0 +1,12 @@
+diff --git a/jtckdint.h b/jtckdint.h
+index f97f47f..077d407 100644
+--- a/jtckdint.h
++++ b/jtckdint.h
+@@ -73,6 +73,7 @@
+ #define __ckd_have_int128
+ #define __ckd_intmax __int128
+ #elif ((defined(__cplusplus) && __cplusplus >= 201103L) ||              \
++       (defined(_MSVC_LANG) && _MSVC_LANG >= 201103L) ||                \
+        (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L))
+ #define __ckd_intmax long long
+ #else
