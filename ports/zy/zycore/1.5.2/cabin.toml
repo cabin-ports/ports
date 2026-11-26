@@ -1,0 +1,52 @@
+[package.upstream]
+url = "https://github.com/zyantific/zycore-c/archive/refs/tags/v1.5.2.tar.gz"
+checksum = "sha256:943f91eb9ab2a8cc01ab9f8b785e769a273502071e0ee8011cdfcaad93947cec"
+format = "tar.gz"
+strip-prefix = "zycore-c-1.5.2"
+
+[package]
+name = "cabin-ports/zycore"
+version = "1.5.2"
+license = "MIT"
+include = ["LICENSE", "include", "src"]
+# Upstream builds C11 (cmake/zyan-functions.cmake:9, meson.build:9).
+c-standard = "c11"
+interface-c-standard = "c11"
+
+# ZYCORE_STATIC_BUILD is upstream's define for its static library
+# (CMakeLists.txt:119): without it Windows consumers see the API as dllimport.
+# Upstream builds with _GNU_SOURCE on Linux (CMakeLists.txt:194), which glibc
+# needs for PTHREAD_MUTEX_RECURSIVE under strict -std=c11.
+[profile]
+defines = ["ZYCORE_STATIC_BUILD"]
+
+[target.'cfg(os = "linux")'.profile]
+defines = ["_GNU_SOURCE"]
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# Not ported: the shared library, the examples and the tests.
+# Limitation: API/Memory.h and API/Process.h have no extern "C" guard, so a C++
+# consumer must wrap their includes in extern "C" (measured: unwrapped, the
+# link fails with an undefined C++-mangled symbol).
+[target.zycore]
+type = "library"
+sources = [
+  "src/Allocator.c",
+  "src/ArgParse.c",
+  "src/Bitset.c",
+  "src/Format.c",
+  "src/List.c",
+  "src/String.c",
+  "src/Vector.c",
+  "src/Zycore.c",
+  "src/API/Memory.c",
+  "src/API/Process.c",
+  "src/API/Synchronization.c",
+  "src/API/Terminal.c",
+  "src/API/Thread.c",
+]
+include-dirs = ["include"]
+interface-defines = ["ZYCORE_STATIC_BUILD"]
+links = "Zycore"
