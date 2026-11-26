@@ -1,0 +1,35 @@
+[package.upstream]
+# Untagged: master's tip, 2020-09-05.  CMakeLists.txt:5 declares
+# VERSION 0.1.0, which is the version.
+url = "https://github.com/olvb/nodesoup/archive/3158ad082bb0cd1abee75418b12b35522dbca74f.tar.gz"
+checksum = "sha256:be95ae6f584afae52f2951a15ef0e4896265f15fd1fab6b449afa75c023538e9"
+format = "tar.gz"
+strip-prefix = "nodesoup-3158ad082bb0cd1abee75418b12b35522dbca74f"
+
+[package]
+name = "cabin-ports/nodesoup"
+version = "0.1.0"
+# LICENSE is the Unlicense.
+license = "Unlicense"
+include = ["LICENSE", "README.md", "include", "src"]
+# src/CMakeLists.txt:10 states C++14 as a public requirement.
+cxx-standard = "c++14"
+
+# src/CMakeLists.txt:1-2.  Not ported: the demo (demo/dot2png.cpp), which
+# needs cairo.
+[target.nodesoup]
+type = "library"
+sources = [
+  "src/algebra.cpp",
+  "src/fruchterman_reingold.cpp",
+  "src/kamada_kawai.cpp",
+  "src/layout.cpp",
+  "src/nodesoup.cpp",
+]
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+links = "nodesoup"
+
+# Upstream's if(MSVC) (src/CMakeLists.txt:19-21): src/layout.cpp uses M_PI.
+[target.'cfg(env = "msvc")'.profile]
+defines = ["_USE_MATH_DEFINES"]
