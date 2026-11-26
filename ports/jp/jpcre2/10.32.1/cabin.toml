@@ -1,0 +1,32 @@
+[package.upstream]
+url = "https://github.com/jpcre2/jpcre2/archive/refs/tags/10.32.01.tar.gz"
+checksum = "sha256:668cbc6d2c0a065bb6abe8494d5a1bb3549a14cd956a44a2df9095045623ea47"
+format = "tar.gz"
+strip-prefix = "jpcre2-10.32.01"
+
+[package]
+name = "cabin-ports/jpcre2"
+# Upstream 10.32.01 (the release tag); SemVer forbids the leading zero.
+version = "10.32.1"
+license = "BSD-3-Clause"
+include = ["AUTHORS", "COPYING", "README.md", "src/jpcre2.hpp"]
+
+[dependencies]
+"cabin-ports/pcre2" = "=10.49.0"
+
+# jpcre2.hpp selects the 8-, 16- or 32-bit PCRE2 API by character type, so
+# the target needs all three libraries.  Upstream supports C++98
+# (src/jpcre2.hpp:73, README.md:863), but cabin-ports/pcre2 requires C++11
+# of consumers (measured: c++98 fails the standard-compatibility check).
+# Limitation: that port has no JIT, so the S modifier and jpcre2::JIT_COMPILE
+# leave getErrorNumber() at -45 (PCRE2_ERROR_JIT_BADOPTION); the regex still
+# compiles and matches (measured).
+[target.jpcre2]
+type = "header-only"
+include-dirs = ["src"]
+interface-cxx-standard = "c++11"
+deps = [
+  { name = "cabin-ports/pcre2:pcre2-8", public = true },
+  { name = "cabin-ports/pcre2:pcre2-16", public = true },
+  { name = "cabin-ports/pcre2:pcre2-32", public = true },
+]
