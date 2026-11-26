@@ -3,6 +3,15 @@ url = "https://github.com/antlr/antlr4/archive/refs/tags/4.13.2.tar.gz"
 checksum = "sha256:9f18272a9b32b622835a3365f850dd1063d60f5045fb1e12ce475ae6e18a35bb"
 format = "tar.gz"
 strip-prefix = "antlr4-4.13.2"
+# ProfilingATNSimulator.cpp uses std::chrono::high_resolution_clock (:38) without
+# including <chrono>, as MSVC's STL no longer provides it transitively; the patch,
+# upstream's df4d68c0 after 4.13.2, adds the include (measured: check-windows,
+# "ProfilingATNSimulator.cpp(38): error C2653: 'high_resolution_clock': is not a class or namespace name").
+# The patch carries lines of that BSD-3-Clause file, so its notice (clause 1) stays here:
+#   Copyright (c) 2012-2017 The ANTLR Project. All rights reserved.
+#   Use of this file is governed by the BSD 3-clause license that
+#   can be found in the LICENSE.txt file in the project root.
+patches = ["patches/0001-include-chrono-in-profiling-atn-simulator.patch"]
 
 [package]
 name = "cabin-ports/antlr4-cppruntime"
@@ -10,7 +19,7 @@ version = "4.13.2"
 # LICENSE.txt is BSD-3-Clause; runtime/Cpp/runtime/src/support/Utf8.cpp:12-16
 # says it is based off Google's cel-cpp internal/utf8.cc, which is Apache-2.0.
 license = "BSD-3-Clause AND Apache-2.0"
-include = ["LICENSE.txt", "runtime/Cpp/runtime/src"]
+include = ["LICENSE.txt", "patches", "runtime/Cpp/runtime/src"]
 # Upstream's minimum is C++17 (runtime/Cpp/README.md:38).
 cxx-standard = "c++17"
 interface-cxx-standard = "c++17"
