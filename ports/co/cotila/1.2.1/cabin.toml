@@ -13,6 +13,8 @@ include = ["AUTHORS", "LICENSE", "include"]
 # Limitation (measured): det() returns the reciprocal of the determinant, so
 # only a determinant of 1, -1 or 0 comes out right (det of {{4,0,0},{0,3,1},{0,1,2}}
 # is 20 and det() gives 0.05); upstream's tests use only 1 and 0.
+# cl hits an internal compiler error (C1001) on matrix's class template
+# argument deduction (measured: check-windows); spell the template arguments.
 [target.cotila]
 type = "header-only"
 include-dirs = ["include"]
