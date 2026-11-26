@@ -1,0 +1,33 @@
+[package.upstream]
+url = "https://github.com/daniele77/aricpp/archive/refs/tags/v1.2.1.tar.gz"
+checksum = "sha256:2182dd4cbf40152f3f563f4a7dbfc2bd5a423d76e90c8c663aada62a265f103b"
+format = "tar.gz"
+strip-prefix = "aricpp-1.2.1"
+
+[package]
+name = "cabin-ports/aricpp"
+version = "1.2.1"
+license = "BSL-1.0"
+include = ["LICENSE", "README.md", "include"]
+
+[dependencies]
+"cabin-ports/boost-asio" = "=1.92.0"
+"cabin-ports/boost-beast" = "=1.92.0"
+"cabin-ports/boost-config" = "=1.92.0"
+"cabin-ports/boost-property-tree" = "=1.92.0"
+"cabin-ports/boost-system" = "=1.92.0"
+
+# C++14 is upstream's floor (README.md:27).  Upstream's CMake target defines
+# BOOST_ASIO_NO_DEPRECATED=1 for consumers (CMakeLists.txt:81).
+[target.aricpp]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+interface-defines = ["BOOST_ASIO_NO_DEPRECATED=1"]
+deps = [
+  { name = "cabin-ports/boost-asio", public = true },
+  { name = "cabin-ports/boost-beast", public = true },
+  { name = "cabin-ports/boost-config", public = true },
+  { name = "cabin-ports/boost-property-tree", public = true },
+  { name = "cabin-ports/boost-system", public = true },
+]
