@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/nextsilicon/cpp-subprocess/archive/refs/tags/v2.1.tar.gz"
+checksum = "sha256:5d006e36fb23f7549f878b993831e01525c255b9f0bcbb3d81ad4c007029ecd2"
+format = "tar.gz"
+strip-prefix = "cpp-subprocess-2.1"
+
+# The header under include/cpp-subprocess/, where upstream's install rule puts it
+# (CMakeLists.txt:16).
+[[package.upstream.copy]]
+from = "subprocess.hpp"
+to = "include/cpp-subprocess/subprocess.hpp"
+
+[package]
+name = "cabin-ports/nextsilicon-cpp-subprocess"
+version = "2.1.0"
+license = "MIT"
+include = ["LICENSE.MIT", "README.md", "include"]
+
+# C++11 is upstream's floor (README.md:32, CMakeLists.txt:4).  Not ported:
+# the tests.
+[target.nextsilicon-cpp-subprocess]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+
+# std::async needs the threads library on older glibc; upstream links
+# Threads::Threads (CMakeLists.txt:9-11).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
