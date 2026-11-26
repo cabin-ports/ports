@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/weisslj/cpp-optparse/archive/2265d647232249a53a03b411099863ceca35f0d3.tar.gz"
+checksum = "sha256:6f38fff3c4d2788eead7a28626b3220cc4c101510fc984678ad55f77756b107e"
+format = "tar.gz"
+strip-prefix = "cpp-optparse-2265d647232249a53a03b411099863ceca35f0d3"
+
+# Upstream has no release or tag; 2022.5.2 is the commit date of main's head
+# 2265d647232249a53a03b411099863ceca35f0d3 (2022-05-02).
+[package]
+name = "cabin-ports/cpp-optparse"
+version = "2022.5.2"
+license = "MIT"
+include = ["LICENSE", "OptionParser.cpp", "OptionParser.h"]
+
+# Not ported: upstream's test program and the optional gettext support
+# (ENABLE_NLS, which needs libintl).
+[target.cpp-optparse]
+type = "library"
+sources = ["OptionParser.cpp"]
+include-dirs = ["."]
+# Upstream states no C++ standard; C++98 is the measured floor of the headers.
+# The implementation is built as C++14, the lowest standard cl accepts.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++98"
