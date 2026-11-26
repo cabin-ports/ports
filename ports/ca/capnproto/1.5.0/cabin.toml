@@ -1,0 +1,221 @@
+[package.upstream]
+url = "https://github.com/capnproto/capnproto/archive/refs/tags/v1.5.0.tar.gz"
+checksum = "sha256:d5ebdf858e9885c33d4b3f765006d68bd66e9b002bf4d607ff4317ef9c1aac6a"
+format = "tar.gz"
+strip-prefix = "capnproto-1.5.0"
+
+[package]
+name = "cabin-ports/capnproto"
+version = "1.5.0"
+# C++17 is the standard c++/src/kj/CMakeLists.txt:79 builds with; C++14 is the
+# one doc/install.md:21 states.
+cxx-standard = "c++17"
+interface-cxx-standard = "c++14"
+# BSD-3-Clause: the socketpair code in c++/src/kj/async-io-win32.c++:66-183
+# and the Protocol Buffers code in c++/src/kj/string.c++:253-574.  The
+# libb64-derived code (c++/src/kj/encoding.c++:692) and the SHA-1
+# (c++/src/kj/compat/http.c++:41-58) are public domain.
+# c++/src/kj/hash.c++:28 credits libc++ for its murmur2 hash; its copyright
+# significance is uncertain.
+# c++/src/kj/exception.c++:1229 and :1271 credit Evgeny Panasyuk's
+# stack_unwinding for its pre-C++17 uncaught-exception count; its copyright
+# significance is uncertain.
+license = "MIT AND BSD-3-Clause"
+include = ["LICENSE", "c++/src/kj", "c++/src/capnp"]
+
+[dependencies]
+"cabin-ports/openssl" = { version = "=4.1.0", optional = true }
+"cabin-ports/zlib" = "=1.3.1"
+
+# The libraries upstream's CMake builds with OpenSSL and zlib found.  Not
+# ported: the capnp, capnpc-c++ and capnpc-capnp executables, and what only
+# upstream's Bazel builds: kj-brotli, capnp/reconnect.c++ (which
+# capnp/reconnect.h declares), and http-over-capnp with byte-stream, whose
+# schema headers it generates.
+[features]
+default = ["openssl"]
+openssl = ["dep:cabin-ports/openssl"]
+# Requests the openssl port's own build of OpenSSL in place of the system's,
+# which that port does not offer on Windows.
+vendored-openssl = ["openssl", "cabin-ports/openssl/vendored"]
+
+[target.'cfg(all(family = "unix", not(os = "android")))'.profile]
+link-libs = ["pthread"]
+
+# The libraries c++/src/kj/BUILD.bazel:109-113 links on Windows; capnpc's
+# CryptGenRandom needs advapi32.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32", "advapi32"]
+
+[target.kj]
+type = "library"
+links = "kj"
+include-dirs = ["c++/src"]
+sources = [
+  "c++/src/kj/array.c++",
+  "c++/src/kj/list.c++",
+  "c++/src/kj/common.c++",
+  "c++/src/kj/debug.c++",
+  "c++/src/kj/exception.c++",
+  "c++/src/kj/io.c++",
+  "c++/src/kj/memory.c++",
+  "c++/src/kj/mutex.c++",
+  "c++/src/kj/string.c++",
+  "c++/src/kj/source-location.c++",
+  "c++/src/kj/hash.c++",
+  "c++/src/kj/table.c++",
+  "c++/src/kj/thread.c++",
+  "c++/src/kj/main.c++",
+  "c++/src/kj/arena.c++",
+  "c++/src/kj/test-helpers.c++",
+  "c++/src/kj/units.c++",
+  "c++/src/kj/encoding.c++",
+  "c++/src/kj/refcount.c++",
+  "c++/src/kj/string-tree.c++",
+  "c++/src/kj/time.c++",
+  "c++/src/kj/filesystem.c++",
+  "c++/src/kj/filesystem-disk-unix.c++",
+  "c++/src/kj/filesystem-disk-win32.c++",
+  "c++/src/kj/parse/char.c++",
+]
+
+[target.kj-test]
+type = "library"
+links = "kj-test"
+sources = ["c++/src/kj/test.c++"]
+deps = [{ name = "kj", public = true }]
+
+# KJ_USE_FIBERS keeps c++/src/kj/async.h:30-36's default, as upstream's Bazel
+# build does; its CMake and autotools builds instead turn fibers off where libc
+# lacks makecontext and no libucontext is found.
+[target.kj-async]
+type = "library"
+links = "kj-async"
+sources = [
+  "c++/src/kj/async.c++",
+  "c++/src/kj/async-unix.c++",
+  "c++/src/kj/async-win32.c++",
+  "c++/src/kj/async-io-win32.c++",
+  "c++/src/kj/async-io.c++",
+  "c++/src/kj/async-io-unix.c++",
+  "c++/src/kj/cidr.c++",
+  "c++/src/kj/timer.c++",
+]
+deps = [{ name = "kj", public = true }]
+
+[target.kj-http]
+type = "library"
+links = "kj-http"
+sources = ["c++/src/kj/compat/url.c++", "c++/src/kj/compat/http.c++"]
+defines = ["KJ_HAS_ZLIB"]
+deps = [
+  { name = "kj-async", public = true },
+  { name = "kj", public = true },
+  { name = "cabin-ports/zlib", public = true },
+]
+
+[target.kj-tls]
+type = "library"
+links = "kj-tls"
+required-features = ["openssl"]
+sources = ["c++/src/kj/compat/readiness-io.c++", "c++/src/kj/compat/tls.c++"]
+defines = ["KJ_HAS_OPENSSL"]
+deps = [
+  { name = "kj-async", public = true },
+  "cabin-ports/openssl:ssl",
+  "cabin-ports/openssl:crypto",
+]
+
+[target.kj-gzip]
+type = "library"
+links = "kj-gzip"
+sources = ["c++/src/kj/compat/gzip.c++"]
+defines = ["KJ_HAS_ZLIB"]
+deps = [
+  { name = "kj-async", public = true },
+  { name = "kj", public = true },
+  { name = "cabin-ports/zlib", public = true },
+]
+
+[target.capnp]
+type = "library"
+links = "capnp"
+sources = [
+  "c++/src/capnp/c++.capnp.c++",
+  "c++/src/capnp/blob.c++",
+  "c++/src/capnp/arena.c++",
+  "c++/src/capnp/layout.c++",
+  "c++/src/capnp/list.c++",
+  "c++/src/capnp/any.c++",
+  "c++/src/capnp/message.c++",
+  "c++/src/capnp/schema.capnp.c++",
+  "c++/src/capnp/stream.capnp.c++",
+  "c++/src/capnp/serialize.c++",
+  "c++/src/capnp/serialize-packed.c++",
+  "c++/src/capnp/schema.c++",
+  "c++/src/capnp/schema-loader.c++",
+  "c++/src/capnp/dynamic.c++",
+  "c++/src/capnp/stringify.c++",
+]
+deps = [{ name = "kj", public = true }]
+
+[target.capnp-rpc]
+type = "library"
+links = "capnp-rpc"
+sources = [
+  "c++/src/capnp/serialize-async.c++",
+  "c++/src/capnp/capability.c++",
+  "c++/src/capnp/membrane.c++",
+  "c++/src/capnp/dynamic-capability.c++",
+  "c++/src/capnp/rpc.c++",
+  "c++/src/capnp/rpc.capnp.c++",
+  "c++/src/capnp/rpc-twoparty.c++",
+  "c++/src/capnp/rpc-twoparty.capnp.c++",
+  "c++/src/capnp/persistent.capnp.c++",
+  "c++/src/capnp/ez-rpc.c++",
+]
+deps = [
+  { name = "capnp", public = true },
+  { name = "kj-async", public = true },
+  { name = "kj", public = true },
+]
+
+[target.capnp-json]
+type = "library"
+links = "capnp-json"
+sources = ["c++/src/capnp/compat/json.c++", "c++/src/capnp/compat/json.capnp.c++"]
+deps = [
+  { name = "capnp", public = true },
+  { name = "kj-async", public = true },
+  { name = "kj", public = true },
+]
+
+[target.capnp-websocket]
+type = "library"
+links = "capnp-websocket"
+sources = ["c++/src/capnp/compat/websocket-rpc.c++"]
+deps = [
+  { name = "capnp", public = true },
+  { name = "capnp-rpc", public = true },
+  { name = "kj-http", public = true },
+  { name = "kj-async", public = true },
+  { name = "kj", public = true },
+]
+
+[target.capnpc]
+type = "library"
+links = "capnpc"
+sources = [
+  "c++/src/capnp/compiler/type-id.c++",
+  "c++/src/capnp/compiler/error-reporter.c++",
+  "c++/src/capnp/compiler/lexer.capnp.c++",
+  "c++/src/capnp/compiler/lexer.c++",
+  "c++/src/capnp/compiler/grammar.capnp.c++",
+  "c++/src/capnp/compiler/parser.c++",
+  "c++/src/capnp/compiler/generics.c++",
+  "c++/src/capnp/compiler/node-translator.c++",
+  "c++/src/capnp/compiler/compiler.c++",
+  "c++/src/capnp/schema-parser.c++",
+  "c++/src/capnp/serialize-text.c++",
+]
+deps = [{ name = "capnp", public = true }, { name = "kj", public = true }]
