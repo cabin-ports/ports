@@ -1,0 +1,47 @@
+--- a/highs/HConfig.h
++++ b/highs/HConfig.h
+@@ -1,22 +1,28 @@
+ #ifndef HCONFIG_H_
+ #define HCONFIG_H_
+ 
+-#cmakedefine FAST_BUILD
+-#cmakedefine ZLIB_FOUND
+-#cmakedefine CUPDLP_CPU
+-#cmakedefine CUPDLP_GPU
+-#cmakedefine HIPO
+-#cmakedefine HIGHS_SHARED_EXTRAS_LIBRARY
+-#cmakedefine CMAKE_BUILD_TYPE "@CMAKE_BUILD_TYPE@"
+-#cmakedefine HIGHSINT64
+-#cmakedefine HIGHS_NO_DEFAULT_THREADS
+-#cmakedefine HIGHS_HAVE_MM_PAUSE
+-#cmakedefine HIGHS_HAVE_BUILTIN_CLZ
+-#cmakedefine HIGHS_HAVE_BITSCAN_REVERSE
++#define FAST_BUILD
++#define ZLIB_FOUND
++#define CUPDLP_CPU
++/* #undef CUPDLP_GPU */
++/* #undef HIPO */
++#define HIGHS_SHARED_EXTRAS_LIBRARY
++#define CMAKE_BUILD_TYPE "Release"
++/* #undef HIGHSINT64 */
++/* #undef HIGHS_NO_DEFAULT_THREADS */
++#if defined(__i386__) || defined(__x86_64__) || defined(_M_IX86) || defined(_M_X64)
++#define HIGHS_HAVE_MM_PAUSE
++#endif
++#if !defined(_MSC_VER) && defined(__GNUC__)
++#define HIGHS_HAVE_BUILTIN_CLZ
++#endif
++#if defined(_MSC_VER) && defined(_WIN64)
++#define HIGHS_HAVE_BITSCAN_REVERSE
++#endif
+ 
+-#define HIGHS_GITHASH "@GITHASH@"
+-#define HIGHS_VERSION_MAJOR @HIGHS_VERSION_MAJOR@
+-#define HIGHS_VERSION_MINOR @HIGHS_VERSION_MINOR@
+-#define HIGHS_VERSION_PATCH @HIGHS_VERSION_PATCH@
++#define HIGHS_GITHASH "n/a"
++#define HIGHS_VERSION_MAJOR 1
++#define HIGHS_VERSION_MINOR 16
++#define HIGHS_VERSION_PATCH 0
+ 
+ #endif /* HCONFIG_H_ */
