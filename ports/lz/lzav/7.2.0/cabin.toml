@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/avaneev/lzav/archive/refs/tags/7.2.tar.gz"
+checksum = "sha256:8c70ce39427178b92709fe3badbeded9203f3749d6e06ffc0a54c6076f59b01a"
+format = "tar.gz"
+strip-prefix = "lzav-7.2"
+
+# Upstream calls this release 7.2 (LZAV_VER_STR, lzav.h:43), so the version
+# takes a .0.
+[package]
+name = "cabin-ports/lzav"
+version = "7.2.0"
+license = "MIT"
+include = ["LICENSE", "lzav.h"]
+
+# Upstream is ISO C99 and, under a C++ compiler, C++ compatible down to a C++98
+# branch (lzav.h:9-10, :180).
+[target.lzav]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
