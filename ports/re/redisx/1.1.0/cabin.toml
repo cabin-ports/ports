@@ -1,0 +1,63 @@
+[package.upstream]
+url = "https://github.com/Sigmyne/redisx/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:d8d2e00039c82b7770f680059e23d2bccd3be6d11e8b25db39c10aa8ab72cf71"
+format = "tar.gz"
+strip-prefix = "redisx-1.1.0"
+
+# Upstream installs only include/redisx.h (CMakeLists.txt:165-168); the
+# private redisx-priv.h, copied beside the sources, stays off consumers'
+# include path.
+[[package.upstream.copy]]
+from = "include/redisx-priv.h"
+to = "src/redisx-priv.h"
+
+[package]
+name = "cabin-ports/redisx"
+version = "1.1.0"
+# src/redisx-tls.c:104 credits OpenSSL's apps/dhparam.c for rSetDHParamsFromFile; its copyright significance is uncertain.
+license = "Unlicense"
+include = ["LICENSE", "include/redisx.h", "src"]
+# README.md:59 states C99; C11 is the oldest Cabin can lower for MSVC.
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+[dependencies]
+"cabin-ports/libxchange" = "^1.3.0"
+
+# The static library CMake builds by default (src/CMakeLists.txt:9-39).  Not
+# ported: the ENABLE_TLS (OpenSSL) and ENABLE_OPENMP options, both off by
+# default (CMakeLists.txt:42-43), the shared library, redisx-cli, tests and
+# examples.
+[target.redisx]
+type = "library"
+sources = [
+  "src/redisx.c",
+  "src/resp.c",
+  "src/redisx-net.c",
+  "src/redisx-hooks.c",
+  "src/redisx-client.c",
+  "src/redisx-sentinel.c",
+  "src/redisx-cluster.c",
+  "src/redisx-tab.c",
+  "src/redisx-sub.c",
+  "src/redisx-script.c",
+  "src/redisx-tls.c",
+]
+include-dirs = ["include"]
+links = "redisx"
+deps = [{ name = "cabin-ports/libxchange", public = true }]
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m", "pthread"]
+
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32"]
+
+# What glibc defines under GCC's and Clang's default GNU C, with which src/
+# resolves hosts through getaddrinfo, with IPv6, and builds
+# redisxDeleteEntries (#if _POSIX_C_SOURCE >= 200112L).  macOS defines no
+# _POSIX_C_SOURCE, so there, as with upstream's build, hosts resolve through
+# gethostbyname, IPv4 only, and redisxDeleteEntries is absent (measured).
+[target.'cfg(os = "linux")'.profile]
+defines = ["_DEFAULT_SOURCE"]
