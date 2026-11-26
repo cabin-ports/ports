@@ -1,0 +1,38 @@
+[package.upstream]
+url = "https://github.com/jimsch/cn-cbor/archive/refs/tags/1.0.0.tar.gz"
+checksum = "sha256:abf08fb6c28590df733f4affc1ae3eb5e7c358cfe9b45933a44739591913d18c"
+format = "tar.gz"
+strip-prefix = "cn-cbor-1.0.0"
+
+[package]
+name = "cabin-ports/cn-cbor"
+# The 1.0.0 release tag (upstream's only release) wins over the 1.1.0 that its
+# CMakeLists.txt declares.
+version = "1.0.0"
+license = "MIT"
+include = ["LICENSE", "include", "src"]
+
+# Upstream's default CMake build: the six sources of cbor_srcs, no context
+# allocator, aligned-read or no-float option.  CMakeLists.txt asks GCC and Clang
+# for gnu99; C11 is the oldest standard Cabin can lower for MSVC.
+[target.cn-cbor]
+type = "library"
+links = "cn-cbor"
+sources = [
+  "src/cn-cbor.c",
+  "src/cn-create.c",
+  "src/cn-encoder.c",
+  "src/cn-error.c",
+  "src/cn-get.c",
+  "src/cn-print.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+interface-c-standard = "c99"
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
+
+# CMakeLists.txt links ws2_32 under MSVC (htons/ntohl).
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32"]
