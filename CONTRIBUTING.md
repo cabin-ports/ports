@@ -291,7 +291,7 @@ Install the pinned `cabin`, then run the publisher's tests and the complete dry-
 stages every port, builds it against the staged package, and runs its consumer test:
 
 ```console
-$ rev="$(scripts/actions/cabin-rev.sh)"
+$ rev="$(.github/scripts/cabin-rev.sh)"
 $ cargo install --locked --debug --git https://github.com/cabinpkg/cabin --rev "$rev" cabinpkg --root target/pinned-cabin
 $ PORT_PUBLISH_CABIN="$PWD/target/pinned-cabin/bin/cabin" cargo test --locked
 $ cargo run --locked -- --dry-run --cabin target/pinned-cabin/bin/cabin
@@ -302,7 +302,7 @@ downloads each pinned upstream archive once into Cabin's cache (`<cache>/ports/a
 `--help`).  On Linux it also runs the probe packages that talk to a database server, which fail
 without the servers [CI](docs/maintaining.md#ci) starts on `127.0.0.1`.
 
-A change to `scripts/actions/` or `.github/workflows/` must also pass the `lint` job's
+A change to `.github/scripts/` or `.github/workflows/` must also pass the `lint` job's
 `shellcheck`, `shfmt`, `actionlint`, and `check-inline-runs.sh` steps;
 [CI](docs/maintaining.md#ci) shows how to run them locally.
 

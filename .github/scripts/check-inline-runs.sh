@@ -36,6 +36,6 @@ hits="$(go run github.com/mikefarah/yq/v4@v4.54.1 --no-doc '
 
 if [[ -n $hits ]]; then
   echo "$hits" >&2
-  echo "Move policy into port-publish (src/) or glue into scripts/actions/, or justify the block with a first line '# inline: <reason>' (AGENTS.md \"GitHub Actions maintainability\")." >&2
+  echo "Move policy into port-publish (src/) or glue into .github/scripts/, or justify the block with a first line '# inline: <reason>' (AGENTS.md \"GitHub Actions maintainability\")." >&2
   exit 1
 fi

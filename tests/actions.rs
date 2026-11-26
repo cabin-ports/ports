@@ -1,4 +1,4 @@
-//! Tests for the workflow glue in `scripts/actions/`.  Each script runs
+//! Tests for the workflow glue in `.github/scripts/`.  Each script runs
 //! under `bash`, as a workflow step runs it, in a temporary directory,
 //! with its inputs set explicitly and a fake `gh` first on `PATH`.
 
@@ -16,15 +16,15 @@ const LOCKED_TO_REV: &str = "git+https://github.com/cabinpkg/cabin?rev=012345678
 const PIN_ERROR: &str =
     "::error::Cargo.lock must lock every cabinpkg-* package to one full cabinpkg/cabin commit";
 
-/// Runs `scripts/actions/<name>` with `args` in `cwd`, with `dir/bin`
+/// Runs `.github/scripts/<name>` with `args` in `cwd`, with `dir/bin`
 /// first on `PATH`, the runner variables the scripts read cleared (the
 /// runner running these tests sets some), and `env` set.  Setting
 /// `PATH` also makes Windows look `bash` up through it, as a runner's
 /// `shell: bash` does, instead of in System32 first.
 fn run(name: &str, args: &[&str], cwd: &Path, dir: &TempDir, env: &[(&str, &str)]) -> Output {
     let script = Path::new(env!("CARGO_MANIFEST_DIR"))
+        .join(".github")
         .join("scripts")
-        .join("actions")
         .join(name);
     let path = std::env::var_os("PATH").unwrap_or_default();
     let path = std::env::join_paths(
@@ -919,7 +919,7 @@ mod receipts {
     /// branch holds only run 222's lock.
     #[test]
     fn acquire_loses_a_race_without_taking_the_lock() {
-        let script = Path::new(env!("CARGO_MANIFEST_DIR")).join("scripts/actions/receipts.sh");
+        let script = Path::new(env!("CARGO_MANIFEST_DIR")).join(".github/scripts/receipts.sh");
         let path = std::env::var_os("PATH").unwrap();
         let real_git = std::env::split_paths(&path)
             .map(|dir| dir.join("git"))
