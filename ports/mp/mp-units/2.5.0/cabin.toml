@@ -14,12 +14,11 @@ version = "2.5.0"
 license = "MIT AND MIT WITH fmt-exception"
 include = ["LICENSE.md", "src/core/include", "src/systems/include"]
 
-# Upstream's default configuration (src/CMakeLists.txt:84-90): std::format, gsl-lite contracts,
-# CRTP, natural units, hosted.  The headers select these themselves when no MP_UNITS_API_* macro
-# is set (compat_macros.h:66-90, 104-122, hacks.h:77-78), so no define is needed.  The fmt
-# formatting backend is not ported (a dependency cannot be feature-gated), nor are the C++ module
-# units.  C++20 is upstream's
-# stated floor (docs/getting_started/cpp_compiler_support.md:18-41).
+# Upstream's default configuration (src/CMakeLists.txt:84-90): std::format, gsl-lite
+# contracts, CRTP, natural units, hosted.  The headers select these themselves when no
+# MP_UNITS_API_* macro is set (compat_macros.h:66-90, 104-122, hacks.h:77-78), so no define
+# is needed.  The fmt formatting backend is not ported, nor are the C++ module units.
+# C++20 is upstream's stated floor (docs/getting_started/cpp_compiler_support.md:18-41).
 [dependencies]
 "cabin-ports/gsl-lite" = "=1.1.1"
 
