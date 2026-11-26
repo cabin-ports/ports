@@ -1,0 +1,56 @@
+[package.upstream]
+url = "https://github.com/arun11299/cpp-jwt/archive/refs/tags/v1.5.1.tar.gz"
+checksum = "sha256:7e5ec6891254c8f00128952ed6b9a73d827539136c3b804563521a0042abe72c"
+format = "tar.gz"
+strip-prefix = "cpp-jwt-1.5.1"
+
+[package]
+name = "cabin-ports/cpp-jwt"
+version = "1.5.1"
+# include/jwt/algorithm.hpp:27-30 credits libjwt (LGPL-3.0-or-later at the
+# time, COPYING.LIB) for most of the signing and verification code.
+# include/jwt/impl/string_view.ipp:270-272 credits libstdc++'s hash_bytes.cc
+# for a MurmurHash2 copy, and include/jwt/config.hpp:41-47 credits an akrzemi1
+# blog post for X_ASSERT; their copyright significance is uncertain.
+license = "MIT AND LGPL-3.0-or-later"
+include = [
+  "LICENSE",
+  "README.md",
+  "include/jwt/algorithm.hpp",
+  "include/jwt/assertions.hpp",
+  "include/jwt/base64.hpp",
+  "include/jwt/config.hpp",
+  "include/jwt/error_codes.hpp",
+  "include/jwt/exceptions.hpp",
+  "include/jwt/jwt.hpp",
+  "include/jwt/parameters.hpp",
+  "include/jwt/short_string.hpp",
+  "include/jwt/stack_alloc.hpp",
+  "include/jwt/string_view.hpp",
+  "include/jwt/detail",
+  "include/jwt/impl",
+]
+
+[dependencies]
+"cabin-ports/nlohmann_json" = "=3.12.0"
+"cabin-ports/openssl" = "=4.1.0"
+
+# Requests the openssl port's own build of OpenSSL in place of the system's;
+# that build is refused on Windows.
+[features]
+vendored-openssl = ["cabin-ports/openssl/vendored"]
+
+# Upstream's CMake cpp-jwt without CPP_JWT_USE_VENDORED_NLOHMANN_JSON:
+# header-only, C++14 (README.md:4, CMakeLists.txt:48), using the nlohmann_json
+# port and OpenSSL's ssl and crypto libraries.  The bundled include/jwt/json
+# and include/jwt/test are left out, as upstream's install does
+# (CMakeLists.txt:103-112).
+[target.cpp-jwt]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+deps = [
+  { name = "cabin-ports/nlohmann_json", public = true },
+  { name = "cabin-ports/openssl:ssl", public = true },
+  { name = "cabin-ports/openssl:crypto", public = true },
+]
