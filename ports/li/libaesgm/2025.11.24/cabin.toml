@@ -1,0 +1,46 @@
+[package.upstream]
+url = "https://github.com/BrianGladman/aes/archive/6c53847f1259d4dff0b240dba3916d9b766624c7.tar.gz"
+checksum = "sha256:b47f179935579e865d37361325e7897de7916b5d5cfce1a3eec2fa0c382c8731"
+format = "tar.gz"
+strip-prefix = "aes-6c53847f1259d4dff0b240dba3916d9b766624c7"
+
+# Consumers see only the public headers (README.md, "aes.h", "aescpp.h"; aes.h
+# includes brg_types.h), not the implementation headers beside the sources.
+[[package.upstream.copy]]
+from = "aes.h"
+to = "include/aes.h"
+
+[[package.upstream.copy]]
+from = "aescpp.h"
+to = "include/aescpp.h"
+
+[[package.upstream.copy]]
+from = "brg_types.h"
+to = "include/brg_types.h"
+
+# Version: no tag exists; 2025.11.24 is the date of commit 6c53847 on master.
+[package]
+name = "cabin-ports/libaesgm"
+version = "2025.11.24"
+# aestab.c:386 credits a Stack Overflow answer by Joe Lowe for the MSVC/GCC startup
+# initializer, which it calls public domain; its copyright significance is uncertain.
+license = "Brian-Gladman-2-Clause"
+include = [
+  "aes.h", "aes_ni.h", "aes_via_ace.h", "aescpp.h", "aesopt.h", "aestab.h", "brg_endian.h",
+  "brg_types.h", "aes_modes.c", "aes_ni.c", "aescrypt.c", "aeskey.c", "aestab.c", "license.txt",
+  "include",
+]
+
+# The five files of upstream's lib_generic_c project, in its default
+# configuration (static tables, modes, AES-NI where the compiler targets it).
+# Not ported: the assembler variants, the test programs and the Python binding.
+[target.aes]
+type = "library"
+links = "aes"
+sources = ["aes_modes.c", "aes_ni.c", "aescrypt.c", "aeskey.c", "aestab.c"]
+include-dirs = ["include"]
+# Upstream states no standard; its headers need C99 <stdint.h> for consumers, and
+# Cabin's MSVC dialect has no /std: spelling for C99, so the sources build as C11.
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
