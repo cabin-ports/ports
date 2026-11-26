@@ -1,0 +1,28 @@
+[package.upstream]
+url = "https://github.com/fnc12/sqlite_orm/archive/refs/tags/v1.9.1.tar.gz"
+checksum = "sha256:de2db80e4f716a27c4e1f4cb8a356394e428676c98c90b0577b0431107d3cccf"
+format = "tar.gz"
+strip-prefix = "sqlite_orm-1.9.1"
+
+[package]
+name = "cabin-ports/sqlite_orm"
+version = "1.9.1"
+# sqlite_orm.h:676-677 credits Stack Overflow answer 37617906 (CC BY-SA 3.0) for static_if; its copyright significance is uncertain.
+# sqlite_orm.h:4079-4080 cites Stack Overflow answer 34672753 (CC BY-SA 3.0) for is_base_of_template; its copyright significance is uncertain.
+# LICENSE is AGPL-3.0 with no "or later".  COMM-LICENSE is upstream's paid
+# commercial licence (README.md:16), so its MIT text is not in the expression.
+license = "AGPL-3.0-only"
+include = ["include", "LICENSE", "COMM-LICENSE"]
+
+[dependencies]
+"cabin-ports/sqlite3" = "=3.53.2"
+
+# Upstream compiles with /Zc:__cplusplus on MSVC (CMakeLists.txt:61-63); like
+# upstream's exported target, the package does not, so an MSVC consumer
+# needs it for C++20 storage.iterate(select(...)) (sqlite_orm.h:128-129).
+[target.sqlite_orm]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:805 and CMakeLists.txt:25 state C++14.
+interface-cxx-standard = "c++14"
+deps = [{ name = "cabin-ports/sqlite3", public = true }]
