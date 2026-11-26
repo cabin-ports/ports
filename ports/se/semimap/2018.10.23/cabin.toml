@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/hogliux/semimap/archive/de556c74721a5017f5a03faf2fbd1c6e5a768a32.tar.gz"
+checksum = "sha256:af4689afb3809664507e2ae77332650b658175d5382cbe63957707547d7ee76e"
+format = "tar.gz"
+strip-prefix = "semimap-de556c74721a5017f5a03faf2fbd1c6e5a768a32"
+
+[package]
+name = "cabin-ports/semimap"
+version = "2018.10.23"
+license = "MIT"
+include = ["LICENSE.md", "semimap.h"]
+
+# Version: upstream has no tags; 2018.10.23 is the commit date of the pinned commit.
+# The C++17 standard is upstream's own: semimap.h #errors below it.
+[target.semimap]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++17"
