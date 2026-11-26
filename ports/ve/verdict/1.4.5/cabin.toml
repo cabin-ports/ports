@@ -1,0 +1,100 @@
+[package.upstream]
+url = "https://github.com/sandialabs/verdict/archive/refs/tags/1.4.5.tar.gz"
+checksum = "sha256:8c3ba194894a1b10b0700643363d02514cfdf88109a0c2710c0a32e857b2bde0"
+format = "tar.gz"
+strip-prefix = "verdict-1.4.5"
+# Patch 0001 fills in the verdict_config.h that the copy step places from its
+# template, as CMake's configure_file would for this static, unmangled build
+# (CMakeLists.txt:35, :37, :39): version 145, BUILD_SHARED_LIBS and
+# VERDICT_MANGLE unset.
+# BSD-3-Clause notice of verdict_config.h.in, whose lines 0001 carries (the
+# License's condition that copies retain it), from LICENSE:
+# Copyright 2003,2006,2019 National Technology & Engineering Solutions of Sandia, LLC (NTESS).
+# Under the terms of Contract DE-NA0003525 with NTESS, the U.S. Government retains certain rights in this software.
+#
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#     * Redistributions in binary form must reproduce the above copyright
+#       notice, this list of conditions and the following disclaimer in the
+#       documentation and/or other materials provided with the distribution.
+#     * Neither the name of the <organization> nor the
+#       names of its contributors may be used to endorse or promote products
+#       derived from this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+# ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL <COPYRIGHT HOLDER> BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+patches = ["patches/0001-fill-in-verdict-config-header.patch"]
+
+[[package.upstream.copy]]
+from = "verdict_config.h.in"
+to = "verdict_config.h"
+
+[package]
+name = "cabin-ports/verdict"
+version = "1.4.5"
+license = "BSD-3-Clause"
+# LICENSE is the BSD-3-Clause text with its <organization> and
+# <COPYRIGHT HOLDER> placeholders unfilled; the holder is NTESS.
+include = [
+  "LICENSE",
+  "README.md",
+  "V_EdgeMetric.cpp",
+  "V_GaussIntegration.cpp",
+  "V_HexMetric.cpp",
+  "V_KnifeMetric.cpp",
+  "V_PyramidMetric.cpp",
+  "V_QuadMetric.cpp",
+  "V_TetMetric.cpp",
+  "V_TriMetric.cpp",
+  "V_WedgeMetric.cpp",
+  "V_GaussIntegration.hpp",
+  "V_HexMetric.hpp",
+  "VerdictVector.cpp",
+  "VerdictVector.hpp",
+  "patches",
+  "verdict.h",
+  "verdict_config.h",
+  "verdict_defines.hpp",
+]
+
+# Upstream's verdict library (CMakeLists.txt:55-82): its ten sources with the
+# package root public, so consumers include <verdict.h>.  Not ported: shared
+# libraries, the namespace mangling option (VERDICT_MANGLE), CUDA and HIP
+# builds, the tests, the manual and the CMake package files.
+[target.verdict]
+type = "library"
+sources = [
+  "V_EdgeMetric.cpp",
+  "V_GaussIntegration.cpp",
+  "V_HexMetric.cpp",
+  "V_KnifeMetric.cpp",
+  "V_PyramidMetric.cpp",
+  "V_QuadMetric.cpp",
+  "V_TetMetric.cpp",
+  "V_TriMetric.cpp",
+  "V_WedgeMetric.cpp",
+  "VerdictVector.cpp",
+]
+include-dirs = ["."]
+# C++11, stated by CMakeLists.txt:78; the sources need C++14 (constexpr void
+# members, VerdictVector.hpp:60) and it is the oldest Cabin can lower for MSVC.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+interface-c-standard = "none"
+links = "verdict"
+
+# Upstream links libm privately on Unix (CMakeLists.txt:81-83).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]

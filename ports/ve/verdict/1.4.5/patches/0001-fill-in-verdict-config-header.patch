@@ -1,0 +1,20 @@
+--- a/verdict_config.h
++++ b/verdict_config.h
+@@ -21,14 +21,14 @@
+ #ifndef __verdict_config_h
+ #define __verdict_config_h
+ 
+-#define VERDICT_VERSION @verdict_VERSION_FLAT@
++#define VERDICT_VERSION 145
+ 
+-#cmakedefine BUILD_SHARED_LIBS
++/* #undef BUILD_SHARED_LIBS */
+ #ifdef BUILD_SHARED_LIBS
+ # define VERDICT_SHARED_LIB
+ #endif
+ 
+-#cmakedefine VERDICT_MANGLE
++/* #undef VERDICT_MANGLE */
+ #ifdef VERDICT_MANGLE
+ # define VERDICT_NAMESPACE @VERDICT_MANGLE_PREFIX@
+ #endif
