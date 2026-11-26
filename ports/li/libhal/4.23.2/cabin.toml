@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/libhal/libhal/archive/refs/tags/4.23.2.tar.gz"
+checksum = "sha256:30ca5bcbec1c197f4a0eb8d562866e71b62368ee534932f45d49f9cbb27b870f"
+format = "tar.gz"
+strip-prefix = "libhal-4.23.2"
+
+[package]
+name = "cabin-ports/libhal"
+version = "4.23.2"
+license = "Apache-2.0 AND BSL-1.0"
+include = ["LICENSE", "MODIFICATIONS", "v4/include"]
+
+[dependencies]
+"cabin-ports/tl-function-ref" = "=1.0.0"
+
+# C++20 is upstream's stated minimum (v4/conanfile.py _min_cppstd).
+[target.libhal]
+type = "header-only"
+include-dirs = ["v4/include"]
+interface-cxx-standard = "c++20"
+deps = [{ name = "cabin-ports/tl-function-ref", public = true }]
