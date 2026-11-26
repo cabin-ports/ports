@@ -1,0 +1,22 @@
+[package.upstream]
+# Upstream tags no releases; this is main on 2026-11-20, whose subject is "v1.55.33".
+url = "https://github.com/mattreecebentley/plf_hive/archive/4ff5621d1fb8704f5e919d45892e7a5dbfe93211.tar.gz"
+checksum = "sha256:c71d0020678e8069978526c980734001a6acd36f05707e53707a55cae67cbe2c"
+format = "tar.gz"
+strip-prefix = "plf_hive-4ff5621d1fb8704f5e919d45892e7a5dbfe93211"
+
+[package]
+name = "cabin-ports/plf-hive"
+version = "1.55.33"
+license = "Zlib"
+include = ["LICENSE.md", "plf_hive.h"]
+
+# README.MD: "C++20 and above only".
+# Limitation (measured: macOS Apple clang, libc++): std::next and std::prev on
+# hive iterators are ambiguous with plf_hive.h:103 and :112.  Measured: cl
+# (check-windows) fails to link std::distance on them (plf_hive.h:121) with
+# LNK1179, duplicate COMDAT.
+[target.plf-hive]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++20"
