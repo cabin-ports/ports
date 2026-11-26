@@ -1,0 +1,12 @@
+[package]
+name = "standalone-probe"
+version = "0.0.0"
+cxx-standard = "c++14"
+
+[dependencies]
+"cabin-ports/cli" = { version = "=2.3.0", features = ["standalone-asio"] }
+
+[target.standalone-probe]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/cli:cli-standalone-asio"]
