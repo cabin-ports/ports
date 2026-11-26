@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/igormironchik/read-excel/archive/refs/tags/1.2.8.tar.gz"
+checksum = "sha256:26859a7262500bfb7703197bb2726ea9bca33455f3102eb3e15e4ddfc97c6a07"
+format = "tar.gz"
+strip-prefix = "read-excel-1.2.8"
+
+[package]
+name = "cabin-ports/read-excel"
+version = "1.2.8"
+license = "MIT"
+include = ["COPYING", "read-excel"]
+
+[target.read-excel]
+type = "header-only"
+include-dirs = ["."]
+# Upstream's CMakeLists.txt:16 sets CMAKE_CXX_STANDARD 14.
+interface-cxx-standard = "c++14"
