@@ -51,6 +51,8 @@ deps = [{ name = "cabin-ports/libxchange", public = true }]
 [target.'cfg(family = "unix")'.profile]
 link-libs = ["m", "pthread"]
 
+# On Windows, a refused connect ends the process through the CRT's
+# invalid-parameter handler (measured, check-windows).
 [target.'cfg(os = "windows")'.profile]
 link-libs = ["ws2_32"]
 

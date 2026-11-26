@@ -78,8 +78,11 @@ int main(void) {
   /* Port 1 on the loopback is closed. */
   CHECK(redisxSetPort(r, 1) == X_SUCCESS);
   CHECK(redisxSetSocketTimeout(r, 500) == X_SUCCESS);
+#ifndef _WIN32
+  /* Not on Windows: see the Windows limitation in cabin.toml. */
   CHECK(redisxConnect(r, FALSE) == X_NO_SERVICE);
   CHECK(redisxIsConnected(r) == FALSE);
+#endif
 #ifdef __linux__
   /* Only built with _POSIX_C_SOURCE >= 200112L (cabin.toml's define). */
   CHECK(redisxDeleteEntries(r, NULL) == X_NULL);

@@ -67,12 +67,13 @@ int main() {
     // Port 1 on the loopback is closed; the hook runs only once connected.
     check(redisxSetPort(r.get(), 1) == X_SUCCESS, "port");
     check(redisxSetSocketTimeout(r.get(), 500) == X_SUCCESS, "socket timeout");
-    std::printf("redisx: C++ consumer connecting to %s:1\n", r->id);
-    std::fflush(stdout);
+#ifndef _WIN32
+    // Not on Windows: see the Windows limitation in cabin.toml.
     check(redisxConnect(r.get(), TRUE) == X_NO_SERVICE, "refused");
     check(!redisxIsConnected(r.get()) && !redisxHasPipeline(r.get()),
           "not connected");
     check(!hookCalled, "hook not called");
+#endif
   }
 
   char first[] = "alpha";
