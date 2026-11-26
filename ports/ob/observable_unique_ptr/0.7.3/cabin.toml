@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/cschreib/observable_unique_ptr/archive/refs/tags/v0.7.3.tar.gz"
+checksum = "sha256:3c53392ef43d9eedcd5a4228de609b04c1022d0b193f30ae37f5e020f300794c"
+format = "tar.gz"
+strip-prefix = "observable_unique_ptr-0.7.3"
+
+[package]
+name = "cabin-ports/observable_unique_ptr"
+version = "0.7.3"
+# include/oup/observable_unique_ptr.hpp:77 credits a Stack Overflow answer for floor_log2/ceil_log2;
+# its copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# The header requires C++17 (README.md:40; CMakeLists.txt:17).
+[target.observable_unique_ptr]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
