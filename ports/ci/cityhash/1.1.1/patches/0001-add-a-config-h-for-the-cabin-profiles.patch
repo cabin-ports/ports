@@ -1,0 +1,13 @@
+--- /dev/null
++++ b/cabin/config.h
+@@ -0,0 +1,10 @@
++/* Stands in for the config.h configure generates.  city.cc reads only
++   WORDS_BIGENDIAN and HAVE_BUILTIN_EXPECT, which configure's AC_C_BIGENDIAN
++   and __builtin_expect checks define; it tests both with #ifdef or #if, so
++   they stay undefined where configure would leave them so. */
++#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
++#define WORDS_BIGENDIAN 1
++#endif
++#if defined(__GNUC__) || defined(__clang__)
++#define HAVE_BUILTIN_EXPECT 1
++#endif
