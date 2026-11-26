@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/MikeLankamp/fpm/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:e34941b4cd1d1f1fbe9ecf39b740cb20b9c272a832f63be27fa24eddf400e51b"
+format = "tar.gz"
+strip-prefix = "fpm-1.1.0"
+
+[package]
+name = "cabin-ports/mikelankamp-fpm"
+version = "1.1.0"
+# include/fpm/math.hpp:424 credits Hacker's Delight for cbrt and :472 Wikipedia for
+# sqrt; their copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# C++11 is the floor README.md:4 states.  Not ported: the benchmark and accuracy
+# tools.
+[target.mikelankamp-fpm]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
