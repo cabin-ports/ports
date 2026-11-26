@@ -74,13 +74,13 @@ jobs:
           ENABLED: ${{ vars.PORTS_AUTO_PUBLISH }}
           PUBLISH: ${{ vars.PORTS_PUBLISH_ENABLED }}
           INPUT: ${{ inputs.mode }}
-        run: scripts/actions/publish-mode.sh
+        run: .github/scripts/publish-mode.sh
 
       - name: Require this commit's passing CI
         if: steps.mode.outputs.mode == 'new'
         env:
           GH_TOKEN: ${{ github.token }}
-        run: scripts/actions/require-ci.sh
+        run: .github/scripts/require-ci.sh
 
       # A missing or unreadable log fails the run; it never reads as
       # "nothing uploaded".
@@ -89,7 +89,7 @@ jobs:
         if: steps.mode.outputs.mode != 'off'
         env:
           MODE: ${{ steps.mode.outputs.mode }}
-        run: scripts/actions/receipts.sh probe
+        run: .github/scripts/receipts.sh probe
 
   # Builds both binaries in a job without the OIDC permission, so no
   # Rust build script runs beside the publish job's token. A `new` or
@@ -109,7 +109,7 @@ jobs:
           persist-credentials: false
       - id: rev
         name: Read the pinned Cabin commit
-        run: scripts/actions/cabin-rev.sh
+        run: .github/scripts/cabin-rev.sh
       # No cache: these binaries run beside the publish job's token.
       - uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
         with:
@@ -125,13 +125,13 @@ jobs:
           cp target/debug/port-publish "$RUNNER_TEMP/tools/bin/"
       - name: Read the receipts log
         if: needs.gate.outputs.mode == 'new' || needs.gate.outputs.mode == 'plan'
-        run: scripts/actions/receipts.sh read "$RUNNER_TEMP/receipts.jsonl"
+        run: .github/scripts/receipts.sh read "$RUNNER_TEMP/receipts.jsonl"
       - id: pending
         name: List the versions to upload
         if: needs.gate.outputs.mode == 'new' || needs.gate.outputs.mode == 'plan'
         env:
           PORT_PUBLISH_RETRY_FAILED: ${{ inputs.retry-failed }}
-        run: scripts/actions/pending-new.sh "$RUNNER_TEMP/tools/bin" "$RUNNER_TEMP/receipts.jsonl"
+        run: .github/scripts/pending-new.sh "$RUNNER_TEMP/tools/bin" "$RUNNER_TEMP/receipts.jsonl"
       - id: tools
         uses: actions/upload-artifact@v7.0.2
         with:
@@ -141,7 +141,7 @@ jobs:
 
   # Every run that may upload, with a receipts log to add to, holds the
   # log's lock (docs/publishing.md, "The lock"). It runs only
-  # scripts/actions/ from its own commit (git and gh), so it may push that
+  # .github/scripts/ from its own commit (git and gh), so it may push that
   # branch.
   lock:
     needs: [gate, build]
@@ -160,14 +160,14 @@ jobs:
         with:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
-          sparse-checkout: scripts/actions/
+          sparse-checkout: .github/scripts/
           sparse-checkout-cone-mode: false
       - id: lock
         name: Take the receipts log's lock
         env:
           GH_TOKEN: ${{ github.token }}
           RECEIPTS: ${{ needs.gate.outputs.receipts }}
-        run: scripts/actions/receipts.sh acquire
+        run: .github/scripts/receipts.sh acquire
 
   # The only job that builds ports, so it holds no OIDC token and may
   # push nothing. It records what it built for `publish`. Under the
@@ -198,7 +198,7 @@ jobs:
             --cache-dir "$RUNNER_TEMP/cabin-cache"
       - name: Read the receipts log
         if: needs.gate.outputs.mode != 'all'
-        run: scripts/actions/receipts.sh read "$RUNNER_TEMP/receipts.jsonl"
+        run: .github/scripts/receipts.sh read "$RUNNER_TEMP/receipts.jsonl"
       - name: Stage and build the new versions
         if: needs.gate.outputs.mode != 'all'
         env:
@@ -314,7 +314,7 @@ jobs:
       - name: Check that this attempt holds the receipts log's lock
         env:
           RECEIPTS: ${{ needs.gate.outputs.receipts }}
-        run: scripts/actions/receipts.sh held "$RUNNER_TEMP/receipts.jsonl"
+        run: .github/scripts/receipts.sh held "$RUNNER_TEMP/receipts.jsonl"
 
       # Rereads both variables as of this job's start: turning either off
       # before then stops a scheduled run here; only PORTS_PUBLISH_ENABLED
@@ -325,7 +325,7 @@ jobs:
           ENABLED: ${{ vars.PORTS_AUTO_PUBLISH }}
           PUBLISH: ${{ vars.PORTS_PUBLISH_ENABLED }}
           INPUT: ${{ inputs.mode }}
-        run: scripts/actions/publish-mode.sh
+        run: .github/scripts/publish-mode.sh
 
       # A stale run would publish an intermediate state of a version as
       # an otherwise unnecessary packaging revision, so --main uploads
@@ -380,7 +380,7 @@ jobs:
 
   # Appends the receipts of the attempt holding the lock to the log and
   # releases it under the rules of docs/publishing.md, "The lock". No OIDC
-  # and no port code - only scripts/actions/ from its own commit (git and
+  # and no port code - only .github/scripts/ from its own commit (git and
   # jq) - so it may push the receipts branch. After a failed push, rerun
   # this job alone; the artifacts last 30 days.
   record:
@@ -394,7 +394,7 @@ jobs:
         with:
           ref: ${{ github.workflow_sha }}
           persist-credentials: false
-          sparse-checkout: scripts/actions/
+          sparse-checkout: .github/scripts/
           sparse-checkout-cone-mode: false
       # By id, so only what the `publish` job itself uploaded is recorded.
       # A rerun `publish` job replaces the id: rerun this job alone.
@@ -412,7 +412,7 @@ jobs:
           PUBLISHED_IN: ${{ needs.publish.outputs.attempt }}
           DOWNLOAD: ${{ steps.download.outcome }}
           CABIN_REV: ${{ needs.build.outputs.cabin-rev }}
-        run: scripts/actions/receipts.sh record "$RUNNER_TEMP/receipts"
+        run: .github/scripts/receipts.sh record "$RUNNER_TEMP/receipts"
 
   exchange-check:
     # Dispatch-only probe of the registered binding end to end (config

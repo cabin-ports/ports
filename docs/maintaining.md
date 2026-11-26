@@ -48,13 +48,13 @@ does not yet serve cannot publish.
 `check-linux`, `check-macos`, and `check-windows` jobs each install the pinned `cabin` and run the
 publisher's tests and the dry-run (the [checks](../CONTRIBUTING.md#checks)) on their platform; and
 its `lint` job runs `cargo fmt --check`, `cargo clippy --locked --all-targets -- -D warnings`,
-`shellcheck` and `shfmt -d -i 2` over `scripts/actions/`, `actionlint` over the workflows,
-`scripts/actions/check-inline-runs.sh`, which flags inline control flow in the workflows' `run:`
+`shellcheck` and `shfmt -d -i 2` over `.github/scripts/`, `actionlint` over the workflows,
+`.github/scripts/check-inline-runs.sh`, which flags inline control flow in the workflows' `run:`
 steps (AGENTS.md, "GitHub Actions maintainability"), and `gh actions-lock --verify`.  CI's dry-run
 is selective (below).
 
 Its `required` job is the only required check and is green only when every one of those jobs
-succeeded.  `scripts/actions/require-needs.sh` judges each job twice, by its `needs` result and by
+succeeded.  `.github/scripts/require-needs.sh` judges each job twice, by its `needs` result and by
 the job's own conclusion in the run's job list, so a failed, cancelled, skipped, or missing job
 fails the check.  The platforms are separate jobs rather than one matrix because a matrix has a
 single `needs` result for all its legs, and that result has not shown a leg that was cancelled
@@ -63,7 +63,7 @@ the new attempt's job list holds the jobs it kept, with their conclusions.
 
 Each `lint` step runs locally, from the repository root, exactly as `ci.yml` writes it, given
 `shellcheck` and Go: `go run` fetches the `shfmt` and `actionlint` versions the job pins, and the
-`yq` version `scripts/actions/check-inline-runs.sh` pins.
+`yq` version `.github/scripts/check-inline-runs.sh` pins.
 
 The jobs that lint and build name their runner's image (`ubuntu-24.04`, `macos-26`,
 `windows-2025-vs2026`), and so does every job of `publish.yml`.  A label such as `ubuntu-latest`

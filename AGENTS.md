@@ -90,14 +90,14 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
 
 - In `publish.yml`, only the `publish` job and the curl-only `exchange-check` probe request
   `id-token: write`.  The `publish` job runs only the binaries the credential-free `build` job
-  produced and `scripts/actions/` from its own checkout.  It neither builds nor runs anything of a
+  produced and `.github/scripts/` from its own checkout.  It neither builds nor runs anything of a
   port: it uploads only what the `prepare` job built in the same run from the same commit, which
   `--prepared` checks against what it stages.  Only `prepare` builds, with no OIDC token and no
   permission to push, because a build is where a port's build script runs; no job of the workflow
   runs a consumer test.  Treat everything `prepare` could have written as untrusted in the jobs
   after it: no cache, the artifacts of `build` and `publish` only by the id each job output, and
   nothing of it executed.  Only the `lock` and `record` jobs request `contents: write`; they run
-  only `scripts/actions/receipts.sh` (`git`, `gh`, and `jq`), checked out sparsely at the
+  only `.github/scripts/receipts.sh` (`git`, `gh`, and `jq`), checked out sparsely at the
   workflow's own commit, and push only the receipts branch.
 - Every upload requires the `PORTS_PUBLISH_ENABLED` variable to be exactly `true`, checked by
   `gate` and again by `publish` right before uploading; the schedule also needs
@@ -124,7 +124,7 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   feature or an established action to a script.  Keep publication policy, receipts and lock
   state, and substantial data processing out of YAML: selection, eligibility, and receipts
   parsing belong in `port-publish` (`src/`, extending `batch.rs`, `select.rs`, or `plan.rs`), and
-  Git and GitHub glue in small single-purpose scripts under `scripts/actions/`.  Before adding
+  Git and GitHub glue in small single-purpose scripts under `.github/scripts/`.  Before adding
   workflow logic, extend the CLI or script that already owns the responsibility; never implement
   one rule in both Rust and shell.
 - Keep each `run:` step to one or a few plain commands; do not add or grow inline control flow,
@@ -132,7 +132,7 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   extracting it would weaken a credential boundary, obscure what a privileged job executes, or
   add disproportionate machinery, and it starts with `# inline: <reason>`.  There is no line-count
   limit; do not compress logic to pass a check.  The `lint` job's
-  `scripts/actions/check-inline-runs.sh` flags these constructs; it is a tripwire for review, and
+  `.github/scripts/check-inline-runs.sh` flags these constructs; it is a tripwire for review, and
   this rule, not the check, is the policy.  Its validation is documented, not tested: a change to
   it shows a deliberately flagged step failing the `lint` job in its pull request, since a test
   would make the suite fetch `yq` through Go and the network.
@@ -143,7 +143,7 @@ Cabin revision and CI, and docs/publishing.md publishing; Cabin's
   a test is impractical.
 - A privileged job is one with `id-token: write` or `contents: write`.  Grant neither to another
   job, and never widen what a privileged job executes.  A repository script it runs comes only
-  from `scripts/actions/` at `github.workflow_sha`, checked out with `persist-credentials: false`,
+  from `.github/scripts/` at `github.workflow_sha`, checked out with `persist-credentials: false`,
   and in `lock` and `record` only from a sparse checkout of that directory.  Privileged jobs
   install no toolchain or dependency and never run port code or build scripts; of them, only
   `publish` runs the `build` job's binaries.  `exchange-check` stays curl-only with no checkout.

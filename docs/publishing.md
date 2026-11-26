@@ -39,7 +39,7 @@ would keep `new` from uploading their recipes.
   no other job builds.  `prepare` records the commit it staged, the run, and the checksums of each
   version's archive and metadata document.  Only the `publish` job may request the run's OIDC
   token for a publish.  It runs just the two prebuilt binaries and the workflow scripts under
-  `scripts/actions/`, builds nothing, and runs no port code: it stages its own commit again and
+  `.github/scripts/`, builds nothing, and runs no port code: it stages its own commit again and
   uploads a version only when that record is its own run's, names the same commit, and lists the
   version with exactly the archive and metadata it has just staged.  Otherwise it uploads nothing
   and fails.  Nothing `prepare` writes is trusted.  Its record can stop an upload and cannot
@@ -54,7 +54,7 @@ would keep `new` from uploading their recipes.
   pull-request and merge-queue dry-run's job: no job of this workflow runs one.  (The
   `exchange-check` probe below also requests the token, but runs only `curl`.)  The `lock` and
   `record` jobs alone may push, only to the receipts branch, and run only
-  `scripts/actions/receipts.sh` (`git`, `gh`, and `jq`), checked out at the workflow's own commit.
+  `.github/scripts/receipts.sh` (`git`, `gh`, and `jq`), checked out at the workflow's own commit.
 - **Registry readiness.**  The `await-deploy` job runs Cabin's own `cargo workflow-await-deploy`
   guard from the pinned commit and waits until the registry has deployed a Cabin commit that
   contains it, so the client never sends metadata the running registry does not accept.
