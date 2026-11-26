@@ -73,6 +73,14 @@ jobs:
           TMP: ${{ runner.temp }}
           TEMP: ${{ runner.temp }}
         run: cargo run --locked -- --dry-run --port boost-mpi --cabin "${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}"
+      # Its dependencies include boost-property-map-parallel.
+      - name: boost-graph-parallel
+        if: ${{ !cancelled() }}
+        env:
+          CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: cargo run --locked -- --dry-run --port boost-graph-parallel --cabin "${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}"
 
   macos:
     runs-on: macos-26

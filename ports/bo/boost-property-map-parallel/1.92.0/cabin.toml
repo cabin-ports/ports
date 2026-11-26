@@ -1,0 +1,45 @@
+[package.upstream]
+url = "https://github.com/boostorg/property_map_parallel/archive/refs/tags/boost-1.92.0.tar.gz"
+checksum = "sha256:ba6c7223cb0599f764e45212522bb90668db95bee3d080e40ee2044cd8cf3e9a"
+format = "tar.gz"
+strip-prefix = "property_map_parallel-boost-1.92.0"
+
+[package]
+name = "cabin-ports/boost-property-map-parallel"
+version = "1.92.0"
+license = "BSL-1.0"
+
+[dependencies]
+"cabin-ports/boost-assert" = "=1.92.0"
+"cabin-ports/boost-bind" = "=1.92.0"
+"cabin-ports/boost-concept-check" = "=1.92.0"
+"cabin-ports/boost-config" = "=1.92.0"
+"cabin-ports/boost-function" = "=1.92.0"
+"cabin-ports/boost-mpi" = "=1.92.0"
+"cabin-ports/boost-mpl" = "=1.92.0"
+"cabin-ports/boost-multi-index" = "=1.92.0"
+"cabin-ports/boost-optional" = "=1.92.0"
+"cabin-ports/boost-property-map" = "=1.92.0"
+"cabin-ports/boost-serialization" = "=1.92.0"
+"cabin-ports/boost-smart-ptr" = "=1.92.0"
+"cabin-ports/boost-type-traits" = "=1.92.0"
+
+[target.boost_property_map_parallel]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+deps = [
+  { name = "cabin-ports/boost-assert", public = true },
+  { name = "cabin-ports/boost-bind", public = true },
+  { name = "cabin-ports/boost-concept-check", public = true },
+  { name = "cabin-ports/boost-config", public = true },
+  { name = "cabin-ports/boost-function", public = true },
+  { name = "cabin-ports/boost-mpi:boost_mpi", public = true },
+  { name = "cabin-ports/boost-mpl", public = true },
+  { name = "cabin-ports/boost-multi-index", public = true },
+  { name = "cabin-ports/boost-optional", public = true },
+  { name = "cabin-ports/boost-property-map", public = true },
+  { name = "cabin-ports/boost-serialization:boost_serialization", public = true },
+  { name = "cabin-ports/boost-smart-ptr", public = true },
+  { name = "cabin-ports/boost-type-traits", public = true },
+]

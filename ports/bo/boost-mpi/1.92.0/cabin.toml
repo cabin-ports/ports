@@ -86,7 +86,7 @@ deps = [
   "cabin-ports/boost-lexical-cast",
   { name = "cabin-ports/boost-mpl", public = true },
   { name = "cabin-ports/boost-optional", public = true },
-  { name = "cabin-ports/boost-serialization", public = true },
+  { name = "cabin-ports/boost-serialization:boost_serialization", public = true },
   { name = "cabin-ports/boost-smart-ptr", public = true },
   { name = "cabin-ports/boost-throw-exception", public = true },
   { name = "cabin-ports/boost-type-traits", public = true },

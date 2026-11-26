@@ -3,6 +3,14 @@ url = "https://github.com/boostorg/compute/archive/refs/tags/boost-1.92.0.tar.gz
 checksum = "sha256:a63ef506dae6e5384cf5603dc0141e9a6af8974c23a6828ca2326de5338087e6"
 format = "tar.gz"
 strip-prefix = "compute-boost-1.92.0"
+# 0001 lets the image headers compile with GCC in an ISO C++ mode, which
+# is how Cabin compiles.  There the OpenCL headers leave out the anonymous
+# union that gives cl_image_desc's `buffer` its OpenCL 2.0 name
+# `mem_object` (CL/cl.h:142-149 and CL/cl_platform.h:505-520 of
+# OpenCL-Headers v2025.07.22), so image1d.hpp:65, image2d.hpp:73 and :123,
+# and image3d.hpp:69 and :123 do not compile.  The patch has them set
+# `buffer`, the same member; upstream's develop still sets `mem_object`.
+patches = ["patches/0001-set-the-image-descriptors-buffer.patch"]
 
 [package]
 name = "cabin-ports/boost-compute"
