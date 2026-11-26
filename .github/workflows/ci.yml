@@ -115,6 +115,14 @@ jobs:
           sudo apt-get update
           sudo apt-get install --yes --no-install-recommends redis-server
 
+      # PoCL's CPU device, which a probe's OpenCL kernel runs on, and the
+      # distribution's ICD loader, which a probe links as libOpenCL.
+      - name: Install an OpenCL implementation
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends pocl-opencl-icd ocl-icd-opencl-dev
+
       # A probe finds OpenSSL's DLLs through PATH: these, before any
       # other program's copy.
       - name: Put the image's OpenSSL first on PATH
