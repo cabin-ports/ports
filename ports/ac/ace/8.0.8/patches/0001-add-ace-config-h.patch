@@ -1,0 +1,16 @@
+--- /dev/null
++++ b/ace/config.h
+@@ -0,0 +1,13 @@
++/* Stands in for the ace/config.h that ACE-INSTALL.html has the user write. */
++#if defined(_WIN32)
++#  if defined(_MSC_VER) && !defined(WIN32)
++#    define WIN32 1
++#  endif
++#  include "ace/config-win32.h"
++#elif defined(__APPLE__)
++#  include "ace/config-macosx.h"
++#elif defined(__linux__) && !defined(__ANDROID__)
++#  include "ace/config-linux.h"
++#else
++#  error "cabin-ports/ace selects an ACE configuration for Linux, macOS and Windows only"
++#endif
