@@ -1,0 +1,71 @@
+[package.upstream]
+url = "https://github.com/KarypisLab/GKlib/archive/refs/tags/v0.0.1.tar.gz"
+checksum = "sha256:9ab4e0b4c3e06fde1de5b83991b9bcd9a3f424e8fe435e46020045fdc8a8e2b9"
+format = "tar.gz"
+strip-prefix = "GKlib-0.0.1"
+# Upstream's CMake passes its consumers __thread=__declspec(thread) on cl,
+# which gk_externs.h's thread-local declarations need, and HAVE_REGEX_H where
+# the C library has POSIX regex; without it GKlib.h declares gkregex.h's
+# regex types, which conflict with a consumer's <regex.h> (measured on
+# macOS).  Interface defines cannot depend on the platform, so patch 0001
+# derives both in GKlib.h; its comment line is the change notice Apache-2.0
+# section 4(b) requires.
+patches = ["patches/0001-derive-consumer-defines-in-gklib-h.patch"]
+
+[package]
+name = "cabin-ports/gklib"
+version = "0.0.1"
+license = "Apache-2.0 AND LGPL-2.1-or-later AND BSD-3-Clause"
+include = ["LICENSE.txt", "LICENSES", "LICENSES.md", "include", "patches", "src"]
+
+[target.GKlib]
+type = "library"
+sources = [
+  "src/b64.c",
+  "src/blas.c",
+  "src/cache.c",
+  "src/csr.c",
+  "src/error.c",
+  "src/evaluate.c",
+  "src/fkvkselect.c",
+  "src/fs.c",
+  "src/getopt.c",
+  "src/gk_util.c",
+  "src/gkregex.c",
+  "src/graph.c",
+  "src/htable.c",
+  "src/io.c",
+  "src/itemsets.c",
+  "src/mcore.c",
+  "src/memory.c",
+  "src/pqueue.c",
+  "src/random.c",
+  "src/rw.c",
+  "src/seq.c",
+  "src/sort.c",
+  "src/string.c",
+  "src/timers.c",
+  "src/tokenizer.c",
+]
+include-dirs = ["include"]
+# Upstream states no C standard.  c11 is the oldest Cabin passes cl; the
+# public GK_MKRANDOM macro expands to C99's long long (measured).
+c-standard = "c11"
+interface-c-standard = "c99"
+links = "GKlib"
+
+[profile]
+defines = ["NDEBUG", "NDEBUG2"]
+
+[target.'cfg(family = "unix")'.profile]
+defines = ["HAVE_GETLINE"]
+link-libs = ["m"]
+
+[target.'cfg(os = "linux")'.profile]
+defines = ["LINUX", "_POSIX_C_SOURCE=200809L"]
+
+[target.'cfg(any(all(os = "linux", env = "gnu"), os = "macos"))'.profile]
+defines = ["HAVE_EXECINFO_H"]
+
+[target.'cfg(family = "windows")'.profile]
+defines = ["USE_GKREGEX"]
