@@ -13,13 +13,8 @@
 #include <string>
 #include <vector>
 
-#ifndef PLF_CPP20_SUPPORT
-// MSVC without /Zc:__cplusplus reports C++98, so the header stays out of its
-// C++20 mode.
-int main() { return 0; }
-#else
-#if !defined(PLF_CONSTEVAL) || !defined(PLF_DECLTYPE_SUPPORT) || \
-    !defined(PLF_64BIT_SUPPORT)
+#if !defined(PLF_CPP20_SUPPORT) || !defined(PLF_CONSTEVAL) || \
+    !defined(PLF_DECLTYPE_SUPPORT) || !defined(PLF_64BIT_SUPPORT)
 #error "plf_tools.h does not detect the C++20 features of this toolchain"
 #endif
 
@@ -157,5 +152,3 @@ int main() {
   std::printf("plf-tools c++20: %d\n", copied_and_filled);
   return 0;
 }
-
-#endif  // PLF_CPP20_SUPPORT
