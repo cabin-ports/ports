@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/ankurvdev/embedresource/archive/refs/tags/v0.0.12.tar.gz"
+checksum = "sha256:8866adbaa5f34099b3f04e9d42fd6686fcbc653a086c38b1507d51b4367f91f2"
+format = "tar.gz"
+strip-prefix = "embedresource-0.0.12"
+
+[package]
+name = "cabin-ports/ankurvdev-embedresource"
+version = "0.0.12"
+license = "BSD-3-Clause"
+include = ["EmbeddedResource.h", "LICENSE", "embedresource.cpp"]
+
+# Upstream's add_executable(embedresource) (CMakeLists.txt:8), at the C++20
+# its CMakeLists.txt:7 sets.
+# Not ported: the CMake functions that run it, add_resource_library() and
+# target_add_resource() (cmake/EmbedResourceTargets.cmake).
+[target.embedresource]
+type = "executable"
+sources = ["embedresource.cpp"]
+cxx-standard = "c++20"
+
+# C++17 is the standard upstream's consumer sample builds with
+# (ci/sample/CMakeLists.txt:9).
+[target.EmbeddedResource]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++17"
