@@ -322,7 +322,8 @@ include-dirs = ["highs", "extern"]
 cxx-standard = "c++14"
 interface-cxx-standard = "c++11"
 c-standard = "c11"
-# interfaces/highs_c_api.h has // comments (:10-12), which C89 lacks.
+# Upstream states no C standard; c99 is the measured floor of highs_c_api.h
+# (c89 fails on "// comments are not allowed in this language").
 interface-c-standard = "c99"
 links = "highs"
 deps = ["cabin-ports/zlib"]
