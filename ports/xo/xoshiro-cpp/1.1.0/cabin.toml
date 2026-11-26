@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/Reputeless/Xoshiro-cpp/archive/refs/tags/v1.1.tar.gz"
+checksum = "sha256:9e1fff51faa8754b5c61ab00f41339df0b9b1c09a13611e3357aab76c65f2ba0"
+format = "tar.gz"
+strip-prefix = "Xoshiro-cpp-1.1"
+
+# The tag is v1.1; the version appends the missing patch component.
+[package]
+name = "cabin-ports/xoshiro-cpp"
+version = "1.1.0"
+# 0BSD: XoshiroCpp.hpp's SplitMix64 and xoshiro/xoroshiro generators transcribe
+# Blackman and Vigna's reference code (prng.di.unimi.it, named in each generator's
+# comment), which is public domain under that permission text.
+license = "MIT AND 0BSD"
+include = ["LICENSE", "README.md", "XoshiroCpp.hpp"]
+
+[target.xoshiro-cpp]
+type = "header-only"
+include-dirs = ["."]
+# XoshiroCpp.hpp:4 states C++17 / C++20.
+interface-cxx-standard = "c++17"
