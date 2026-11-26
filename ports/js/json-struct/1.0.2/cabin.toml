@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/jorgen/json_struct/archive/refs/tags/1.0.2.tar.gz"
+checksum = "sha256:c424ae3e8dbe6846311cb878d2d400c98a297a28eb1556961a985b6ed7b16090"
+format = "tar.gz"
+strip-prefix = "json_struct-1.0.2"
+
+[package]
+name = "cabin-ports/json-struct"
+version = "1.0.2"
+# include/json_struct/json_struct.h:4754 takes its float code from jorgen/float_tools,
+# whose float_tools.h is under the Unlicense.
+license = "HPND-sell-variant AND Unlicense"
+include = ["COPYING", "include"]
+
+# C++11 is the floor README.md:13 and CMakeLists.txt:35 (CXX_STANDARD 11) state.
+[target.json-struct]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
