@@ -13,7 +13,7 @@ static int failures = 0;
   } while (0)
 
 int main() {
-  static_assert(sizeof(tinyobj::real_t) == sizeof(float), "float build");
+  CHECK(sizeof(tinyobj::real_t) == sizeof(float));
 
   const std::string obj =
       "# CRLF endings exercise the line reader\r\n"
