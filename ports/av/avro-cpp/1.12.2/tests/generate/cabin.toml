@@ -1,0 +1,17 @@
+[package]
+name = "generate"
+version = "0.0.0"
+
+[dependencies]
+"cabin-ports/avro-cpp" = "=1.12.2"
+
+# Built for the machine the build runs on; `build.c` runs its executable.
+[build-dependencies]
+"cabin-ports/avro-cpp" = "=1.12.2"
+
+[target.generate]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/avro-cpp"]
+# The standard avro-cpp itself requires.
+cxx-standard = "c++17"
