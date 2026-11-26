@@ -122,6 +122,22 @@ jobs:
         shell: bash
         run: printf '%s\n' 'C:\Program Files\OpenSSL\bin' >> "$GITHUB_PATH"
 
+      # The directory of the image's Python, which holds `include` and
+      # `libs`: an MSVC build finds Python no other way.
+      - name: Name the image's Python for build scripts
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          # inline: one expression; only the runner knows where its Python is
+          Add-Content $env:GITHUB_ENV ("CABIN_SDK_PYTHON_DIR=" + (Split-Path (Get-Command python).Source))
+
+      # Open MPI, and Microsoft MPI on Windows, with the `mpiexec` a
+      # probe starts its processes with.
+      - name: Install MPI
+        uses: mpi4py/setup-mpi@v1.4.4
+        with:
+          mpi: ${{ runner.os == 'Windows' && 'msmpi' || 'openmpi' }}
+
       - name: Test the publisher
         run: cargo test --locked
         env:
@@ -163,6 +179,8 @@ jobs:
     runs-on: windows-2025-vs2026
     env:
       CABIN_SDK_OPENSSL_DIR: C:\Program Files\OpenSSL
+      # Where the `Install MPI` step puts the Microsoft MPI SDK.
+      CABIN_SDK_MPI_DIR: C:\Program Files (x86)\Microsoft SDKs\MPI
     steps: *check
 
   # The required check: green only when every job it needs succeeded.

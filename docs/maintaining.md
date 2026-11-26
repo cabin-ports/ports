@@ -80,6 +80,15 @@ that directory to a script only because the runner is an administrator
 the SDK out of `Program Files`.  The Windows job also puts that installation's `bin` first on
 `PATH`, where a probe finds the DLLs it runs with.  On Linux pkg-config finds the distribution's.
 
+The images hold Python with its development files.  On Linux and macOS pkg-config finds it
+(`python3-embed`); `check-windows` sets `CABIN_SDK_PYTHON_DIR` to the directory of the `python`
+on `PATH`, which holds `include` and `libs`.
+
+Every check job installs MPI with the [`setup-mpi`](https://github.com/mpi4py/setup-mpi) action:
+Open MPI, which pkg-config finds (`ompi-c`), and Microsoft MPI on Windows, whose SDK
+`check-windows` names in `CABIN_SDK_MPI_DIR`.  The action puts `mpiexec`, which a probe package
+starts its processes with, on `PATH`.
+
 `check-linux` also starts the image's MySQL server (user `root`, password `root`) and installs
 the distribution's Redis server, both on `127.0.0.1`, for probe packages that talk to a server.
 No other job has them, so such a probe package requires its port under `cfg(os = "linux")`.

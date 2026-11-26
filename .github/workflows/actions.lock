@@ -8,6 +8,7 @@ workflows:
         - 'actions/checkout@v7.0.1'
         - 'actions/setup-go@v7.0.0'
         - 'ilammy/msvc-dev-cmd@v1.13.0'
+        - 'mpi4py/setup-mpi@v1.4.4'
     '.github/workflows/publish.yml':
         - 'actions-rust-lang/setup-rust-toolchain@v2.0.0'
         - 'actions/checkout@v7.0.1'
@@ -46,6 +47,11 @@ dependencies:
         commit: 'sha1-0b201ec74fa43914dc39ae48a89fd1d8cb592756'
         owner_id: 1256587
         repo_id: 212181767
+    'mpi4py/setup-mpi@v1.4.4':
+        ref: 'v1.4.4'
+        commit: 'sha1-3417e34f1394a16723d7913c236642c24e95fd5a'
+        owner_id: 5232933
+        repo_id: 355998026
     'swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6':
         ref: 'v2.9.2'
         commit: 'sha1-6323deb102c322ba6fcbdcafc7e3dddab59af2b6'
