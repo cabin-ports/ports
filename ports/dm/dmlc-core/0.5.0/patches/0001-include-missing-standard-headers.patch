@@ -1,0 +1,33 @@
+--- a/include/dmlc/array_view.h
++++ b/include/dmlc/array_view.h
+@@ -8,6 +8,8 @@
+ 
+ #include <vector>
+ #include <array>
++// Changed for cabin-ports on 2026-11-26: include <cstddef>.
++#include <cstddef>
+ 
+ namespace dmlc {
+ 
+--- a/include/dmlc/common.h
++++ b/include/dmlc/common.h
+@@ -11,6 +11,8 @@
+ #include <sstream>
+ #include <mutex>
+ #include <utility>
++// Changed for cabin-ports on 2026-11-26: include <exception>.
++#include <exception>
+ #include "./logging.h"
+ 
+ namespace dmlc {
+--- a/include/dmlc/memory.h
++++ b/include/dmlc/memory.h
+@@ -9,6 +9,8 @@
+ #include <vector>
+ #include <memory>
+ #include <utility>
++// Changed for cabin-ports on 2026-11-26: include <type_traits>.
++#include <type_traits>
+ #include "./base.h"
+ #include "./logging.h"
+ #include "./thread_local.h"
