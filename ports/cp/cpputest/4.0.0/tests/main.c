@@ -38,6 +38,10 @@ int main(void) {
 
   mock_c()->expectNCalls(2, "g");
   mock_c()->actualCall("g");
+  mock_c()->actualCall("g");
+  mock_c()->checkExpectations();
+
+  mock_c()->expectOneCall("h");
   CHECK_THAT(mock_c()->expectedCallsLeft() == 1);
   mock_c()->clear();
   CHECK_THAT(mock_c()->expectedCallsLeft() == 0);
