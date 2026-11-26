@@ -36,5 +36,8 @@ sources = [
   "src/decoder/weight_infill.cc",
 ]
 include-dirs = ["include"]
-cxx-standard = "c++11"
+# Upstream requires C++11 (CMakeLists.txt:23); C++14 is the oldest standard
+# Cabin accepts on MSVC, so consumers still need only C++11.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
 links = "astc-codec"
