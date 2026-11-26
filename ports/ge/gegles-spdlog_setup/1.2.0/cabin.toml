@@ -1,0 +1,59 @@
+[package.upstream]
+url = "https://github.com/gegles/spdlog_setup/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:f202bba9e9b9a10dc7b60ac09fc8781f1f41216b1f4eb8c8e84f61360973a4c1"
+format = "tar.gz"
+strip-prefix = "spdlog_setup-1.2.0"
+# Patch 0001 points details/fmt.hpp at <spdlog/fmt/fmt.h>, the fmt copy bundled
+# with cabin-ports/spdlog, in place of <fmt/format.h>: this package depends on no
+# separate fmt, so two fmt copies never meet in one translation unit; without it
+# the include fails (measured: 'fmt/format.h' file not found).
+# MIT License notice of details/fmt.hpp, whose lines 0001 carries (the License's
+# condition that copies include it):
+# Copyright (c) 2017 guangie88
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+patches = ["patches/0001-use-the-fmt-bundled-with-spdlog.patch"]
+
+[package]
+name = "cabin-ports/gegles-spdlog_setup"
+version = "1.2.0"
+license = "MIT"
+include = ["LICENSE", "include", "patches"]
+
+[dependencies]
+"cabin-ports/cpptoml" = "=0.1.2"
+"cabin-ports/spdlog" = "=1.17.0"
+
+# Header-only, as upstream's CMake INTERFACE target (CMakeLists.txt:14-15).
+# Upstream's C++17 floor is conanfile.py:33-34 (_min_cppstd); its CMake sets 20
+# only for its own tests.  SPDLOG_SETUP_USE_STD_FORMAT is not offered: the
+# spdlog port uses its bundled fmt.
+# Limitations (measured): from_file_with_tag_replacement and
+# from_file_and_override_with_tag_replacement do not compile as C++20 or later
+# (conf_impl.hpp:349: call to consteval function is not a constant expression),
+# and a logger configured with a named [[thread_pool]] drops its messages;
+# loggers on the [global_thread_pool] deliver.
+[target.gegles-spdlog_setup]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+deps = [
+  { name = "cabin-ports/cpptoml", public = true },
+  { name = "cabin-ports/spdlog", public = true },
+]

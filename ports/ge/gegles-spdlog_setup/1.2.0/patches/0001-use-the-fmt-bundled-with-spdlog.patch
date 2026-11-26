@@ -1,0 +1,13 @@
+--- a/include/spdlog_setup/details/fmt.hpp
++++ b/include/spdlog_setup/details/fmt.hpp
+@@ -16,8 +16,8 @@
+         }
+     }
+ #else
+-    // Use external fmt library
+-    #include <fmt/format.h>
++    // Use the fmt library bundled with spdlog
++    #include <spdlog/fmt/fmt.h>
+     namespace spdlog_setup {
+         namespace fmt {
+             using ::fmt::format;
