@@ -1,0 +1,24 @@
+[package.upstream]
+# Commit 76110158e904c83eca4c4a5f1dc36629be4d706e (2026-09-24); upstream has no
+# releases or tags, so the version is the commit date as YYYY.M.D.
+url = "https://github.com/teslamotors/fixed-containers/archive/76110158e904c83eca4c4a5f1dc36629be4d706e.tar.gz"
+checksum = "sha256:418000a62e5ffa4741d86693b6f800603bc0f527ee73565b6b85b424b61fec4d"
+format = "tar.gz"
+strip-prefix = "fixed-containers-76110158e904c83eca4c4a5f1dc36629be4d706e"
+
+[package]
+name = "cabin-ports/fixed-containers"
+version = "2026.9.24"
+# type_name.hpp:11-14 credits Stack Overflow answer 56766138 (CC BY-SA) for type_name(); its copyright significance is uncertain.
+license = "MIT AND Apache-2.0 WITH LLVM-exception AND Unlicense"
+include = ["LICENSE", "README.md", "include"]
+
+[dependencies]
+"cabin-ports/magic_enum" = "^0.9"
+
+# C++20 is upstream's stated standard (README.md:10, CMakeLists.txt:10).
+[target.fixed-containers]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
+deps = [{ name = "cabin-ports/magic_enum", public = true }]
