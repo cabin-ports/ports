@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/kongaskristjan/fire-hpp/archive/v1.0.tar.gz"
+checksum = "sha256:73086d72a785a57bac8833d4f92799e8e769fef1d2ca46399cfbdb82a5c22f84"
+format = "tar.gz"
+strip-prefix = "fire-hpp-1.0"
+
+[package]
+name = "cabin-ports/fire-hpp"
+version = "1.0.0"
+# fire.hpp:1356 credits Stack Overflow q/5134523 for the one-line EXPAND(x) macro; its copyright significance is uncertain.
+license = "BSL-1.0"
+include = ["LICENCE", "README.md", "include"]
+
+# FIRE(...) defines main, so a consumer includes <fire-hpp/fire.hpp> and
+# writes FIRE in exactly one translation unit of an executable.
+[target.fire-hpp]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
