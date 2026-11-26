@@ -1,0 +1,108 @@
+[package.upstream]
+url = "https://github.com/cpputest/cpputest/archive/refs/tags/v4.0.tar.gz"
+checksum = "sha256:0b66d20661f232d2a6af124c4455c8ccc9a4ce72d29f6ad4877eb385faaf5108"
+format = "tar.gz"
+strip-prefix = "cpputest-4.0"
+
+[package]
+name = "cabin-ports/cpputest"
+version = "4.0.0"
+license = "BSD-3-Clause"
+include = [
+  "AUTHORS",
+  "COPYING",
+  "include/CppUTest",
+  "include/CppUTestExt",
+  "src/CppUTest",
+  "src/CppUTestExt",
+  "src/Platforms/Gcc",
+  "src/Platforms/VisualCpp",
+]
+# Upstream names no standard (CMakeLists.txt, cmake/Modules/CppUTestConfigurationOptions.cmake:71-77);
+# c++14 is the oldest Cabin can request from MSVC.  The interface standards
+# are c++98 (measured) and c99, since
+# CppUTestConfig.h changes the C types under strict C89 (no LLONG_MAX).
+cxx-standard = "c++14"
+interface-cxx-standard = "c++98"
+interface-c-standard = "c99"
+
+# The two static libraries of upstream's CMake build: CppUTest
+# (src/CppUTest/CMakeLists.txt) and CppUTestExt, which needs it.  Not ported:
+# the other platform directories, the tests and examples, and the GTest and
+# GMock support, which upstream builds only with GMOCK_HOME set.
+#
+# Upstream's CMake force-includes MemoryLeakDetectorNewMacros.h and
+# MemoryLeakDetectorMallocMacros.h into every source of the library
+# (CppUTestConfigurationOptions.cmake:30-41), a raw flag Cabin drops, so the
+# library is built without them, as upstream's Visual Studio project does.
+[target.cpputest]
+type = "library"
+links = "CppUTest"
+sources = [
+  "src/CppUTest/CommandLineArguments.cpp",
+  "src/CppUTest/CommandLineTestRunner.cpp",
+  "src/CppUTest/JUnitTestOutput.cpp",
+  "src/CppUTest/MemoryLeakDetector.cpp",
+  "src/CppUTest/MemoryLeakWarningPlugin.cpp",
+  "src/CppUTest/SimpleMutex.cpp",
+  "src/CppUTest/SimpleString.cpp",
+  "src/CppUTest/SimpleStringInternalCache.cpp",
+  "src/CppUTest/TeamCityTestOutput.cpp",
+  "src/CppUTest/TestFailure.cpp",
+  "src/CppUTest/TestFilter.cpp",
+  "src/CppUTest/TestHarness_c.cpp",
+  "src/CppUTest/TestMemoryAllocator.cpp",
+  "src/CppUTest/TestOutput.cpp",
+  "src/CppUTest/TestPlugin.cpp",
+  "src/CppUTest/TestRegistry.cpp",
+  "src/CppUTest/TestResult.cpp",
+  "src/CppUTest/TestTestingFixture.cpp",
+  "src/CppUTest/Utest.cpp",
+]
+include-dirs = ["include"]
+
+[target.cpputestext]
+type = "library"
+links = "CppUTestExt"
+sources = [
+  "src/CppUTestExt/CodeMemoryReportFormatter.cpp",
+  "src/CppUTestExt/GTest.cpp",
+  "src/CppUTestExt/IEEE754ExceptionsPlugin.cpp",
+  "src/CppUTestExt/MemoryReportAllocator.cpp",
+  "src/CppUTestExt/MemoryReportFormatter.cpp",
+  "src/CppUTestExt/MemoryReporterPlugin.cpp",
+  "src/CppUTestExt/MockActualCall.cpp",
+  "src/CppUTestExt/MockExpectedCall.cpp",
+  "src/CppUTestExt/MockExpectedCallsList.cpp",
+  "src/CppUTestExt/MockFailure.cpp",
+  "src/CppUTestExt/MockNamedValue.cpp",
+  "src/CppUTestExt/MockSupport.cpp",
+  "src/CppUTestExt/MockSupportPlugin.cpp",
+  "src/CppUTestExt/MockSupport_c.cpp",
+  "src/CppUTestExt/OrderedTest.cpp",
+]
+deps = [{ name = "cpputest", public = true }]
+
+# upstream's CMake selects the platform file with if (MSVC)
+# (CppUTestConfigurationOptions.cmake:1-19): MinGW takes the Gcc one.
+[target.'cfg(env = "msvc")'.sources]
+cpputest = ["src/Platforms/VisualCpp/UtestPlatform.cpp"]
+
+[target.'cfg(not(env = "msvc"))'.sources]
+cpputest = ["src/Platforms/Gcc/UtestPlatform.cpp"]
+
+# What upstream's check_function_exists calls find on a Unix (CMakeLists.txt:21-39).
+[target.'cfg(family = "unix")'.profile]
+defines = [
+  "CPPUTEST_HAVE_FORK",
+  "CPPUTEST_HAVE_GETTIMEOFDAY=1",
+  "CPPUTEST_HAVE_PTHREAD_MUTEX_LOCK=1",
+  "CPPUTEST_HAVE_STRDUP=1",
+]
+link-libs = ["pthread"]
+
+[target.'cfg(env = "msvc")'.profile]
+defines = ["STDC_WANT_SECURE_LIB"]
+
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["winmm"]
