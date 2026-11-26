@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/joboccara/NamedType/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:9a4f7e2054e25c753b1cc3fbd0883e03acee85a9a0f2299b4e7a47e8b46a4c80"
+format = "tar.gz"
+strip-prefix = "NamedType-1.1.0"
+# named_type_impl.hpp uses std::make_tuple and std::get without including
+# <tuple> (measured: macOS AppleClang, libc++, -std=c++14, "no member named
+# 'make_tuple' in namespace 'std'").
+patches = ["patches/0001-include-tuple.patch"]
+
+[package]
+name = "cabin-ports/namedtype"
+version = "1.1.0"
+license = "MIT"
+include = ["LICENSE", "include", "patches"]
+
+# Not fixed: Addable and Subtractable (so Arithmetic) inherit both a unary and a binary
+# operator and cannot be used, so the Binary* and Unary* skills stand in for
+# them (measured: macOS AppleClang, "member 'operator+' found in multiple base
+# classes of different types").
+# Upstream states no standard; C++14 is the measured floor (macOS AppleClang
+# -std=c++11: "no template named 'remove_reference_t' in namespace 'std'").
+[target.namedtype]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"

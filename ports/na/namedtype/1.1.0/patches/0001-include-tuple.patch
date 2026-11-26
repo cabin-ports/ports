@@ -1,0 +1,10 @@
+--- a/include/NamedType/named_type_impl.hpp
++++ b/include/NamedType/named_type_impl.hpp
+@@ -1,6 +1,7 @@
+ #ifndef named_type_impl_h
+ #define named_type_impl_h
+ 
++#include <tuple>
+ #include <type_traits>
+ #include <utility>
+ 
