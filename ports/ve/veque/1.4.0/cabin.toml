@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/Shmoopty/veque/archive/refs/tags/v1.4.0.tar.gz"
+checksum = "sha256:e2af7fd5ab998404abe3af670bb3804bf0bff95abd100ae6f3fd5b030d9ea27a"
+format = "tar.gz"
+strip-prefix = "veque-1.4.0"
+
+[package]
+name = "cabin-ports/veque"
+version = "1.4.0"
+license = "BSL-1.0"
+include = ["LICENSE", "include"]
+
+# interface-cxx-standard: README.md:6 ("A very fast C++17 container").
+[target.veque]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
