@@ -1,0 +1,74 @@
+[package.upstream]
+url = "https://github.com/paullouisageneau/libjuice/archive/refs/tags/v1.7.5.tar.gz"
+checksum = "sha256:a0cdc9069613d4dfdc54f829ad11ebd23fedf345bc43727fbcd2f5439f2425bd"
+format = "tar.gz"
+strip-prefix = "libjuice-1.7.5"
+
+[package]
+name = "cabin-ports/libjuice"
+version = "1.7.5"
+license = "MPL-2.0"
+include = ["LICENSE", "include", "src"]
+# Upstream states C11 (CMakeLists.txt); the public header needs only C99.
+c-standard = "c11"
+interface-c-standard = "c99"
+
+# The static library of upstream's CMake build, with its default
+# configuration: the built-in hashing (picohash.h, public domain), not the
+# Nettle backend (USE_NETTLE), which is not ported.  Not reproduced:
+# position-independent code (CMakeLists.txt:21; Cabin drops a dependency's
+# raw compiler flags).
+[target.juice]
+type = "library"
+sources = [
+  "src/addr.c",
+  "src/agent.c",
+  "src/base64.c",
+  "src/const_time.c",
+  "src/conn.c",
+  "src/conn_mux.c",
+  "src/conn_poll.c",
+  "src/conn_thread.c",
+  "src/crc32.c",
+  "src/hash.c",
+  "src/hmac.c",
+  "src/ice.c",
+  "src/juice.c",
+  "src/log.c",
+  "src/random.c",
+  "src/server.c",
+  "src/stun.c",
+  "src/tcp.c",
+  "src/timestamp.c",
+  "src/turn.c",
+  "src/udp.c",
+]
+include-dirs = ["include"]
+links = "juice"
+defines = ["JUICE_EXPORTS", "JUICE_STATIC", "USE_NETTLE=0"]
+# Without JUICE_STATIC, juice.h marks the API dllimport on Windows.
+interface-defines = ["JUICE_STATIC"]
+
+# Upstream's private include/juice directory, for the sources' "juice.h".
+[profile]
+include-dirs = ["include/juice"]
+
+# Upstream defines RELEASE=1 in its Release configuration.
+[target.'cfg(any(family = "unix", family = "windows"))'.profile.release]
+defines = ["RELEASE=1"]
+
+# Upstream compiles gnu11 (CMAKE_C_STANDARD 11 with extensions on), which
+# gives glibc _DEFAULT_SOURCE for getaddrinfo, clock_gettime and getifaddrs.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_DEFAULT_SOURCE"]
+link-libs = ["pthread"]
+
+[target.'cfg(all(family = "unix", not(os = "linux")))'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(os = "windows")'.profile]
+defines = ["WIN32_LEAN_AND_MEAN"]
+link-libs = ["bcrypt", "ws2_32"]
+
+[target.'cfg(any(cc = "msvc", cc = "clang-cl"))'.profile]
+defines = ["NOMINMAX", "_CRT_SECURE_NO_WARNINGS"]
