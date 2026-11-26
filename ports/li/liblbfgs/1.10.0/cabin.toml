@@ -9,8 +9,6 @@ name = "cabin-ports/liblbfgs"
 # Tag v1.10 (configure.in:21); a third component is appended.
 version = "1.10.0"
 license = "MIT"
-# Licence: MIT (COPYING).  lib/lbfgs.c:30-33 credits Nocedal's FORTRAN L-BFGS
-# as the code it ports; its copyright significance is uncertain.
 include = [
   "AUTHORS",
   "COPYING",
@@ -23,6 +21,9 @@ include = [
 # Upstream states no standard; lib/lbfgs.c uses `inline static`, which is C99,
 # and C11 is the oldest standard Cabin can request from MSVC.
 c-standard = "c11"
+# Upstream states no C standard; c99 is the measured floor of lbfgs.h (under
+# -std=c89 -pedantic-errors, clang: "commas at the end of enumerator lists are
+# a C99-specific feature", lbfgs.h:146).
 interface-c-standard = "c99"
 
 # Upstream's default build: double precision and the portable arithmetic_ansi.h.
