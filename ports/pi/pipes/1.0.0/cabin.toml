@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/joboccara/pipes/archive/refs/tags/v1.0.0.tar.gz"
+checksum = "sha256:f1d477e2627701e34a966be72530e3a243333632f09fb89df27e91f1c55fad0a"
+format = "tar.gz"
+strip-prefix = "pipes-1.0.0"
+
+[package]
+name = "cabin-ports/pipes"
+# The tag is v1.0.0; CMakeLists.txt:3 still says 0.0.1.
+version = "1.0.0"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+[target.pipes]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:10 states C++14, as does CMakeLists.txt:18 (cxx_std_14).
+interface-cxx-standard = "c++14"
