@@ -1,0 +1,51 @@
+[package.upstream]
+url = "https://github.com/r-lyeh-archived/sole/archive/refs/tags/1.0.4.tar.gz"
+checksum = "sha256:2801bd0d275903bfa1086901eb887cfde844bafe5beea6c2a57f28de4e0540cc"
+format = "tar.gz"
+strip-prefix = "sole-1.0.4"
+# Build-only backport of upstream master 95612e5c: clang rejects __thread on
+# the non-trivial statics in uuid4() (measured: macOS clang, "type of
+# thread-local variable has non-trivial destruction").
+# zlib License notice of sole.hpp, whose lines 0001 carries (the License's
+# condition that the notice stays in any source distribution):
+# Copyright (c) 2015 r-lyeh (https://github.com/r-lyeh)
+#
+# This software is provided 'as-is', without any express or implied
+# warranty.  In no event will the authors be held liable for any damages
+# arising from the use of this software.
+#
+# Permission is granted to anyone to use this software for any purpose,
+# including commercial applications, and to alter it and redistribute it
+# freely, subject to the following restrictions:
+#
+# 1. The origin of this software must not be misrepresented; you must not
+# claim that you wrote the original software. If you use this software
+# in a product, an acknowledgment in the product documentation would be
+# appreciated but is not required.
+# 2. Altered source versions must be plainly marked as such, and must not be
+# misrepresented as being the original software.
+# 3. This notice may not be removed or altered from any source distribution.
+patches = ["patches/0001-use-thread-local-on-clang.patch"]
+
+[package]
+name = "cabin-ports/sole"
+version = "1.0.4"
+# sole.hpp:6 credits Poco, Philip O'Toole and Dmitri Bouianov.  The Windows
+# adapter lookup (sole.hpp:492-537) matches Poco's Environment_WIN32.cpp
+# (BSL-1.0), and get_time() and uuid1() (sole.hpp:469-487, 682-715) match
+# cppuuid's uuid.cpp (MIT).  The clock_gettime() shim (sole.hpp:455-462)
+# credits Bouianov's Stack Overflow answer; its copyright significance is
+# uncertain.
+license = "Zlib AND BSL-1.0 AND MIT"
+include = ["LICENSE", "README.md", "patches", "sole.fwd.hpp", "sole.hpp"]
+
+# C++11 is stated in sole.hpp:1 and README.md.
+[target.sole]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
+
+# uuid1() lists adapters with GetAdaptersInfo; the header's
+# `#pragma comment(lib)` takes effect only under cl.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["iphlpapi"]
