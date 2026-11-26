@@ -1,0 +1,63 @@
+[package.upstream]
+url = "https://github.com/miguelmartin75/anax/archive/refs/tags/v2.1.0.tar.gz"
+checksum = "sha256:27fd944f34ce0693865f51019032f4dbf43eeb93f2482dee1ed667e0539c5b1e"
+format = "tar.gz"
+strip-prefix = "anax-2.1.0"
+# MIT License notice of Config.hpp.inl, whose lines 0001 carries (the License's
+# condition that copies include it):
+# Copyright (C) 2013-2014 Miguel Martin (miguel@miguel-martin.com)
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+patches = ["patches/0001-fill-in-config-hpp.patch"]
+
+# CMake generates Config.hpp from Config.hpp.inl; patch 0001 fills the copy
+# with the values CMakeLists.txt defaults its options to.
+[[package.upstream.copy]]
+from = "include/anax/Config.hpp.inl"
+to = "include/anax/Config.hpp"
+
+[package]
+name = "cabin-ports/anax"
+version = "2.1.0"
+license = "MIT"
+include = ["LICENSE", "include", "patches", "src"]
+
+# Upstream's anax library, built static.  Not ported: the shared library that
+# CMake's BUILD_SHARED_LIBS default builds, and the CMake options other than
+# their defaults (Config.hpp takes those defaults, patch 0001).
+[target.anax]
+type = "library"
+sources = [
+  "src/anax/Entity.cpp",
+  "src/anax/World.cpp",
+  "src/anax/detail/BaseSystem.cpp",
+  "src/anax/detail/EntityComponentStorage.cpp",
+  "src/anax/detail/EntityIdPool.cpp",
+  "src/anax/detail/Filter.cpp",
+]
+include-dirs = ["include"]
+# Upstream compiles C++11 (CMakeLists.txt); C++14 is the oldest standard
+# Cabin can request from MSVC.
+# The maximum is C++17: include/anax/detail/Filter.hpp:51 names a parameter `requires`,
+# a keyword in C++20, so a C++20 consumer fails (measured:
+# clang 21 -std=c++20, "trailing requires clause can only be used when
+# declaring a function").
+cxx-standard = "c++14"
+interface-cxx-standard = { min = "c++11", max = "c++17" }
+links = "anax"
