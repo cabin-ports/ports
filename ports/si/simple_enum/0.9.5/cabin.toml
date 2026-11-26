@@ -10,10 +10,12 @@ version = "0.9.5"
 license = "BSL-1.0"
 include = ["LICENSE", "include"]
 
-# C++23: upstream's CMakeLists.txt:29 requires it, and enum_bitfield.h uses explicit object
-# parameters (line 240); docs/compiler_and_standard_support.md:18 states C++20 for the core only.
+# C++20 is the standard upstream documents for the core (docs/compiler_and_standard_support.md:18).
 # Not ported: ext_support/ (fmt and glaze support) and module/.
+# enum_bitfield.h uses explicit object parameters and needs C++23, which Cabin cannot request
+# from cl (measured, Apple clang 21 -std=c++20: "explicit object parameters are incompatible
+# with C++ standards before C++2b").
 [target.simple_enum]
 type = "header-only"
 include-dirs = ["include"]
-interface-cxx-standard = "c++23"
+interface-cxx-standard = "c++20"

@@ -1,6 +1,5 @@
 // C++ consumer: enum_name at compile time and run time, enum_cast from a name, and
 // out-of-range behavior on an enum bounded by its own first and last members.
-#include <simple_enum/enum_bitfield.h>
 #include <simple_enum/enum_cast.hpp>
 #include <simple_enum/simple_enum.hpp>
 
@@ -39,10 +38,6 @@ int main() {
 
   check(simple_enum::enum_name(static_cast<color>(7)).empty(),
         "enum_name of an out-of-range value is empty");
-
-  simple_enum::enum_bitfield_t<color> colors;
-  colors[color::green] = true;
-  check(colors[color::green] && !colors[color::red] && !colors[color::blue], "enum_bitfield_t indexing");
 
   return failures == 0 ? 0 : 1;
 }
