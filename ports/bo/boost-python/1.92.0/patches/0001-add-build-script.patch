@@ -1,14 +1,15 @@
 --- /dev/null
 +++ b/build.c
-@@ -0,0 +1,125 @@
+@@ -0,0 +1,126 @@
 +/* Boost.Python for Cabin: supplies the target `python`, the system's
 + * Python 3.8 or newer, which the library and its consumers embed or
 + * extend.
 + *
 + * Python comes from the installation CABIN_SDK_PYTHON_DIR names, laid
 + * out as the Windows installers lay it out (`include`, `libs`) or as an
-+ * installation prefix (`include/python3.N`, `lib`), and without it from
-+ * pkg-config (`python3-embed`), which an MSVC build cannot use. */
++ * installation prefix (`include/python3.N`, the shared `lib/libpython3.N`),
++ * and without it from pkg-config (`python3-embed`), which an MSVC build
++ * cannot use. */
 +#define _POSIX_C_SOURCE 200809L
 +#define _CRT_SECURE_NO_WARNINGS
 +#include <stdarg.h>
@@ -95,12 +96,12 @@
 +#ifdef _WIN32
 +        fail("no Python headers in CABIN_SDK_PYTHON_DIR (%s)", sdk);
 +#else
-+        /* As a linker given `-L<sdk>/lib -lpython3.N` chooses. */
++        /* The shared library only: a static libpython needs further
++         * libraries that only its own python3-config names. */
 +        const char *shared = is("CABIN_TARGET_OS", "macos") ? "dylib" : "so";
 +        prefix_include(sdk, include, sizeof include);
 +        headers_version(include, &major, &minor);
 +        snprintf(library, sizeof library, "%s/lib/libpython%d.%d.%s", sdk, major, minor, shared);
-+        if (!exists(library)) snprintf(library, sizeof library, "%s/lib/libpython%d.%d.a", sdk, major, minor);
 +#endif
 +    }
 +    if (major != 3 || minor < OLDEST_MINOR) {
