@@ -1,0 +1,26 @@
+--- /dev/null
++++ b/cabin/config.h
+@@ -0,0 +1,23 @@
++/* Stands in for the config.h CMakeLists.txt generates from
++   config_in_cmake.h: cabin.toml defines the HAVE_* macros. */
++#define PACKAGE_VERSION "2.8.2"
++#define PACKAGE_STRING "libsrtp2 2.8.2"
++
++/* Define if building for a CISC machine (e.g. Intel). */
++#define CPU_CISC 1
++
++/* What test_big_endian finds. */
++#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_BIG_ENDIAN__
++#define WORDS_BIGENDIAN 1
++#endif
++
++/* Define gcc/clang-style SSE macros on compilers that don't define them (primarilly, MSVC). */
++#if !defined(__SSE2__) && (defined(_M_X64) || (defined(_M_IX86_FP) && _M_IX86_FP >= 2))
++#define __SSE2__
++#endif
++#if !defined(__SSSE3__) && defined(__AVX__)
++#define __SSSE3__
++#endif
++#if !defined(__SSE4_1__) && defined(__AVX__)
++#define __SSE4_1__
++#endif
