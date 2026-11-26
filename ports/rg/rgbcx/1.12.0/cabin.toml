@@ -14,8 +14,8 @@ license = "MIT OR Unlicense"
 include = ["LICENSE", "rgbcx.h", "rgbcx_table4.h"]
 
 # Exactly one consumer translation unit defines RGBCX_IMPLEMENTATION before
-# including rgbcx.h, after <string.h> and <math.h>, which it uses without
-# including.  Upstream states no standard; c++11 is the measured floor.
+# including rgbcx.h.  Upstream states no standard; c++11 is the measured
+# floor.
 [target.rgbcx]
 type = "header-only"
 include-dirs = ["."]

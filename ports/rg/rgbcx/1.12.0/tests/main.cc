@@ -2,11 +2,6 @@
 // values come from the formats: BC1 endpoints are RGB565 expanded to 8 bits
 // ((v << 3) | (v >> 2) for 5 bits, (v << 2) | (v >> 4) for 6), and BC4
 // endpoints are 8-bit values, so a block of one or two values is exact.
-// rgbcx.h uses memset, memcpy and fabs without including <string.h> or
-// <math.h>; upstream's own test includes both first.
-#include <math.h>
-#include <string.h>
-
 #define RGBCX_IMPLEMENTATION
 #include "rgbcx.h"
 
