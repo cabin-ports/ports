@@ -1,6 +1,7 @@
 --- /dev/null
 +++ b/wolfssl/wolfcrypt/user_settings.h
-@@ -0,0 +1,171 @@
+@@ -0,0 +1,172 @@
++/* Added for cabin-ports on 2026-11-12. */
 +/* The configuration a default ./configure of wolfSSL 5.9.4 writes to
 +   wolfssl/options.h (configure.ac:14087-14171), with the config.h macros the
 +   library reads, for the build in cabin.toml.  settings.h includes this file
