@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/jeaiii/itoa/archive/69308f65e87a9954f11f952ed04d551eabeee0ae.tar.gz"
+checksum = "sha256:a502b87820fca18f3f5bd15794ade61753ab10053f22a3f20c1a159083c8d207"
+format = "tar.gz"
+strip-prefix = "itoa-69308f65e87a9954f11f952ed04d551eabeee0ae"
+
+[package]
+name = "cabin-ports/jeaiii-itoa"
+# Upstream has no tags or version; 2022.11.24 is the committer date of the pinned commit 69308f65.
+version = "2022.11.24"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# The README ("compiles on clang, msvc, and gcc as C++11 or later") states the floor.
+[target.jeaiii-itoa]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
