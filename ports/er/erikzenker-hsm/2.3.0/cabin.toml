@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/erikzenker/hsm/archive/refs/tags/v2.3.0.tar.gz"
+checksum = "sha256:b3a13cd70fa2470fba4db09fad3c22afbfe6042c8da81da4396f890d02ee3518"
+format = "tar.gz"
+strip-prefix = "hsm-2.3.0"
+
+[package]
+name = "cabin-ports/erikzenker-hsm"
+version = "2.3.0"
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+[dependencies]
+"cabin-ports/boost-any" = "=1.92.0"
+"cabin-ports/boost-hana" = "=1.92.0"
+"cabin-ports/boost-mp11" = "=1.92.0"
+
+# C++17 is upstream's stated standard (CMakeLists.txt:31).
+[target.hsm]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+deps = [
+  { name = "cabin-ports/boost-any", public = true },
+  { name = "cabin-ports/boost-hana", public = true },
+  { name = "cabin-ports/boost-mp11", public = true },
+]
