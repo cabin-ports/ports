@@ -100,8 +100,8 @@ int main(void) {
   CHECK(NEAR(c.a, 0.2f) && NEAR(c.rgba[3], c.a));
   c = nvgRGBf(0.25f, 0.5f, 0.75f);
   CHECK(NEAR(c.r, 0.25f) && NEAR(c.g, 0.5f) && NEAR(c.b, 0.75f) && NEAR(c.a, 1.0f));
-  d = nvgLerpRGBA(nvgRGBA(0, 0, 0, 0), nvgRGBA(255, 255, 255, 255), 0.5f);
-  CHECK(NEAR(d.r, 0.5f) && NEAR(d.a, 0.5f));
+  d = nvgLerpRGBA(nvgRGBA(0, 0, 0, 0), nvgRGBA(255, 255, 255, 255), 0.25f);
+  CHECK(NEAR(d.r, 0.25f) && NEAR(d.a, 0.25f));
   d = nvgTransRGBAf(c, 0.125f);
   CHECK(NEAR(d.b, 0.75f) && NEAR(d.a, 0.125f));
   d = nvgHSL(0.0f, 1.0f, 0.5f); /* pure red */
