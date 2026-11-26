@@ -1,0 +1,69 @@
+[package.upstream]
+url = "https://github.com/dmlc/dmlc-core/archive/refs/tags/v0.5.tar.gz"
+checksum = "sha256:cd97475ae1ecf561a1cb1129552f9889d52b11b3beb4c56e5345d007d5020ece"
+format = "tar.gz"
+strip-prefix = "dmlc-core-0.5"
+# common.h, memory.h and array_view.h use std::exception_ptr,
+# std::aligned_storage and size_t without including their headers, so LLVM
+# 23's libc++ rejects the library's own sources (measured: "field has
+# incomplete type 'std::exception_ptr'"); patch 0001 includes them.
+patches = ["patches/0001-include-missing-standard-headers.patch"]
+
+[package]
+name = "cabin-ports/dmlc-core"
+# The v0.5 tag decides the version; CMakeLists.txt:3 still says 0.3.
+version = "0.5.0"
+# LICENSE is Apache-2.0; the bundled moodycamel queue is BSD-2-Clause
+# (include/dmlc/concurrentqueue.h:8-28) and its semaphore Zlib
+# (blockingconcurrentqueue.h:45-65).
+# include/dmlc/concurrentqueue.h:3384 credits a preshing.com post for the
+# implicit-producer hash lookup; its copyright significance is uncertain.
+license = "Apache-2.0 AND BSD-2-Clause AND Zlib"
+include = ["LICENSE", "include", "patches", "src"]
+
+# libdmlc.a as upstream's Makefile builds it by default (Makefile:36,
+# make/config.mk:31-40): no OpenMP (on by default in CMake,
+# CMakeLists.txt:20), HDFS, S3 or Azure, whose DMLC_USE_*=0 defines
+# (make/dmlc.mk:74-94) are the sources' defaults.  Without CMake's
+# DMLC_CORE_USE_CMAKE, base.h includes the shipped build_config_default.h
+# instead of the build_config.h CMake generates (base.h:333-337).  Not
+# reproduced: -msse2 and -fPIC (Makefile:26, make/dmlc.mk:43).  Not ported:
+# include/dmlc/lua.h's Torch binding, which needs Lua and Torch's luaT.h
+# (measured: "'luaT.h' file not found").
+[target.dmlc]
+type = "library"
+sources = [
+  "src/config.cc",
+  "src/data.cc",
+  "src/io.cc",
+  "src/io/filesys.cc",
+  "src/io/indexed_recordio_split.cc",
+  "src/io/input_split_base.cc",
+  "src/io/line_split.cc",
+  "src/io/local_filesys.cc",
+  "src/io/recordio_split.cc",
+  "src/recordio.cc",
+]
+include-dirs = ["include"]
+# Upstream builds with C++11 (Makefile:17; CMake unless
+# USE_CXX14_IF_AVAILABLE, CMakeLists.txt:21, :31-38); C++14 is the oldest
+# standard Cabin can request from MSVC.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "dmlc"
+
+# std::thread (threadediter.h) and POSIX semaphores
+# (blockingconcurrentqueue.h); the Makefile links -pthread -lm (Makefile:15).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread", "m"]
+
+# clock_gettime, in librt before glibc 2.17; the Makefile links -lrt on
+# Linux but not Android (make/dmlc.mk:27-35).
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["rt"]
+
+# filesystem.h:20-22 links Shlwapi through #pragma comment, which only
+# MSVC-style compilers read; CMake links it for the others
+# (CMakeLists.txt:126-128).
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["shlwapi"]
