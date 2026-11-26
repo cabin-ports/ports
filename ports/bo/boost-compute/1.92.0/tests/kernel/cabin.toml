@@ -1,0 +1,18 @@
+[package]
+name = "kernel"
+version = "0.0.0"
+cxx-standard = "c++14"
+
+# CI has an OpenCL device only on Linux: PoCL's CPU device
+# (docs/maintaining.md, "CI").
+[target.'cfg(os = "linux")'.dependencies]
+"cabin-ports/boost-compute" = "=1.92.0"
+
+# The platform's OpenCL library: the distribution's ICD loader.
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["OpenCL"]
+
+[target.kernel]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/boost-compute"]
