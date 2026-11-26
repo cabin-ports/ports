@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/calebzulawski/cotila/archive/refs/tags/1.2.1.tar.gz"
+checksum = "sha256:898ebfdf562cd1a3622870e17a703b38559cf2c607b2d5f79e6b3a55563af619"
+format = "tar.gz"
+strip-prefix = "cotila-1.2.1"
+
+[package]
+name = "cabin-ports/cotila"
+version = "1.2.1"
+license = "Apache-2.0"
+include = ["AUTHORS", "LICENSE", "include"]
+
+# Limitation (measured): det() returns the reciprocal of the determinant, so
+# only a determinant of 1, -1 or 0 comes out right (det of {{4,0,0},{0,3,1},{0,1,2}}
+# is 20 and det() gives 0.05); upstream's tests use only 1 and 0.
+[target.cotila]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:21 and CMakeLists.txt:14 (cxx_std_17) state C++17.
+interface-cxx-standard = "c++17"
