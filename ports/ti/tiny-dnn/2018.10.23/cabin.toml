@@ -1,0 +1,45 @@
+# Version: upstream tagged only 1.0.0a..a3 pre-releases (2016) and v0.1.1; this
+# is the last commit of its default branch (2018-10-23), the date scheme's YYYY.M.D.
+[package.upstream]
+url = "https://github.com/tiny-dnn/tiny-dnn/archive/c0f576f5cb7b35893f62127cb7aec18f77a3bcc5.tar.gz"
+checksum = "sha256:123dabe15b019938e04c7ccdd22c8423ceae091f4bd2fb878f972a2ea031d4b9"
+format = "tar.gz"
+strip-prefix = "tiny-dnn-c0f576f5cb7b35893f62127cb7aec18f77a3bcc5"
+
+[package]
+name = "cabin-ports/tiny-dnn"
+version = "2018.10.23"
+# tiny_dnn/ is BSD-3-Clause with the BSD-3-Clause xtensor in tiny_dnn/xtensor/;
+# core/kernels/tiny_quantized_matmul_kernel.h is Apache-2.0 (TensorFlow);
+# tiny_dnn/io/caffe/caffe.proto is a copy of the BSD-2-Clause Caffe schema;
+# third_party/stb offers MIT or the Unlicense.
+# core/kernels/avx_kernel_common.h:61,241,255,338 credit Stack Overflow answers
+# for short intrinsic sequences; their copyright significance is uncertain.
+license = "BSD-3-Clause AND BSD-2-Clause AND Apache-2.0 AND (MIT OR Unlicense)"
+# include is what upstream installs plus the stb copies image.h includes by
+# relative path; the root cereal/ stays out so it cannot shadow the cereal
+# dependency.
+include = ["LICENSE", "tiny_dnn", "third_party/stb"]
+
+[dependencies]
+"cabin-ports/cereal" = "=1.3.2"
+
+# Not ported: -DUSE_GEMMLOWP (quantized ops) and third_party/gemmlowp.  Upstream's
+# own kernel fails to compile with it (measured): tiny_quantized_matmul_kernel.h:132
+# "use of undeclared identifier 'min_a'".
+# Not set: upstream's CMake defines DNN_USE_IMAGE_API, CNN_USE_SSE and
+# CNN_USE_AVX only for its own examples and tests, never on the installed
+# target; consumers define them (the SIMD ones with -msse3/-mavx) themselves.
+[target.tiny_dnn]
+type = "header-only"
+include-dirs = ["."]
+# README.md:16 and :114 name C++14, as does CMakeLists.txt:242.  The cap is
+# measured: under -std=c++20 tiny_dnn/xtensor/xstorage.hpp:36 fails ("no type
+# named 'reference' in 'std::allocator<float>'"), as C++20 removed those members.
+interface-cxx-standard = { min = "c++14", max = "c++17" }
+deps = [{ name = "cabin-ports/cereal", public = true }]
+
+# CMakeLists.txt:196-203 adds -pthread off Windows for the default
+# std::async/std::thread parallel_for; it has no Android exception.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
