@@ -1,0 +1,17 @@
+diff --git a/src/bacport.h b/src/bacport.h
+new file mode 100644
+index 0000000..1111111
+--- /dev/null
++++ b/src/bacport.h
+@@ -0,0 +1,11 @@
++/* Selects the per-OS port header the way the manifest selects the port sources. */
++#ifndef BACPORT_FORWARDER_H
++#define BACPORT_FORWARDER_H
++#if defined(_WIN32)
++#include "../ports/win32/bacport.h"
++#elif defined(__linux__)
++#include "../ports/linux/bacport.h"
++#else
++#include "../ports/bsd/bacport.h"
++#endif
++#endif

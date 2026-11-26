@@ -1,0 +1,24 @@
+diff --git a/src/bacnet/bacapp.c b/src/bacnet/bacapp.c
+--- a/src/bacnet/bacapp.c
++++ b/src/bacnet/bacapp.c
+@@ -4226,7 +4226,9 @@
+     /* get the string length first */
+     str_len = bacapp_snprintf_value(NULL, 0, object_value);
+     if (str_len > 0) {
+-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
++#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L && \
++    !defined(__STDC_NO_VLA__)
++        /* Changed for cabin-ports on 2026-11-26: take the calloc path without VLAs. */
+         char str[str_len + 1];
+ #else
+         char *str;
+@@ -4252,7 +4254,8 @@
+                 fprintf(stream, "%s", str);
+             }
+         }
+-#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
++#if defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901L && \
++    !defined(__STDC_NO_VLA__)
+         /* nothing to do with stack based RAM */
+ #else
+         if (str) {

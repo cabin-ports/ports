@@ -3,6 +3,15 @@ url = "https://github.com/bacnet-stack/bacnet-stack/archive/refs/tags/bacnet-sta
 checksum = "sha256:9ebd5db0f1850be575849011e50c8a9750d2827a1e40cba89836c006d12e2629"
 format = "tar.gz"
 strip-prefix = "bacnet-stack-bacnet-stack-1.7.0"
+# 0001 adds src/bacport.h, which forwards to the per-OS port header: upstream installs
+# that header into the include root (CMakeLists.txt:1474-1478), and Cabin's target
+# include-dirs cannot be per-OS.  Add-only.
+# 0002 makes cl take bacapp_print_value's existing calloc path instead of a VLA, which
+# cl rejects under /std:c11 (measured: check-windows, C2057 "expected constant expression").
+patches = [
+  "patches/0001-bacport-forwarder.patch",
+  "patches/0002-bacapp-no-vla.patch",
+]
 
 [package]
 name = "cabin-ports/bacnet-stack"
@@ -13,10 +22,13 @@ version = "1.7.0"
 # color-temperature approximation.  The copyright significance of all three is uncertain.
 license = "GPL-2.0-or-later WITH GCC-exception-2.0 AND MIT AND BSD-3-Clause AND CC-PDDC"
 # Not ported: upstream's apps and the options CMake leaves off by default (BACnet MS/TP,
-# BACnet/SC, Ethernet, ARCNET, UCI, intrinsic reporting).  The server/, ubasic and ucix
+# BACnet/SC, Ethernet, ARCNET, UCI, intrinsic reporting), so the port headers rs485.h,
+# dlmstp_port.h, termios2.h and websocket-global.h are not provided.  The server/, ubasic and ucix
 # directories, which only those apps and options use, are left out of the package.
 include = [
   "license",
+  "patches",
+  "src/bacport.h",
   "src/bacnet/abort.c",
   "src/bacnet/abort.h",
   "src/bacnet/access_rule.c",
@@ -478,9 +490,6 @@ bacnet-stack = [
   "ports/posix/bacfile-posix.c",
 ]
 
-# Not exported: the per-OS port header bacport.h, which upstream's CMake adds to the
-# public include path; Cabin's profile include directories are private (measured on
-# macOS: a consumer's #include <bacport.h> fails).
 # CMake's BACNET_PORT selects the port directory; strict -std=c11 hides the POSIX
 # declarations ports/linux needs, which _DEFAULT_SOURCE restores.
 [target.'cfg(os = "linux")'.profile]

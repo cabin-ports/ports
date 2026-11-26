@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <string.h>
 
+#include <bacport.h>
+
 #include "bacnet/bacdcode.h"
 #include "bacnet/basic/sys/mstimer.h"
 
@@ -36,6 +38,14 @@ int main(void)
     mstimer_set(&timer, 60000);
     CHECK(mstimer_interval(&timer) == 60000);
     CHECK(!mstimer_expired(&timer));
+
+    /* bacport.h is the per-OS port header; sockaddr_in is common to all three. */
+    {
+        struct sockaddr_in addr;
+        memset(&addr, 0, sizeof addr);
+        addr.sin_family = AF_INET;
+        CHECK(addr.sin_family == AF_INET);
+    }
 
     return failures ? 1 : 0;
 }
