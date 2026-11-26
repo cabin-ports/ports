@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/edrosten/fast-C-src/archive/refs/tags/VERSION_2_1.tar.gz"
+checksum = "sha256:108890d0bf0a64b6c922f9ae2f4ba637ef51abe6adb9f4803c31713cece9b9fd"
+format = "tar.gz"
+strip-prefix = "fast-C-src-VERSION_2_1"
+
+[package]
+name = "cabin-ports/fastfeat"
+# Upstream tags this release VERSION_2_1 (its README still says 2.0); Cabin
+# versions have three components.
+version = "2.1.0"
+# BSD-3-Clause, from upstream's LICENSE; no source file carries a header.
+license = "BSD-3-Clause"
+
+# The six C files upstream says to compile along with the project (README:4-6).
+[target.fastfeat]
+type = "library"
+sources = ["fast.c", "fast_9.c", "fast_10.c", "fast_11.c", "fast_12.c", "nonmax.c"]
+include-dirs = ["."]
+# Upstream states no standard; C89 is the oldest standard the sources compile
+# under with -pedantic-errors (measured, clang and gcc).  C11 is the oldest
+# Cabin can lower for MSVC.
+c-standard = "c11"
+interface-c-standard = "c89"
+# fast.h has no extern "C" guard: a C++ translation unit that includes it
+# directly fails to link (measured on macOS: undefined symbol
+# fast11_score(unsigned char const*, int, xy*, int, int)), so C++ consumers
+# wrap the include in extern "C".
+interface-cxx-standard = "c++98"
