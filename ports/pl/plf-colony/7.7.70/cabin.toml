@@ -1,0 +1,25 @@
+[package.upstream]
+# Upstream tags no releases; this is the commit "tools v1.0.18", whose
+# plf_colony.h is that of the commit with subject "v7.7.70".
+url = "https://github.com/mattreecebentley/plf_colony/archive/bf12bb575b4902fc45b7c4b2537c1eec6bdc7975.tar.gz"
+checksum = "sha256:fc3b10d50bb0603671a3b2d8d97c0fe481521745e5c70686dd9f71ff2ca09b6a"
+format = "tar.gz"
+strip-prefix = "plf_colony-bf12bb575b4902fc45b7c4b2537c1eec6bdc7975"
+
+[package]
+name = "cabin-ports/plf-colony"
+version = "7.7.70"
+license = "Zlib"
+# Upstream's bundled plf_tools.h and plf_tools_undef.h are left out: the
+# plf-tools dependency supplies them, and a sibling copy would shadow it.
+include = ["LICENSE.md", "plf_colony.h"]
+
+[dependencies]
+"cabin-ports/plf-tools" = "^1.0.18"
+
+# README.md: "plf::colony is C++98/03/11/14/17/20/23-compatible".
+[target.plf-colony]
+type = "header-only"
+include-dirs = ["."]
+deps = [{ name = "cabin-ports/plf-tools", public = true }]
+interface-cxx-standard = "c++98"
