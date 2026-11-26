@@ -12,9 +12,14 @@ static_assert(det(a) == 1., "det");
 static_assert(det(matrix<double, 2, 2>{{{1., 2.}, {2., 4.}}}) == 0., "singular det");
 static_assert(inverse(a) == matrix<double, 2, 2>{{{7., -3.}, {-2., 1.}}}, "inverse");
 static_assert(dot(vector{1, 2, 3}, vector{4, 5, 6}) == 32, "dot");
-static_assert(transpose(matrix{{{1, 2, 3}, {4, 5, 6}}}) ==
-                  matrix{{{1, 4}, {2, 5}, {3, 6}}},
+static_assert(transpose(matrix<int, 2, 3>{{{1, 2, 3}, {4, 5, 6}}}) ==
+                  matrix<int, 3, 2>{{{1, 4}, {2, 5}, {3, 6}}},
               "transpose");
+#if !defined(_MSC_VER)
+static_assert(matrix{{{1, 2, 3}, {4, 5, 6}}} ==
+                  matrix<int, 2, 3>{{{1, 2, 3}, {4, 5, 6}}},
+              "matrix deduction guide");
+#endif
 
 int main() {
   // Runtime values, so the same code also runs outside constant evaluation.
