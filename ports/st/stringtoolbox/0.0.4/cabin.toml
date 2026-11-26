@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/chrberger/stringtoolbox/archive/refs/tags/v0.0.4.tar.gz"
+checksum = "sha256:5778bc508f880e9f9d139446059766047108f941cd08f8fba102464289ebb967"
+format = "tar.gz"
+strip-prefix = "stringtoolbox-0.0.4"
+
+[package]
+name = "cabin-ports/stringtoolbox"
+version = "0.0.4"
+license = "MIT"
+include = ["stringtoolbox.hpp", "LICENSE", "README.md"]
+
+# interface-cxx-standard: README.md:28 and CMakeLists.txt:26 state C++11.
+[target.stringtoolbox]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
