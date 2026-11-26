@@ -1,0 +1,44 @@
+[package.upstream]
+url = "https://github.com/TartanLlama/tl/archive/refs/tags/v1.0.0.tar.gz"
+checksum = "sha256:c60e26e9be41fa7b06060609b47e98f4a8f60807dee31fa0aca01f54709a5df0"
+format = "tar.gz"
+strip-prefix = "tl-1.0.0"
+
+# Patch 0001: typelist.hpp uses size_t without including <cstddef> (measured:
+# Apple clang, unknown type name 'size_t' when it is the first header), and
+# cat_typelist declares `auto... Us` yet instantiates List<Us...> with a
+# class... template, which clang rejects at C++14 to C++20 (measured:
+# "template argument for template type parameter must be a type"; GCC 16
+# accepts it); it takes `class... Us` now.
+patches = ["patches/0001-fix-typelist.patch"]
+
+[package]
+name = "cabin-ports/tl"
+version = "1.0.0"
+license = "CC0-1.0"
+# Headers listed individually to leave out upstream's stray include/tl/test.cpp.
+include = [
+  "COPYING",
+  "include/tl/apply.hpp",
+  "include/tl/casts.hpp",
+  "include/tl/decay_copy.hpp",
+  "include/tl/dependent_false.hpp",
+  "include/tl/integer_sequence.hpp",
+  "include/tl/make_array.hpp",
+  "include/tl/numeric_aliases.hpp",
+  "include/tl/overload.hpp",
+  "include/tl/tl.hpp",
+  "include/tl/type_traits.hpp",
+  "include/tl/typelist.hpp",
+  "patches",
+]
+
+# C++14 is the standard upstream's CMakeLists.txt sets (CMAKE_CXX_STANDARD 14).
+# Limitations (measured, Apple clang with libc++): C++20 and later fail because
+# type_traits.hpp:90 names std::result_of, which libc++ removes there.
+# tl::overload sees only its first callable's operator(): with an int and a
+# double lambda, o(1.0) is ambiguous.
+[target.tl]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = { min = "c++14", max = "c++17" }
