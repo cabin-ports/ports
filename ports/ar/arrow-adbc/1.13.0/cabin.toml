@@ -50,7 +50,10 @@ sources = [
   "c/driver_manager/adbc_driver_manager_profiles.cc",
 ]
 include-dirs = ["c/include"]
-defines = ["ADBC_EXPORTING", "ADBC_CONDA_BUILD=0"]
+# The empty ADBC_EXPORT override adbc.h:152-153 offers: a static library
+# neither exports nor imports its API.
+defines = ["ADBC_EXPORT=", "ADBC_CONDA_BUILD=0"]
+interface-defines = ["ADBC_EXPORT="]
 links = "adbc_driver_manager"
 
 [target.'cfg(any(os = "linux", os = "android"))'.profile]
