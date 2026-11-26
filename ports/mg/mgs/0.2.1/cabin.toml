@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/theodelrieu/mgs/releases/download/v0.2.1/mgs.zip"
+checksum = "sha256:da4a74d1cdaeb6c32c2097bcbebe21ba912ad84176a89014ac8232885d76bcc7"
+format = "zip"
+strip-prefix = "mgs"
+
+[package]
+name = "cabin-ports/mgs"
+version = "0.2.1"
+license = "BSL-1.0"
+include = ["LICENSE", "include"]
+
+# The release asset is upstream's only prebuilt layout: the tag archive keeps each
+# codec's headers in its own directory (a Conan workspace), the asset merges them.
+# include/mgs/meta/concepts/swappable.hpp:16 and meta/detail/can_call_std.hpp:5 credit
+# stackoverflow.com/a/26745591 for an is_swappable idiom; its copyright significance
+# is uncertain; meta/detected.hpp:7 credits cppreference for is_detected (same doubt),
+# and concepts/input_iterator.hpp:13 and common_reference_with.hpp:12 for concept emulation.
+# interface-cxx-standard: README.md:4 ("mgs is a C++14 codec library").
+[target.mgs]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
