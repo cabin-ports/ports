@@ -1,0 +1,67 @@
+[package.upstream]
+url = "https://github.com/inie0722/air-ctl/archive/refs/tags/v1.1.2.tar.gz"
+checksum = "sha256:2978eaddaae59402f5baac4858133a3c8b263f3f90ce47bbe5c74ef7b1711dd3"
+format = "tar.gz"
+strip-prefix = "air-ctl-1.1.2"
+
+[package]
+name = "cabin-ports/air-ctl"
+version = "1.1.2"
+license = "BSL-1.0 AND MIT AND LicenseRef-PLEASE-LICENSE"
+include = ["LICENSE", "README.md", "include", "src"]
+# CMakeLists.txt:4 sets CMAKE_C_STANDARD 17, which CMake compiles as gnu17 on
+# GCC and Clang.  Cabin's gnu-extensions cannot be limited to those compilers
+# (MSVC rejects it), so the build is strict C17, and _DEFAULT_SOURCE below
+# exposes the declarations the sources use (PTHREAD_MUTEX_RECURSIVE, alloca).
+c-standard = "c17"
+interface-c-standard = "c17"
+interface-cxx-standard = "none"
+
+# Upstream links pthread on every Unix (src/CMakeLists.txt:19-21).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+defines = ["_DEFAULT_SOURCE"]
+
+# Limitation (measured): an insert that triggers a resize stores its element
+# in a stale bucket (int keys 0..499: one later find fails).  CTL_deque_new
+# leaves size uninitialized (wrong on a stack object), so zero a CTL_deque
+# first; the same holds for a CTL_queue over the deque.
+# A spsc_queue push or pop that wraps the ring with count > 1 passes a wrong
+# length to memcpy (capacity 8 ints: push 6, pop 5, push 6 kills the process).
+#
+# Static build of src/CMakeLists.txt.  Upstream builds the lockfree allocator,
+# queue and stack only for 8-byte pointers (aba_pointer.h needs them); Cabin has
+# no pointer-width key, so the 64-bit arches are listed.
+[target.air-ctl]
+type = "library"
+sources = [
+  "src/adapter/heap.c",
+  "src/adapter/priority_queue.c",
+  "src/adapter/queue.c",
+  "src/adapter/stack.c",
+  "src/algorithm/heap_sort.c",
+  "src/algorithm/insertion_sort.c",
+  "src/algorithm/intro_sort.c",
+  "src/algorithm/merge_sort.c",
+  "src/algorithm/quick_sort.c",
+  "src/algorithm/tim_sort.c",
+  "src/container/array.c",
+  "src/container/container.c",
+  "src/container/deque.c",
+  "src/container/hash_map.c",
+  "src/container/list.c",
+  "src/container/tree_map.c",
+  "src/container/vector.c",
+  "src/lockfree/mpmc_queue.c",
+  "src/lockfree/spsc_queue.c",
+  "src/malloc.c",
+]
+include-dirs = ["include"]
+links = "ctl"
+
+[target.'cfg(any(arch = "x86_64", arch = "aarch64", arch = "arm64ec", arch = "mips64", arch = "powerpc64", arch = "riscv64", arch = "s390x", arch = "sparc64", arch = "loongarch64"))'.sources]
+air-ctl = [
+  "src/lockfree/allocator.c",
+  "src/lockfree/queue.c",
+  "src/lockfree/stack.c",
+]
