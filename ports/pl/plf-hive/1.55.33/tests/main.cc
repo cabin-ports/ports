@@ -36,10 +36,13 @@ int main() {
   h.insert(100);
   CHECK(h.size() == 9);
   CHECK(sum(h) == 144);
-  CHECK(std::distance(h.begin(), h.end()) == 9);
+  int counted = 0;
+  for (auto i = h.begin(); i != h.end(); ++i) ++counted;
+  CHECK(counted == 9);
 
   h.sort();
-  std::vector<int> sorted(h.begin(), h.end());
+  std::vector<int> sorted;
+  for (const int v : h) sorted.push_back(v);
   CHECK((sorted == std::vector<int>{1, 2, 3, 4, 7, 8, 9, 10, 100}));
   h.sort(std::greater<int>());
   CHECK(*h.begin() == 100);
