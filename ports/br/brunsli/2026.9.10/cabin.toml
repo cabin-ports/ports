@@ -1,0 +1,87 @@
+[package.upstream]
+url = "https://github.com/google/brunsli/archive/c18b9625ef045b0b89ebb4439ae2339e2160df71.tar.gz"
+checksum = "sha256:dfc22b0090ea90767879507bc8aaa90991a268554c4adf37c7808a895ba1b7a9"
+format = "tar.gz"
+strip-prefix = "brunsli-c18b9625ef045b0b89ebb4439ae2339e2160df71"
+# Patch 0001 adds c/include/brunsli/brunsli_export.h, which decode.h and
+# encode.h include and CMake generates (brunsli.cmake:70-74); the file is
+# the empty-macro form BUILD.bazel:71-85 generates for static builds.
+patches = ["patches/0001-add-the-brunsli-export-header.patch"]
+
+# Upstream declares no version (the only tag, v0.1, is from 2019); this is
+# the date of the pinned commit, c18b9625 (2026-09-10).
+[package]
+name = "cabin-ports/brunsli"
+version = "2026.9.10"
+license = "MIT AND CC0-1.0"
+# MIT is LICENSE.  c/common/port.h and platform.h carry Evan Nemerson's
+# Hedley macros, which are CC0-1.0.
+include = ["LICENSE", "c/common", "c/dec", "c/enc", "c/include", "patches"]
+
+[dependencies]
+"cabin-ports/brotli" = "^1.2"
+
+# The three static libraries brunsli.cmake:78-98 builds.  Like upstream's
+# tests (:236-249) and its brunslidec-c and brunslienc-c libraries, the dec
+# and enc libraries also hold the C API (c/dec/decode.cc, c/enc/encode.cc).
+# Not ported: the cbrunsli and dbrunsli tools, the WebAssembly modules, the
+# Java bindings, contrib/ and c/experimental.
+[target.brunslicommon]
+type = "library"
+sources = [
+  "c/common/ans_params.cc",
+  "c/common/constants.cc",
+  "c/common/context.cc",
+  "c/common/lehmer_code.cc",
+  "c/common/platform.cc",
+  "c/common/predict.cc",
+  "c/common/quant_matrix.cc",
+]
+include-dirs = ["c/include"]
+# Upstream requires C++11 (CMakeLists.txt:25); C++14 is the oldest standard
+# Cabin can request from MSVC.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "brunslicommon"
+
+[target.brunslidec]
+type = "library"
+sources = [
+  "c/dec/ans_decode.cc",
+  "c/dec/bit_reader.cc",
+  "c/dec/brunsli_decode.cc",
+  "c/dec/context_map_decode.cc",
+  "c/dec/decode.cc",
+  "c/dec/histogram_decode.cc",
+  "c/dec/huffman_decode.cc",
+  "c/dec/huffman_table.cc",
+  "c/dec/jpeg_data_writer.cc",
+  "c/dec/state.cc",
+]
+include-dirs = ["c/include"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "brunslidec"
+interface-c-standard = "c99"
+deps = ["brunslicommon", "cabin-ports/brotli:brotlidec"]
+
+[target.brunslienc]
+type = "library"
+sources = [
+  "c/enc/ans_encode.cc",
+  "c/enc/brunsli_encode.cc",
+  "c/enc/context_map_encode.cc",
+  "c/enc/encode.cc",
+  "c/enc/histogram_encode.cc",
+  "c/enc/huffman_encode.cc",
+  "c/enc/huffman_tree.cc",
+  "c/enc/jpeg_data_reader.cc",
+  "c/enc/jpeg_huffman_decode.cc",
+  "c/enc/write_bits.cc",
+]
+include-dirs = ["c/include"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "brunslienc"
+interface-c-standard = "c99"
+deps = ["brunslicommon", "cabin-ports/brotli:brotlienc"]
