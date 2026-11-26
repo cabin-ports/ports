@@ -1,0 +1,64 @@
+[package.upstream]
+url = "https://github.com/linksplatform/Interfaces/archive/refs/tags/cpp_0.4.1.tar.gz"
+checksum = "sha256:f28aee66ed7a29c8a0ddb49cf18735577479384b3fff9aee92abf218aabf9e6a"
+format = "tar.gz"
+strip-prefix = "Interfaces-cpp_0.4.1"
+
+# ConanCenter's platform.interfaces; Cabin names reject '.'.
+[package]
+name = "cabin-ports/platform-interfaces"
+version = "0.4.1"
+license = "Unlicense"
+include = [
+  "LICENSE",
+  "README.md",
+  "cpp/Platform.Interfaces/CArray.h",
+  "cpp/Platform.Interfaces/CCli.h",
+  "cpp/Platform.Interfaces/CCounter.h",
+  "cpp/Platform.Interfaces/CDictionary.h",
+  "cpp/Platform.Interfaces/CEnumerable.h",
+  "cpp/Platform.Interfaces/CFactory.h",
+  "cpp/Platform.Interfaces/CLink.h",
+  "cpp/Platform.Interfaces/CLinkAddress.h",
+  "cpp/Platform.Interfaces/CLinks.h",
+  "cpp/Platform.Interfaces/CList.h",
+  "cpp/Platform.Interfaces/CMatcher.h",
+  "cpp/Platform.Interfaces/CProperties.h",
+  "cpp/Platform.Interfaces/CProperty.h",
+  "cpp/Platform.Interfaces/CProvider.h",
+  "cpp/Platform.Interfaces/CSet.h",
+  "cpp/Platform.Interfaces/CSetter.h",
+  "cpp/Platform.Interfaces/Decorated.h",
+  "cpp/Platform.Interfaces/DecoratedBase.h",
+  "cpp/Platform.Interfaces/DecoratorBase.h",
+  "cpp/Platform.Interfaces/Extended.h",
+  "cpp/Platform.Interfaces/ExtendedBase.h",
+  "cpp/Platform.Interfaces/ExtendedContainer.h",
+  "cpp/Platform.Interfaces/ExtendedContainerBase.h",
+  "cpp/Platform.Interfaces/ExtendedReference.h",
+  "cpp/Platform.Interfaces/ExtendedReferenceBase.h",
+  "cpp/Platform.Interfaces/ICli.h",
+  "cpp/Platform.Interfaces/ICounter[TResult, TArgument].h",
+  "cpp/Platform.Interfaces/ICounter[TResult].h",
+  "cpp/Platform.Interfaces/IFactory.h",
+  "cpp/Platform.Interfaces/IMatcher.h",
+  "cpp/Platform.Interfaces/IProperties.h",
+  "cpp/Platform.Interfaces/IProperty.h",
+  "cpp/Platform.Interfaces/IProvider[TProvided, TArgument].h",
+  "cpp/Platform.Interfaces/IProvider[TProvided].h",
+  "cpp/Platform.Interfaces/ISetter[TValue, TArgument].h",
+  "cpp/Platform.Interfaces/ISetter[TValue].h",
+  "cpp/Platform.Interfaces/Macros.h",
+  "cpp/Platform.Interfaces/Platform.Interfaces.h",
+  "cpp/Platform.Interfaces/Polymorph.h",
+]
+
+# Consumers include <Platform.Interfaces.h> (namespace Platform::Interfaces).
+# CLinks.h, which the umbrella header omits, does not compile: CLinks.h:22
+# "'auto' not allowed in template argument" (measured, Apple clang).
+# Header names carry '[', ']', ',' and spaces, hence the literal include list.
+[target.platform-interfaces]
+type = "header-only"
+include-dirs = ["cpp/Platform.Interfaces"]
+# cpp/CMakeLists.txt:33 builds upstream's tests with CXX_STANDARD 20.
+interface-cxx-standard = "c++20"
