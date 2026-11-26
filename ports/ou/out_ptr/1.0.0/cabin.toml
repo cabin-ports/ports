@@ -1,0 +1,19 @@
+[package.upstream]
+# Upstream tags no releases; 1.0.0 is the VERSION in CMakeLists.txt at this commit.
+url = "https://github.com/soasis/out_ptr/archive/02a577edfcf25e2519e380a95c16743b7e5878a1.tar.gz"
+checksum = "sha256:7795bef58bf13b4dec6ad15b330b5fb20b11de990a36b76a197f1de14158cd40"
+format = "tar.gz"
+strip-prefix = "out_ptr-02a577edfcf25e2519e380a95c16743b7e5878a1"
+
+[package]
+name = "cabin-ports/out_ptr"
+version = "1.0.0"
+license = "Apache-2.0"
+include = ["LICENSE", "include"]
+
+# Upstream's ztd_out_ptr INTERFACE target (CMakeLists.txt:58-65).  Its C++11 floor is the
+# default standard at CMakeLists.txt:46.
+[target.out_ptr]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
