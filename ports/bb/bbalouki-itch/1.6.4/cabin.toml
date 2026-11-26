@@ -1,0 +1,39 @@
+[package.upstream]
+url = "https://github.com/bbalouki/itchcpp/archive/refs/tags/v1.6.4.tar.gz"
+checksum = "sha256:a6ae59f1d0dd9275bd6a155b19abbd3359cde631591bfb9d829a407967fa7624"
+format = "tar.gz"
+strip-prefix = "itchcpp-1.6.4"
+
+# vcpkg's name; the upstream repository is itchcpp.
+[package]
+name = "cabin-ports/bbalouki-itch"
+version = "1.6.4"
+license = "MIT"
+include = ["LICENSE", "README.md", "VERSION.txt", "include", "src"]
+
+# Consumers include <itch/parser.hpp>.  Not ported: the optional Apache
+# Arrow/Parquet export (ITCH_WITH_ARROW), the Python bindings, tools,
+# benchmarks and examples.
+[target.itch]
+type = "library"
+links = "itch"
+sources = [
+  "src/book/book_manager.cpp",
+  "src/book/l3_book.cpp",
+  "src/encoder.cpp",
+  "src/io/arrow_export.cpp",
+  "src/io/csv_sink.cpp",
+  "src/messages.cpp",
+  "src/order_book.cpp",
+  "src/parser.cpp",
+  "src/replay.cpp",
+  "src/transport/moldudp64.cpp",
+  "src/transport/pcap.cpp",
+  "src/transport/soupbintcp.cpp",
+]
+include-dirs = ["include"]
+# README.md:136 states C++20.  The library is built as C++20, upstream's default, so the
+# std::expected overloads of Parser::try_parse (declared under __cpp_lib_expected) are not
+# defined for a C++23 consumer (measured: undefined symbol at link).
+cxx-standard = "c++20"
+interface-cxx-standard = "c++20"
