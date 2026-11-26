@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/OleksandrKvl/sbepp/archive/refs/tags/1.8.0.tar.gz"
+checksum = "sha256:6d78cb3fb94a1295ffd1201949c4b4173f873d063d47cc8e6646e029ade9b69e"
+format = "tar.gz"
+strip-prefix = "sbepp-1.8.0"
+
+[package]
+name = "cabin-ports/sbepp"
+version = "1.8.0"
+# sbepp.hpp:407 credits Boost.Endian (<boost/endian/detail/intrinsic.hpp>) for its byteswap intrinsic detection; its copyright significance is uncertain.
+# sbepp.hpp:348 credits cppreference for the endian fallback and :4985 credits Stack Overflow a/34672753 for is_base_of_tmp; their copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE.md", "sbepp/src"]
+
+# C++11: doc/installation.md and README.md.
+[target.sbepp]
+type = "header-only"
+include-dirs = ["sbepp/src"]
+interface-cxx-standard = "c++11"
