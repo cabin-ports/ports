@@ -1,0 +1,44 @@
+diff --git a/Source/C++/Core/Ap4Array.h b/Source/C++/Core/Ap4Array.h
+index 65131a5..55aa986 100644
+--- a/Source/C++/Core/Ap4Array.h
++++ b/Source/C++/Core/Ap4Array.h
+@@ -58,8 +58,9 @@ public:
+     // methods
+              AP4_Array(): m_AllocatedCount(0), m_ItemCount(0), m_Items(0) {}
+              AP4_Array(const T* items, AP4_Size count);
+-    AP4_Array<T>(const AP4_Array<T>& copy);
+-    AP4_Array<T>& operator=(const AP4_Array<T>& copy);
++    // Changed for cabin-ports on 2026-11-26: drop the template-id from constructor and destructor names (C++20).
++    AP4_Array(const AP4_Array<T>& copy);
++    AP4_Array& operator=(const AP4_Array& copy);
+     virtual ~AP4_Array();
+     AP4_Cardinal ItemCount() const { return m_ItemCount; }
+     AP4_Result   Append(const T& item);
+diff --git a/Source/C++/Core/Ap4List.h b/Source/C++/Core/Ap4List.h
+index 083f030..e8887e6 100644
+--- a/Source/C++/Core/Ap4List.h
++++ b/Source/C++/Core/Ap4List.h
+@@ -85,9 +85,10 @@ public:
+         friend class AP4_List;
+     };
+ 
++    // Changed for cabin-ports on 2026-11-26: drop the template-id from constructor and destructor names (C++20).
+     // methods
+-                 AP4_List<T>(): m_ItemCount(0), m_Head(0), m_Tail(0) {}
+-    virtual     ~AP4_List<T>();
++                 AP4_List(): m_ItemCount(0), m_Head(0), m_Tail(0) {}
++    virtual     ~AP4_List();
+     AP4_Result   Clear();
+     AP4_Result   Add(T* data);
+     AP4_Result   Add(Item* item);
+@@ -115,8 +116,8 @@ protected:
+     
+ private:
+ 	// these cannot be used
+-    AP4_List<T>(const AP4_List<T>&);
+-	AP4_List<T>& operator=(const AP4_List<T>&);
++    AP4_List(const AP4_List&);
++	AP4_List& operator=(const AP4_List&);
+ };
+ 
+ /*----------------------------------------------------------------------

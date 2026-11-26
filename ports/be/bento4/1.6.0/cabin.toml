@@ -7,7 +7,14 @@ strip-prefix = "Bento4-1.6.0-641"
 # Upstream installs the headers to include/bento4/ (CMakeLists.txt:131-134);
 # 141 headers exceed Cabin's 16 copy steps, so the patch adds a forwarder for
 # each there.
-patches = ["patches/0001-add-bento4-include-forwarders.patch"]
+# 0002 backports the constructor and destructor declarations of upstream's
+# b92b7c30; GCC rejects the template-id names in C++20 (measured: check-linux,
+# /usr/bin/c++ on ubuntu-24.04, Ap4List.h:89:30: error: expected
+# unqualified-id before ')' token).
+patches = [
+  "patches/0001-add-bento4-include-forwarders.patch",
+  "patches/0002-allow-cxx20-template-id-constructors.patch",
+]
 
 [package]
 name = "cabin-ports/bento4"
