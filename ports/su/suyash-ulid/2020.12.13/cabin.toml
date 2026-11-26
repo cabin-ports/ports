@@ -1,0 +1,20 @@
+# Upstream has no release or tag; this is master's last commit, versioned by its date.
+[package.upstream]
+url = "https://github.com/suyash/ulid/archive/3a46362db2c0f5fece10e59a52bdefbf7eec0877.tar.gz"
+checksum = "sha256:4a9756e5d481f591c0ea4f4e767b5eecf05fea32e5b74915b044d1401548485a"
+format = "tar.gz"
+strip-prefix = "ulid-3a46362db2c0f5fece10e59a52bdefbf7eec0877"
+
+[package]
+name = "cabin-ports/suyash-ulid"
+version = "2020.12.13"
+# src/ulid_uint128.hh:235 and src/ulid_struct.hh:381 credit oklog/ulid (Apache-2.0)
+# for the marshal bit layout; its copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "README.md", "src/ulid.hh", "src/ulid_struct.hh", "src/ulid_uint128.hh"]
+
+# C++11 is measured: upstream states no standard.
+[target.suyash-ulid]
+type = "header-only"
+include-dirs = ["src"]
+interface-cxx-standard = "c++11"
