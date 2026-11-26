@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/mmahnic/argumentum/archive/refs/tags/v0.3.2.tar.gz"
+checksum = "sha256:3db84bfbd4d459b3128f449de9b88ae1e222cb62a4ba95dc4db6eb48a2af9f80"
+format = "tar.gz"
+strip-prefix = "argumentum-0.3.2"
+
+[package]
+name = "cabin-ports/argumentum"
+version = "0.3.2"
+license = "MPL-2.0"
+# include/CMakeLists.txt and prepare-headers.cmake only relocate src/*.h for
+# installation and stay out; src/ ships because include/argumentum/argparse.h
+# includes "../../src/argparser.h" in place.
+include = ["LICENSE", "README.md", "ChangeLog.md", "doc", "include", "src"]
+
+# Not ported: include/argumentum/argparse-h.h, upstream's header-only variant
+# (ARGUMENTUM_INSTALL_HEADERONLY, off by default); it ships in the package but
+# is no target, and a program must not mix it with this library.
+[target.argumentum]
+type = "library"
+sources = ["src/argparser.cpp"]
+include-dirs = ["include"]
+# README.md: "The library requires a C++17 compiler".
+cxx-standard = "c++17"
+interface-cxx-standard = "c++17"
+links = "argumentum"
