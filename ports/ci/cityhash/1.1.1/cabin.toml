@@ -1,0 +1,32 @@
+[package.upstream]
+url = "https://github.com/google/cityhash/archive/f5dc54147fcce12cefd16548c8e760d68ac04226.tar.gz"
+checksum = "sha256:22c24af73a3fec9402e3a183f2dee87d71f13a81859b0406472e671fb7d13a69"
+format = "tar.gz"
+strip-prefix = "cityhash-f5dc54147fcce12cefd16548c8e760d68ac04226"
+# city.cc includes "config.h", which configure generates; patch 0001 adds one
+# under cabin/, outside the public include directory.
+patches = ["patches/0001-add-a-config-h-for-the-cabin-profiles.patch"]
+
+[package]
+name = "cabin-ports/cityhash"
+# Upstream is untagged; 1.1.1 is the version configure.ac and NEWS declare at
+# this commit, the head of master.
+version = "1.1.1"
+license = "MIT"
+include = ["COPYING", "NEWS", "README", "cabin/config.h", "patches", "src"]
+
+# city.cc as src/Makefile.am builds it by default.  Not built: the
+# CityHashCrc functions of citycrc.h, which city.cc compiles only when the
+# compiler defines __SSE4_2__, as with upstream's default build.
+[target.cityhash]
+type = "library"
+links = "cityhash"
+sources = ["src/city.cc"]
+include-dirs = ["src"]
+# Upstream states no standard; C++98 is the lowest standard measured to
+# compile it, and cl has no flag below C++14.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++98"
+
+[profile]
+include-dirs = ["cabin"]
