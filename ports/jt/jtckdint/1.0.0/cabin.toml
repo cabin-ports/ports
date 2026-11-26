@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/jart/jtckdint/archive/refs/tags/1.0.tar.gz"
+checksum = "sha256:a117f12bfe41f17d947c8ccc122d18b162d634c5ae9059391a6d36cee83a000f"
+format = "tar.gz"
+strip-prefix = "jtckdint-1.0"
+# MSVC reports __cplusplus as 199711L without /Zc:__cplusplus, which Cabin does
+# not pass, so the header picks a 32-bit long as its widest type; the patch also
+# accepts _MSVC_LANG (measured: check-windows, "check failed: ckd_add(&w,
+# INT64_MAX, std::int64_t(1))").
+patches = ["patches/0001-msvc-long-long.patch"]
+
+# Upstream calls this release 1.0 (jtckdint.h:54), so the version gets a patch
+# component.
+[package]
+name = "cabin-ports/jtckdint"
+version = "1.0.0"
+license = "ISC"
+include = ["LICENSE.txt", "jtckdint.h", "patches"]
+
+# Upstream states "pure C11 and C++11" (jtckdint.h:51).
+[target.jtckdint]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c11"
+interface-cxx-standard = "c++11"
