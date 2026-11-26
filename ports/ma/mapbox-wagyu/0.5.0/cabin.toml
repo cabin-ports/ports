@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/mapbox/wagyu/archive/refs/tags/0.5.0.tar.gz"
+checksum = "sha256:88c41eaba03107ebe79052fdbd66e419e903d331a2616a51849018e13648ab83"
+format = "tar.gz"
+strip-prefix = "wagyu-0.5.0"
+
+[package]
+name = "cabin-ports/mapbox-wagyu"
+version = "0.5.0"
+# LICENSE (BSL-1.0 terms, with Clipper's and Mapbox's copyrights) covers the
+# package; almost_equal.hpp carries Google Test's BSD-3-Clause header.
+license = "BSL-1.0 AND BSD-3-Clause"
+include = ["LICENSE", "README.md", "include"]
+
+[dependencies]
+"cabin-ports/mapbox-geometry" = "^2.0"
+
+# Upstream states C++11 (docs/getting_started.md, CMakeLists.txt), but Cabin
+# rejects a c++11 consumer of the public mapbox-geometry dependency (c++14).
+[target.mapbox-wagyu]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+deps = [{ name = "cabin-ports/mapbox-geometry", public = true }]
