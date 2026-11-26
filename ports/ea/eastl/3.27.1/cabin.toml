@@ -1,0 +1,47 @@
+[package.upstream]
+url = "https://github.com/electronicarts/EASTL/archive/refs/tags/3.27.01.tar.gz"
+checksum = "sha256:fce43bf443f5569b00a8deae735394ea0b16f6c3f96867a17ded50775ffcdd12"
+format = "tar.gz"
+strip-prefix = "EASTL-3.27.01"
+
+# The 3.27.01 tag; include/EASTL/internal/config.h still declares
+# EASTL_VERSION "3.27.00".
+[package]
+name = "cabin-ports/eastl"
+version = "3.27.1"
+# include/EASTL/type_traits.h:542 credits Walter Brown for the is_function
+# implementation; its copyright significance is uncertain.
+license = "BSD-3-Clause AND HPND-sell-variant AND MIT"
+include = ["3RDPARTYLICENSES.TXT", "LICENSE", "include", "source"]
+
+[dependencies]
+"cabin-ports/eabase" = "=2.9.12"
+
+# C++17 is how scripts/CMake/CommonCppFlags.cmake compiles the library with
+# GCC and Clang; consumers need C++14 (CMakeLists.txt:32), except that
+# include/EASTL/bonus/flags.h needs C++17 (measured with Clang at c++14).
+[target.eastl]
+type = "library"
+sources = [
+  "source/allocator_eastl.cpp",
+  "source/assert.cpp",
+  "source/atomic.cpp",
+  "source/fixed_pool.cpp",
+  "source/hashtable.cpp",
+  "source/intrusive_list.cpp",
+  "source/numeric_limits.cpp",
+  "source/red_black_tree.cpp",
+  "source/string.cpp",
+  "source/thread_support.cpp",
+]
+include-dirs = ["include"]
+defines = [
+  "_CHAR16T",
+  "_CRT_SECURE_NO_WARNINGS",
+  "_SCL_SECURE_NO_WARNINGS",
+  "EASTL_OPENSOURCE=1",
+]
+cxx-standard = "c++17"
+interface-cxx-standard = "c++14"
+links = "EASTL"
+deps = [{ name = "cabin-ports/eabase", public = true }]
