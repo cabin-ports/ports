@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/ast-al/rangeless/archive/a6ea959a6034991e46dc3fc9ff0920f6abc928b8.tar.gz"
+checksum = "sha256:8f2bad299cae15872b4233828c09a53299f1a111ef524c8ce4f00b959bf989d5"
+format = "tar.gz"
+strip-prefix = "rangeless-a6ea959a6034991e46dc3fc9ff0920f6abc928b8"
+
+# Untagged: 1.0.0 is fn_VERSION_MAJOR/MINOR in CMakeLists.txt; the pinned
+# commit is upstream's master HEAD.
+# include/fn.hpp:253 credits stackoverflow.com/questions/34419045 for the overload
+# priority tags; its copyright significance is uncertain.
+[package]
+name = "cabin-ports/rangeless"
+version = "1.0.0"
+license = "LicenseRef-NCBI-Public-Domain"
+include = ["LICENSE", "README.md", "include"]
+
+# c++11 is the standard README.md states ("Portable c++11").
+[target.rangeless]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
