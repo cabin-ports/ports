@@ -1,0 +1,53 @@
+[package.upstream]
+url = "https://github.com/banditcpp/bandit/archive/77f50861c09d794af9ae5f65111b330d9b721054.tar.gz"
+checksum = "sha256:4fe2eeb623e16a09b56f7a4e3d8fde864a5a4a67226cb514945fa7e9a1ae216a"
+format = "tar.gz"
+strip-prefix = "bandit-77f50861c09d794af9ae5f65111b330d9b721054"
+# Patch 0001 includes snowhouse from the cabin-ports/snowhouse dependency: the
+# archive lacks upstream's snowhouse submodule, so bandit/adapters/snowhouse.h
+# could not find its header (measured: "fatal error:
+# 'bandit/assertion_frameworks/snowhouse/snowhouse.h' file not found").
+# MIT License notice of bandit/adapters/snowhouse.h, whose lines 0001 carries
+# (the License's condition that copies include it), from docs/LICENSE.txt:
+# Copyright (c) 2013–2016 Joakim Karlsson
+# Copyright (c) 2017 Stephan Beyer
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+patches = ["patches/0001-include-snowhouse-from-dependency.patch"]
+
+[package]
+name = "cabin-ports/bandit"
+version = "2021.6.17"
+license = "MIT"
+# LICENSE.txt in the archive is a symlink to docs/LICENSE.txt, which Cabin's
+# extractor skips, so the license is included at its real path.
+include = ["docs/LICENSE.txt", "bandit", "patches"]
+
+[dependencies]
+"cabin-ports/snowhouse" = "^5.0"
+
+# Version 2021.6.17 is the date of commit 77f50861 (bandit/version.h says
+# 3.0.0-snapshot; the last release, v2.0.0, needs snowhouse 2.1).  Standard:
+# C++11 per docs/index.md.  Not ported: the specs, cmake and CI files.
+# The vendored bandit/external/optionparser.h is MIT (its header).
+[target.bandit]
+type = "header-only"
+include-dirs = ["."]
+deps = [{ name = "cabin-ports/snowhouse", public = true }]
+interface-cxx-standard = "c++11"
