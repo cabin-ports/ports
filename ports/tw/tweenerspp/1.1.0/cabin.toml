@@ -15,3 +15,6 @@ include = ["LICENSE", "README.md", "include"]
 type = "header-only"
 include-dirs = ["include"]
 interface-cxx-standard = "c++11"
+# detail/easing.tpp uses M_PI, which MSVC declares only under
+# _USE_MATH_DEFINES (measured: check-windows, "'M_PI': undeclared identifier").
+interface-defines = ["_USE_MATH_DEFINES"]
