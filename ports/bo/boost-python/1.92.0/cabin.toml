@@ -32,6 +32,7 @@ include = [
   "include",
   "index.html",
   "meta",
+  "patches",
   "src",
   "test",
   "todo.txt",

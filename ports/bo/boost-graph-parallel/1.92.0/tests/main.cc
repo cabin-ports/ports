@@ -28,13 +28,13 @@ typedef boost::adjacency_list<boost::vecS, boost::distributedS<mpi_process_group
 int process(int argc, char** argv) {
   boost::mpi::environment environment(argc, argv);
 
-  const int vertices = 6;
+  const int count = 6;
   const std::pair<int, int> edges[] = {{0, 1}, {0, 2}, {0, 5}, {1, 2}, {1, 3}, {2, 3}, {2, 5}, {3, 4}, {4, 5}};
   const int weights[] = {7, 9, 14, 10, 15, 11, 2, 6, 9};
   const int from_first[] = {0, 7, 9, 20, 20, 11};
 
   // Every process gives the same edges; each keeps those of its vertices.
-  Graph graph(edges, edges + 9, weights, vertices);
+  Graph graph(edges, edges + 9, weights, count);
   boost::dijkstra_shortest_paths(graph, boost::vertex(0, graph),
                                  boost::distance_map(get(boost::vertex_distance, graph)));
 
@@ -54,7 +54,7 @@ int process(int argc, char** argv) {
   const boost::mpi::communicator world;
   boost::mpi::all_reduce(world, 1, processes, std::plus<int>());
   boost::mpi::all_reduce(world, owned, total, std::plus<int>());
-  if (processes != 2 || total != vertices || owned == vertices) {
+  if (processes != 2 || total != count || owned == count) {
     std::fprintf(stderr, "FAIL: %d processes hold %d vertices, %d of them here\n", processes, total, owned);
     ok = false;
   }
