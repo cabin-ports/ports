@@ -1,0 +1,12 @@
+[package]
+name = "asl2"
+version = "0.0.0"
+c-standard = "c11"
+
+[dependencies]
+"cabin-ports/ampl-asl" = { version = "=1.0.2", features = ["asl2"] }
+
+[target.asl2]
+type = "executable"
+sources = ["src/main.c"]
+deps = ["cabin-ports/ampl-asl:asl2"]

@@ -1,0 +1,8 @@
+--- a/include/details.c
++++ b/include/details.c
+@@ -2,4 +2,4 @@
+ /* Obtain details.c by changeing "System_details" */
+ /* to the appropriate string. */
+ 
+-char sysdetails_ASL[] = "System_details";
++char sysdetails_ASL[] = "";
