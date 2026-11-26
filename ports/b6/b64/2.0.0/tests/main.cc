@@ -1,3 +1,4 @@
+#define BUFFERSIZE 4096
 #include <cstring>
 #include <iostream>
 #include <sstream>

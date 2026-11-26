@@ -15,18 +15,18 @@ include = ["AUTHORS.md", "LICENSE.md", "include", "src"]
 # request from MSVC.
 c-standard = "c11"
 interface-c-standard = "c89"
+# c++98 (measured: clang++ -std=c++98 -fsyntax-only on encode.h and decode.h).
 interface-cxx-standard = "c++98"
 
 # src/Makefile's static libb64.a.  The header-only C++ wrappers ship in the
 # include directory; upstream's base64 tool is not ported.  cencode.h and
 # cdecode.h have no extern "C" guard, so C++ code must wrap them itself
 # (measured: a direct include fails to link with an undefined
-# base64_init_encodestate).
+# base64_init_encodestate).  encode.h and decode.h use BUFFERSIZE as a default
+# argument, so a C++ consumer defines it (upstream's tool passes 16777216,
+# base64/Makefile:16).
 [target.b64]
 type = "library"
 sources = ["src/cdecode.c", "src/cencode.c"]
 include-dirs = ["include"]
-# encode.h and decode.h default their buffer size to BUFFERSIZE, which no
-# header defines; upstream's tool passes this value (base64/Makefile:16,25).
-interface-defines = ["BUFFERSIZE=16777216"]
 links = "b64"
