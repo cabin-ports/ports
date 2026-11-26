@@ -1,0 +1,99 @@
+[package.upstream]
+url = "https://github.com/approvals/ApprovalTests.cpp/archive/refs/tags/v.10.14.0.tar.gz"
+format = "tar.gz"
+checksum = "sha256:a0dc6350b5b0e812878c0438c0d90fa603110653175253ebcca4b5df642bd399"
+strip-prefix = "ApprovalTests.cpp-v.10.14.0"
+
+[package]
+name = "cabin-ports/approval-tests-cpp"
+version = "10.14.0"
+# utilities/CartesianProduct.h:49 credits cppreference for apply(); its
+# copyright significance is uncertain.
+license = "Apache-2.0"
+# The test-framework integrations are headers the consumer selects with a
+# macro (APPROVALS_CATCH2_V3, APPROVALS_GOOGLETEST, ...) and builds against
+# its own framework; third_party/ is left out.
+include = ["ApprovalTests", "LICENSE", "README.md"]
+
+# The static library ApprovalTests/CMakeLists.txt builds from these 70
+# sources; its include paths are the package root and ApprovalTests/.
+# README.md:39 states C++11 (or above); C++14 is the oldest standard Cabin
+# can request from MSVC.
+[target.ApprovalTests]
+type = "library"
+sources = [
+  "ApprovalTests/ApprovalUtils.cpp",
+  "ApprovalTests/comparators/ComparatorDisposer.cpp",
+  "ApprovalTests/comparators/ComparatorFactory.cpp",
+  "ApprovalTests/comparators/TextFileComparator.cpp",
+  "ApprovalTests/core/ApprovalException.cpp",
+  "ApprovalTests/core/FileApprover.cpp",
+  "ApprovalTests/core/Options.cpp",
+  "ApprovalTests/integrations/FrameworkIntegrations.cpp",
+  "ApprovalTests/integrations/google/GoogleConfiguration.cpp",
+  "ApprovalTests/integrations/google/GoogleCustomizationsFactory.cpp",
+  "ApprovalTests/launchers/SystemLauncher.cpp",
+  "ApprovalTests/logs/ApprovalFileLog.cpp",
+  "ApprovalTests/namers/ApprovalTestNamer.cpp",
+  "ApprovalTests/namers/DefaultNamerDisposer.cpp",
+  "ApprovalTests/namers/DefaultNamerFactory.cpp",
+  "ApprovalTests/namers/ExistingFileNamer.cpp",
+  "ApprovalTests/namers/FileNameSanitizerDisposer.cpp",
+  "ApprovalTests/namers/FileNameSanitizerFactory.cpp",
+  "ApprovalTests/namers/HelpMessages.cpp",
+  "ApprovalTests/namers/NamerFactory.cpp",
+  "ApprovalTests/namers/SectionNameDisposer.cpp",
+  "ApprovalTests/namers/SeparateApprovedAndReceivedDirectoriesNamer.cpp",
+  "ApprovalTests/namers/SubdirectoryDisposer.cpp",
+  "ApprovalTests/namers/TemplatedCustomNamer.cpp",
+  "ApprovalTests/reporters/AutoApproveIfMissingReporter.cpp",
+  "ApprovalTests/reporters/AutoApproveReporter.cpp",
+  "ApprovalTests/reporters/BlockingReporter.cpp",
+  "ApprovalTests/reporters/CIBuildOnlyReporter.cpp",
+  "ApprovalTests/reporters/CIBuildOnlyReporterUtils.cpp",
+  "ApprovalTests/reporters/ClipboardReporter.cpp",
+  "ApprovalTests/reporters/CombinationReporter.cpp",
+  "ApprovalTests/reporters/CommandReporter.cpp",
+  "ApprovalTests/reporters/ConvertForCygwin.cpp",
+  "ApprovalTests/reporters/CrossPlatformReporters.cpp",
+  "ApprovalTests/reporters/CustomReporter.cpp",
+  "ApprovalTests/reporters/DefaultFrontLoadedReporter.cpp",
+  "ApprovalTests/reporters/DefaultReporter.cpp",
+  "ApprovalTests/reporters/DefaultReporterDisposer.cpp",
+  "ApprovalTests/reporters/DefaultReporterFactory.cpp",
+  "ApprovalTests/reporters/DiffInfo.cpp",
+  "ApprovalTests/reporters/DiffPrograms.cpp",
+  "ApprovalTests/reporters/DiffReporter.cpp",
+  "ApprovalTests/reporters/EnvironmentVariableReporter.cpp",
+  "ApprovalTests/reporters/FirstWorkingReporter.cpp",
+  "ApprovalTests/reporters/FrontLoadedReporterDisposer.cpp",
+  "ApprovalTests/reporters/FrontLoadedReporterFactory.cpp",
+  "ApprovalTests/reporters/GenericDiffReporter.cpp",
+  "ApprovalTests/reporters/LinuxReporters.cpp",
+  "ApprovalTests/reporters/MacReporters.cpp",
+  "ApprovalTests/reporters/QuietReporter.cpp",
+  "ApprovalTests/reporters/ReporterFactory.cpp",
+  "ApprovalTests/reporters/TextDiffReporter.cpp",
+  "ApprovalTests/reporters/WindowsReporters.cpp",
+  "ApprovalTests/scrubbers/Scrubbers.cpp",
+  "ApprovalTests/Storyboard.cpp",
+  "ApprovalTests/utilities/DateUtils.cpp",
+  "ApprovalTests/utilities/EmptyFileCreatorByType.cpp",
+  "ApprovalTests/utilities/EmptyFileCreatorDisposer.cpp",
+  "ApprovalTests/utilities/EmptyFileCreatorFactory.cpp",
+  "ApprovalTests/utilities/ExceptionCollector.cpp",
+  "ApprovalTests/utilities/FileUtils.cpp",
+  "ApprovalTests/utilities/FileUtilsSystemSpecific.cpp",
+  "ApprovalTests/utilities/Grid.cpp",
+  "ApprovalTests/utilities/MachineBlocker.cpp",
+  "ApprovalTests/utilities/MoreHelpMessages.cpp",
+  "ApprovalTests/utilities/Path.cpp",
+  "ApprovalTests/utilities/StringUtils.cpp",
+  "ApprovalTests/utilities/SystemUtils.cpp",
+  "ApprovalTests/writers/ExistingFile.cpp",
+  "ApprovalTests/writers/StringWriter.cpp",
+]
+include-dirs = [".", "ApprovalTests"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "ApprovalTests"
