@@ -93,10 +93,6 @@ jobs:
       matrix:
         os: [ubuntu-24.04, windows-2025-vs2026]
     runs-on: ${{ matrix.os }}
-    env:
-      CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache
-      TMP: ${{ runner.temp }}
-      TEMP: ${{ runner.temp }}
     steps:
       - uses: actions/checkout@v7.0.1
         with:
@@ -113,8 +109,16 @@ jobs:
         uses: ilammy/msvc-dev-cmd@v1.13.0
       - name: boost-mpi without MPI
         continue-on-error: true
+        env:
+          CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
         run: cargo run --locked -- --dry-run --port boost-mpi --cabin "${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}"
       - name: boost-python without a named Python
         if: runner.os == 'Windows'
         continue-on-error: true
+        env:
+          CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
         run: cargo run --locked -- --dry-run --port boost-python --cabin "${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}"
