@@ -58,7 +58,8 @@ include = [
 # program, the Python binding, and message translation (configure uses
 # gettext when found; without it tre_regerror returns the English
 # strings, as upstream's Windows build does).
-# Upstream states no standard; tre.h:134 ends an enum with a trailing comma (C99, C++11).
+# Upstream states no standard; c99 and c++11 are the measured floors (with
+# -pedantic-errors, c89 and c++98 reject the trailing comma at tre.h:134).
 [target.tre]
 type = "library"
 sources = [
