@@ -1,0 +1,12 @@
+--- a/include/deco/Deco.h
++++ b/include/deco/Deco.h
+@@ -1,7 +1,9 @@
+ #ifndef Deco_h
+ #define Deco_h
++// Changed for cabin-ports on 2026-11-26: include <cstdint> for uint_fast8_t.
+ 
+ #include <array>
++#include <cstdint>
+ #include <limits>
+ #include <string_view>
+ #include <strong_type.h>
