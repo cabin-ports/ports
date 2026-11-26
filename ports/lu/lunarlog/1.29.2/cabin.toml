@@ -6,11 +6,11 @@ strip-prefix = "LunarLog-1.29.2"
 
 [package]
 name = "cabin-ports/lunarlog"
-license = "MIT"
 version = "1.29.2"
+license = "MIT"
 include = ["LICENSE", "include"]
 
-# Upstream's CMake, vcpkg.json and conanfile still declare 1.29.0 and 1.29.1; the v1.29.2 tag
+# Upstream's CMake, vcpkg.json and conanfile declare 1.29.0 and 1.29.1; the v1.29.2 tag
 # is the release.
 [target.lunarlog]
 type = "header-only"
