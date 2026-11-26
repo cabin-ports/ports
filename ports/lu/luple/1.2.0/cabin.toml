@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/alexpolt/luple/archive/1.2.tar.gz"
+checksum = "sha256:810e622b656fa4f1cae5b299db94f550262eb49c81d373cfe770edcea3e8a68b"
+format = "tar.gz"
+strip-prefix = "luple-1.2"
+
+[package]
+name = "cabin-ports/luple"
+# Upstream's tag is 1.2; Cabin versions need three components.
+version = "1.2.0"
+# Upstream ships no license file.  README.md:83-85 and the header comment of each shipped header
+# (line 7) state "License: Public-domain software".
+license = "LicenseRef-PublicDomain"
+include = ["README.md", "intern.h", "luple.h", "nuple.h", "struct-reader.h", "type-loophole.h"]
+
+# The headers have no include guards: a translation unit that includes both luple.h and nuple.h
+# (which includes luple.h) fails with redefinition errors (measured).  Include nuple.h alone.
+# The headers state C++14 (luple.h:3 and the README's headings).
+[target.luple]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++14"
