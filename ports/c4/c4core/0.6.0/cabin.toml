@@ -48,7 +48,9 @@ sources = [
 include-dirs = ["src"]
 defines = ["C4CORE_SYS_FAST_FLOAT"]
 interface-defines = ["C4CORE_SYS_FAST_FLOAT"]
-cxx-standard = "c++11"
+# Upstream requires C++11 (src/c4/language.hpp); C++14 is the oldest standard
+# Cabin can request from MSVC.
+cxx-standard = "c++14"
 interface-cxx-standard = "c++11"
 # charconv.hpp includes <fast_float/fast_float.h> from the public header.
 deps = [{ name = "cabin-ports/fast_float", public = true }]
