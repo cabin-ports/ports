@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/im95able/Rea/archive/064d99897c9dcc547dc38853dcd917ba04a34ef4.tar.gz"
+checksum = "sha256:efcf822116ea22422d2ea5249250cd5d13db54ab65b1a84a3f16c5d7413aed7e"
+format = "tar.gz"
+strip-prefix = "Rea-064d99897c9dcc547dc38853dcd917ba04a34ef4"
+
+[package]
+name = "cabin-ports/im95able-rea"
+version = "2019.2.24"
+# Upstream has no tags or version: the version is the date of the pinned commit
+# (064d9989, committer date 2019-02-24 UTC), the last commit of master.
+license = "MIT"
+include = ["LICENSE", "Rea/rea.h"]
+
+# README.md:2 states C++11, but the header needs C++17 (measured): -std=c++11
+# rejects the constexpr void function at rea.h:911, and under -std=c++14 the
+# link fails on the undefined static constexpr member npos (rea.h:845), which
+# the constructors odr-use.  On slot_map and versioned_slot_map, erase(iterator),
+# erase(const_iterator) and clear() do not compile (measured: "no matching
+# function for call to 'iterator_distance'" at rea.h:1623); erase(id) and the
+# lists work.
+[target.im95able-rea]
+type = "header-only"
+include-dirs = ["Rea"]
+interface-cxx-standard = "c++17"
