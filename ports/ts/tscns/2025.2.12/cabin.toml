@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/MengRao/tscns/archive/de26b452bae664d91bdcf04f9c5eeca2d05ec0ad.tar.gz"
+checksum = "sha256:5de0356e134a3161fcd06536d0764ddc7963abca5e741a065ca3b5df4e04d7d1"
+format = "tar.gz"
+strip-prefix = "tscns-de26b452bae664d91bdcf04f9c5eeca2d05ec0ad"
+
+# Upstream has no tags: the version is the commit date (2025-02-12) of the
+# pinned master commit de26b452.
+[package]
+name = "cabin-ports/tscns"
+version = "2025.2.12"
+license = "MIT"
+include = ["LICENSE", "tscns.h"]
+
+[target.tscns]
+type = "header-only"
+include-dirs = ["."]
+# Upstream states no standard; c++17 is measured: tscns.h:145 copy-initializes
+# a std::atomic, which does not compile before C++17.
+interface-cxx-standard = "c++17"
