@@ -52,6 +52,8 @@ int main() {
 #if !defined(_MSC_VER)
   check(std::string(r[std::size_t(0)]) == "pos1", "positional index");
 #endif
+  const argagg::parser_results &cr = r;
+  check(std::string(cr[std::size_t(1)]) == "pos2", "const positional index");
   check(r.as<std::string>(1) == "pos2", "positional as");
   std::vector<std::string> all = r.all_as<std::string>();
   check(all.size() == 2 && all[1] == "pos2", "all_as");
