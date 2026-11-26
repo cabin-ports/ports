@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/cbeck88/visit_struct/archive/refs/tags/1.2.0.tar.gz"
+checksum = "sha256:aa0f4cc674ee584e0498604971c8bbdc0eeb7d6d6386c95695211b0418ff2bef"
+format = "tar.gz"
+strip-prefix = "visit_struct-1.2.0"
+
+[package]
+name = "cabin-ports/visit_struct"
+version = "1.2.0"
+license = "BSL-1.0"
+include = ["LICENSE", "README.md", "include"]
+
+# visit_struct_boost_fusion.hpp and visit_struct_boost_hana.hpp ship as
+# upstream ships them; upstream's CMake target links no Boost, so a consumer
+# including one adds cabin-ports/boost-fusion (with boost-mpl) or
+# cabin-ports/boost-hana itself.
+[target.visit_struct]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:7 and :606 state C++11.
+interface-cxx-standard = "c++11"
