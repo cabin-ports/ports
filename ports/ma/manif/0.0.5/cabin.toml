@@ -1,0 +1,58 @@
+[package.upstream]
+url = "https://github.com/artivis/manif/archive/refs/tags/0.0.5.tar.gz"
+checksum = "sha256:246a781c54a5c57179d48096faca0d108944e120f69d8fd7fb69e3cb4a0a67fb"
+format = "tar.gz"
+strip-prefix = "manif-0.0.5"
+# Patch 0001 includes <cassert> in include/manif/impl/eigen.h, whose assert
+# macros need it: Eigen 5 includes it only without NDEBUG, so a release build
+# fails (measured: NDEBUG build without the patch, "'assert' was not declared").
+# MIT License notice of manif (LICENSE), covering include/manif/impl/eigen.h,
+# whose lines 0001 carries (the License's condition that copies include it):
+# Copyright (c) 2018 Jeremie Deray
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+patches = ["patches/0001-include-cassert-for-ndebug.patch"]
+
+[package]
+name = "cabin-ports/manif"
+version = "0.0.5"
+# include/manif/constants.h:32 credits https://stackoverflow.com/a/34134071 for
+# csqrt; its copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "include", "patches"]
+
+[dependencies]
+"cabin-ports/eigen3" = "=5.0.1"
+"cabin-ports/tl-optional" = "=1.1.0"
+
+# Upstream states C++11 (README.md:16); the interface is C++14, which the
+# Eigen 5 dependency requires.  Not ported: upstream's
+# vendored external/tl copy of tl-optional (cabin-ports/tl-optional replaces
+# it), the Python bindings, tests, examples and benchmarks.  Not validated:
+# the manif/ceres and manif/autodiff adapter headers, which need Ceres or
+# autodiff (C++17 per upstream's test/autodiff/CMakeLists.txt); this package
+# declares neither.
+[target.manif]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+deps = [
+    { name = "cabin-ports/eigen3", public = true },
+    { name = "cabin-ports/tl-optional", public = true },
+]
