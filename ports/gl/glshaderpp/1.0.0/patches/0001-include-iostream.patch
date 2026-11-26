@@ -1,0 +1,13 @@
+diff --git a/GLShaderPP/public/GLShaderPP/Shader.h b/GLShaderPP/public/GLShaderPP/Shader.h
+index 04d58c8..3fdc7a7 100644
+--- a/GLShaderPP/public/GLShaderPP/Shader.h
++++ b/GLShaderPP/public/GLShaderPP/Shader.h
+@@ -10,6 +10,8 @@
+ #include <string>
+ #include <istream>
+ #include <sstream>
++// Changed for cabin-ports on 2026-11-26: include <iostream> for the std::cerr uses below.
++#include <iostream>
+ #include "ShaderException.h"
+ 
+ namespace GLShaderPP {

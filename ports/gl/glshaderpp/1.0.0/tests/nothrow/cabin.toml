@@ -1,0 +1,12 @@
+[package]
+name = "nothrow"
+version = "0.0.0"
+cxx-standard = "c++17"
+
+[dependencies]
+"cabin-ports/glshaderpp" = "=1.0.0"
+
+[target.nothrow]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/glshaderpp"]
