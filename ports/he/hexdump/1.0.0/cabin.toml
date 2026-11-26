@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/FernandoVelcic/hexdump/archive/refs/tags/1.0.0.tar.gz"
+checksum = "sha256:6745f9a528c0932d99ff7c400109784688e9948f298c3cc26c4cb5bd7ec002c5"
+format = "tar.gz"
+strip-prefix = "hexdump-1.0.0"
+
+[package]
+name = "cabin-ports/hexdump"
+version = "1.0.0"
+license = "BSD-3-Clause"
+include = ["COPYING", "README.md", "hexdump.hpp"]
+
+# Upstream states no standard; its Makefile builds with -std=c++14 and
+# ConanCenter requires C++11.  operator<< leaves the caller's stream in hex
+# with fill '0' (measured by the consumer test).
+[target.hexdump]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
