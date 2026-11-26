@@ -3,13 +3,15 @@ url = "https://github.com/joboccara/pipes/archive/refs/tags/v1.0.0.tar.gz"
 checksum = "sha256:f1d477e2627701e34a966be72530e3a243333632f09fb89df27e91f1c55fad0a"
 format = "tar.gz"
 strip-prefix = "pipes-1.0.0"
+# send.hpp uses size_t without including <cstddef> (measured: check-linux, "send.hpp:12:18: error: 'size_t' has not been declared").
+patches = ["patches/0001-include-cstddef.patch"]
 
 [package]
 name = "cabin-ports/pipes"
 # The tag is v1.0.0; CMakeLists.txt:3 still says 0.0.1.
 version = "1.0.0"
 license = "MIT"
-include = ["LICENSE", "include"]
+include = ["LICENSE", "include", "patches"]
 
 [target.pipes]
 type = "header-only"
