@@ -7,9 +7,9 @@ strip-prefix = "json_struct-1.0.2"
 [package]
 name = "cabin-ports/json-struct"
 version = "1.0.2"
-# include/json_struct/json_struct.h:4754 credits https://github.com/jorgen/float_tools
-# for the float conversion code; its copyright significance is uncertain.
-license = "HPND-sell-variant"
+# include/json_struct/json_struct.h:4754 takes its float code from jorgen/float_tools,
+# whose float_tools.h is under the Unlicense.
+license = "HPND-sell-variant AND Unlicense"
 include = ["COPYING", "include"]
 
 # C++11 is the floor README.md:13 and CMakeLists.txt:35 (CXX_STANDARD 11) state.
