@@ -1,0 +1,189 @@
+[package.upstream]
+url = "https://github.com/axiomatic-systems/Bento4/archive/refs/tags/v1.6.0-641.tar.gz"
+checksum = "sha256:e6575877708526e399cff752b4ee23cb1e2ac32fb251e2ca0a1e8d691fd172a7"
+format = "tar.gz"
+strip-prefix = "Bento4-1.6.0-641"
+# Tag v1.6.0-641 declares AP4_VERSION_STRING "1.6.0.0" (Ap4Version.h).
+# Upstream installs the headers to include/bento4/ (CMakeLists.txt:131-134);
+# 141 headers exceed Cabin's 16 copy steps, so the patch adds a forwarder for
+# each there.
+patches = ["patches/0001-add-bento4-include-forwarders.patch"]
+
+[package]
+name = "cabin-ports/bento4"
+version = "1.6.0"
+# Crypto/Ap4Hmac.cpp:30 and Crypto/Ap4KeyWrap.cpp:30 credit LibTomCrypt, which
+# they state is public domain.  Crypto/Ap4AesBlockCipher.cpp:12-30 carries
+# Brian Gladman's 2001 terms, which match no SPDX identifier.
+license = "GPL-2.0-or-later AND LicenseRef-Gladman-AES-2001 AND LicenseRef-PublicDomain"
+include = [
+  "Documents/LICENSE.txt",
+  "README.md",
+  "Source/C++/Codecs",
+  "Source/C++/Core",
+  "Source/C++/Crypto",
+  "Source/C++/MetaData",
+  "Source/C++/System/Posix",
+  "Source/C++/System/StdC",
+  "Source/C++/System/Win32",
+  "include",
+  "patches",
+]
+
+[target.ap4]
+type = "library"
+links = "ap4"
+sources = [
+  "Source/C++/Core/Ap4.cpp",
+  "Source/C++/Core/Ap48bdlAtom.cpp",
+  "Source/C++/Core/Ap4Ac4Utils.cpp",
+  "Source/C++/Core/Ap4AinfAtom.cpp",
+  "Source/C++/Core/Ap4Atom.cpp",
+  "Source/C++/Core/Ap4AtomFactory.cpp",
+  "Source/C++/Core/Ap4AtomSampleTable.cpp",
+  "Source/C++/Core/Ap4Av1cAtom.cpp",
+  "Source/C++/Core/Ap4AvccAtom.cpp",
+  "Source/C++/Core/Ap4BlocAtom.cpp",
+  "Source/C++/Core/Ap4ByteStream.cpp",
+  "Source/C++/Core/Ap4Co64Atom.cpp",
+  "Source/C++/Core/Ap4Command.cpp",
+  "Source/C++/Core/Ap4CommandFactory.cpp",
+  "Source/C++/Core/Ap4CommonEncryption.cpp",
+  "Source/C++/Core/Ap4ContainerAtom.cpp",
+  "Source/C++/Core/Ap4CttsAtom.cpp",
+  "Source/C++/Core/Ap4Dac3Atom.cpp",
+  "Source/C++/Core/Ap4Dac4Atom.cpp",
+  "Source/C++/Core/Ap4DataBuffer.cpp",
+  "Source/C++/Core/Ap4Debug.cpp",
+  "Source/C++/Core/Ap4Dec3Atom.cpp",
+  "Source/C++/Core/Ap4DecoderConfigDescriptor.cpp",
+  "Source/C++/Core/Ap4DecoderSpecificInfoDescriptor.cpp",
+  "Source/C++/Core/Ap4Descriptor.cpp",
+  "Source/C++/Core/Ap4DescriptorFactory.cpp",
+  "Source/C++/Core/Ap4DrefAtom.cpp",
+  "Source/C++/Core/Ap4DvccAtom.cpp",
+  "Source/C++/Core/Ap4ElstAtom.cpp",
+  "Source/C++/Core/Ap4EsDescriptor.cpp",
+  "Source/C++/Core/Ap4EsdsAtom.cpp",
+  "Source/C++/Core/Ap4Expandable.cpp",
+  "Source/C++/Core/Ap4File.cpp",
+  "Source/C++/Core/Ap4FileCopier.cpp",
+  "Source/C++/Core/Ap4FileWriter.cpp",
+  "Source/C++/Core/Ap4FragmentSampleTable.cpp",
+  "Source/C++/Core/Ap4FrmaAtom.cpp",
+  "Source/C++/Core/Ap4FtypAtom.cpp",
+  "Source/C++/Core/Ap4GrpiAtom.cpp",
+  "Source/C++/Core/Ap4HdlrAtom.cpp",
+  "Source/C++/Core/Ap4HintTrackReader.cpp",
+  "Source/C++/Core/Ap4HmhdAtom.cpp",
+  "Source/C++/Core/Ap4HvccAtom.cpp",
+  "Source/C++/Core/Ap4IkmsAtom.cpp",
+  "Source/C++/Core/Ap4IodsAtom.cpp",
+  "Source/C++/Core/Ap4Ipmp.cpp",
+  "Source/C++/Core/Ap4IproAtom.cpp",
+  "Source/C++/Core/Ap4IsfmAtom.cpp",
+  "Source/C++/Core/Ap4IsltAtom.cpp",
+  "Source/C++/Core/Ap4IsmaCryp.cpp",
+  "Source/C++/Core/Ap4LinearReader.cpp",
+  "Source/C++/Core/Ap4Marlin.cpp",
+  "Source/C++/Core/Ap4MdhdAtom.cpp",
+  "Source/C++/Core/Ap4MehdAtom.cpp",
+  "Source/C++/Core/Ap4MfhdAtom.cpp",
+  "Source/C++/Core/Ap4MfroAtom.cpp",
+  "Source/C++/Core/Ap4MoovAtom.cpp",
+  "Source/C++/Core/Ap4Movie.cpp",
+  "Source/C++/Core/Ap4MovieFragment.cpp",
+  "Source/C++/Core/Ap4Mpeg2Ts.cpp",
+  "Source/C++/Core/Ap4MvhdAtom.cpp",
+  "Source/C++/Core/Ap4NmhdAtom.cpp",
+  "Source/C++/Core/Ap4ObjectDescriptor.cpp",
+  "Source/C++/Core/Ap4OdafAtom.cpp",
+  "Source/C++/Core/Ap4OddaAtom.cpp",
+  "Source/C++/Core/Ap4OdheAtom.cpp",
+  "Source/C++/Core/Ap4OhdrAtom.cpp",
+  "Source/C++/Core/Ap4OmaDcf.cpp",
+  "Source/C++/Core/Ap4PdinAtom.cpp",
+  "Source/C++/Core/Ap4Piff.cpp",
+  "Source/C++/Core/Ap4Processor.cpp",
+  "Source/C++/Core/Ap4Protection.cpp",
+  "Source/C++/Core/Ap4PsshAtom.cpp",
+  "Source/C++/Core/Ap4Results.cpp",
+  "Source/C++/Core/Ap4RtpAtom.cpp",
+  "Source/C++/Core/Ap4RtpHint.cpp",
+  "Source/C++/Core/Ap4SLConfigDescriptor.cpp",
+  "Source/C++/Core/Ap4SaioAtom.cpp",
+  "Source/C++/Core/Ap4SaizAtom.cpp",
+  "Source/C++/Core/Ap4Sample.cpp",
+  "Source/C++/Core/Ap4SampleDescription.cpp",
+  "Source/C++/Core/Ap4SampleEntry.cpp",
+  "Source/C++/Core/Ap4SampleSource.cpp",
+  "Source/C++/Core/Ap4SampleTable.cpp",
+  "Source/C++/Core/Ap4SbgpAtom.cpp",
+  "Source/C++/Core/Ap4SchmAtom.cpp",
+  "Source/C++/Core/Ap4SdpAtom.cpp",
+  "Source/C++/Core/Ap4SegmentBuilder.cpp",
+  "Source/C++/Core/Ap4SencAtom.cpp",
+  "Source/C++/Core/Ap4SgpdAtom.cpp",
+  "Source/C++/Core/Ap4SidxAtom.cpp",
+  "Source/C++/Core/Ap4SmhdAtom.cpp",
+  "Source/C++/Core/Ap4StcoAtom.cpp",
+  "Source/C++/Core/Ap4SthdAtom.cpp",
+  "Source/C++/Core/Ap4String.cpp",
+  "Source/C++/Core/Ap4StscAtom.cpp",
+  "Source/C++/Core/Ap4StsdAtom.cpp",
+  "Source/C++/Core/Ap4StssAtom.cpp",
+  "Source/C++/Core/Ap4StszAtom.cpp",
+  "Source/C++/Core/Ap4SttsAtom.cpp",
+  "Source/C++/Core/Ap4Stz2Atom.cpp",
+  "Source/C++/Core/Ap4SyntheticSampleTable.cpp",
+  "Source/C++/Core/Ap4TencAtom.cpp",
+  "Source/C++/Core/Ap4TfdtAtom.cpp",
+  "Source/C++/Core/Ap4TfhdAtom.cpp",
+  "Source/C++/Core/Ap4TfraAtom.cpp",
+  "Source/C++/Core/Ap4TimsAtom.cpp",
+  "Source/C++/Core/Ap4TkhdAtom.cpp",
+  "Source/C++/Core/Ap4Track.cpp",
+  "Source/C++/Core/Ap4TrakAtom.cpp",
+  "Source/C++/Core/Ap4TrefTypeAtom.cpp",
+  "Source/C++/Core/Ap4TrexAtom.cpp",
+  "Source/C++/Core/Ap4TrunAtom.cpp",
+  "Source/C++/Core/Ap4UrlAtom.cpp",
+  "Source/C++/Core/Ap4Utils.cpp",
+  "Source/C++/Core/Ap4UuidAtom.cpp",
+  "Source/C++/Core/Ap4VmhdAtom.cpp",
+  "Source/C++/Core/Ap4VpccAtom.cpp",
+  "Source/C++/Codecs/Ap4Ac3Parser.cpp",
+  "Source/C++/Codecs/Ap4Ac4Parser.cpp",
+  "Source/C++/Codecs/Ap4AdtsParser.cpp",
+  "Source/C++/Codecs/Ap4AvcParser.cpp",
+  "Source/C++/Codecs/Ap4BitStream.cpp",
+  "Source/C++/Codecs/Ap4Eac3Parser.cpp",
+  "Source/C++/Codecs/Ap4HevcParser.cpp",
+  "Source/C++/Codecs/Ap4Mp4AudioInfo.cpp",
+  "Source/C++/Codecs/Ap4NalParser.cpp",
+  "Source/C++/Crypto/Ap4AesBlockCipher.cpp",
+  "Source/C++/Crypto/Ap4Hmac.cpp",
+  "Source/C++/Crypto/Ap4KeyWrap.cpp",
+  "Source/C++/Crypto/Ap4StreamCipher.cpp",
+  "Source/C++/MetaData/Ap4MetaData.cpp",
+  "Source/C++/System/StdC/Ap4StdCFileByteStream.cpp",
+]
+include-dirs = [
+  "Source/C++/Core",
+  "Source/C++/Codecs",
+  "Source/C++/Crypto",
+  "Source/C++/MetaData",
+  "include",
+]
+# Upstream states no C++ standard; the interface floor is measured.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++98"
+
+[target.'cfg(os = "windows")'.sources]
+ap4 = ["Source/C++/System/Win32/Ap4Win32Random.cpp"]
+
+[target.'cfg(not(os = "windows"))'.sources]
+ap4 = ["Source/C++/System/Posix/Ap4PosixRandom.cpp"]
+
+# Not ported: upstream's command-line tools (Source/C++/Apps) and C wrapper (Source/C++/CApi), which
+# its CMake build also omits.

@@ -1,0 +1,987 @@
+diff --git a/include/bento4/Ap4.h b/include/bento4/Ap4.h
+new file mode 100644
+index 0000000..7cb13c7
+--- /dev/null
++++ b/include/bento4/Ap4.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4.h"
+diff --git a/include/bento4/Ap48bdlAtom.h b/include/bento4/Ap48bdlAtom.h
+new file mode 100644
+index 0000000..b1b7598
+--- /dev/null
++++ b/include/bento4/Ap48bdlAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap48bdlAtom.h"
+diff --git a/include/bento4/Ap4Ac3Parser.h b/include/bento4/Ap4Ac3Parser.h
+new file mode 100644
+index 0000000..96d2f6b
+--- /dev/null
++++ b/include/bento4/Ap4Ac3Parser.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Codecs/Ap4Ac3Parser.h"
+diff --git a/include/bento4/Ap4Ac4Parser.h b/include/bento4/Ap4Ac4Parser.h
+new file mode 100644
+index 0000000..0ac4b17
+--- /dev/null
++++ b/include/bento4/Ap4Ac4Parser.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Codecs/Ap4Ac4Parser.h"
+diff --git a/include/bento4/Ap4Ac4Utils.h b/include/bento4/Ap4Ac4Utils.h
+new file mode 100644
+index 0000000..8db36c0
+--- /dev/null
++++ b/include/bento4/Ap4Ac4Utils.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Ac4Utils.h"
+diff --git a/include/bento4/Ap4AdtsParser.h b/include/bento4/Ap4AdtsParser.h
+new file mode 100644
+index 0000000..544276d
+--- /dev/null
++++ b/include/bento4/Ap4AdtsParser.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Codecs/Ap4AdtsParser.h"
+diff --git a/include/bento4/Ap4AesBlockCipher.h b/include/bento4/Ap4AesBlockCipher.h
+new file mode 100644
+index 0000000..5b84503
+--- /dev/null
++++ b/include/bento4/Ap4AesBlockCipher.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Crypto/Ap4AesBlockCipher.h"
+diff --git a/include/bento4/Ap4AinfAtom.h b/include/bento4/Ap4AinfAtom.h
+new file mode 100644
+index 0000000..2e20bd9
+--- /dev/null
++++ b/include/bento4/Ap4AinfAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4AinfAtom.h"
+diff --git a/include/bento4/Ap4Array.h b/include/bento4/Ap4Array.h
+new file mode 100644
+index 0000000..c0b0a3e
+--- /dev/null
++++ b/include/bento4/Ap4Array.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Array.h"
+diff --git a/include/bento4/Ap4Atom.h b/include/bento4/Ap4Atom.h
+new file mode 100644
+index 0000000..1cdcc48
+--- /dev/null
++++ b/include/bento4/Ap4Atom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Atom.h"
+diff --git a/include/bento4/Ap4AtomFactory.h b/include/bento4/Ap4AtomFactory.h
+new file mode 100644
+index 0000000..d7c50c2
+--- /dev/null
++++ b/include/bento4/Ap4AtomFactory.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4AtomFactory.h"
+diff --git a/include/bento4/Ap4AtomSampleTable.h b/include/bento4/Ap4AtomSampleTable.h
+new file mode 100644
+index 0000000..11a3b12
+--- /dev/null
++++ b/include/bento4/Ap4AtomSampleTable.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4AtomSampleTable.h"
+diff --git a/include/bento4/Ap4Av1cAtom.h b/include/bento4/Ap4Av1cAtom.h
+new file mode 100644
+index 0000000..01976c5
+--- /dev/null
++++ b/include/bento4/Ap4Av1cAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Av1cAtom.h"
+diff --git a/include/bento4/Ap4AvcParser.h b/include/bento4/Ap4AvcParser.h
+new file mode 100644
+index 0000000..cdb28bd
+--- /dev/null
++++ b/include/bento4/Ap4AvcParser.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Codecs/Ap4AvcParser.h"
+diff --git a/include/bento4/Ap4AvccAtom.h b/include/bento4/Ap4AvccAtom.h
+new file mode 100644
+index 0000000..5945895
+--- /dev/null
++++ b/include/bento4/Ap4AvccAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4AvccAtom.h"
+diff --git a/include/bento4/Ap4BitStream.h b/include/bento4/Ap4BitStream.h
+new file mode 100644
+index 0000000..1e4a9b5
+--- /dev/null
++++ b/include/bento4/Ap4BitStream.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Codecs/Ap4BitStream.h"
+diff --git a/include/bento4/Ap4BlocAtom.h b/include/bento4/Ap4BlocAtom.h
+new file mode 100644
+index 0000000..69b7fa4
+--- /dev/null
++++ b/include/bento4/Ap4BlocAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4BlocAtom.h"
+diff --git a/include/bento4/Ap4ByteStream.h b/include/bento4/Ap4ByteStream.h
+new file mode 100644
+index 0000000..a6da584
+--- /dev/null
++++ b/include/bento4/Ap4ByteStream.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4ByteStream.h"
+diff --git a/include/bento4/Ap4Co64Atom.h b/include/bento4/Ap4Co64Atom.h
+new file mode 100644
+index 0000000..4ea8e6d
+--- /dev/null
++++ b/include/bento4/Ap4Co64Atom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Co64Atom.h"
+diff --git a/include/bento4/Ap4Command.h b/include/bento4/Ap4Command.h
+new file mode 100644
+index 0000000..5b03957
+--- /dev/null
++++ b/include/bento4/Ap4Command.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Command.h"
+diff --git a/include/bento4/Ap4CommandFactory.h b/include/bento4/Ap4CommandFactory.h
+new file mode 100644
+index 0000000..fe6f260
+--- /dev/null
++++ b/include/bento4/Ap4CommandFactory.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4CommandFactory.h"
+diff --git a/include/bento4/Ap4CommonEncryption.h b/include/bento4/Ap4CommonEncryption.h
+new file mode 100644
+index 0000000..001d382
+--- /dev/null
++++ b/include/bento4/Ap4CommonEncryption.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4CommonEncryption.h"
+diff --git a/include/bento4/Ap4Config.h b/include/bento4/Ap4Config.h
+new file mode 100644
+index 0000000..afe5911
+--- /dev/null
++++ b/include/bento4/Ap4Config.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Config.h"
+diff --git a/include/bento4/Ap4Constants.h b/include/bento4/Ap4Constants.h
+new file mode 100644
+index 0000000..e24e3c5
+--- /dev/null
++++ b/include/bento4/Ap4Constants.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Constants.h"
+diff --git a/include/bento4/Ap4ContainerAtom.h b/include/bento4/Ap4ContainerAtom.h
+new file mode 100644
+index 0000000..5c2e92a
+--- /dev/null
++++ b/include/bento4/Ap4ContainerAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4ContainerAtom.h"
+diff --git a/include/bento4/Ap4CttsAtom.h b/include/bento4/Ap4CttsAtom.h
+new file mode 100644
+index 0000000..562cc37
+--- /dev/null
++++ b/include/bento4/Ap4CttsAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4CttsAtom.h"
+diff --git a/include/bento4/Ap4Dac3Atom.h b/include/bento4/Ap4Dac3Atom.h
+new file mode 100644
+index 0000000..feee1b1
+--- /dev/null
++++ b/include/bento4/Ap4Dac3Atom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Dac3Atom.h"
+diff --git a/include/bento4/Ap4Dac4Atom.h b/include/bento4/Ap4Dac4Atom.h
+new file mode 100644
+index 0000000..11a84e0
+--- /dev/null
++++ b/include/bento4/Ap4Dac4Atom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Dac4Atom.h"
+diff --git a/include/bento4/Ap4DataBuffer.h b/include/bento4/Ap4DataBuffer.h
+new file mode 100644
+index 0000000..9aa1446
+--- /dev/null
++++ b/include/bento4/Ap4DataBuffer.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4DataBuffer.h"
+diff --git a/include/bento4/Ap4Debug.h b/include/bento4/Ap4Debug.h
+new file mode 100644
+index 0000000..2ff64ed
+--- /dev/null
++++ b/include/bento4/Ap4Debug.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Debug.h"
+diff --git a/include/bento4/Ap4Dec3Atom.h b/include/bento4/Ap4Dec3Atom.h
+new file mode 100644
+index 0000000..1d1cf7d
+--- /dev/null
++++ b/include/bento4/Ap4Dec3Atom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Dec3Atom.h"
+diff --git a/include/bento4/Ap4DecoderConfigDescriptor.h b/include/bento4/Ap4DecoderConfigDescriptor.h
+new file mode 100644
+index 0000000..0ab4eb0
+--- /dev/null
++++ b/include/bento4/Ap4DecoderConfigDescriptor.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4DecoderConfigDescriptor.h"
+diff --git a/include/bento4/Ap4DecoderSpecificInfoDescriptor.h b/include/bento4/Ap4DecoderSpecificInfoDescriptor.h
+new file mode 100644
+index 0000000..d4913fa
+--- /dev/null
++++ b/include/bento4/Ap4DecoderSpecificInfoDescriptor.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4DecoderSpecificInfoDescriptor.h"
+diff --git a/include/bento4/Ap4Descriptor.h b/include/bento4/Ap4Descriptor.h
+new file mode 100644
+index 0000000..2d89fd9
+--- /dev/null
++++ b/include/bento4/Ap4Descriptor.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Descriptor.h"
+diff --git a/include/bento4/Ap4DescriptorFactory.h b/include/bento4/Ap4DescriptorFactory.h
+new file mode 100644
+index 0000000..27736db
+--- /dev/null
++++ b/include/bento4/Ap4DescriptorFactory.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4DescriptorFactory.h"
+diff --git a/include/bento4/Ap4DrefAtom.h b/include/bento4/Ap4DrefAtom.h
+new file mode 100644
+index 0000000..73f0313
+--- /dev/null
++++ b/include/bento4/Ap4DrefAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4DrefAtom.h"
+diff --git a/include/bento4/Ap4DvccAtom.h b/include/bento4/Ap4DvccAtom.h
+new file mode 100644
+index 0000000..d86f0ac
+--- /dev/null
++++ b/include/bento4/Ap4DvccAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4DvccAtom.h"
+diff --git a/include/bento4/Ap4DynamicCast.h b/include/bento4/Ap4DynamicCast.h
+new file mode 100644
+index 0000000..45737a9
+--- /dev/null
++++ b/include/bento4/Ap4DynamicCast.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4DynamicCast.h"
+diff --git a/include/bento4/Ap4Eac3Parser.h b/include/bento4/Ap4Eac3Parser.h
+new file mode 100644
+index 0000000..055ec0d
+--- /dev/null
++++ b/include/bento4/Ap4Eac3Parser.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Codecs/Ap4Eac3Parser.h"
+diff --git a/include/bento4/Ap4ElstAtom.h b/include/bento4/Ap4ElstAtom.h
+new file mode 100644
+index 0000000..645341b
+--- /dev/null
++++ b/include/bento4/Ap4ElstAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4ElstAtom.h"
+diff --git a/include/bento4/Ap4EsDescriptor.h b/include/bento4/Ap4EsDescriptor.h
+new file mode 100644
+index 0000000..9eea03d
+--- /dev/null
++++ b/include/bento4/Ap4EsDescriptor.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4EsDescriptor.h"
+diff --git a/include/bento4/Ap4EsdsAtom.h b/include/bento4/Ap4EsdsAtom.h
+new file mode 100644
+index 0000000..c70c579
+--- /dev/null
++++ b/include/bento4/Ap4EsdsAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4EsdsAtom.h"
+diff --git a/include/bento4/Ap4Expandable.h b/include/bento4/Ap4Expandable.h
+new file mode 100644
+index 0000000..277f1fb
+--- /dev/null
++++ b/include/bento4/Ap4Expandable.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Expandable.h"
+diff --git a/include/bento4/Ap4File.h b/include/bento4/Ap4File.h
+new file mode 100644
+index 0000000..4d0bca5
+--- /dev/null
++++ b/include/bento4/Ap4File.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4File.h"
+diff --git a/include/bento4/Ap4FileByteStream.h b/include/bento4/Ap4FileByteStream.h
+new file mode 100644
+index 0000000..3aee723
+--- /dev/null
++++ b/include/bento4/Ap4FileByteStream.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4FileByteStream.h"
+diff --git a/include/bento4/Ap4FileCopier.h b/include/bento4/Ap4FileCopier.h
+new file mode 100644
+index 0000000..623ae50
+--- /dev/null
++++ b/include/bento4/Ap4FileCopier.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4FileCopier.h"
+diff --git a/include/bento4/Ap4FileWriter.h b/include/bento4/Ap4FileWriter.h
+new file mode 100644
+index 0000000..59d3473
+--- /dev/null
++++ b/include/bento4/Ap4FileWriter.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4FileWriter.h"
+diff --git a/include/bento4/Ap4FragmentSampleTable.h b/include/bento4/Ap4FragmentSampleTable.h
+new file mode 100644
+index 0000000..b80c37d
+--- /dev/null
++++ b/include/bento4/Ap4FragmentSampleTable.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4FragmentSampleTable.h"
+diff --git a/include/bento4/Ap4FrmaAtom.h b/include/bento4/Ap4FrmaAtom.h
+new file mode 100644
+index 0000000..2d124b9
+--- /dev/null
++++ b/include/bento4/Ap4FrmaAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4FrmaAtom.h"
+diff --git a/include/bento4/Ap4FtypAtom.h b/include/bento4/Ap4FtypAtom.h
+new file mode 100644
+index 0000000..0f946e2
+--- /dev/null
++++ b/include/bento4/Ap4FtypAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4FtypAtom.h"
+diff --git a/include/bento4/Ap4GrpiAtom.h b/include/bento4/Ap4GrpiAtom.h
+new file mode 100644
+index 0000000..6b341e3
+--- /dev/null
++++ b/include/bento4/Ap4GrpiAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4GrpiAtom.h"
+diff --git a/include/bento4/Ap4HdlrAtom.h b/include/bento4/Ap4HdlrAtom.h
+new file mode 100644
+index 0000000..6d042a7
+--- /dev/null
++++ b/include/bento4/Ap4HdlrAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4HdlrAtom.h"
+diff --git a/include/bento4/Ap4HevcParser.h b/include/bento4/Ap4HevcParser.h
+new file mode 100644
+index 0000000..7455f37
+--- /dev/null
++++ b/include/bento4/Ap4HevcParser.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Codecs/Ap4HevcParser.h"
+diff --git a/include/bento4/Ap4HintTrackReader.h b/include/bento4/Ap4HintTrackReader.h
+new file mode 100644
+index 0000000..eec6a0d
+--- /dev/null
++++ b/include/bento4/Ap4HintTrackReader.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4HintTrackReader.h"
+diff --git a/include/bento4/Ap4Hmac.h b/include/bento4/Ap4Hmac.h
+new file mode 100644
+index 0000000..688e3af
+--- /dev/null
++++ b/include/bento4/Ap4Hmac.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Crypto/Ap4Hmac.h"
+diff --git a/include/bento4/Ap4HmhdAtom.h b/include/bento4/Ap4HmhdAtom.h
+new file mode 100644
+index 0000000..437cbbf
+--- /dev/null
++++ b/include/bento4/Ap4HmhdAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4HmhdAtom.h"
+diff --git a/include/bento4/Ap4HvccAtom.h b/include/bento4/Ap4HvccAtom.h
+new file mode 100644
+index 0000000..c845cee
+--- /dev/null
++++ b/include/bento4/Ap4HvccAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4HvccAtom.h"
+diff --git a/include/bento4/Ap4IkmsAtom.h b/include/bento4/Ap4IkmsAtom.h
+new file mode 100644
+index 0000000..6089854
+--- /dev/null
++++ b/include/bento4/Ap4IkmsAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4IkmsAtom.h"
+diff --git a/include/bento4/Ap4Interfaces.h b/include/bento4/Ap4Interfaces.h
+new file mode 100644
+index 0000000..10fb7d1
+--- /dev/null
++++ b/include/bento4/Ap4Interfaces.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Interfaces.h"
+diff --git a/include/bento4/Ap4IodsAtom.h b/include/bento4/Ap4IodsAtom.h
+new file mode 100644
+index 0000000..4b01fd2
+--- /dev/null
++++ b/include/bento4/Ap4IodsAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4IodsAtom.h"
+diff --git a/include/bento4/Ap4Ipmp.h b/include/bento4/Ap4Ipmp.h
+new file mode 100644
+index 0000000..23dc435
+--- /dev/null
++++ b/include/bento4/Ap4Ipmp.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Ipmp.h"
+diff --git a/include/bento4/Ap4IproAtom.h b/include/bento4/Ap4IproAtom.h
+new file mode 100644
+index 0000000..ae2f88f
+--- /dev/null
++++ b/include/bento4/Ap4IproAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4IproAtom.h"
+diff --git a/include/bento4/Ap4IsfmAtom.h b/include/bento4/Ap4IsfmAtom.h
+new file mode 100644
+index 0000000..41ee685
+--- /dev/null
++++ b/include/bento4/Ap4IsfmAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4IsfmAtom.h"
+diff --git a/include/bento4/Ap4IsltAtom.h b/include/bento4/Ap4IsltAtom.h
+new file mode 100644
+index 0000000..e018df0
+--- /dev/null
++++ b/include/bento4/Ap4IsltAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4IsltAtom.h"
+diff --git a/include/bento4/Ap4IsmaCryp.h b/include/bento4/Ap4IsmaCryp.h
+new file mode 100644
+index 0000000..c755932
+--- /dev/null
++++ b/include/bento4/Ap4IsmaCryp.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4IsmaCryp.h"
+diff --git a/include/bento4/Ap4KeyWrap.h b/include/bento4/Ap4KeyWrap.h
+new file mode 100644
+index 0000000..ad400dd
+--- /dev/null
++++ b/include/bento4/Ap4KeyWrap.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Crypto/Ap4KeyWrap.h"
+diff --git a/include/bento4/Ap4LinearReader.h b/include/bento4/Ap4LinearReader.h
+new file mode 100644
+index 0000000..156d305
+--- /dev/null
++++ b/include/bento4/Ap4LinearReader.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4LinearReader.h"
+diff --git a/include/bento4/Ap4List.h b/include/bento4/Ap4List.h
+new file mode 100644
+index 0000000..d252302
+--- /dev/null
++++ b/include/bento4/Ap4List.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4List.h"
+diff --git a/include/bento4/Ap4Marlin.h b/include/bento4/Ap4Marlin.h
+new file mode 100644
+index 0000000..54a40d6
+--- /dev/null
++++ b/include/bento4/Ap4Marlin.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Marlin.h"
+diff --git a/include/bento4/Ap4MdhdAtom.h b/include/bento4/Ap4MdhdAtom.h
+new file mode 100644
+index 0000000..2e36696
+--- /dev/null
++++ b/include/bento4/Ap4MdhdAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4MdhdAtom.h"
+diff --git a/include/bento4/Ap4MehdAtom.h b/include/bento4/Ap4MehdAtom.h
+new file mode 100644
+index 0000000..3aedcf5
+--- /dev/null
++++ b/include/bento4/Ap4MehdAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4MehdAtom.h"
+diff --git a/include/bento4/Ap4MetaData.h b/include/bento4/Ap4MetaData.h
+new file mode 100644
+index 0000000..209ad99
+--- /dev/null
++++ b/include/bento4/Ap4MetaData.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/MetaData/Ap4MetaData.h"
+diff --git a/include/bento4/Ap4MfhdAtom.h b/include/bento4/Ap4MfhdAtom.h
+new file mode 100644
+index 0000000..b3b171d
+--- /dev/null
++++ b/include/bento4/Ap4MfhdAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4MfhdAtom.h"
+diff --git a/include/bento4/Ap4MfroAtom.h b/include/bento4/Ap4MfroAtom.h
+new file mode 100644
+index 0000000..2936a22
+--- /dev/null
++++ b/include/bento4/Ap4MfroAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4MfroAtom.h"
+diff --git a/include/bento4/Ap4MoovAtom.h b/include/bento4/Ap4MoovAtom.h
+new file mode 100644
+index 0000000..11e5690
+--- /dev/null
++++ b/include/bento4/Ap4MoovAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4MoovAtom.h"
+diff --git a/include/bento4/Ap4Movie.h b/include/bento4/Ap4Movie.h
+new file mode 100644
+index 0000000..1299a7c
+--- /dev/null
++++ b/include/bento4/Ap4Movie.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Movie.h"
+diff --git a/include/bento4/Ap4MovieFragment.h b/include/bento4/Ap4MovieFragment.h
+new file mode 100644
+index 0000000..60e6a0b
+--- /dev/null
++++ b/include/bento4/Ap4MovieFragment.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4MovieFragment.h"
+diff --git a/include/bento4/Ap4Mp4AudioInfo.h b/include/bento4/Ap4Mp4AudioInfo.h
+new file mode 100644
+index 0000000..7c1e2d8
+--- /dev/null
++++ b/include/bento4/Ap4Mp4AudioInfo.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Codecs/Ap4Mp4AudioInfo.h"
+diff --git a/include/bento4/Ap4Mpeg2Ts.h b/include/bento4/Ap4Mpeg2Ts.h
+new file mode 100644
+index 0000000..63dd0c2
+--- /dev/null
++++ b/include/bento4/Ap4Mpeg2Ts.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Mpeg2Ts.h"
+diff --git a/include/bento4/Ap4MvhdAtom.h b/include/bento4/Ap4MvhdAtom.h
+new file mode 100644
+index 0000000..0a216c3
+--- /dev/null
++++ b/include/bento4/Ap4MvhdAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4MvhdAtom.h"
+diff --git a/include/bento4/Ap4NalParser.h b/include/bento4/Ap4NalParser.h
+new file mode 100644
+index 0000000..65125d4
+--- /dev/null
++++ b/include/bento4/Ap4NalParser.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Codecs/Ap4NalParser.h"
+diff --git a/include/bento4/Ap4NmhdAtom.h b/include/bento4/Ap4NmhdAtom.h
+new file mode 100644
+index 0000000..a553fc1
+--- /dev/null
++++ b/include/bento4/Ap4NmhdAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4NmhdAtom.h"
+diff --git a/include/bento4/Ap4ObjectDescriptor.h b/include/bento4/Ap4ObjectDescriptor.h
+new file mode 100644
+index 0000000..5bedd86
+--- /dev/null
++++ b/include/bento4/Ap4ObjectDescriptor.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4ObjectDescriptor.h"
+diff --git a/include/bento4/Ap4OdafAtom.h b/include/bento4/Ap4OdafAtom.h
+new file mode 100644
+index 0000000..b61704c
+--- /dev/null
++++ b/include/bento4/Ap4OdafAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4OdafAtom.h"
+diff --git a/include/bento4/Ap4OddaAtom.h b/include/bento4/Ap4OddaAtom.h
+new file mode 100644
+index 0000000..28d085b
+--- /dev/null
++++ b/include/bento4/Ap4OddaAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4OddaAtom.h"
+diff --git a/include/bento4/Ap4OdheAtom.h b/include/bento4/Ap4OdheAtom.h
+new file mode 100644
+index 0000000..0dad986
+--- /dev/null
++++ b/include/bento4/Ap4OdheAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4OdheAtom.h"
+diff --git a/include/bento4/Ap4OhdrAtom.h b/include/bento4/Ap4OhdrAtom.h
+new file mode 100644
+index 0000000..e0558fc
+--- /dev/null
++++ b/include/bento4/Ap4OhdrAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4OhdrAtom.h"
+diff --git a/include/bento4/Ap4OmaDcf.h b/include/bento4/Ap4OmaDcf.h
+new file mode 100644
+index 0000000..0c52fa4
+--- /dev/null
++++ b/include/bento4/Ap4OmaDcf.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4OmaDcf.h"
+diff --git a/include/bento4/Ap4PdinAtom.h b/include/bento4/Ap4PdinAtom.h
+new file mode 100644
+index 0000000..960c645
+--- /dev/null
++++ b/include/bento4/Ap4PdinAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4PdinAtom.h"
+diff --git a/include/bento4/Ap4Piff.h b/include/bento4/Ap4Piff.h
+new file mode 100644
+index 0000000..b09a9ea
+--- /dev/null
++++ b/include/bento4/Ap4Piff.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Piff.h"
+diff --git a/include/bento4/Ap4Processor.h b/include/bento4/Ap4Processor.h
+new file mode 100644
+index 0000000..65d8ac7
+--- /dev/null
++++ b/include/bento4/Ap4Processor.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Processor.h"
+diff --git a/include/bento4/Ap4Protection.h b/include/bento4/Ap4Protection.h
+new file mode 100644
+index 0000000..a46b7dd
+--- /dev/null
++++ b/include/bento4/Ap4Protection.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Protection.h"
+diff --git a/include/bento4/Ap4PsshAtom.h b/include/bento4/Ap4PsshAtom.h
+new file mode 100644
+index 0000000..af75964
+--- /dev/null
++++ b/include/bento4/Ap4PsshAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4PsshAtom.h"
+diff --git a/include/bento4/Ap4Results.h b/include/bento4/Ap4Results.h
+new file mode 100644
+index 0000000..9e4d392
+--- /dev/null
++++ b/include/bento4/Ap4Results.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Results.h"
+diff --git a/include/bento4/Ap4RtpAtom.h b/include/bento4/Ap4RtpAtom.h
+new file mode 100644
+index 0000000..42dd857
+--- /dev/null
++++ b/include/bento4/Ap4RtpAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4RtpAtom.h"
+diff --git a/include/bento4/Ap4RtpHint.h b/include/bento4/Ap4RtpHint.h
+new file mode 100644
+index 0000000..b2ce2dd
+--- /dev/null
++++ b/include/bento4/Ap4RtpHint.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4RtpHint.h"
+diff --git a/include/bento4/Ap4SLConfigDescriptor.h b/include/bento4/Ap4SLConfigDescriptor.h
+new file mode 100644
+index 0000000..5aec67b
+--- /dev/null
++++ b/include/bento4/Ap4SLConfigDescriptor.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SLConfigDescriptor.h"
+diff --git a/include/bento4/Ap4SaioAtom.h b/include/bento4/Ap4SaioAtom.h
+new file mode 100644
+index 0000000..a5ec9e6
+--- /dev/null
++++ b/include/bento4/Ap4SaioAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SaioAtom.h"
+diff --git a/include/bento4/Ap4SaizAtom.h b/include/bento4/Ap4SaizAtom.h
+new file mode 100644
+index 0000000..9e898a5
+--- /dev/null
++++ b/include/bento4/Ap4SaizAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SaizAtom.h"
+diff --git a/include/bento4/Ap4Sample.h b/include/bento4/Ap4Sample.h
+new file mode 100644
+index 0000000..55e0d7a
+--- /dev/null
++++ b/include/bento4/Ap4Sample.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Sample.h"
+diff --git a/include/bento4/Ap4SampleDescription.h b/include/bento4/Ap4SampleDescription.h
+new file mode 100644
+index 0000000..4dc7aa6
+--- /dev/null
++++ b/include/bento4/Ap4SampleDescription.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SampleDescription.h"
+diff --git a/include/bento4/Ap4SampleEntry.h b/include/bento4/Ap4SampleEntry.h
+new file mode 100644
+index 0000000..15f300c
+--- /dev/null
++++ b/include/bento4/Ap4SampleEntry.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SampleEntry.h"
+diff --git a/include/bento4/Ap4SampleSource.h b/include/bento4/Ap4SampleSource.h
+new file mode 100644
+index 0000000..000514e
+--- /dev/null
++++ b/include/bento4/Ap4SampleSource.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SampleSource.h"
+diff --git a/include/bento4/Ap4SampleTable.h b/include/bento4/Ap4SampleTable.h
+new file mode 100644
+index 0000000..9398658
+--- /dev/null
++++ b/include/bento4/Ap4SampleTable.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SampleTable.h"
+diff --git a/include/bento4/Ap4SbgpAtom.h b/include/bento4/Ap4SbgpAtom.h
+new file mode 100644
+index 0000000..c507b0d
+--- /dev/null
++++ b/include/bento4/Ap4SbgpAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SbgpAtom.h"
+diff --git a/include/bento4/Ap4SchmAtom.h b/include/bento4/Ap4SchmAtom.h
+new file mode 100644
+index 0000000..3f12ff0
+--- /dev/null
++++ b/include/bento4/Ap4SchmAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SchmAtom.h"
+diff --git a/include/bento4/Ap4SdpAtom.h b/include/bento4/Ap4SdpAtom.h
+new file mode 100644
+index 0000000..a15c8da
+--- /dev/null
++++ b/include/bento4/Ap4SdpAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SdpAtom.h"
+diff --git a/include/bento4/Ap4SegmentBuilder.h b/include/bento4/Ap4SegmentBuilder.h
+new file mode 100644
+index 0000000..a65b946
+--- /dev/null
++++ b/include/bento4/Ap4SegmentBuilder.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SegmentBuilder.h"
+diff --git a/include/bento4/Ap4SencAtom.h b/include/bento4/Ap4SencAtom.h
+new file mode 100644
+index 0000000..2440251
+--- /dev/null
++++ b/include/bento4/Ap4SencAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SencAtom.h"
+diff --git a/include/bento4/Ap4SgpdAtom.h b/include/bento4/Ap4SgpdAtom.h
+new file mode 100644
+index 0000000..93ad835
+--- /dev/null
++++ b/include/bento4/Ap4SgpdAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SgpdAtom.h"
+diff --git a/include/bento4/Ap4SidxAtom.h b/include/bento4/Ap4SidxAtom.h
+new file mode 100644
+index 0000000..8f7fd1d
+--- /dev/null
++++ b/include/bento4/Ap4SidxAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SidxAtom.h"
+diff --git a/include/bento4/Ap4SmhdAtom.h b/include/bento4/Ap4SmhdAtom.h
+new file mode 100644
+index 0000000..4146a00
+--- /dev/null
++++ b/include/bento4/Ap4SmhdAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SmhdAtom.h"
+diff --git a/include/bento4/Ap4StcoAtom.h b/include/bento4/Ap4StcoAtom.h
+new file mode 100644
+index 0000000..6235e9c
+--- /dev/null
++++ b/include/bento4/Ap4StcoAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4StcoAtom.h"
+diff --git a/include/bento4/Ap4SthdAtom.h b/include/bento4/Ap4SthdAtom.h
+new file mode 100644
+index 0000000..2e66bb1
+--- /dev/null
++++ b/include/bento4/Ap4SthdAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SthdAtom.h"
+diff --git a/include/bento4/Ap4StreamCipher.h b/include/bento4/Ap4StreamCipher.h
+new file mode 100644
+index 0000000..e1b3572
+--- /dev/null
++++ b/include/bento4/Ap4StreamCipher.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Crypto/Ap4StreamCipher.h"
+diff --git a/include/bento4/Ap4String.h b/include/bento4/Ap4String.h
+new file mode 100644
+index 0000000..74b8d24
+--- /dev/null
++++ b/include/bento4/Ap4String.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4String.h"
+diff --git a/include/bento4/Ap4StscAtom.h b/include/bento4/Ap4StscAtom.h
+new file mode 100644
+index 0000000..b4a6076
+--- /dev/null
++++ b/include/bento4/Ap4StscAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4StscAtom.h"
+diff --git a/include/bento4/Ap4StsdAtom.h b/include/bento4/Ap4StsdAtom.h
+new file mode 100644
+index 0000000..43d20ca
+--- /dev/null
++++ b/include/bento4/Ap4StsdAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4StsdAtom.h"
+diff --git a/include/bento4/Ap4StssAtom.h b/include/bento4/Ap4StssAtom.h
+new file mode 100644
+index 0000000..06214a8
+--- /dev/null
++++ b/include/bento4/Ap4StssAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4StssAtom.h"
+diff --git a/include/bento4/Ap4StszAtom.h b/include/bento4/Ap4StszAtom.h
+new file mode 100644
+index 0000000..0f3debf
+--- /dev/null
++++ b/include/bento4/Ap4StszAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4StszAtom.h"
+diff --git a/include/bento4/Ap4SttsAtom.h b/include/bento4/Ap4SttsAtom.h
+new file mode 100644
+index 0000000..3b9a7c8
+--- /dev/null
++++ b/include/bento4/Ap4SttsAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SttsAtom.h"
+diff --git a/include/bento4/Ap4Stz2Atom.h b/include/bento4/Ap4Stz2Atom.h
+new file mode 100644
+index 0000000..1845538
+--- /dev/null
++++ b/include/bento4/Ap4Stz2Atom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Stz2Atom.h"
+diff --git a/include/bento4/Ap4SyntheticSampleTable.h b/include/bento4/Ap4SyntheticSampleTable.h
+new file mode 100644
+index 0000000..17e639a
+--- /dev/null
++++ b/include/bento4/Ap4SyntheticSampleTable.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4SyntheticSampleTable.h"
+diff --git a/include/bento4/Ap4TencAtom.h b/include/bento4/Ap4TencAtom.h
+new file mode 100644
+index 0000000..8ea66ed
+--- /dev/null
++++ b/include/bento4/Ap4TencAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4TencAtom.h"
+diff --git a/include/bento4/Ap4TfdtAtom.h b/include/bento4/Ap4TfdtAtom.h
+new file mode 100644
+index 0000000..02d1106
+--- /dev/null
++++ b/include/bento4/Ap4TfdtAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4TfdtAtom.h"
+diff --git a/include/bento4/Ap4TfhdAtom.h b/include/bento4/Ap4TfhdAtom.h
+new file mode 100644
+index 0000000..ebbd423
+--- /dev/null
++++ b/include/bento4/Ap4TfhdAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4TfhdAtom.h"
+diff --git a/include/bento4/Ap4TfraAtom.h b/include/bento4/Ap4TfraAtom.h
+new file mode 100644
+index 0000000..864e0f0
+--- /dev/null
++++ b/include/bento4/Ap4TfraAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4TfraAtom.h"
+diff --git a/include/bento4/Ap4TimsAtom.h b/include/bento4/Ap4TimsAtom.h
+new file mode 100644
+index 0000000..b387d50
+--- /dev/null
++++ b/include/bento4/Ap4TimsAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4TimsAtom.h"
+diff --git a/include/bento4/Ap4TkhdAtom.h b/include/bento4/Ap4TkhdAtom.h
+new file mode 100644
+index 0000000..c72d676
+--- /dev/null
++++ b/include/bento4/Ap4TkhdAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4TkhdAtom.h"
+diff --git a/include/bento4/Ap4Track.h b/include/bento4/Ap4Track.h
+new file mode 100644
+index 0000000..f846b7f
+--- /dev/null
++++ b/include/bento4/Ap4Track.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Track.h"
+diff --git a/include/bento4/Ap4TrakAtom.h b/include/bento4/Ap4TrakAtom.h
+new file mode 100644
+index 0000000..a6075f1
+--- /dev/null
++++ b/include/bento4/Ap4TrakAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4TrakAtom.h"
+diff --git a/include/bento4/Ap4TrefTypeAtom.h b/include/bento4/Ap4TrefTypeAtom.h
+new file mode 100644
+index 0000000..afbd669
+--- /dev/null
++++ b/include/bento4/Ap4TrefTypeAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4TrefTypeAtom.h"
+diff --git a/include/bento4/Ap4TrexAtom.h b/include/bento4/Ap4TrexAtom.h
+new file mode 100644
+index 0000000..a23861b
+--- /dev/null
++++ b/include/bento4/Ap4TrexAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4TrexAtom.h"
+diff --git a/include/bento4/Ap4TrunAtom.h b/include/bento4/Ap4TrunAtom.h
+new file mode 100644
+index 0000000..d6053d1
+--- /dev/null
++++ b/include/bento4/Ap4TrunAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4TrunAtom.h"
+diff --git a/include/bento4/Ap4Types.h b/include/bento4/Ap4Types.h
+new file mode 100644
+index 0000000..400ab88
+--- /dev/null
++++ b/include/bento4/Ap4Types.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Types.h"
+diff --git a/include/bento4/Ap4UrlAtom.h b/include/bento4/Ap4UrlAtom.h
+new file mode 100644
+index 0000000..cc018b9
+--- /dev/null
++++ b/include/bento4/Ap4UrlAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4UrlAtom.h"
+diff --git a/include/bento4/Ap4Utils.h b/include/bento4/Ap4Utils.h
+new file mode 100644
+index 0000000..8dab16e
+--- /dev/null
++++ b/include/bento4/Ap4Utils.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Utils.h"
+diff --git a/include/bento4/Ap4UuidAtom.h b/include/bento4/Ap4UuidAtom.h
+new file mode 100644
+index 0000000..b7f1b00
+--- /dev/null
++++ b/include/bento4/Ap4UuidAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4UuidAtom.h"
+diff --git a/include/bento4/Ap4Version.h b/include/bento4/Ap4Version.h
+new file mode 100644
+index 0000000..cc2f6a6
+--- /dev/null
++++ b/include/bento4/Ap4Version.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4Version.h"
+diff --git a/include/bento4/Ap4VmhdAtom.h b/include/bento4/Ap4VmhdAtom.h
+new file mode 100644
+index 0000000..a5b9b3a
+--- /dev/null
++++ b/include/bento4/Ap4VmhdAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4VmhdAtom.h"
+diff --git a/include/bento4/Ap4VpccAtom.h b/include/bento4/Ap4VpccAtom.h
+new file mode 100644
+index 0000000..f013ce5
+--- /dev/null
++++ b/include/bento4/Ap4VpccAtom.h
+@@ -0,0 +1 @@
++#include "../../Source/C++/Core/Ap4VpccAtom.h"
