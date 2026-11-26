@@ -30,6 +30,7 @@ include-dirs = ["include"]
 interface-cxx-standard = "c++14"
 links = "nodesoup"
 
-# Upstream's if(MSVC) (src/CMakeLists.txt:19-21): src/layout.cpp uses M_PI.
+# Upstream's MSVC branch (src/CMakeLists.txt:20-22) defines this for the
+# library and its consumers; only src/layout.cpp (M_PI) needs it.
 [target.'cfg(env = "msvc")'.profile]
 defines = ["_USE_MATH_DEFINES"]
