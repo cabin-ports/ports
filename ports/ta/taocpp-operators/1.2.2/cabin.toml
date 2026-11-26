@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/taocpp/operators/archive/refs/tags/1.2.2.tar.gz"
+checksum = "sha256:9e7811621c86444d6c4f47f822eaee713039b04ab38fb9ad652046e4ab4f647c"
+format = "tar.gz"
+strip-prefix = "operators-1.2.2"
+
+[package]
+name = "cabin-ports/taocpp-operators"
+version = "1.2.2"
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+# C++11 from README.md ("Requires C++11 or newer").
+[target.taocpp-operators]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
