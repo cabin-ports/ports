@@ -1,0 +1,32 @@
+[package.upstream]
+url = "https://github.com/Enhex/Deco/archive/refs/tags/v1.0.1.tar.gz"
+checksum = "sha256:f8673ebaba7f745e96cb08ca4b6824c9177ab478e1369a41f4cc95fd48fb13db"
+format = "tar.gz"
+strip-prefix = "Deco-1.0.1"
+# Deco.h uses uint_fast8_t without <cstdint> (measured: check-linux, 'uint_fast8_t'
+# was not declared in this scope); the patch adds the include.
+patches = ["patches/0001-include-cstdint.patch"]
+
+[package]
+name = "cabin-ports/deco"
+version = "1.0.1"
+license = "Apache-2.0 WITH LLVM-exception"
+include = ["LICENSE.txt", "README.md", "include", "patches"]
+
+[dependencies]
+"cabin-ports/boost-spirit" = "=1.92.0"
+"cabin-ports/enhex-generic_serialization" = "=1.0.0"
+"cabin-ports/enhex-strong_type" = "=1.0.0"
+"cabin-ports/fmt" = "=12.2.0"
+
+# README.md:90: "header-only and uses C++17".
+[target.deco]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+deps = [
+  { name = "cabin-ports/boost-spirit", public = true },
+  { name = "cabin-ports/enhex-generic_serialization", public = true },
+  { name = "cabin-ports/enhex-strong_type", public = true },
+  { name = "cabin-ports/fmt", public = true },
+]
