@@ -1,0 +1,37 @@
+[package.upstream]
+# The v1.0.2 tag archive from hoshimoe/NekoEvent.
+url = "https://github.com/hoshimoe/NekoEvent/archive/refs/tags/v1.0.2.tar.gz"
+checksum = "sha256:89d1ec159fbe9a430e5cc4994dc2932e94a27852c7b068bc98c252770938f452"
+format = "tar.gz"
+strip-prefix = "NekoEvent-1.0.2"
+
+[package]
+name = "cabin-ports/neko-event"
+version = "1.0.2"
+license = "MIT OR Apache-2.0"
+# LICENSE carries both texts of the MIT OR Apache-2.0 choice.
+include = [
+  "LICENSE",
+  "include/neko/event/event.hpp",
+]
+
+[dependencies]
+# Upstream's CMakeLists.txt fetches NekoSchema at main (:36-46) and pins
+# no version; event.hpp uses only types.hpp, in 1.1.6.
+"cabin-ports/neko-schema" = "=1.1.6"
+
+# Upstream limitation (measured): scheduleRepeating runs its callback twice
+# and then stops, since the second reschedule queues an empty callback
+# (event.hpp:722-739); EventLoop's other APIs are unaffected.
+#
+# Upstream's header-only NekoEvent INTERFACE target (CMakeLists.txt:70-76):
+# include/ at C++20, linked to NekoSchema.  Not ported: neko.event.cppm,
+# the C++20 module unit that only NEKO_EVENT_ENABLE_MODULE builds, off by
+# default (CMakeLists.txt:11), though the install rule copies it; a Cabin
+# target cannot build a module unit.  Also not ported: the tests and the
+# vcpkg and Conan recipes.
+[target.neko-event]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
+deps = [{ name = "cabin-ports/neko-schema", public = true }]
