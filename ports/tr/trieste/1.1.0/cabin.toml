@@ -5,11 +5,10 @@ format = "tar.gz"
 strip-prefix = "Trieste-1.1.0"
 # trieste/json.h and trieste/yaml.h include json_export.h and yaml_export.h,
 # which CMake's generate_export_header writes (parsers/json/CMakeLists.txt:16-17,
-# parsers/yaml/CMakeLists.txt:18-19).  The patch adds them as CMake 4.4.5 writes
-# them for the static libraries, with JSON_EXPORT and YAML_EXPORT empty under
-# the static defines, and the value it writes for Windows (the *_DEPRECATED
-# macros, which nothing uses) left to the preprocessor.
-patches = ["patches/0001-add-the-generated-export-headers.patch"]
+# parsers/yaml/CMakeLists.txt:18-19).  The patch adds headers that stand in for
+# them for the static build, defining JSON_EXPORT and YAML_EXPORT, the only
+# macros the sources use, empty.
+patches = ["patches/0001-add-the-static-build-export-headers.patch"]
 
 [package]
 name = "cabin-ports/trieste"

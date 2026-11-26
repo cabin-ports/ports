@@ -1,0 +1,18 @@
+--- /dev/null
++++ b/parsers/include/trieste/json_export.h
+@@ -0,0 +1,6 @@
++#ifndef JSON_EXPORT_H
++#define JSON_EXPORT_H
++
++#define JSON_EXPORT
++
++#endif
+--- /dev/null
++++ b/parsers/include/trieste/yaml_export.h
+@@ -0,0 +1,6 @@
++#ifndef YAML_EXPORT_H
++#define YAML_EXPORT_H
++
++#define YAML_EXPORT
++
++#endif
