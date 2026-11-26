@@ -1,0 +1,63 @@
+[package.upstream]
+url = "https://github.com/argtable/argtable3/releases/download/v3.3.1/argtable-v3.3.1.tar.gz"
+checksum = "sha256:c08bca4b88ddb9234726b75455b3b1670d7c864d8daf198eaa7a3b4d41addf2c"
+format = "tar.gz"
+strip-prefix = "argtable-v3.3.1"
+
+# Only the public header goes on consumers' include path; src/ also holds
+# private headers.
+[[package.upstream.copy]]
+from = "src/argtable3.h"
+to = "include/argtable3.h"
+
+[package]
+name = "cabin-ports/argtable3"
+version = "3.3.1"
+# src/arg_hashtable.c:92 credits Java 1.4's hash table source for the
+# supplemental hash in enhanced_hash; its copyright significance is uncertain.
+license = "BSD-3-Clause AND BSD-2-Clause AND ISC AND TCL AND Zlib"
+include = ["LICENSE", "README.md", "include", "src"]
+# Upstream's library (CMakeLists.txt:124-139, src/CMakeLists.txt): the 15
+# sources and -D_XOPEN_SOURCE=700 on every platform.  ARGTABLE3_REPLACE_GETOPT
+# stays at its default, so the embedded getopt_long is built.  Not ported: the
+# shared library and its version resource, the CMake package, argtable3.pc, the
+# ARGTABLE3_LONG_ONLY and ARGTABLE3_ENABLE_ARG_REX_DEBUG options, the tests,
+# examples, docs and tools.
+[target.argtable3]
+type = "library"
+sources = [
+  "src/arg_cmd.c",
+  "src/arg_date.c",
+  "src/arg_dbl.c",
+  "src/arg_dstr.c",
+  "src/arg_end.c",
+  "src/arg_file.c",
+  "src/arg_getopt_long.c",
+  "src/arg_hashtable.c",
+  "src/arg_int.c",
+  "src/arg_lit.c",
+  "src/arg_rem.c",
+  "src/arg_rex.c",
+  "src/arg_str.c",
+  "src/arg_utils.c",
+  "src/argtable3.c",
+]
+include-dirs = ["include"]
+defines = ["_XOPEN_SOURCE=700"]
+links = "argtable3"
+# Upstream compiles with -std=c89 -Wpedantic (src/CMakeLists.txt); C11 is the
+# oldest standard Cabin can lower for MSVC.
+c-standard = "c11"
+# The header is C89 and has extern "C" guards (src/argtable3.h).
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
+
+# arg_hashtable.c calls ceil(); upstream links libm into its tests and
+# examples and lists -lm in argtable3.pc.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
+
+# arg_file.c:42 tests WIN32, which CMake's MSVC defaults define (/DWIN32) but
+# cl does not.
+[target.'cfg(os = "windows")'.profile]
+defines = ["WIN32"]
