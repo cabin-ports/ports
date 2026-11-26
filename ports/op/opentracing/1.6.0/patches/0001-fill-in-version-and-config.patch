@@ -1,0 +1,35 @@
+diff --git a/include/opentracing/config.h b/include/opentracing/config.h
+index 18d1172..6c3c3d5 100644
+--- a/include/opentracing/config.h
++++ b/include/opentracing/config.h
+@@ -1,3 +1,4 @@
+ #pragma once
+ 
+-#cmakedefine OPENTRACING_BUILD_DYNAMIC_LOADING
++// Changed for cabin-ports on 2026-11-26: enabled dynamic loading.
++#define OPENTRACING_BUILD_DYNAMIC_LOADING
+diff --git a/include/opentracing/version.h b/include/opentracing/version.h
+index 8143f5d..306947a 100644
+--- a/include/opentracing/version.h
++++ b/include/opentracing/version.h
+@@ -1,14 +1,16 @@
+ #ifndef OPENTRACING_VERSION_H
+ #define OPENTRACING_VERSION_H
+ 
+-#define OPENTRACING_VERSION "${OPENTRACING_VERSION_STRING}"
+-#define OPENTRACING_ABI_VERSION "${OPENTRACING_ABI_VERSION}"
++// Changed for cabin-ports on 2026-11-26: filled in the CMake placeholders.
++
++#define OPENTRACING_VERSION "1.6.0"
++#define OPENTRACING_ABI_VERSION "3"
+ 
+ // clang-format off
+ #define BEGIN_OPENTRACING_ABI_NAMESPACE \
+-  inline namespace v${OPENTRACING_ABI_VERSION} {
++  inline namespace v3 {
+ #define END_OPENTRACING_ABI_NAMESPACE \
+-  }  // namespace v${OPENTRACING_ABI_VERSION}
++  }  // namespace v3
+ // clang-format on
+ 
+ #endif // OPENTRACING_VERSION_H

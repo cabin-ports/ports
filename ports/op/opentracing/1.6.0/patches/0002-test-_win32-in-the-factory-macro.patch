@@ -1,0 +1,12 @@
+--- a/include/opentracing/dynamic_load.h
++++ b/include/opentracing/dynamic_load.h
+@@ -44,7 +44,8 @@
+     const char* opentracing_version, const char* opentracing_abi_version,
+     const void** error_category, void* error_message, void** tracer_factory);
+ 
+-#ifdef WIN32
++// Changed for cabin-ports on 2026-11-26: test _WIN32, which MSVC defines itself.
++#ifdef _WIN32
+ 
+ #define OPENTRACING_DECLARE_IMPL_FACTORY(X)                                 \
+   extern "C" {                                                              \
