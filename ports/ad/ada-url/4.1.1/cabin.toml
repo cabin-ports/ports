@@ -26,9 +26,9 @@ include = ["LICENSE-APACHE", "LICENSE-MIT", "include", "src"]
 # Like upstream, the package compiles in its own ada-idna (the
 # ada::idna functions) and tl::expected 1.1.0 (include/ada/expected.h, under
 # TL_EXPECTED_HPP and namespace tl), and offers no build with external
-# copies.  With cabin-ports/tl-expected in the same program, a translation unit
-# gets whichever <tl/expected.hpp> or <ada.h> it includes first and the
-# program has two definitions of tl::expected, an ODR violation.
+# copies.  A translation unit that includes <ada.h> before <tl/expected.hpp>
+# from cabin-ports/tl-expected 1.3.1 gets ada's 1.1.0 (measured:
+# TL_EXPECTED_VERSION_MINOR is 1, not 3).
 # Not ported: tools/ (adaparse), benchmarks, fuzz, tests, the singleheader
 # amalgamation, and the optional ADA_USE_SIMDUTF.  URLPattern matching needs
 # a regex provider, which upstream leaves to the consumer
