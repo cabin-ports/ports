@@ -23,8 +23,7 @@ interface-cxx-standard = "c++98"
 # Upstream's CMake library, static: all of src/*.cpp, with its default
 # options.  As there, the library defines the unprefixed extern "C" BLAS and
 # LAPACK replacements (dgemm_, dpotrf_, dtrtrs_, dtrcon_ and the
-# single-precision ones), so a consumer that also links a real BLAS or LAPACK
-# gets clashing definitions; and SQProblemSchur gets only the dummy sparse
+# single-precision ones); and SQProblemSchur gets only the dummy sparse
 # solver, as no HSL or MUMPS is configured.  Not ported: the shared library,
 # examples, tests, and the C wrapper and Matlab, Python and other interfaces.
 [target.qpoases]
