@@ -1,0 +1,63 @@
+[package.upstream]
+url = "https://github.com/stbrumme/hash-library/archive/refs/tags/hash_library_v8.tar.gz"
+checksum = "sha256:ddf9d398166e08482af1225aed968ac4c370f99648b5359b0a20c9ed56f7b1c7"
+format = "tar.gz"
+strip-prefix = "hash-library-hash_library_v8"
+# macOS has no <endian.h>, which every hash .cpp includes unless _MSC_VER
+# (measured: keccak.cpp:11:10: fatal error: 'endian.h' file not found).  The
+# patch guards the include with !__APPLE__.  It carries lines of upstream's
+# Zlib-licensed .cpp files and marks each change per clause 2 of the zlib
+# License, which upstream's LICENSE states in full:
+#
+#   Copyright (c) 2014,2015 Stephan Brumme
+#
+#   This software is provided 'as-is', without any express or implied
+#   warranty. In no event will the authors be held liable for any damages
+#   arising from the use of this software.
+#   Permission is granted to anyone to use this software for any purpose,
+#   including commercial applications, and to alter it and redistribute it
+#   freely, subject to the following restrictions:
+#   1. The origin of this software must not be misrepresented; you must not
+#      claim that you wrote the original software. If you use this software
+#      in a product, an acknowledgment in the product documentation would be
+#      appreciated but is not required.
+#   2. Altered source versions must be plainly marked as such, and must not
+#      be misrepresented as being the original software.
+#   3. This notice may not be removed or altered from any source distribution.
+patches = ["patches/0001-skip-endian-h-on-macos.patch"]
+
+# Upstream tags hash_library_v1 to v8 and states no X.Y.Z; v8 maps to 8.0.0.
+[package]
+name = "cabin-ports/hashlibrary"
+version = "8.0.0"
+license = "Zlib"
+include = [
+  "LICENSE",
+  "patches",
+  "crc32.cpp",
+  "crc32.h",
+  "hash.h",
+  "hmac.h",
+  "keccak.cpp",
+  "keccak.h",
+  "md5.cpp",
+  "md5.h",
+  "sha1.cpp",
+  "sha1.h",
+  "sha256.cpp",
+  "sha256.h",
+  "sha3.cpp",
+  "sha3.h",
+]
+
+# Every hash source upstream ships except the digest tool.  Upstream states
+# no standard; the sources build as C++98 (measured), which the interface
+# requirement states.  They compile as C++14 because Cabin lowers no older
+# standard on MSVC.
+# The headers sit in the package root, so consumers include them as "md5.h".
+[target.hashlibrary]
+type = "library"
+sources = ["crc32.cpp", "keccak.cpp", "md5.cpp", "sha1.cpp", "sha256.cpp", "sha3.cpp"]
+include-dirs = ["."]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++98"
