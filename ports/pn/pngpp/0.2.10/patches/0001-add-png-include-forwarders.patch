@@ -1,0 +1,203 @@
+diff --git a/include/png++/color.hpp b/include/png++/color.hpp
+new file mode 100644
+index 0000000..cba1920
+--- /dev/null
++++ b/include/png++/color.hpp
+@@ -0,0 +1 @@
++#include "../../color.hpp"
+diff --git a/include/png++/config.hpp b/include/png++/config.hpp
+new file mode 100644
+index 0000000..21a29fe
+--- /dev/null
++++ b/include/png++/config.hpp
+@@ -0,0 +1 @@
++#include "../../config.hpp"
+diff --git a/include/png++/consumer.hpp b/include/png++/consumer.hpp
+new file mode 100644
+index 0000000..c6e8c72
+--- /dev/null
++++ b/include/png++/consumer.hpp
+@@ -0,0 +1 @@
++#include "../../consumer.hpp"
+diff --git a/include/png++/convert_color_space.hpp b/include/png++/convert_color_space.hpp
+new file mode 100644
+index 0000000..a342501
+--- /dev/null
++++ b/include/png++/convert_color_space.hpp
+@@ -0,0 +1 @@
++#include "../../convert_color_space.hpp"
+diff --git a/include/png++/end_info.hpp b/include/png++/end_info.hpp
+new file mode 100644
+index 0000000..8039803
+--- /dev/null
++++ b/include/png++/end_info.hpp
+@@ -0,0 +1 @@
++#include "../../end_info.hpp"
+diff --git a/include/png++/error.hpp b/include/png++/error.hpp
+new file mode 100644
+index 0000000..19a00df
+--- /dev/null
++++ b/include/png++/error.hpp
+@@ -0,0 +1 @@
++#include "../../error.hpp"
+diff --git a/include/png++/ga_pixel.hpp b/include/png++/ga_pixel.hpp
+new file mode 100644
+index 0000000..d07bda0
+--- /dev/null
++++ b/include/png++/ga_pixel.hpp
+@@ -0,0 +1 @@
++#include "../../ga_pixel.hpp"
+diff --git a/include/png++/generator.hpp b/include/png++/generator.hpp
+new file mode 100644
+index 0000000..16ec0c0
+--- /dev/null
++++ b/include/png++/generator.hpp
+@@ -0,0 +1 @@
++#include "../../generator.hpp"
+diff --git a/include/png++/gray_pixel.hpp b/include/png++/gray_pixel.hpp
+new file mode 100644
+index 0000000..06112fc
+--- /dev/null
++++ b/include/png++/gray_pixel.hpp
+@@ -0,0 +1 @@
++#include "../../gray_pixel.hpp"
+diff --git a/include/png++/image.hpp b/include/png++/image.hpp
+new file mode 100644
+index 0000000..3ed08bc
+--- /dev/null
++++ b/include/png++/image.hpp
+@@ -0,0 +1 @@
++#include "../../image.hpp"
+diff --git a/include/png++/image_info.hpp b/include/png++/image_info.hpp
+new file mode 100644
+index 0000000..a1f5298
+--- /dev/null
++++ b/include/png++/image_info.hpp
+@@ -0,0 +1 @@
++#include "../../image_info.hpp"
+diff --git a/include/png++/index_pixel.hpp b/include/png++/index_pixel.hpp
+new file mode 100644
+index 0000000..96d5307
+--- /dev/null
++++ b/include/png++/index_pixel.hpp
+@@ -0,0 +1 @@
++#include "../../index_pixel.hpp"
+diff --git a/include/png++/info.hpp b/include/png++/info.hpp
+new file mode 100644
+index 0000000..a80cad7
+--- /dev/null
++++ b/include/png++/info.hpp
+@@ -0,0 +1 @@
++#include "../../info.hpp"
+diff --git a/include/png++/info_base.hpp b/include/png++/info_base.hpp
+new file mode 100644
+index 0000000..d67da9f
+--- /dev/null
++++ b/include/png++/info_base.hpp
+@@ -0,0 +1 @@
++#include "../../info_base.hpp"
+diff --git a/include/png++/io_base.hpp b/include/png++/io_base.hpp
+new file mode 100644
+index 0000000..b599d4a
+--- /dev/null
++++ b/include/png++/io_base.hpp
+@@ -0,0 +1 @@
++#include "../../io_base.hpp"
+diff --git a/include/png++/packed_pixel.hpp b/include/png++/packed_pixel.hpp
+new file mode 100644
+index 0000000..6d0561b
+--- /dev/null
++++ b/include/png++/packed_pixel.hpp
+@@ -0,0 +1 @@
++#include "../../packed_pixel.hpp"
+diff --git a/include/png++/palette.hpp b/include/png++/palette.hpp
+new file mode 100644
+index 0000000..f80d03e
+--- /dev/null
++++ b/include/png++/palette.hpp
+@@ -0,0 +1 @@
++#include "../../palette.hpp"
+diff --git a/include/png++/pixel_buffer.hpp b/include/png++/pixel_buffer.hpp
+new file mode 100644
+index 0000000..143d528
+--- /dev/null
++++ b/include/png++/pixel_buffer.hpp
+@@ -0,0 +1 @@
++#include "../../pixel_buffer.hpp"
+diff --git a/include/png++/pixel_traits.hpp b/include/png++/pixel_traits.hpp
+new file mode 100644
+index 0000000..0ee37dc
+--- /dev/null
++++ b/include/png++/pixel_traits.hpp
+@@ -0,0 +1 @@
++#include "../../pixel_traits.hpp"
+diff --git a/include/png++/png.hpp b/include/png++/png.hpp
+new file mode 100644
+index 0000000..59e2883
+--- /dev/null
++++ b/include/png++/png.hpp
+@@ -0,0 +1 @@
++#include "../../png.hpp"
+diff --git a/include/png++/reader.hpp b/include/png++/reader.hpp
+new file mode 100644
+index 0000000..1657883
+--- /dev/null
++++ b/include/png++/reader.hpp
+@@ -0,0 +1 @@
++#include "../../reader.hpp"
+diff --git a/include/png++/require_color_space.hpp b/include/png++/require_color_space.hpp
+new file mode 100644
+index 0000000..9e28b8c
+--- /dev/null
++++ b/include/png++/require_color_space.hpp
+@@ -0,0 +1 @@
++#include "../../require_color_space.hpp"
+diff --git a/include/png++/rgb_pixel.hpp b/include/png++/rgb_pixel.hpp
+new file mode 100644
+index 0000000..2ac3f00
+--- /dev/null
++++ b/include/png++/rgb_pixel.hpp
+@@ -0,0 +1 @@
++#include "../../rgb_pixel.hpp"
+diff --git a/include/png++/rgba_pixel.hpp b/include/png++/rgba_pixel.hpp
+new file mode 100644
+index 0000000..8e7986f
+--- /dev/null
++++ b/include/png++/rgba_pixel.hpp
+@@ -0,0 +1 @@
++#include "../../rgba_pixel.hpp"
+diff --git a/include/png++/solid_pixel_buffer.hpp b/include/png++/solid_pixel_buffer.hpp
+new file mode 100644
+index 0000000..617a690
+--- /dev/null
++++ b/include/png++/solid_pixel_buffer.hpp
+@@ -0,0 +1 @@
++#include "../../solid_pixel_buffer.hpp"
+diff --git a/include/png++/streaming_base.hpp b/include/png++/streaming_base.hpp
+new file mode 100644
+index 0000000..4c12ba7
+--- /dev/null
++++ b/include/png++/streaming_base.hpp
+@@ -0,0 +1 @@
++#include "../../streaming_base.hpp"
+diff --git a/include/png++/tRNS.hpp b/include/png++/tRNS.hpp
+new file mode 100644
+index 0000000..1da2095
+--- /dev/null
++++ b/include/png++/tRNS.hpp
+@@ -0,0 +1 @@
++#include "../../tRNS.hpp"
+diff --git a/include/png++/types.hpp b/include/png++/types.hpp
+new file mode 100644
+index 0000000..bb146b6
+--- /dev/null
++++ b/include/png++/types.hpp
+@@ -0,0 +1 @@
++#include "../../types.hpp"
+diff --git a/include/png++/writer.hpp b/include/png++/writer.hpp
+new file mode 100644
+index 0000000..163a859
+--- /dev/null
++++ b/include/png++/writer.hpp
+@@ -0,0 +1 @@
++#include "../../writer.hpp"
