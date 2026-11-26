@@ -1,0 +1,11 @@
+--- a/rgbcx.h
++++ b/rgbcx.h
+@@ -58,6 +58,8 @@
+ 
+ #include <stdlib.h>
+ #include <stdint.h>
++#include <string.h>
++#include <math.h>
+ #include <algorithm>
+ #include <assert.h>
+ #include <limits.h>
