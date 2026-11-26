@@ -7,6 +7,8 @@ strip-prefix = "air-ctl-1.1.2"
 [package]
 name = "cabin-ports/air-ctl"
 version = "1.1.2"
+# LicenseRef-PLEASE-LICENSE: the "PLEASE LICENSE" grant (Michael Clark, 2022) in
+# include/CTL/compat/atomic.h, kept in the shipped header.
 license = "BSL-1.0 AND MIT AND LicenseRef-PLEASE-LICENSE"
 include = ["LICENSE", "README.md", "include", "src"]
 # CMakeLists.txt:4 sets CMAKE_C_STANDARD 17, which CMake compiles as gnu17 on
