@@ -9,10 +9,9 @@ name = "cabin-ports/qpoases"
 version = "3.2.2"
 # LGPL-2.1-or-later: the file headers of include/ and src/.  A program that
 # links the static library carries the obligations of LGPL-2.1 section 6.
-# src/SparseSolver.cpp:1166 credits Ipopt for a few MUMPS parameter values, in
-# code that is compiled only with SOLVER_MUMPS; its copyright significance is
-# uncertain.
-license = "LGPL-2.1-or-later"
+# src/SparseSolver.cpp:1166-1412 adapts Ipopt's IpMumpsSolverInterface.cpp
+# (EPL-2.0, Ipopt's LICENSE); the code is compiled only with SOLVER_MUMPS.
+license = "LGPL-2.1-or-later AND EPL-2.0"
 include = ["AUTHORS", "LICENSE", "LICENSE.txt", "README", "VERSIONS", "include", "src"]
 # Upstream's CMake sets no standard; C++14 is the oldest Cabin lowers for
 # MSVC.
