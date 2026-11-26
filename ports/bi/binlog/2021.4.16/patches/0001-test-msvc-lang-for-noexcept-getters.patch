@@ -1,0 +1,32 @@
+--- a/include/mserialize/StructSerializer.hpp
++++ b/include/mserialize/StructSerializer.hpp
+@@ -42,7 +42,8 @@
+ template <typename T, typename Ret>
+ auto serializable_member(Ret (T::*getter)() const) -> decltype(getter);
+ 
+-#if __cplusplus >= 201703L
++// Changed for cabin-ports on 2026-11-26: also test _MSVC_LANG, as cl reports __cplusplus 199711L.
++#if __cplusplus >= 201703L || _MSVC_LANG >= 201703L
+ template <typename T, typename Ret>
+ auto serializable_member(Ret (T::*getter)() const noexcept) -> decltype(getter);
+ #endif
+@@ -117,7 +118,8 @@
+     mserialize::serialize((t.*getter)(), ostream);
+   }
+ 
+-#if __cplusplus >= 201703L
++// Changed for cabin-ports on 2026-11-26: also test _MSVC_LANG, as cl reports __cplusplus 199711L.
++#if __cplusplus >= 201703L || _MSVC_LANG >= 201703L
+   template <typename Field, typename OutputStream>
+   static void serialize_member(const T& t, Field (T::*getter)() const noexcept, OutputStream& ostream)
+   {
+@@ -137,7 +139,8 @@
+     return mserialize::serialized_size((t.*getter)());
+   }
+ 
+-#if __cplusplus >= 201703L
++// Changed for cabin-ports on 2026-11-26: also test _MSVC_LANG, as cl reports __cplusplus 199711L.
++#if __cplusplus >= 201703L || _MSVC_LANG >= 201703L
+   template <typename Field>
+   static std::size_t serialized_size_member(const T& t, Field (T::*getter)() const noexcept)
+   {

@@ -3,6 +3,12 @@ url = "https://github.com/morganstanley/binlog/archive/refs/tags/2021-04-16.tar.
 checksum = "sha256:f72b0c93c01ebf0834779c347bd76c2fe93064901e8e577a04152fd3596ae20f"
 format = "tar.gz"
 strip-prefix = "binlog-2021-04-16"
+# Patch 0001 tests _MSVC_LANG beside __cplusplus at the three guards of the C++17
+# noexcept-getter overloads in StructSerializer.hpp: cl reports __cplusplus as
+# 199711L without /Zc:__cplusplus (measured: check-windows, C++17 consumer,
+# "StructSerializer.hpp(111): error C2298: missing call to bound pointer to member
+# function").
+patches = ["patches/0001-test-msvc-lang-for-noexcept-getters.patch"]
 
 # Upstream names releases by date (tag 2021-04-16); its CMake VERSION 0.1.0 never changed.
 # include/mserialize/string_view.hpp is based on Boost's string_view and carries the Boost
@@ -11,7 +17,7 @@ strip-prefix = "binlog-2021-04-16"
 name = "cabin-ports/binlog"
 version = "2021.4.16"
 license = "Apache-2.0 AND BSL-1.0"
-include = ["LICENSE", "NOTICE", "include"]
+include = ["LICENSE", "NOTICE", "include", "patches"]
 
 # The static library upstream's CMake builds (CMakeLists.txt add_library).  Not ported: the
 # bread and brecovery tools (bin/).
