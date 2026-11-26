@@ -14,7 +14,8 @@ include = ["LICENSES", "README.md", "include", "src/ittnotify", "cpp/include"]
 # Not ported: the x86-64 Processor Trace marks (ITT_API_IPT_SUPPORT), the
 # Fortran modules, and the shared reference collector, all off by default
 # upstream.
-# Upstream sets no C standard; c11 is Cabin's lowest on MSVC.
+# Upstream states no C standard; c99 is the measured floor of the public headers
+# (c89 fails on variadic macros and long long). c11 is Cabin's lowest on MSVC.
 [target.ittnotify]
 type = "library"
 links = "ittnotify"
@@ -23,7 +24,7 @@ include-dirs = ["include"]
 c-standard = "c11"
 interface-c-standard = "c99"
 
-# Upstream's C++ wrapper (ITT_API_CPP_SUPPORT, off by default); C++17 is
+# Upstream builds its C++ wrapper only with ITT_API_CPP_SUPPORT; C++17 is
 # stated in cpp/CMakeLists.txt.
 [target.ittapi-cpp]
 type = "header-only"
