@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/sengelha/streaming-percentiles/archive/refs/tags/v3.1.0.tar.gz"
+checksum = "sha256:196d76a7d7ce1bcdb6f720b1c2d8feb1cda62ac18cc6412f8bd907e4eafbab6c"
+format = "tar.gz"
+strip-prefix = "streaming-percentiles-3.1.0"
+# gk.hpp uses std::vector and assert, ckms_impl.hpp assert, and ckms_tq.hpp
+# std::max/min and std::numeric_limits, without including their headers; the
+# patch adds them, as upstream commits 058037ec and b55ab5b5 do (measured:
+# local port-check, clang, "gk.hpp:54:22: error: no template named 'vector'
+# in namespace 'std'").
+patches = ["patches/0001-add-missing-std-includes.patch"]
+
+[package]
+name = "cabin-ports/streaming-percentiles"
+version = "3.1.0"
+license = "MIT"
+include = ["LICENSE", "cpp/src/include", "patches"]
+
+# Upstream states no standard; C++11 is the measured floor (the consumer test
+# builds at it).
+[target.streaming-percentiles]
+type = "header-only"
+include-dirs = ["cpp/src/include"]
+interface-cxx-standard = "c++11"
