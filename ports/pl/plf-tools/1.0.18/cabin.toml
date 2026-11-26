@@ -1,0 +1,22 @@
+[package.upstream]
+# Upstream tags no releases; this is the commit whose subject is "v1.0.18".
+url = "https://github.com/mattreecebentley/plf_tools/archive/03a08b6861ab2db491291c2deac207f38e70a2b5.tar.gz"
+checksum = "sha256:f9c069fbda7571bbab03bc4f44fe02b0ad14bc85310ff8e32f7a6429de0aea7a"
+format = "tar.gz"
+strip-prefix = "plf_tools-03a08b6861ab2db491291c2deac207f38e70a2b5"
+
+[package]
+name = "cabin-ports/plf-tools"
+version = "1.0.18"
+license = "Zlib"
+include = [
+  "LICENSE.md",
+  "plf_tools.h",
+  "plf_tools_undef.h",
+]
+
+# No standard is stated upstream; c++98 is the standard the consumer test builds at.
+[target.plf-tools]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++98"
