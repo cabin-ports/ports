@@ -13,9 +13,11 @@ version = "3.2.2"
 # (EPL-2.0, Ipopt's LICENSE); the code is compiled only with SOLVER_MUMPS.
 license = "LGPL-2.1-or-later AND EPL-2.0"
 include = ["AUTHORS", "LICENSE", "LICENSE.txt", "README", "VERSIONS", "include", "src"]
-# Upstream's CMake sets no standard; C++14 is the oldest Cabin lowers for
-# MSVC.
+# Upstream states no C++ standard (CMakeLists.txt:87 builds with -pedantic
+# only); C++14 is the oldest Cabin lowers for MSVC.
 cxx-standard = "c++14"
+# Upstream states no C++ standard; c++98 is the measured floor: including
+# qpOASES.hpp compiles with -pedantic-errors at -std=c++98 (clang 21).
 interface-cxx-standard = "c++98"
 
 # Upstream's CMake library, static: all of src/*.cpp, with its default
