@@ -36,21 +36,10 @@ bool hookCalled = false;
 
 void onConnect(Redis *) { hookCalled = true; }
 
-#ifdef _WIN32
-void onInvalidParameter(const wchar_t *expr, const wchar_t *func,
-                        const wchar_t *file, unsigned line, uintptr_t) {
-  std::fprintf(stderr, "DIAG: invalid CRT parameter: %ls in %ls (%ls:%u)\n",
-               expr ? expr : L"?", func ? func : L"?", file ? file : L"?",
-               line);
-  std::fflush(stderr);
-}
-#endif
-
 }  // namespace
 
 int main() {
 #ifdef _WIN32
-  _set_invalid_parameter_handler(onInvalidParameter);
   WSADATA wsa;
   if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
     std::fprintf(stderr, "WSAStartup failed\n");
