@@ -1,0 +1,48 @@
+[package.upstream]
+url = "https://github.com/msgpack/msgpack-c/releases/download/cpp-9.0.0/msgpack-cxx-9.0.0.tar.gz"
+checksum = "sha256:303d3a7321aee65eb9450db8a6c973954e00af34b88ba0c0aca236bc50bfb8a9"
+format = "tar.gz"
+strip-prefix = "msgpack-cxx-9.0.0"
+
+[package]
+name = "cabin-ports/msgpack-cxx"
+version = "9.0.0"
+license = "BSL-1.0"
+include = [
+  "AUTHORS",
+  "COPYING",
+  "LICENSE_1_0.txt",
+  "NOTICE",
+  "README.md",
+  "include",
+]
+
+[dependencies]
+"cabin-ports/boost-assert" = "=1.92.0"
+"cabin-ports/boost-config" = "=1.92.0"
+"cabin-ports/boost-fusion" = "=1.92.0"
+"cabin-ports/boost-mpl" = "=1.92.0"
+"cabin-ports/boost-optional" = "=1.92.0"
+"cabin-ports/boost-predef" = "=1.92.0"
+"cabin-ports/boost-preprocessor" = "=1.92.0"
+"cabin-ports/boost-utility" = "=1.92.0"
+"cabin-ports/boost-variant" = "=1.92.0"
+
+# Upstream's CMakeLists.txt:19 and :51 default to C++11.  The library itself
+# still supports C++03 (cpp_version.hpp:4-9), but not with its default Boost
+# dependencies, which include boost-fusion's C++11 floor.
+[target.msgpack-cxx]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+deps = [
+  { name = "cabin-ports/boost-assert", public = true },
+  { name = "cabin-ports/boost-config", public = true },
+  { name = "cabin-ports/boost-fusion", public = true },
+  { name = "cabin-ports/boost-mpl", public = true },
+  { name = "cabin-ports/boost-optional", public = true },
+  { name = "cabin-ports/boost-predef", public = true },
+  { name = "cabin-ports/boost-preprocessor", public = true },
+  { name = "cabin-ports/boost-utility", public = true },
+  { name = "cabin-ports/boost-variant", public = true },
+]
