@@ -1,0 +1,43 @@
+[package.upstream]
+url = "https://github.com/team-charls/charls/archive/refs/tags/2.4.5.tar.gz"
+checksum = "sha256:b55c742ef96b5e9d63f813a75d0ba29944302abb5a6ab59756ad61fa017b1dd3"
+format = "tar.gz"
+strip-prefix = "charls-2.4.5"
+
+[package]
+name = "cabin-ports/charls"
+version = "2.4.5"
+license = "BSD-3-Clause"
+include = [
+  "LICENSE.md",
+  "include",
+  "src",
+]
+# C++14 is src/CMakeLists.txt:57 (PUBLIC); upstream states no C standard, and
+# the C interface headers need only <stdint.h>, so c99.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++14"
+interface-c-standard = "c99"
+
+# Upstream's static library: CHARLS_LIBRARY_BUILD is private to the build
+# and CHARLS_STATIC public (src/CMakeLists.txt), so that Windows consumers
+# do not declare the API dllimport.  Not ported: the shared library, the
+# Windows resources and export list, samples, tests and benchmarks.
+# (measured: check-windows, C2664) cl rejects the container overloads of
+# jpegls_encoder::encode and jpegls_decoder::decode; pass pointer and size.
+[target.charls]
+type = "library"
+sources = [
+  "src/charls_jpegls_decoder.cpp",
+  "src/charls_jpegls_encoder.cpp",
+  "src/jpeg_stream_reader.cpp",
+  "src/jpeg_stream_writer.cpp",
+  "src/jpegls.cpp",
+  "src/jpegls_error.cpp",
+  "src/validate_spiff_header.cpp",
+  "src/version.cpp",
+]
+include-dirs = ["include"]
+defines = ["CHARLS_LIBRARY_BUILD", "CHARLS_STATIC"]
+interface-defines = ["CHARLS_STATIC"]
+links = "charls"
