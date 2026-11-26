@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/cor3ntin/rangesnext/archive/056d3d22f007f8eef1692954660be8e77a50e315.tar.gz"
+checksum = "sha256:261ea3f71b7f6d0775a6fe91c6d42632465925106d49c66d844124d444f44922"
+format = "tar.gz"
+strip-prefix = "rangesnext-056d3d22f007f8eef1692954660be8e77a50e315"
+
+# Upstream has no tags: 2021.7.20 is the date of commit 056d3d22 (master).
+[package]
+name = "cabin-ports/rangesnext"
+version = "2021.7.20"
+# generator.hpp:6 credits cppcoro, which LICENSE.md lists under MIT.
+license = "BSL-1.0 AND MIT"
+include = ["LICENSE.md", "include"]
+
+# ranges::to in its template-template form (to<std::vector>(), to<std::set>())
+# fails to compile on Apple clang with libc++: to.hpp:111 "no viable
+# constructor or deduction guide for deduction of template arguments"
+# (measured).  The full-type form, to<std::vector<int>>(), works there.
+[target.rangesnext]
+type = "header-only"
+include-dirs = ["include"]
+# CMakeLists.txt:8, cxx_std_20.
+interface-cxx-standard = "c++20"
