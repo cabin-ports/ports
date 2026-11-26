@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/martinus/svector/archive/refs/tags/v1.4.0.tar.gz"
+checksum = "sha256:b340399e1b6205d3cfc413b245fde2b5bbc6938b88a12ebf6daf4dc9f98ddccf"
+format = "tar.gz"
+strip-prefix = "svector-1.4.0"
+
+[package]
+name = "cabin-ports/svector"
+version = "1.4.0"
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+# C++17 floor: include/ankerl/svector.h:1 ("C++17 or higher"), README.md:31.
+[target.svector]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
