@@ -37,7 +37,9 @@ jobs:
       - name: Name the image's Python for build scripts
         if: runner.os == 'Windows'
         shell: pwsh
-        run: Add-Content $env:GITHUB_ENV ("CABIN_SDK_PYTHON_DIR=" + (Split-Path (Get-Command python).Source))
+        run: |
+          # inline: one expression; only the runner knows where its Python is
+          Add-Content $env:GITHUB_ENV ("CABIN_SDK_PYTHON_DIR=" + (Split-Path (Get-Command python).Source))
       - name: Install MPI
         uses: mpi4py/setup-mpi@v1.4.4
         with:

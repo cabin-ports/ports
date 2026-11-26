@@ -90,6 +90,6 @@ deps = [
   { name = "cabin-ports/boost-smart-ptr", public = true },
   { name = "cabin-ports/boost-throw-exception", public = true },
   { name = "cabin-ports/boost-type-traits", public = true },
-  "cabin-ports/boost-utility",
+  { name = "cabin-ports/boost-utility", public = true },
   { name = "mpi", public = true },
 ]

@@ -1,12 +1,12 @@
 --- /dev/null
 +++ b/build.c
-@@ -0,0 +1,94 @@
+@@ -0,0 +1,96 @@
 +/* Boost.MPI for Cabin: supplies the target `mpi`, the system's MPI
 + * library, version 2 of the standard or newer, through its C interface.
 + *
 + * MPI comes from the installation CABIN_SDK_MPI_DIR names, which is
 + * the Microsoft MPI SDK (`Include`, `Lib`) or an installation prefix
-+ * (`include/mpi.h`, `lib/libmpi`), and without it from pkg-config
++ * (`include/mpi.h`, the shared `lib/libmpi`), and without it from pkg-config
 + * (`ompi-c`: Open MPI, whose first release with that module, 1.5,
 + * implements MPI 2.1), which an MSVC build cannot use. */
 +#define _POSIX_C_SOURCE 200809L
@@ -61,16 +61,18 @@
 +
 +static void from_sdk(FILE *result, const char *sdk) {
 +    char include[4096], library[4096];
-+    const char *arch = is("CABIN_TARGET_ARCH", "x86_64") ? "x64" : "x86";
++    /* The SDK has `x64` and `x86`; any other architecture finds no library. */
++    const char *arch = is("CABIN_TARGET_ARCH", "x86_64") ? "x64" : need("CABIN_TARGET_ARCH");
 +    int version;
 +    snprintf(include, sizeof include, "%s/Include", sdk);
 +    snprintf(library, sizeof library, "%s/Lib/%s/msmpi.lib", sdk, arch);
 +    if (!exists(library)) {
-+        /* As a linker given `-L<sdk>/lib -lmpi` chooses. */
++        /* The shared library only: a static libmpi needs further libraries
++         * that only its own wrapper compiler names. */
 +        snprintf(include, sizeof include, "%s/include", sdk);
 +        snprintf(library, sizeof library, "%s/lib/libmpi.%s", sdk, is("CABIN_TARGET_OS", "macos") ? "dylib" : "so");
-+        if (!exists(library)) snprintf(library, sizeof library, "%s/lib/libmpi.a", sdk);
-+        if (!exists(library)) fail("no MPI library in CABIN_SDK_MPI_DIR (%s)", sdk);
++        if (!exists(library))
++            fail("CABIN_SDK_MPI_DIR (%s) holds neither Lib/%s/msmpi.lib nor a shared lib/libmpi", sdk, arch);
 +    }
 +    version = headers_version(include);
 +    if (version < OLDEST_MPI) fail("the MPI in CABIN_SDK_MPI_DIR (%s) is older than MPI %d", sdk, OLDEST_MPI);

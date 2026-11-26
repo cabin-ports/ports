@@ -18,6 +18,27 @@ version = "1.92.0"
 # include/boost/compute/random/threefry_engine.hpp:147-175 carries
 # Random123's Threefry code under D. E. Shaw Research's BSD-3-Clause terms.
 license = "BSL-1.0 AND BSD-3-Clause"
+# `include` lists the tree without cmake/, whose FindBolt.cmake,
+# FindEigen.cmake, and FindTBB.cmake carry terms of their own.
+include = [
+  ".appveyor.yml",
+  ".coveralls.yml",
+  ".gitignore",
+  ".travis.yml",
+  "CMakeLists.txt",
+  "CONTRIBUTING.md",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "build.jam",
+  "doc",
+  "example",
+  "include",
+  "index.html",
+  "meta",
+  "patches",
+  "perf",
+  "test",
+]
 
 [dependencies]
 "cabin-ports/boost-algorithm" = "=1.92.0"

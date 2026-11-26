@@ -108,9 +108,9 @@ normalize, re-wrap, or regenerate a committed patch.  See
 ## Build scripts
 
 Most ports need none.  A port carries a [build script](https://cabinpkg.com/docs/build-scripts/)
-only when Cabin's target model cannot build the library - its upstream build configures or
-generates what it compiles - or the library needs one of the system's that the catalog has no
-port of.  A library a manifest can describe stays a plain port built from its
+only when Cabin's target model cannot build the library, because its upstream build configures
+or generates what it compiles, or when the library needs a system library that the catalog has
+no port of.  A library a manifest can describe stays a plain port built from its
 sources, whether or not systems install it.  Cabin compiles the script and runs it confined
 before it builds the package, on every machine that builds it, so the port and every port that
 requires it build only

@@ -53,10 +53,9 @@ int process(int argc, char** argv) {
   boost::local_property_map<group, global_map, storage_map> owned(here, global_map(),
                                                                  storage_map(storage.begin()));
   std::vector<entry> mine, theirs;
-  for (int key = rank; key < keys; key += 2) {
-    put(owned, key, value_of(key));
-    mine.push_back(entry(key, get(owned, key)));
-  }
+  for (int key = rank; key < keys; key += 2) put(owned, key, value_of(key));
+  // Read only once every key is written, so that each must keep its own value.
+  for (int key = rank; key < keys; key += 2) mine.push_back(entry(key, get(owned, key)));
 
   if (rank == 0) {
     world.send(other, 0, mine);

@@ -14,7 +14,7 @@ name = "cabin-ports/boost-python"
 version = "1.92.0"
 # include/boost/python/detail/python22_fixed.h is Python 2.2's Python.h,
 # modified, under Python 2.2's terms.
-license = "BSL-1.0 AND Python-2.0"
+license = "BSL-1.0 AND Python-2.0.1"
 # `include` lists the tree without doc/, whose files carry terms of their
 # own or none: doc/article.rst reserves all rights.  It leaves out build/,
 # upstream's b2 files, too: Cabin packages no directory of that name.
