@@ -11,8 +11,6 @@ version = "1.0.0"
 license = "BSL-1.0"
 include = ["LICENCE", "README.md", "include"]
 
-# FIRE(...) defines main, so a consumer includes <fire-hpp/fire.hpp> and
-# writes FIRE in exactly one translation unit of an executable.
 [target.fire-hpp]
 type = "header-only"
 include-dirs = ["include"]
