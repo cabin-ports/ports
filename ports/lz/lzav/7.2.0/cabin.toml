@@ -13,8 +13,7 @@ license = "MIT"
 include = ["LICENSE", "lzav.h"]
 
 # Upstream is ISO C99 and, under a C++ compiler, C++ compatible down to a C++98
-# branch (lzav.h:9-10, :180).  The header declares everything static or inline,
-# so including it from several translation units is fine.
+# branch (lzav.h:9-10, :180).
 [target.lzav]
 type = "header-only"
 include-dirs = ["."]
