@@ -95,6 +95,9 @@ defines = ["_POSIX_C_SOURCE=200809L"]
 [target.'cfg(os = "macos")'.profile]
 defines = ["_DARWIN_C_SOURCE"]
 
+# NOGDI: spdlog's <windows.h>, included after logger.hpp's #undef ERROR,
+# redefines ERROR and breaks LogLevel::ERROR in logger.cc (MSVC C2589 on
+# check-windows).
 [target.'cfg(os = "windows")'.profile]
-defines = ["_WIN32_WINNT=0x0A00"]
+defines = ["_WIN32_WINNT=0x0A00", "NOGDI"]
 link-libs = ["iphlpapi", "mswsock", "ws2_32"]
