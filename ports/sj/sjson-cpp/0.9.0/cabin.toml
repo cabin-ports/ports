@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/nfrechette/sjson-cpp/archive/refs/tags/v0.9.0.tar.gz"
+checksum = "sha256:61b8ea49acce6fa6c48db2c70a6fd7514e219c17b276bff2da3bfc510840320f"
+format = "tar.gz"
+strip-prefix = "sjson-cpp-0.9.0"
+
+[package]
+name = "cabin-ports/sjson-cpp"
+version = "0.9.0"
+license = "MIT"
+include = ["LICENSE", "includes"]
+
+# README.md:16 states C++11.
+[target.sjson-cpp]
+type = "header-only"
+include-dirs = ["includes"]
+interface-cxx-standard = "c++11"
