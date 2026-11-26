@@ -1,0 +1,474 @@
+--- a/src/aabb.c
++++ b/src/aabb.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "aabb.h"
+ 
+--- a/src/arena_allocator.c
++++ b/src/arena_allocator.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "arena_allocator.h"
+ 
+--- a/src/bitset.c
++++ b/src/bitset.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "bitset.h"
+ 
+--- a/src/body.c
++++ b/src/body.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "body.h"
+ 
+--- a/src/broad_phase.c
++++ b/src/broad_phase.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2026 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #if defined( _MSC_VER ) && !defined( _CRT_SECURE_NO_WARNINGS )
+ #define _CRT_SECURE_NO_WARNINGS
+--- a/src/constraint_graph.c
++++ b/src/constraint_graph.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2026 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "constraint_graph.h"
+ 
+--- a/src/contact.c
++++ b/src/contact.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2026 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "contact.h"
+ 
+--- a/src/contact_solver.c
++++ b/src/contact_solver.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2026 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "contact_solver.h"
+ 
+--- a/src/contact_solver_w4.c
++++ b/src/contact_solver_w4.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2026 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #define B2_SIMD_WIDTH 4
+ #include "contact_solver_wide.inl"
+--- a/src/contact_solver_w8.c
++++ b/src/contact_solver_w8.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2026 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #define B2_SIMD_WIDTH 8
+ 
+--- a/src/core.c
++++ b/src/core.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "core.h"
+ 
+--- a/src/distance.c
++++ b/src/distance.c
+@@ -1,6 +1,9 @@
+ 
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "core.h"
+ 
+--- a/src/distance_joint.c
++++ b/src/distance_joint.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #if defined( _MSC_VER ) && !defined( _CRT_SECURE_NO_WARNINGS )
+ #define _CRT_SECURE_NO_WARNINGS
+--- a/src/dynamic_tree.c
++++ b/src/dynamic_tree.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2026 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "dynamic_tree.h"
+ 
+--- a/src/geometry.c
++++ b/src/geometry.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "aabb.h"
+ #include "shape.h"
+--- a/src/hull.c
++++ b/src/hull.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "core.h"
+ 
+--- a/src/id_pool.c
++++ b/src/id_pool.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "id_pool.h"
+ 
+--- a/src/island.c
++++ b/src/island.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "island.h"
+ 
+--- a/src/joint.c
++++ b/src/joint.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "joint.h"
+ 
+--- a/src/manifold.c
++++ b/src/manifold.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "core.h"
+ 
+--- a/src/math_functions.c
++++ b/src/math_functions.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "box2d/math_functions.h"
+ 
+--- a/src/motor_joint.c
++++ b/src/motor_joint.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "body.h"
+ #include "joint.h"
+--- a/src/mover.c
++++ b/src/mover.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2025 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "box2d/collision.h"
+ #include "box2d/constants.h"
+--- a/src/mover_joint.c
++++ b/src/mover_joint.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "body.h"
+ #include "joint.h"
+--- a/src/parallel_for.c
++++ b/src/parallel_for.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2026 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "parallel_for.h"
+ 
+--- a/src/physics_world.c
++++ b/src/physics_world.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2026 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #if defined( _MSC_VER ) && !defined( _CRT_SECURE_NO_WARNINGS )
+ #define _CRT_SECURE_NO_WARNINGS
+--- a/src/pogo_joint.c
++++ b/src/pogo_joint.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "body.h"
+ #include "joint.h"
+--- a/src/prismatic_joint.c
++++ b/src/prismatic_joint.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "body.h"
+ #include "core.h"
+--- a/src/recording.c
++++ b/src/recording.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2026 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #if defined( _MSC_VER ) && !defined( _CRT_SECURE_NO_WARNINGS )
+ #define _CRT_SECURE_NO_WARNINGS
+--- a/src/replay.c
++++ b/src/replay.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2026 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #if defined( _MSC_VER ) && !defined( _CRT_SECURE_NO_WARNINGS )
+ #define _CRT_SECURE_NO_WARNINGS
+--- a/src/revolute_joint.c
++++ b/src/revolute_joint.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #if defined( _MSC_VER ) && !defined( _CRT_SECURE_NO_WARNINGS )
+ #define _CRT_SECURE_NO_WARNINGS
+--- a/src/scheduler.c
++++ b/src/scheduler.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2026 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "scheduler.h"
+ 
+--- a/src/sensor.c
++++ b/src/sensor.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "sensor.h"
+ 
+--- a/src/shape.c
++++ b/src/shape.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "shape.h"
+ 
+--- a/src/simd.c
++++ b/src/simd.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2026 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "simd.h"
+ 
+--- a/src/snapshot.c
++++ b/src/snapshot.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2026 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "snapshot.h"
+ 
+--- a/src/solver.c
++++ b/src/solver.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "solver.h"
+ 
+--- a/src/solver_set.c
++++ b/src/solver_set.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "solver_set.h"
+ 
+--- a/src/table.c
++++ b/src/table.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "table.h"
+ 
+--- a/src/timer.c
++++ b/src/timer.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ // Required on Linux to expose pthread_setname_np. Must be defined before any
+ // system header is included.
+--- a/src/types.c
++++ b/src/types.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "core.h"
+ 
+--- a/src/weld_joint.c
++++ b/src/weld_joint.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "body.h"
+ #include "core.h"
+--- a/src/wheel_joint.c
++++ b/src/wheel_joint.c
+@@ -1,5 +1,8 @@
+ // SPDX-FileCopyrightText: 2023 Erin Catto
+ // SPDX-License-Identifier: MIT
++#if defined( __clang__ )
++#pragma STDC FP_CONTRACT OFF
++#endif
+ 
+ #include "body.h"
+ #include "core.h"

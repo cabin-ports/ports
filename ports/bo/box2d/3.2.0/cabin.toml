@@ -1,0 +1,108 @@
+[package.upstream]
+url = "https://github.com/erincatto/box2d/archive/refs/tags/v3.2.0.tar.gz"
+checksum = "sha256:ffec747b27a2267016f8d0240d658c82d187fb2271fa0f69fcbe53fbc067180d"
+format = "tar.gz"
+strip-prefix = "box2d-3.2.0"
+# 0001 opens every source with `#pragma STDC FP_CONTRACT OFF` for Clang,
+# standing in for upstream's -ffp-contract=off, which its cross-platform
+# determinism relies on and which Cabin cannot pass: without it, Apple Clang
+# fuses multiply-adds on arm64 (measured).  GCC already keeps them apart
+# under the strict -std=c17 Cabin passes (measured), and MSVC's default
+# /fp:precise is upstream's setting.
+# MIT License notice of the src/*.c files, whose lines 0001 carries (the
+# License's condition that copies include it):
+# Copyright (c) 2022 Erin Catto
+# SPDX-FileCopyrightText: 2023 Erin Catto
+# SPDX-FileCopyrightText: 2025 Erin Catto
+# SPDX-FileCopyrightText: 2026 Erin Catto
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+patches = ["patches/0001-reproduce-upstream-fp-contract-off.patch"]
+
+[package]
+name = "cabin-ports/box2d"
+version = "3.2.0"
+# src/math_functions.c:95 credits Stack Overflow q/46210708 (answer a/46251566, CC BY-SA 3.0) for b2Atan2; its copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "include", "patches", "src"]
+# Upstream states C17 (README.md, "Compatibility"); C++11 is the measured
+# floor of the headers.
+c-standard = "c17"
+interface-c-standard = "c17"
+interface-cxx-standard = "c++11"
+
+# Not ported: the shared library; upstream's options for double precision,
+# scalar math and Tracy profiling; and validation, which upstream enables
+# only when box2d is the top-level CMake project.  Not reproduced:
+# upstream's hidden symbol visibility, so a shared library linking this
+# archive exports Box2D's symbols (measured), and its /arch:AVX2 for
+# src/contact_solver_w8.c on MSVC, which Cabin does not pass to cl.
+[target.box2d]
+type = "library"
+sources = [
+  "src/aabb.c",
+  "src/arena_allocator.c",
+  "src/bitset.c",
+  "src/body.c",
+  "src/broad_phase.c",
+  "src/constraint_graph.c",
+  "src/contact.c",
+  "src/contact_solver.c",
+  "src/contact_solver_w4.c",
+  "src/contact_solver_w8.c",
+  "src/core.c",
+  "src/distance.c",
+  "src/distance_joint.c",
+  "src/dynamic_tree.c",
+  "src/geometry.c",
+  "src/hull.c",
+  "src/id_pool.c",
+  "src/island.c",
+  "src/joint.c",
+  "src/manifold.c",
+  "src/math_functions.c",
+  "src/motor_joint.c",
+  "src/mover.c",
+  "src/mover_joint.c",
+  "src/parallel_for.c",
+  "src/physics_world.c",
+  "src/pogo_joint.c",
+  "src/prismatic_joint.c",
+  "src/recording.c",
+  "src/replay.c",
+  "src/revolute_joint.c",
+  "src/scheduler.c",
+  "src/sensor.c",
+  "src/shape.c",
+  "src/simd.c",
+  "src/snapshot.c",
+  "src/solver.c",
+  "src/solver_set.c",
+  "src/table.c",
+  "src/timer.c",
+  "src/types.c",
+  "src/weld_joint.c",
+  "src/wheel_joint.c",
+]
+include-dirs = ["include"]
+links = "box2d"
+
+# libm as upstream links it; pthread for timer.c's worker threads.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m", "pthread"]
