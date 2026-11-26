@@ -1,0 +1,104 @@
+[package.upstream]
+url = "https://code.videolan.org/videolan/libudfread/-/archive/1.2.0/libudfread-1.2.0.tar.gz"
+checksum = "sha256:adcce1190925f9d35a477757c5e3f0e221315d14d3d45b4ae62540ea0925f877"
+format = "tar.gz"
+strip-prefix = "libudfread-1.2.0"
+# The copy steps install the public headers under include/udfread/ as
+# meson does (src/udfread/meson.build:7-30), and 0001 fills in the version
+# template there as meson's configure_file would.
+# LGPL-2.1 section 1 notice of src/udfread-version.h.in, whose lines 0001
+# carries (the License's condition that copies keep it):
+# This file is part of libudfread
+# Copyright (C) 2014 VLC authors and VideoLAN
+#
+# Authors: Petri Hintukainen <phintuka@users.sourceforge.net>
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 2.1 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library. If not, see
+# <http://www.gnu.org/licenses/>.
+patches = ["patches/0001-fill-in-udfread-version-h.patch"]
+
+[[package.upstream.copy]]
+from = "src/udfread.h"
+to = "include/udfread/udfread.h"
+
+[[package.upstream.copy]]
+from = "src/blockinput.h"
+to = "include/udfread/blockinput.h"
+
+[[package.upstream.copy]]
+from = "src/udfread-version.h.in"
+to = "include/udfread/udfread-version.h"
+
+[package]
+name = "cabin-ports/libudfread"
+version = "1.2.0"
+license = "LGPL-2.1-or-later"
+include = [
+  "COPYING",
+  "include/udfread/blockinput.h",
+  "include/udfread/udfread-version.h",
+  "include/udfread/udfread.h",
+  "patches",
+  "src/attributes.h",
+  "src/blockinput.h",
+  "src/default_blockinput.c",
+  "src/default_blockinput.h",
+  "src/ecma167.c",
+  "src/ecma167.h",
+  "src/udfread-version.c",
+  "src/udfread.c",
+  "src/udfread.h",
+]
+# Upstream builds C99 (meson.build:7); C11 is the oldest standard Cabin can
+# request from MSVC.  Upstream states no C++ standard: udfread.h's trailing
+# enum commas need C++11 (measured).
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+[profile]
+defines = ["HAVE_FCNTL_H=1", "HAVE_UDFREAD_VERSION_H=1", "_ISOC99_SOURCE"]
+include-dirs = ["src", "include/udfread"]
+
+[target.'cfg(family = "unix")'.profile]
+defines = [
+  "HAVE_PTHREAD_H=1",
+  "HAVE_UNISTD_H=1",
+  "UDFREAD_API_EXPORT",
+  "_POSIX_C_SOURCE=200809L",
+]
+link-libs = ["pthread"]
+
+[target.'cfg(all(family = "unix", not(any(os = "macos", os = "ios"))))'.profile]
+defines = ["_FILE_OFFSET_BITS=64"]
+
+[target.'cfg(all(os = "windows", any(cc = "gcc", env = "gnu")))'.profile]
+defines = ["HAVE_UNISTD_H=1", "_FILE_OFFSET_BITS=64"]
+
+# udfread-version.h has no extern "C" block, so C++ consumers wrap its
+# #include in one (measured: without it udfread_get_version(int*, int*,
+# int*) is an undefined symbol).  Not reproduced: hidden symbol visibility
+# (src/meson.build:34; Cabin drops a dependency's raw compiler flags), so a
+# shared object linking this archive also exports internals such as
+# decode_file_entry (measured with nm).
+[target.udfread]
+type = "library"
+sources = [
+  "src/default_blockinput.c",
+  "src/ecma167.c",
+  "src/udfread-version.c",
+  "src/udfread.c",
+]
+include-dirs = ["include"]
+links = "udfread"
