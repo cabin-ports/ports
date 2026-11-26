@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/mpusz/mp-units/archive/refs/tags/v2.5.0.tar.gz"
+checksum = "sha256:a6bd48bee699f11f0ed5b04b8c5006d15f76e6d898e058db3880554d2e47a400"
+format = "tar.gz"
+strip-prefix = "mp-units-2.5.0"
+
+[package]
+name = "cabin-ports/mp-units"
+version = "2.5.0"
+# MIT WITH fmt-exception: src/core/include/mp-units/bits/fmt.h is based on/copied from fmtlib
+# (Victor Zverovich).
+# src/core/include/mp-units/ext/type_name.h:1 credits Stack Overflow answer 56766138 for
+# type_name<T>(); its copyright significance is uncertain.
+license = "MIT AND MIT WITH fmt-exception"
+include = ["LICENSE.md", "src/core/include", "src/systems/include"]
+
+# Upstream's default configuration (src/CMakeLists.txt:84-90): std::format, gsl-lite
+# contracts, CRTP, natural units, hosted.  The headers select these themselves when no
+# MP_UNITS_API_* macro is set (compat_macros.h:66-90, 104-122, hacks.h:77-78), so no define
+# is needed.  The fmt formatting backend is not ported, nor are the C++ module units.
+# C++20 is upstream's stated floor (docs/getting_started/cpp_compiler_support.md:18-41).
+[dependencies]
+"cabin-ports/gsl-lite" = "=1.1.1"
+
+[target.mp-units]
+type = "header-only"
+include-dirs = ["src/core/include", "src/systems/include"]
+interface-cxx-standard = "c++20"
+deps = [{ name = "cabin-ports/gsl-lite", public = true }]
