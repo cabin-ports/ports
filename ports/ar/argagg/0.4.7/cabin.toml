@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/vietjtnguyen/argagg/archive/refs/tags/0.4.7.tar.gz"
+checksum = "sha256:5e740b904128eb2716750c72f19d33da49d904d34f1734f7e9113e9943cf3f7c"
+format = "tar.gz"
+strip-prefix = "argagg-0.4.7"
+
+[package]
+name = "cabin-ports/argagg"
+version = "0.4.7"
+license = "MIT"
+include = ["LICENSE", "README.md", "CHANGELOG", "include"]
+
+# interface-cxx-standard: CMakeLists.txt builds upstream's tests and examples
+# with -std=c++11.  include/argagg/convert/opencv.hpp needs OpenCV, which the
+# catalog does not provide.
+[target.argagg]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
