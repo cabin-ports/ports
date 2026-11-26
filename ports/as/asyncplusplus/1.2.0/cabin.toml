@@ -1,0 +1,37 @@
+[package.upstream]
+# Tag v1.2 ("Version 1.2"); the sources carry no version number, so the
+# version is 1.2.0.
+url = "https://github.com/Amanieu/asyncplusplus/archive/refs/tags/v1.2.tar.gz"
+checksum = "sha256:0711c8db231bf3eb1066400f49ed73b5c3211a10eb3b8c3e64da3d5fdee8a4bf"
+format = "tar.gz"
+strip-prefix = "asyncplusplus-1.2"
+
+[package]
+name = "cabin-ports/asyncplusplus"
+version = "1.2.0"
+license = "MIT"
+# Not ported: examples/ and the CMake package files.
+include = ["LICENSE", "include", "src"]
+
+# Upstream's static async++ library (CMakeLists.txt:36-87), with exceptions on
+# as its USE_CXX_EXCEPTIONS default.  Upstream states C++11 (README.md,
+# CMakeLists.txt:66-69); cl has no /std:c++11, so the library builds at c++14
+# while consumers need only c++11.  Its private -fno-rtti and warning flags are
+# not reproduced.
+[target.asyncplusplus]
+type = "library"
+links = "async++"
+sources = ["src/scheduler.cpp", "src/threadpool_scheduler.cpp"]
+include-dirs = ["include"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+# Upstream's static build defines LIBASYNC_STATIC for the library and its
+# consumers (CMakeLists.txt:87); without it, include/async++.h:42-57 marks the
+# API dllimport on Windows.
+defines = ["LIBASYNC_STATIC"]
+interface-defines = ["LIBASYNC_STATIC"]
+
+# Upstream links Threads::Threads (CMakeLists.txt:76-78) and says nothing of
+# Android.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
