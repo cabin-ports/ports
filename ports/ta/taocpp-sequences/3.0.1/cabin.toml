@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/taocpp/sequences/archive/refs/tags/3.0.1.tar.gz"
+checksum = "sha256:691c35d83ea68337ef9406a9a63656300f0e566115d3dd56eb8ce3b259d8fbb6"
+format = "tar.gz"
+strip-prefix = "sequences-3.0.1"
+
+[package]
+name = "cabin-ports/taocpp-sequences"
+version = "3.0.1"
+# include/tao/seq/at_index.hpp:29 credits talesofcpp.fusionfenix.com/post-22 for its
+# indexed-type fallback; its copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# README.md:8 and :12 state C++11.
+[target.taocpp-sequences]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
