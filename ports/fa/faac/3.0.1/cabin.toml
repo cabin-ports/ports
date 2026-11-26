@@ -1,0 +1,65 @@
+[package.upstream]
+url = "https://github.com/FreewareAdvancedAudio/faac/archive/refs/tags/faac-3.0.1.tar.gz"
+checksum = "sha256:add89f93bbbbe3b7df3c17124719853b47dc3ae1f07afc35bd57ecc2816044a9"
+format = "tar.gz"
+strip-prefix = "faac-faac-3.0.1"
+
+[package]
+name = "cabin-ports/faac"
+version = "3.0.1"
+license = "LGPL-2.1-or-later"
+include = ["AUTHORS", "COPYING", "README.md", "common", "include/faac.h", "libfaac"]
+# Upstream builds C11 (meson.build:7) and compiles its consumer example as
+# C11 (docs/libfaac.md:41).
+c-standard = "c11"
+interface-c-standard = "c11"
+
+# Upstream's default encoder options only: SBR and DRC on, encoder-ps (HE-AAC
+# v2) and stats off, max-channels 8, sbr-decimation 1.  Not ported: the faac,
+# faad, faam and faar tools and the libfaad3, libfaam and libfaar libraries.
+[target.faac]
+type = "library"
+sources = [
+  "libfaac/bitstream.c",
+  "libfaac/blockswitch.c",
+  "libfaac/channels.c",
+  "libfaac/cpu_compute.c",
+  "libfaac/faac.c",
+  "libfaac/filtbank.c",
+  "libfaac/frame.c",
+  "libfaac/huff2.c",
+  "libfaac/huffdata.c",
+  "libfaac/quantize.c",
+  "libfaac/ratecontrol.c",
+  "libfaac/stereo.c",
+  "libfaac/tns.c",
+  "libfaac/util.c",
+  "libfaac/sbr.c",
+  "libfaac/sbr_analysis.c",
+  "libfaac/sbr_bitstream.c",
+  "libfaac/sbr_huff_tables.c",
+  "libfaac/resample.c",
+  "libfaac/drc.c",
+  "libfaac/drc_analyzer.c",
+  "common/fft.c",
+  "common/sbr_tables.c",
+  "common/sfb_tables.c",
+]
+include-dirs = ["include"]
+defines = ['PACKAGE="faac"', 'PACKAGE_VERSION="3.0.1"', "COMMON_PREFIX=faac_"]
+links = "faac"
+
+[target.faac.instruction-sets]
+"libfaac/quantize_sse.c" = ["sse2"]
+
+[profile]
+include-dirs = ["common"]
+
+[target.'cfg(any(arch = "x86", arch = "x86_64"))'.sources]
+faac = ["libfaac/quantize_sse.c"]
+
+[target.'cfg(any(arch = "x86", arch = "x86_64"))'.profile]
+defines = ["HAVE_SSE2"]
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
