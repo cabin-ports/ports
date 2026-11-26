@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/abumq/easyloggingpp/archive/refs/tags/v9.97.1.tar.gz"
+checksum = "sha256:ebe473e17b13f1d1f16d0009689576625796947a711e14aec29530f39560c7c2"
+format = "tar.gz"
+strip-prefix = "easyloggingpp-9.97.1"
+
+[package]
+name = "cabin-ports/easyloggingpp"
+version = "9.97.1"
+license = "MIT"
+include = ["ACKNOWLEDGEMENTS.md", "LICENSE", "src/easylogging++.cc", "src/easylogging++.h"]
+# Upstream's build_static_lib target (CMakeLists.txt:55-62) requires C++14
+# (:5-22); the C++11 interface standard is README.md:166's -std=c++11.
+cxx-standard = "c++14"
+
+# Upstream's default static library: no ELPP_* feature macros.  A consumer
+# must write INITIALIZE_EASYLOGGINGPP once (README.md:155-169).  HAVE_EXECINFO
+# (CMakeLists.txt:49-53) is omitted: it only serves ELPP_FEATURE_CRASH_LOG, and
+# <execinfo.h> is missing on musl.
+[target.easyloggingpp]
+type = "library"
+sources = ["src/easylogging++.cc"]
+include-dirs = ["src"]
+interface-cxx-standard = "c++11"
+links = "easyloggingpp"
