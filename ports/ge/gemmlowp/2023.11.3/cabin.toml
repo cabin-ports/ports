@@ -29,6 +29,7 @@ include = [
 type = "library"
 sources = ["eight_bit_int_gemm/eight_bit_int_gemm.cc"]
 include-dirs = ["."]
+links = "eight_bit_int_gemm"
 # Upstream states C++11 (README.md, contrib/CMakeLists.txt); cl's floor is C++14.
 cxx-standard = "c++14"
 interface-cxx-standard = "c++11"
