@@ -401,7 +401,9 @@ defines = [
   "HAVE_PQOS_FLOWID",
   'OS="Windows"',
 ]
-link-libs = ["qwave", "iphlpapi", "wsock32", "ws2_32", "dbghelp"]
+# shell32 comes from CMake's default MSVC link line, not RE_LIBS (measured:
+# check-windows, unresolved external __imp_SHGetFolderPathA in fs.c).
+link-libs = ["qwave", "iphlpapi", "wsock32", "ws2_32", "dbghelp", "shell32"]
 
 [target.'cfg(any(cc = "msvc", cc = "clang-cl"))'.profile]
 defines = ["HAVE_IO_H", "_CRT_SECURE_NO_WARNINGS"]
