@@ -13,6 +13,8 @@ include = ["LICENSE", "README.md", "CHANGELOG", "include"]
 # interface-cxx-standard: CMakeLists.txt builds upstream's tests and examples
 # with -std=c++11.  include/argagg/convert/opencv.hpp needs OpenCV, which the
 # catalog does not provide.
+# Measured on check-windows: with cl (Cabin passes no /permissive-), indexing a
+# non-const parser_results with a constant 0 is ambiguous (C2666); use .pos[0].
 [target.argagg]
 type = "header-only"
 include-dirs = ["include"]

@@ -47,7 +47,11 @@ int main() {
   check(!r["help"] && !r.has_option("help"), "help absent");
   check(r.has_option("num"), "num present");
   check(r["num"].as<int>(-1) == 7, "as with default");
-  check(r.count() == 2 && std::string(r[std::size_t(0)]) == "pos1", "positional count");
+  check(r.count() == 2 && std::string(r.pos[0]) == "pos1", "positional count");
+// C2666 on cl, see cabin.toml.
+#if !defined(_MSC_VER)
+  check(std::string(r[std::size_t(0)]) == "pos1", "positional index");
+#endif
   check(r.as<std::string>(1) == "pos2", "positional as");
   std::vector<std::string> all = r.all_as<std::string>();
   check(all.size() == 2 && all[1] == "pos2", "all_as");
