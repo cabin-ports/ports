@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/arun11299/cpp-subprocess/archive/refs/tags/v2.5.tar.gz"
+checksum = "sha256:26fe0f3c62c412ee616f56003ea01e2a31497c36c947c0e9d3b7142440ba9ecc"
+format = "tar.gz"
+strip-prefix = "cpp-subprocess-2.5"
+
+[package]
+name = "cabin-ports/arun11299-cpp-subprocess"
+version = "2.5.0"
+# cpp-subprocess/subprocess.hpp:1614 and :2030 credit subprocess.py for a
+# waitpid ECHILD fallback and a single-pipe shortcut; their copyright
+# significance is uncertain.
+license = "MIT"
+include = ["LICENSE.MIT", "README.md", "cpp-subprocess"]
+
+# C++11 is upstream's floor (README.md:32, CMakeLists.txt:4).  Not ported:
+# the tests.
+[target.arun11299-cpp-subprocess]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
+
+# Upstream links Threads::Threads (CMakeLists.txt:9-11).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
