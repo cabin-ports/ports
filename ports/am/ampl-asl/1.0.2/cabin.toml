@@ -87,10 +87,10 @@ interface-cxx-standard = "c++98"
 default = []
 asl2 = []
 
-# In strict C, glibc hides ssize_t, which asl.h uses, and fdopen, fileno,
-# popen and tempnam, which func_add.c and printf.c use, unless a feature
-# macro such as _DEFAULT_SOURCE asks for them; upstream's CMake compiles in
-# GCC's default GNU dialect, where glibc defines it.
+# Upstream's CMake sets no C standard (no C_STANDARD, C_EXTENSIONS or -std),
+# so it compiles in the compiler's default GNU dialect, where glibc exposes
+# ssize_t, fdopen, fileno, popen and tempnam (asl.h, func_add.c, printf.c);
+# Cabin's strict -std=c11 hides them without _DEFAULT_SOURCE.
 [target.asl]
 type = "library"
 sources = [
@@ -185,7 +185,6 @@ sources = [
 ]
 include-dirs = ["include", "src/solvers"]
 defines = ["_DEFAULT_SOURCE"]
-interface-defines = ["_DEFAULT_SOURCE"]
 links = "asl"
 
 [target.asl2]
@@ -271,7 +270,6 @@ sources = [
 ]
 include-dirs = ["include", "src/solvers2"]
 defines = ["_DEFAULT_SOURCE"]
-interface-defines = ["_DEFAULT_SOURCE"]
 links = "asl2"
 required-features = ["asl2"]
 
