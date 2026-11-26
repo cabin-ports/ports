@@ -12,8 +12,7 @@ include = ["LICENSE.txt", "c/include"]
 
 # Not ported: nvtxw3-loader (c/src/nvtxw3_loader.c, CMakeLists.txt:62-69), the
 # optional reference loader for the NVTXW backend, which README.md:250 calls
-# not required.  Its nvtxw3/ headers ship.  nvToolsExtCuda.h, nvToolsExtCudaRt.h,
-# nvToolsExtMemCudaRt.h and nvToolsExtOpenCL.h need CUDA or OpenCL SDK headers.
+# not required.  Its nvtxw3/ headers ship.
 # Standards are those upstream's tests build with (tests/CMakeLists.txt:30,37);
 # the C++ one is also the documented floor (docs/index.html:389).
 [target.nvtx]
