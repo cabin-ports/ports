@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/seekstar/rusty-cpp/archive/refs/tags/v0.1.13.tar.gz"
+checksum = "sha256:dcd3b0922045008d76da8e6596df71667b4a7dd0ac4cea7bce4627d7a33b477a"
+format = "tar.gz"
+strip-prefix = "rusty-cpp-0.1.13"
+# MinHeap's constructor uses POSIX ssize_t, which MSVC lacks (measured:
+# check-windows, "'ssize_t': undeclared identifier"); the patch uses
+# std::ptrdiff_t.  Its comment line is the change notice the Apache-2.0 option
+# of the license (section 4(b)) requires.
+patches = ["patches/0001-use-ptrdiff-t-in-min-heap.patch"]
+
+[package]
+name = "cabin-ports/rusty-cpp"
+version = "0.1.13"
+license = "MIT OR Apache-2.0"
+include = ["LICENSE-APACHE", "LICENSE-MIT", "README.md", "include", "patches"]
+
+[target.rusty-cpp]
+type = "header-only"
+include-dirs = ["include"]
+# CMakeLists.txt:5 requires cxx_std_17.
+interface-cxx-standard = "c++17"

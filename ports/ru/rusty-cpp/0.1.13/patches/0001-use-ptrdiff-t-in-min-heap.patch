@@ -1,0 +1,20 @@
+--- a/include/rusty/collections/min_heap.h
++++ b/include/rusty/collections/min_heap.h
+@@ -5,6 +5,7 @@
+ #include "rusty/option.h"
+ 
+ #include <cassert>
++#include <cstddef>
+ #include <vector>
+ 
+ namespace rusty {
+@@ -61,7 +62,8 @@
+ 	explicit MinHeap(
+ 		std::vector<T> v = {}, Compare compare = Compare()
+ 	) : v_(std::move(v)), cmp_(std::move(compare)) {
+-		for (ssize_t i = v_.size() / 2 - 1; i >= 0; --i) {
++		// Changed for cabin-ports on 2026-11-26: ssize_t is POSIX-only, MSVC lacks it.
++		for (std::ptrdiff_t i = v_.size() / 2 - 1; i >= 0; --i) {
+ 			heapify_subtree(i);
+ 		}
+ 	}
