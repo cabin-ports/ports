@@ -1,0 +1,240 @@
+diff --git a/v4/include/libhal/can.hpp b/v4/include/libhal/can.hpp
+index 224d8ab..1e8c3f1 100644
+--- a/v4/include/libhal/can.hpp
++++ b/v4/include/libhal/can.hpp
+@@ -11,6 +11,7 @@
+ // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
++// Changed for cabin-ports on 2026-11-26: defaulted operator== in place of bool operator<=>, which cl rejects.
+ 
+ #pragma once
+ 
+@@ -84,7 +85,7 @@ public:
+      * @brief Enables default comparison
+      *
+      */
+-    bool operator<=>(message_t const&) const = default;
++    bool operator==(message_t const&) const = default;
+   };
+ 
+   /**
+@@ -138,7 +139,7 @@ public:
+      * @brief Enables default comparison
+      *
+      */
+-    bool operator<=>(settings const&) const = default;
++    bool operator==(settings const&) const = default;
+   };
+ 
+   /**
+@@ -758,7 +759,7 @@ public:
+      * @brief Enables default comparison
+      *
+      */
+-    constexpr bool operator<=>(pair const&) const = default;
++    constexpr bool operator==(pair const&) const = default;
+   };
+ 
+   /**
+@@ -824,7 +825,7 @@ public:
+      * @brief Enables default comparison
+      *
+      */
+-    constexpr bool operator<=>(pair const&) const = default;
++    constexpr bool operator==(pair const&) const = default;
+   };
+ 
+   /**
+@@ -888,7 +889,7 @@ public:
+      * @brief Enables default comparison
+      *
+      */
+-    constexpr bool operator<=>(pair const&) const = default;
++    constexpr bool operator==(pair const&) const = default;
+   };
+ 
+   /**
+@@ -945,7 +946,7 @@ public:
+      * @brief Enables default comparison
+      *
+      */
+-    constexpr bool operator<=>(pair const&) const = default;
++    constexpr bool operator==(pair const&) const = default;
+   };
+ 
+   /**
+diff --git a/v4/include/libhal/i2c.hpp b/v4/include/libhal/i2c.hpp
+index cedca5f..b304984 100644
+--- a/v4/include/libhal/i2c.hpp
++++ b/v4/include/libhal/i2c.hpp
+@@ -11,6 +11,7 @@
+ // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
++// Changed for cabin-ports on 2026-11-26: defaulted operator== in place of bool operator<=>, which cl rejects.
+ 
+ #pragma once
+ 
+@@ -54,7 +55,7 @@ public:
+      * @brief Enables default comparison
+      *
+      */
+-    bool operator<=>(settings const&) const = default;
++    bool operator==(settings const&) const = default;
+   };
+ 
+   /**
+diff --git a/v4/include/libhal/input_pin.hpp b/v4/include/libhal/input_pin.hpp
+index 733f754..e0fb21f 100644
+--- a/v4/include/libhal/input_pin.hpp
++++ b/v4/include/libhal/input_pin.hpp
+@@ -11,6 +11,7 @@
+ // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
++// Changed for cabin-ports on 2026-11-26: defaulted operator== in place of bool operator<=>, which cl rejects.
+ 
+ #pragma once
+ 
+@@ -36,7 +37,7 @@ public:
+      * @brief Enables default comparison
+      *
+      */
+-    bool operator<=>(settings const&) const = default;
++    bool operator==(settings const&) const = default;
+   };
+ 
+   /**
+diff --git a/v4/include/libhal/interrupt_pin.hpp b/v4/include/libhal/interrupt_pin.hpp
+index c87be08..13f1727 100644
+--- a/v4/include/libhal/interrupt_pin.hpp
++++ b/v4/include/libhal/interrupt_pin.hpp
+@@ -11,6 +11,7 @@
+ // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
++// Changed for cabin-ports on 2026-11-26: defaulted operator== in place of bool operator<=>, which cl rejects.
+ 
+ #pragma once
+ 
+@@ -84,7 +85,7 @@ public:
+      * @brief Enables default comparison
+      *
+      */
+-    bool operator<=>(settings const&) const = default;
++    bool operator==(settings const&) const = default;
+   };
+ 
+   /**
+diff --git a/v4/include/libhal/output_pin.hpp b/v4/include/libhal/output_pin.hpp
+index 6c5de4e..f9ec32d 100644
+--- a/v4/include/libhal/output_pin.hpp
++++ b/v4/include/libhal/output_pin.hpp
+@@ -11,6 +11,7 @@
+ // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
++// Changed for cabin-ports on 2026-11-26: defaulted operator== in place of bool operator<=>, which cl rejects.
+ 
+ #pragma once
+ 
+@@ -45,7 +46,7 @@ public:
+      * @brief Enables default comparison
+      *
+      */
+-    bool operator<=>(settings const&) const = default;
++    bool operator==(settings const&) const = default;
+   };
+ 
+   /**
+diff --git a/v4/include/libhal/serial.hpp b/v4/include/libhal/serial.hpp
+index ecd1916..2fd585e 100644
+--- a/v4/include/libhal/serial.hpp
++++ b/v4/include/libhal/serial.hpp
+@@ -11,6 +11,7 @@
+ // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
++// Changed for cabin-ports on 2026-11-26: defaulted operator== in place of bool operator<=>, which cl rejects.
+ 
+ #pragma once
+ 
+@@ -89,7 +90,7 @@ public:
+      * @brief Enables default comparison
+      *
+      */
+-    bool operator<=>(settings const&) const = default;
++    bool operator==(settings const&) const = default;
+   };
+ 
+   /// Return type for serial read operations
+@@ -279,7 +280,7 @@ public:
+      * @brief Enables default comparison
+      *
+      */
+-    bool operator<=>(settings const&) const = default;
++    bool operator==(settings const&) const = default;
+   };
+   /**
+    * @brief Configure serial to match the settings supplied
+diff --git a/v4/include/libhal/spi.hpp b/v4/include/libhal/spi.hpp
+index 5709cab..795448b 100644
+--- a/v4/include/libhal/spi.hpp
++++ b/v4/include/libhal/spi.hpp
+@@ -11,6 +11,7 @@
+ // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
++// Changed for cabin-ports on 2026-11-26: defaulted operator== in place of bool operator<=>, which cl rejects.
+ 
+ #pragma once
+ 
+@@ -182,7 +183,7 @@ public:
+      * @brief Enables default comparison
+      *
+      */
+-    bool operator<=>(settings const&) const = default;
++    bool operator==(settings const&) const = default;
+   };
+ 
+   /**
+diff --git a/v4/include/libhal/usb.hpp b/v4/include/libhal/usb.hpp
+index 3446e3f..55eb13e 100644
+--- a/v4/include/libhal/usb.hpp
++++ b/v4/include/libhal/usb.hpp
+@@ -11,6 +11,7 @@
+ // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ // See the License for the specific language governing permissions and
+ // limitations under the License.
++// Changed for cabin-ports on 2026-11-26: defaulted operator== in place of bool operator<=>, which cl rejects.
+ 
+ #pragma once
+ 
+@@ -471,7 +472,7 @@ struct lpm_support
+     }
+   }
+ 
+-  constexpr bool operator<=>(lpm_support const& rhs) const = default;
++  constexpr bool operator==(lpm_support const& rhs) const = default;
+ 
+   /// @brief Raw bitmask of supported LPM states; zero means none supported.
+   hal::u8 bits = 0;
+@@ -1416,7 +1417,7 @@ public:
+ 
+     /// Number of string descriptors provided by this interface
+     u8 string;
+-    constexpr bool operator<=>(descriptor_count const& rhs) const = default;
++    constexpr bool operator==(descriptor_count const& rhs) const = default;
+   };
+ 
+   /**
+@@ -1439,7 +1440,7 @@ public:
+     /// string 2 would be `value + 1` and string 3 would be `value + 2`.
+     std::optional<u8> string;
+ 
+-    constexpr bool operator<=>(descriptor_start const& rhs) const = default;
++    constexpr bool operator==(descriptor_start const& rhs) const = default;
+   };
+ 
+   /**

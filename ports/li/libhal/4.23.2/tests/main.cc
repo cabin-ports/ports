@@ -69,6 +69,10 @@ int main()
   check(pin.applied.resistor == hal::pin_resistor::pull_down &&
           pin.applied.open_drain,
         "settings forwarded");
+  check(pin.applied == hal::output_pin::settings{ hal::pin_resistor::pull_down, true },
+        "settings equal");
+  check(pin.applied != hal::output_pin::settings{},
+        "settings differ");
   base.level(true);
   check(base.level(), "level high");
   base.level(false);
