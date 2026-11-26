@@ -1,0 +1,23 @@
+--- a/include/ss/setup.hpp
++++ b/include/ss/setup.hpp
+@@ -201,16 +201,16 @@
+                            is_instance_of_matcher_t<Option, trim_right>> {};
+ 
+     template <typename T>
+-    struct is_string_error : std::is_same<T, string_error> {};
++    struct is_string_error : std::is_same<T, ss::string_error> {};
+ 
+     template <typename T>
+-    struct is_ignore_header : std::is_same<T, ignore_header> {};
++    struct is_ignore_header : std::is_same<T, ss::ignore_header> {};
+ 
+     template <typename T>
+-    struct is_ignore_empty : std::is_same<T, ignore_empty> {};
++    struct is_ignore_empty : std::is_same<T, ss::ignore_empty> {};
+ 
+     template <typename T>
+-    struct is_throw_on_error : std::is_same<T, throw_on_error> {};
++    struct is_throw_on_error : std::is_same<T, ss::throw_on_error> {};
+ 
+     constexpr static auto count_matcher = count_v<is_matcher, Options...>;
+ 
