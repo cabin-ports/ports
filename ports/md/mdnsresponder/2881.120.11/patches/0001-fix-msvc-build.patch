@@ -1,0 +1,32 @@
+--- a/mDNSShared/dnssd_clientstub.c
++++ b/mDNSShared/dnssd_clientstub.c
+@@ -69,6 +69,7 @@
+ static int g_initWinsock = 0;
+     #define LOG_WARNING kDebugLevelWarning
+     #define LOG_INFO kDebugLevelInfo
++    #define LOG_ERR kDebugLevelError
+ static void syslog( int priority, const char * message, ...)
+ {
+     va_list args;
+--- a/mDNSShared/dnssd_ipc.c
++++ b/mDNSShared/dnssd_ipc.c
+@@ -275,7 +275,7 @@
+     return put_tlv(type, sizeof(value), value, ptr, limit);
+ }
+ 
+-size_t put_tlv_uuid(const uint16_t type, const uint8_t uuid[MDNS_STATIC_ARRAY_PARAM MDNS_UUID_SIZE], uint8_t **const ptr,
++size_t put_tlv_uuid(const uint16_t type, const uint8_t uuid[MDNS_UUID_SIZE], uint8_t **const ptr,
+     const uint8_t *const limit)
+ {
+     return put_tlv(type, MDNS_UUID_SIZE, uuid, ptr, limit);
+--- a/mDNSShared/dnssd_ipc.h
++++ b/mDNSShared/dnssd_ipc.h
+@@ -242,7 +242,7 @@
+ void put_tlv_uint8(uint16_t type, uint8_t u8, uint8_t **ptr, const uint8_t *limit);
+ void put_tlv_uint16(uint16_t type, uint16_t u16, uint8_t **ptr, const uint8_t *limit);
+ size_t put_tlv_uint32(uint16_t type, uint32_t u32, uint8_t **ptr, const uint8_t *limit);
+-size_t put_tlv_uuid(uint16_t type, const uint8_t uuid[MDNS_STATIC_ARRAY_PARAM MDNS_UUID_SIZE], uint8_t **ptr,
++size_t put_tlv_uuid(uint16_t type, const uint8_t uuid[MDNS_UUID_SIZE], uint8_t **ptr,
+     const uint8_t *limit);
+ const uint8_t *get_tlv(const uint8_t *src, const uint8_t *end, uint16_t type, size_t *out_length);
+ const char *get_tlv_string(const uint8_t *const start, const uint8_t *const end, const uint16_t type);
