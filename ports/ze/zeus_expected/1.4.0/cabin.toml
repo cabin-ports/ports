@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/zeus-cpp/expected/archive/refs/tags/v1.4.0.tar.gz"
+checksum = "sha256:70f7118651be51f5c02c0aa10bfb903f5a6c0bcd13ae726dfe34bf8836aaece0"
+format = "tar.gz"
+strip-prefix = "expected-1.4.0"
+
+[package]
+name = "cabin-ports/zeus_expected"
+version = "1.4.0"
+# README.md's acknowledgements name tl-expected (CC0-1.0) as the code base the header came from.
+license = "MIT AND CC0-1.0"
+include = ["LICENSE", "README.md", "include"]
+
+# The C++17 floor is stated in README.md and CMakeLists.txt:44.
+[target.zeus_expected]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
