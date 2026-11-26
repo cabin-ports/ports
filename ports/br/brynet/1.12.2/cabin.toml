@@ -31,8 +31,6 @@ vendored-openssl = ["openssl", "cabin-ports/openssl/vendored"]
 # TLS.  C++11 is the standard README.md states; base/Platform.hpp pulls in
 # ws2_32 on MSVC only, so MinGW needs the explicit library.  Linux, macOS and
 # Windows are the platforms upstream names (README.md).
-# net/EventLoop.hpp:40 uses std::make_unique on Windows without a fallback, so a
-# MinGW consumer needs C++14 (by reading the source; not measured).
 [target.brynet]
 type = "header-only"
 include-dirs = ["include"]
