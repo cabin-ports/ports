@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/microsoft/winmd/archive/refs/tags/1.0.260529.3.tar.gz"
+checksum = "sha256:5a777a2ff1cdfff23d7fd613df7d224de18906e528c1785ade6b6657e8d2f98e"
+format = "tar.gz"
+strip-prefix = "winmd-1.0.260529.3"
+
+[package]
+name = "cabin-ports/winmd"
+# Upstream tags only 1.0.YYMMDD.N; 2026.5.29 is the date of tag 1.0.260529.3.
+version = "2026.5.29"
+license = "MIT"
+include = ["LICENSE", "README.md", "src"]
+
+# interface-cxx-standard: upstream's test/winmd.vcxproj:119 sets stdcpp17.
+[target.winmd]
+type = "header-only"
+include-dirs = ["src"]
+interface-cxx-standard = "c++17"
