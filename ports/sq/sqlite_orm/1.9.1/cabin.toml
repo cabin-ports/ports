@@ -17,9 +17,6 @@ include = ["include", "LICENSE", "COMM-LICENSE"]
 [dependencies]
 "cabin-ports/sqlite3" = "=3.53.2"
 
-# Upstream compiles with /Zc:__cplusplus on MSVC (CMakeLists.txt:61-63); like
-# upstream's exported target, the package does not, so an MSVC consumer
-# needs it for C++20 storage.iterate(select(...)) (sqlite_orm.h:128-129).
 [target.sqlite_orm]
 type = "header-only"
 include-dirs = ["include"]

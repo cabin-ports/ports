@@ -1,7 +1,6 @@
 #include <sqlite_orm/sqlite_orm.h>
 
 #include <cstdio>
-#include <memory>
 #include <string>
 
 using namespace sqlite_orm;
