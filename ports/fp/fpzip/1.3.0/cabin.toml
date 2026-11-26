@@ -1,0 +1,39 @@
+[package.upstream]
+# The release asset; it holds the same tree as the 1.3.0 tag archive but is
+# the artifact upstream publishes.
+url = "https://github.com/LLNL/fpzip/releases/download/1.3.0/fpzip-1.3.0.tar.gz"
+checksum = "sha256:248df7d84259e3feaa4c4797956b2a77c3fcd734e8f8fdc51ce171dcf4f0136c"
+format = "tar.gz"
+strip-prefix = "fpzip-1.3.0"
+
+[package]
+name = "cabin-ports/fpzip"
+version = "1.3.0"
+license = "BSD-3-Clause"
+include = ["LICENSE", "NOTICE", "include", "src"]
+# README.md:14-15 states conformance to C++98 and C89; C++14 is the oldest
+# standard Cabin lowers for MSVC.
+cxx-standard = "c++14"
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
+
+# The static library of upstream's CMake build (src/CMakeLists.txt) with its
+# defaults: FPZIP_FP_FAST, public because include/fpzip.h's FPZIP_CODEC reads
+# it (CMakeLists.txt:119-120), and a 4096-byte FPZIP_BLOCK_SIZE.  Not offered:
+# the FPZIP_FP_SAFE, FPZIP_FP_EMUL and FPZIP_FP_INT modes, and the shared
+# library, the fpzip utility and upstream's tests.
+[target.fpzip]
+type = "library"
+sources = [
+  "src/error.cpp",
+  "src/rcdecoder.cpp",
+  "src/rcencoder.cpp",
+  "src/rcqsmodel.cpp",
+  "src/read.cpp",
+  "src/version.cpp",
+  "src/write.cpp",
+]
+include-dirs = ["include"]
+defines = ["FPZIP_BLOCK_SIZE=4096", "FPZIP_FP=FPZIP_FP_FAST"]
+interface-defines = ["FPZIP_FP=FPZIP_FP_FAST"]
+links = "fpzip"
