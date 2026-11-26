@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/badaix/popl/archive/refs/tags/v1.3.0.tar.gz"
+checksum = "sha256:7c59554371da3c6c093bd79c2f403f921c1938bd523f1a48682352e0d92883a6"
+format = "tar.gz"
+strip-prefix = "popl-1.3.0"
+
+[package]
+name = "cabin-ports/popl"
+version = "1.3.0"
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+# C++11 floor as upstream states it (README.md:14, CMakeLists.txt:19).
+# Not ported: the tests (with their bundled Catch), examples and CI files.
+[target.popl]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
