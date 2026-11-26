@@ -1,0 +1,36 @@
+[package.upstream]
+url = "https://github.com/tinycthread/tinycthread/archive/6957fc8383d6c7db25b60b8c849b29caab1caaee.tar.gz"
+checksum = "sha256:7068d21ddffaab68eea6d41a39ea8b6597984ef2436eee3d4bcf664ec67528f9"
+format = "tar.gz"
+strip-prefix = "tinycthread-6957fc8383d6c7db25b60b8c849b29caab1caaee"
+
+[package]
+name = "cabin-ports/tinycthread"
+# Upstream's only tag, v1.1 (2012), predates later fixes (for example
+# cnd_broadcast calling pthread_cond_signal); this is the last commit of
+# master (2016-09-30), which declares itself 1.2 (tinycthread.h) while
+# README.txt still lists v1.2 as unreleased.
+version = "2016.9.30"
+# source/tinycthread.c:635 credits a Stack Overflow answer for a one-line
+# CloseHandle call; its copyright significance is uncertain.
+license = "Zlib"
+include = ["README.txt", "source"]
+# cl accepts no C89 flag; C11 is the oldest standard Cabin can request.
+c-standard = "c11"
+
+[target.tinycthread]
+type = "library"
+sources = ["source/tinycthread.c"]
+include-dirs = ["source"]
+# Upstream builds with -std=c89 (test/Makefile), but the library compiles at
+# c11 here, where <time.h> has TIME_UTC and tinycthread.c omits
+# _tthread_timespec_get, which the header of a pre-C11 consumer would call.
+# C++ needs c++17 for the same reason (measured on macOS arm64: with
+# -std=c++14 the header defines _TTHREAD_EMULATE_TIMESPEC_GET_).
+interface-c-standard = "c11"
+interface-cxx-standard = "c++17"
+links = "tinycthread"
+
+# upstream's CMakeLists.txt links ${CMAKE_THREAD_LIBS_INIT} from find_package(Threads).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
