@@ -1,0 +1,99 @@
+[package.upstream]
+url = "https://download.osgeo.org/librttopo/src/librttopo-1.1.0.tar.gz"
+checksum = "sha256:a77d8b787ba13f685de819348d5146f9f6ec56fd3bcf71e880dfc5e0086d4cb0"
+format = "tar.gz"
+strip-prefix = "librttopo-1.1.0"
+
+[package]
+name = "cabin-ports/librttopo"
+version = "1.1.0"
+# GPL-2.0-or-later: the file headers of src/ and headers/ (COPYING is GPL-2.0).
+# MIT: src/rtalgorithm.c:594 and :660 credit geohash-native.c (D. Troy) for
+# geohash_point and geohash_point_as_int, under the MIT License.
+license = "GPL-2.0-or-later AND MIT"
+include = ["COPYING", "CREDITS", "headers", "src"]
+# Upstream's autoconf build states no standard; C11 is the oldest Cabin can
+# lower for MSVC.  Upstream builds in the compiler's default GNU dialect, so
+# the Unix profile below defines _DEFAULT_SOURCE for the M_PI that glibc hides
+# in strict C11.
+c-standard = "c11"
+
+# The public headers have no extern "C" guards: a C++ consumer includes
+# <geos_c.h> first and then wraps <librttopo.h> (measured: wrapping alone
+# fails in libc++'s <cstddef>, which geos_c.h includes).
+# The release tarball ships the configure-generated src/rttopo_config.h and
+# headers/librttopo_geom.h, which the sources use as shipped.  Not ported:
+# shared libraries, GeoJSON input (the shipped rttopo_config.h leaves
+# HAVE_LIBJSON unset), the documentation and the autotools and nmake files.
+[target.rttopo]
+type = "library"
+sources = [
+  "src/box2d.c",
+  "src/bytebuffer.c",
+  "src/g_box.c",
+  "src/g_serialized.c",
+  "src/g_util.c",
+  "src/measures.c",
+  "src/measures3d.c",
+  "src/ptarray.c",
+  "src/rtalgorithm.c",
+  "src/rtcircstring.c",
+  "src/rtcollection.c",
+  "src/rtcompound.c",
+  "src/rtcurvepoly.c",
+  "src/rtgeodetic.c",
+  "src/rtgeom.c",
+  "src/rtgeom_api.c",
+  "src/rtgeom_debug.c",
+  "src/rtgeom_geos.c",
+  "src/rtgeom_geos_clean.c",
+  "src/rtgeom_geos_node.c",
+  "src/rtgeom_geos_split.c",
+  "src/rtgeom_topo.c",
+  "src/rthomogenize.c",
+  "src/rtin_geojson.c",
+  "src/rtin_twkb.c",
+  "src/rtin_wkb.c",
+  "src/rtiterator.c",
+  "src/rtline.c",
+  "src/rtlinearreferencing.c",
+  "src/rtmcurve.c",
+  "src/rtmline.c",
+  "src/rtmpoint.c",
+  "src/rtmpoly.c",
+  "src/rtmsurface.c",
+  "src/rtout_encoded_polyline.c",
+  "src/rtout_geojson.c",
+  "src/rtout_gml.c",
+  "src/rtout_kml.c",
+  "src/rtout_svg.c",
+  "src/rtout_twkb.c",
+  "src/rtout_wkb.c",
+  "src/rtout_wkt.c",
+  "src/rtout_x3d.c",
+  "src/rtpoint.c",
+  "src/rtpoly.c",
+  "src/rtprint.c",
+  "src/rtpsurface.c",
+  "src/rtspheroid.c",
+  "src/rtstroke.c",
+  "src/rtt_tpsnap.c",
+  "src/rttin.c",
+  "src/rttree.c",
+  "src/rttriangle.c",
+  "src/rtutil.c",
+  "src/stringbuffer.c",
+  "src/varint.c",
+]
+include-dirs = ["headers"]
+deps = [{ name = "cabin-ports/geos:geos_c", public = true }]
+interface-c-standard = "c99"
+links = "rttopo"
+
+# Upstream links libm (src/Makefile.am: librttopo_la_LIBADD).
+[target.'cfg(family = "unix")'.profile]
+defines = ["_DEFAULT_SOURCE"]
+link-libs = ["m"]
+
+[dependencies]
+"cabin-ports/geos" = "=3.15.0"
