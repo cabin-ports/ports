@@ -1,0 +1,57 @@
+[package.upstream]
+url = "https://github.com/biojppm/c4core/releases/download/v0.6.0/c4core-0.6.0-src.tgz"
+checksum = "sha256:fd0a3e2c39a5985c6699e306ead71e8a73a6ada2577c905734a2a6ba0a61c1b7"
+format = "tar.gz"
+strip-prefix = "c4core-0.6.0-src"
+
+[package]
+name = "cabin-ports/c4core"
+version = "0.6.0"
+# Credited snippets, whose copyright significance is uncertain: src/c4/enum.hpp:18
+# (stackoverflow.com/questions/15586163), hash.hpp:21 (stackoverflow.com/a/34597785),
+# preprocessor.hpp:50 (stackoverflow.com/a/1872506), type_name.hpp:41 and
+# language.hpp:95-118 (stackoverflow.com/a/20170989), and the debugger helpers at
+# error.cpp:168-223 (stackoverflow.com/a/24969863, questions/3596781, questions/2200277).
+# The bundled fast_float under src/c4/ext is
+# Apache-2.0 OR MIT OR BSL-1.0, which MIT or BSL-1.0 covers.  LICENSE.txt
+# is MIT; LICENSE-BOOST.txt covers src/c4/ext/sg14/inplace_function.h
+# (BSL-1.0), src/c4/ext/debugbreak/COPYING is BSD-2-Clause, and
+# src/c4/ext/rng/rng.hpp is MIT.  The libc++ code copied into types.hpp
+# (:370-508) was MIT or UIUC licensed, which MIT covers.
+license = "MIT AND BSD-2-Clause AND BSL-1.0"
+include = ["LICENSE-BOOST.txt", "LICENSE.txt", "README.md", "src"]
+
+# Upstream's c4core library (CMakeLists.txt:122-127): the ten sources under
+# src, with src public.  Upstream's C4CORE_WITH_FASTFLOAT_SYSTEM configuration
+# (CMakeLists.txt:89-106, :130-132), which defines C4CORE_SYS_FAST_FLOAT so
+# that src/c4/ext/fast_float.hpp includes <fast_float/fast_float.h> instead
+# of the bundled src/c4/ext/fast_float_all.h; cabin-ports/fast_float
+# supplies it, so one fast_float version meets in a program.  Not ported:
+# the shared library (C4CORE_SHARED), the tests and benchmarks.
+# Standard: c++11 is upstream's floor (src/c4/language.hpp, "C++ lesser than
+# C++11 not supported"; cmake/c4Project.cmake:45).
+[target.c4core]
+type = "library"
+links = "c4core"
+sources = [
+  "src/c4/alloc.cpp",
+  "src/c4/base64.cpp",
+  "src/c4/char_traits.cpp",
+  "src/c4/error.cpp",
+  "src/c4/format.cpp",
+  "src/c4/language.cpp",
+  "src/c4/memory_resource.cpp",
+  "src/c4/memory_util.cpp",
+  "src/c4/utf.cpp",
+  "src/c4/version.cpp",
+]
+include-dirs = ["src"]
+defines = ["C4CORE_SYS_FAST_FLOAT"]
+interface-defines = ["C4CORE_SYS_FAST_FLOAT"]
+cxx-standard = "c++11"
+interface-cxx-standard = "c++11"
+# charconv.hpp includes <fast_float/fast_float.h> from the public header.
+deps = [{ name = "cabin-ports/fast_float", public = true }]
+
+[dependencies]
+"cabin-ports/fast_float" = "=8.3.3"
