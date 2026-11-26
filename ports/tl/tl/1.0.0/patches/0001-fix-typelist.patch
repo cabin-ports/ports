@@ -1,0 +1,46 @@
+--- a/include/tl/typelist.hpp
++++ b/include/tl/typelist.hpp
+@@ -15,16 +15,18 @@
+ #ifndef TL_TYPELIST_HPP
+ #define TL_TYPELIST_HPP
+ 
++#include <cstddef>
++
+ namespace tl {
+     template <class... Ts> struct typelist{};
+ 
+     // Given a typelist and an index, stores the Nth type in the list as a member alias
+     // Assumes that the list is long enough
+-    template <class List, size_t N>
++    template <class List, std::size_t N>
+     struct index_typelist;
+ 
+     // Recursive case
+-    template <template <class...> class List, class T, class... Ts, size_t N>
++    template <template <class...> class List, class T, class... Ts, std::size_t N>
+     struct index_typelist<List<T,Ts...>, N> {
+         using type = typename index_typelist<List<Ts...>, N-1>::type;
+     };
+@@ -39,7 +41,7 @@
+     template <class List1, class List2>
+     struct cat_typelist;
+ 
+-    template <template <class...> class List, class... Ts, auto... Us>
++    template <template <class...> class List, class... Ts, class... Us>
+     struct cat_typelist<List<Ts...>, List<Us...>> {
+         using type = List<Ts...,Us...>;
+     };
+@@ -49,11 +51,11 @@
+ 
+     // Given a list of non-type template params and an index, stores the Nth type in the list as static data member
+     // Assumes that the list is long enough
+-    template <class List, size_t N>
++    template <class List, std::size_t N>
+     struct index_vallist;
+ 
+     // Recursive case
+-    template <template <auto...> class List, auto T, auto... Ts, size_t N>
++    template <template <auto...> class List, auto T, auto... Ts, std::size_t N>
+     struct index_vallist<List<T,Ts...>, N> {
+         static constexpr auto value = index_vallist<List<Ts...>, N-1>::value;
+     };
