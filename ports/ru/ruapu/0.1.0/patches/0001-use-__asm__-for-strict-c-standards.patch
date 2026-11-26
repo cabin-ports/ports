@@ -1,0 +1,26 @@
+--- a/ruapu.h
++++ b/ruapu.h
+@@ -146,11 +146,11 @@
+ #else // defined _WIN32
+ 
+ #if defined(__i386__) || defined(__x86_64__) || __s390x__
+-#define RUAPU_INSTCODE(isa, ...) static void ruapu_some_##isa() { asm volatile(".byte " #__VA_ARGS__ : : : ); }
++#define RUAPU_INSTCODE(isa, ...) static void ruapu_some_##isa() { __asm__ volatile(".byte " #__VA_ARGS__ : : : ); }
+ #elif __aarch64__ || __arm__ || __mips__ || __riscv || __loongarch__
+-#define RUAPU_INSTCODE(isa, ...) static void ruapu_some_##isa() { asm volatile(".word " #__VA_ARGS__ : : : ); }
++#define RUAPU_INSTCODE(isa, ...) static void ruapu_some_##isa() { __asm__ volatile(".word " #__VA_ARGS__ : : : ); }
+ #elif __powerpc__
+-#define RUAPU_INSTCODE(isa, ...) static void ruapu_some_##isa() { asm volatile(".long " #__VA_ARGS__ : : : ); }
++#define RUAPU_INSTCODE(isa, ...) static void ruapu_some_##isa() { __asm__ volatile(".long " #__VA_ARGS__ : : : ); }
+ #endif
+ 
+ #endif // defined _WIN32
+@@ -375,7 +375,7 @@
+ {
+     uint32_t value;
+     uint16_t addr = U(0x0000);
+-    asm volatile ("l.mfspr %0, r0, %1" : "=r" (value) : "K" (addr));
++    __asm__ volatile ("l.mfspr %0, r0, %1" : "=r" (value) : "K" (addr));
+     for (size_t i = 0; i < sizeof(g_ruapu_isa_map) / sizeof(g_ruapu_isa_map[0]); i++)
+     {
+         g_ruapu_isa_map[0].capable = ((value) >> (5 + i)) & 0x1;

@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/nihui/ruapu/archive/refs/tags/0.1.0.tar.gz"
+checksum = "sha256:65fd826ed1772717d4cee70b6620277df0328408612f7643658a0064f1a163ff"
+format = "tar.gz"
+strip-prefix = "ruapu-0.1.0"
+# Patch 0001 spells the inline-assembly keyword __asm__: the header writes asm,
+# which a strict -std=c99 compile rejects (measured on macOS arm64: use of
+# undeclared identifier 'asm').
+patches = ["patches/0001-use-__asm__-for-strict-c-standards.patch"]
+
+[package]
+name = "cabin-ports/ruapu"
+version = "0.1.0"
+license = "MIT"
+include = ["LICENSE", "patches", "ruapu.h"]
+
+# Define RUAPU_IMPLEMENTATION before including ruapu.h in exactly one source
+# file (README.md).  Upstream states no C standard; C99 is measured.
+# interface-defines: under a strict -std=c99, glibc hides the sigaction and
+# sigsetjmp declarations the header uses on Linux.
+# Not ported: main.c (a sample) and the Python binding.
+[target.ruapu]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c99"
+interface-defines = ["_POSIX_C_SOURCE=200809L"]
