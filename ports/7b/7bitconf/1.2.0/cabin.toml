@@ -32,3 +32,8 @@ cxx-standard = "c++17"
 interface-cxx-standard = "c++17"
 links = "7bitConf"
 deps = [{ name = "cabin-ports/taocpp-json:json", public = true }]
+# Only Source.cpp reaches the Impl header that declares _environ itself;
+# UCRT's <stdlib.h> otherwise defines it as (*__p__environ())
+# (measured: check-windows C2375 __p__environ).
+[target.'cfg(os = "windows")'.profile]
+defines = ["_CRT_DECLARE_GLOBAL_VARIABLES_DIRECTLY"]
