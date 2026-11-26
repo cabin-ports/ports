@@ -3,9 +3,9 @@ url = "https://github.com/jeremyko/ASockLib/archive/refs/tags/1.0.7.tar.gz"
 checksum = "sha256:51c7b8bfce95a4d605e3ebaf779cd5ab7f2b7a4bfeff4f81b326324c5f0f6050"
 format = "tar.gz"
 strip-prefix = "ASockLib-1.0.7"
-# Patch 0001 tests _WIN32 where upstream tests WIN32.  cl defines only _WIN32,
-# and WIN32 comes from CMake's default flags, which Cabin does not pass, so
-# without it every public header declares nothing on Windows.
+# Patch 0001 tests _WIN32 where upstream tests WIN32.  cl defines only _WIN32;
+# WIN32 comes from CMake's default flags, which Cabin does not pass, and a
+# target's interface-defines cannot be platform-conditional.
 # MIT License notice of the files whose lines 0001 carries (the License's
 # condition that copies include it):
 # Copyright (c) 2025 jung hyun, ko
