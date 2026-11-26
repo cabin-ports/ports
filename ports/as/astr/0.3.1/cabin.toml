@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/a4z/astr/archive/refs/tags/v0.3.1.tar.gz"
+checksum = "sha256:04f82a1565f1717d61f0ea2604cc5481ff88eba4b52cc22088785a09330f1f15"
+format = "tar.gz"
+strip-prefix = "astr-0.3.1"
+
+[package]
+name = "cabin-ports/astr"
+version = "0.3.1"
+license = "MPL-2.0"
+include = ["LICENSE", "include"]
+
+# C++20 is the standard upstream's README.md states ("for C++20 and above").
+[target.astr]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
