@@ -1,0 +1,26 @@
+[package.upstream]
+# Upstream has no tags or releases; 2022.3.16 is the date of the only branch's
+# head commit.
+url = "https://github.com/naasking/async.h/archive/427bd46a1389b594f6963df38323ebb38e55e93f.tar.gz"
+checksum = "sha256:b25feb61b4fc11cd8a221149297045e0de4f6c75281a7d6fbcb4b0ed62f0d983"
+format = "tar.gz"
+strip-prefix = "async.h-427bd46a1389b594f6963df38323ebb38e55e93f"
+
+[package]
+name = "cabin-ports/asynch"
+version = "2022.3.16"
+# async/async-sem.h:3 credits protothreads for the semaphore; its copyright
+# significance is uncertain.
+license = "BSD-3-Clause"
+include = ["LICENSE", "async/async.h", "async/async-sem.h"]
+
+# Consumers write <async/async.h>.  Upstream states no C standard; C89 is
+# measured (-std=c89 -pedantic-errors).  C only: async.h:70 and :80 declare a
+# typedef and a struct both named async, which C++ rejects (measured: clang++
+# "definition of type 'async' conflicts with typedef of the same name").
+# Not ported: the examples and the Visual Studio project.
+[target.asynch]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c89"
+interface-cxx-standard = "none"
