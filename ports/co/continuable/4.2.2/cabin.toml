@@ -1,0 +1,30 @@
+[package.upstream]
+url = "https://github.com/Naios/continuable/archive/4.2.2.tar.gz"
+checksum = "sha256:49bf82a349b26c01194631e4fe5d1dbad080b3b4a347eebc5cf95326ea130fba"
+format = "tar.gz"
+strip-prefix = "continuable-4.2.2"
+
+[package]
+name = "cabin-ports/continuable"
+version = "4.2.2"
+license = "MIT"
+include = ["LICENSE.txt", "Readme.md", "include"]
+
+[dependencies]
+"cabin-ports/function2" = "^4.2"
+
+# Consumers write <continuable/continuable.hpp>.  C++14 is upstream's floor
+# (Readme.md:19).  Upstream links Threads unconditionally (CMakeLists.txt:80-82,
+# 108) and says nothing about Android.  Optional features are the consumer's
+# CONTINUABLE_WITH_* macros, identically in every translation unit.
+# include/continuable/detail/features.hpp:90 credits boost::asio for the
+# coroutine detection conditions; its copyright significance is uncertain.
+# Not ported: upstream's tests, examples, docs and CMake files.
+[target.continuable]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+deps = [{ name = "cabin-ports/function2", public = true }]
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
