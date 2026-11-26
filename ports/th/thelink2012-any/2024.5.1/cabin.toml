@@ -1,0 +1,18 @@
+# Upstream has no tags: 2024.5.1 is the commit date of master's a05d5ad9.
+[package.upstream]
+url = "https://github.com/thelink2012/any/archive/a05d5ad91cfbca0153adb7d7b3e6456fffc7b812.tar.gz"
+checksum = "sha256:0148f38d7a97bec157f9d8b5420ff6cb47cecebc4b8103c4db5bc4bc0e522a92"
+format = "tar.gz"
+strip-prefix = "any-a05d5ad91cfbca0153adb7d7b3e6456fffc7b812"
+
+[package]
+name = "cabin-ports/thelink2012-any"
+version = "2024.5.1"
+license = "BSL-1.0"
+include = ["LICENSE_1_0.txt", "README.md", "any.hpp"]
+
+# The C++11 floor is stated in any.hpp:2 and CMakeLists.txt:5.
+[target.thelink2012-any]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
