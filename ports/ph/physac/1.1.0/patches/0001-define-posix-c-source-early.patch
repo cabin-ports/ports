@@ -1,0 +1,28 @@
+--- a/src/physac.h
++++ b/src/physac.h
+@@ -233,6 +233,14 @@
+ ************************************************************************************/
+ 
+ #if defined(PHYSAC_IMPLEMENTATION)
++
++// Changed for cabin-ports on 2026-11-26: define _POSIX_C_SOURCE before the first libc header.
++#if defined(__linux__)
++    #if _POSIX_C_SOURCE < 199309L
++        #undef _POSIX_C_SOURCE
++        #define _POSIX_C_SOURCE 199309L // Required for CLOCK_MONOTONIC if compiled with c99 without gnu ext.
++    #endif
++#endif
+ 
+ #if !defined(PHYSAC_NO_THREADS)
+     #include <pthread.h>            // Required for: pthread_t, pthread_create()
+@@ -257,10 +265,6 @@
+     int __stdcall QueryPerformanceCounter(unsigned long long int *lpPerformanceCount);
+     int __stdcall QueryPerformanceFrequency(unsigned long long int *lpFrequency);
+ #elif defined(__linux__)
+-    #if _POSIX_C_SOURCE < 199309L
+-        #undef _POSIX_C_SOURCE
+-        #define _POSIX_C_SOURCE 199309L // Required for CLOCK_MONOTONIC if compiled with c99 without gnu ext.
+-    #endif
+     #include <sys/time.h>           // Required for: timespec
+ #elif defined(__APPLE__)            // macOS also defines __MACH__
+     #include <mach/mach_time.h>     // Required for: mach_absolute_time()
