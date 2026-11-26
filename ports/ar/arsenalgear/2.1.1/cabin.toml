@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/JustWhit3/arsenalgear-cpp/archive/refs/tags/v2.1.1.tar.gz"
+checksum = "sha256:5bcad6f0a2dfa3c271a532d60bfd7e45dd150fdd3c12503354718ff2b62ce967"
+format = "tar.gz"
+strip-prefix = "arsenalgear-cpp-2.1.1"
+
+[package]
+name = "cabin-ports/arsenalgear"
+version = "2.1.1"
+license = "MIT"
+include = ["LICENSE", "include", "src"]
+
+# The static library upstream's CMake builds (CMakeLists.txt add_library).
+[target.arsenalgear]
+type = "library"
+sources = ["src/stream.cpp", "src/system.cpp", "src/utils.cpp"]
+include-dirs = ["include"]
+# CMakeLists.txt: target_compile_features(arsenalgear PUBLIC cxx_std_17).
+cxx-standard = "c++17"
+interface-cxx-standard = "c++17"
+links = "arsenalgear"
