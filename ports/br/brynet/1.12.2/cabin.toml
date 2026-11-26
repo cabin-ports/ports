@@ -10,6 +10,8 @@ version = "1.12.2"
 # MIT: LICENSE and net/http/http_parser.h (Joyent's http-parser 2.9.2).
 # LicenseRef-PublicDomain: base/crypto/SHA1.hpp, "100% free public domain" by
 # Dominik Reichl.
+# net/Socket.hpp:167 credits libev and muduo for its EMFILE recovery; its
+# copyright significance is uncertain.
 license = "MIT AND LicenseRef-PublicDomain"
 include = ["LICENSE", "include"]
 
