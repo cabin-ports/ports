@@ -25,6 +25,17 @@ static int failures = 0;
     }                                                                     \
   } while (0)
 
+#ifdef _WIN32
+static void onInvalidParameter(const wchar_t *expr, const wchar_t *func,
+                               const wchar_t *file, unsigned line,
+                               uintptr_t reserved) {
+  (void)reserved;
+  fprintf(stderr, "DIAG: invalid CRT parameter: %ls in %ls (%ls:%u)\n",
+          expr ? expr : L"?", func ? func : L"?", file ? file : L"?", line);
+  fflush(stderr);
+}
+#endif
+
 int main(void) {
   Redis *r;
   RESP num = {RESP_INT, 6379, NULL};
@@ -43,6 +54,7 @@ int main(void) {
 #ifdef _WIN32
   WSADATA wsa;
 
+  _set_invalid_parameter_handler(onInvalidParameter);
   if (WSAStartup(MAKEWORD(2, 2), &wsa) != 0) {
     fprintf(stderr, "WSAStartup failed\n");
     return 1;
