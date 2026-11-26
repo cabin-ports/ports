@@ -1,0 +1,12 @@
+--- a/lang/c++/include/avro/Exception.hh
++++ b/lang/c++/include/avro/Exception.hh
+@@ -20,7 +20,8 @@
+ #define avro_Exception_hh__
+ 
+ #include "Config.hh"
+-#include <fmt/core.h>
++// Changed for cabin-ports on 2026-11-26: include <fmt/format.h>, which declares fmt::format.
++#include <fmt/format.h>
+ #include <stdexcept>
+ 
+ namespace avro {
