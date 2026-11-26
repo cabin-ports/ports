@@ -1,0 +1,29 @@
+--- a/inc/generator.hpp
++++ b/inc/generator.hpp
+@@ -8,7 +8,7 @@
+ #ifndef _FPGEN_GENERATOR
+ #define _FPGEN_GENERATOR
+ 
+-#ifdef __clang__
++#if defined(__clang__) && !__has_include(<coroutine>)
+ #include <experimental/coroutine>
+ #else
+ #include <coroutine>
+@@ -58,7 +58,7 @@
+     /**
+      *  \brief Type alias for the suspend type (`std::suspend_always`).
+      */
+-#ifdef __clang__
++#if defined(__clang__) && !__has_include(<coroutine>)
+     using suspend_type = std::experimental::suspend_always;
+ #else
+     using suspend_type = std::suspend_always;
+@@ -237,7 +237,7 @@
+    *  \brief Type alias for the coroutine handle type
+    * (`std::coroutine_handle<promise_type>`).
+    */
+-#ifdef __clang__
++#if defined(__clang__) && !__has_include(<coroutine>)
+   using handle_type = std::experimental::coroutine_handle<promise_type>;
+ #else
+   using handle_type = std::coroutine_handle<promise_type>;

@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/jay-tux/fpgen/archive/refs/tags/v1.1.0-clang.tar.gz"
+checksum = "sha256:02936c1e790bcdba1479cf8164596b05cfc5b7401b3c71e0a1fd77e51fe8b93f"
+format = "tar.gz"
+strip-prefix = "fpgen-1.1.0-clang"
+# generator.hpp includes <experimental/coroutine> on every Clang, which
+# current libc++ no longer ships; the patch takes <coroutine> where it
+# exists, as GCC and cl already do (measured: macOS Apple clang,
+# "'experimental/coroutine' file not found").
+patches = ["patches/0001-use-std-coroutine-on-clang.patch"]
+
+[package]
+name = "cabin-ports/fpgen"
+version = "1.1.0"
+license = "MPL-2.0"
+# The archive is the v1.1.0-clang tag, the release that builds with Clang;
+# the v1.1.0 tag is its predecessor.
+include = ["LICENSE", "README.md", "inc", "patches"]
+
+# Consumers include "fpgen.hpp".
+[target.fpgen]
+type = "header-only"
+include-dirs = ["inc"]
+# README.md:59, "This project strongly depends on C++20".
+interface-cxx-standard = "c++20"
