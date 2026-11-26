@@ -1,0 +1,95 @@
+[package.upstream]
+url = "https://github.com/boostorg/mpi/archive/refs/tags/boost-1.92.0.tar.gz"
+checksum = "sha256:de0dad9d7e49b73cd65e6d79a85e36d1f03695bcdcb63b94fc4bb22cab8dd636"
+format = "tar.gz"
+strip-prefix = "mpi-boost-1.92.0"
+# 0001 adds build.c, the package's build script.  It supplies the target
+# `mpi`, the system's MPI library (MPI 2 or newer) through its C
+# interface: the installation CABIN_SDK_MPI_DIR names, the Microsoft MPI
+# SDK among them, or else pkg-config's ompi-c (Open MPI 1.5 or newer),
+# which an MSVC build cannot use.
+patches = ["patches/0001-add-build-script.patch"]
+
+[package]
+name = "cabin-ports/boost-mpi"
+version = "1.92.0"
+license = "BSL-1.0"
+
+[dependencies]
+"cabin-ports/boost-assert" = "=1.92.0"
+"cabin-ports/boost-config" = "=1.92.0"
+"cabin-ports/boost-core" = "=1.92.0"
+"cabin-ports/boost-foreach" = "=1.92.0"
+"cabin-ports/boost-function" = "=1.92.0"
+"cabin-ports/boost-graph" = "=1.92.0"
+"cabin-ports/boost-integer" = "=1.92.0"
+"cabin-ports/boost-iterator" = "=1.92.0"
+"cabin-ports/boost-lexical-cast" = "=1.92.0"
+"cabin-ports/boost-mpl" = "=1.92.0"
+"cabin-ports/boost-optional" = "=1.92.0"
+"cabin-ports/boost-serialization" = "=1.92.0"
+"cabin-ports/boost-smart-ptr" = "=1.92.0"
+"cabin-ports/boost-throw-exception" = "=1.92.0"
+"cabin-ports/boost-type-traits" = "=1.92.0"
+"cabin-ports/boost-utility" = "=1.92.0"
+
+# The system's MPI library, which build.c supplies.
+[target.mpi]
+type = "library"
+sources = []
+interface-c-standard = "c99"
+
+# Upstream's Python bindings (src/python), which its CMake does not
+# build, are not built.
+[target.boost_mpi]
+type = "library"
+sources = [
+  "src/broadcast.cpp",
+  "src/cartesian_communicator.cpp",
+  "src/communicator.cpp",
+  "src/computation_tree.cpp",
+  "src/content_oarchive.cpp",
+  "src/environment.cpp",
+  "src/error_string.cpp",
+  "src/exception.cpp",
+  "src/graph_communicator.cpp",
+  "src/group.cpp",
+  "src/intercommunicator.cpp",
+  "src/mpi_datatype_cache.cpp",
+  "src/mpi_datatype_oarchive.cpp",
+  "src/offsets.cpp",
+  "src/packed_iarchive.cpp",
+  "src/packed_oarchive.cpp",
+  "src/packed_skeleton_iarchive.cpp",
+  "src/packed_skeleton_oarchive.cpp",
+  "src/point_to_point.cpp",
+  "src/request.cpp",
+  "src/status.cpp",
+  "src/text_skeleton_oarchive.cpp",
+  "src/timer.cpp",
+]
+include-dirs = ["include"]
+defines = ["BOOST_MPI_SOURCE", "BOOST_MPI_STATIC_LINK"]
+interface-defines = ["BOOST_MPI_STATIC_LINK"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++14"
+links = "boost_mpi"
+deps = [
+  { name = "cabin-ports/boost-assert", public = true },
+  { name = "cabin-ports/boost-config", public = true },
+  { name = "cabin-ports/boost-core", public = true },
+  { name = "cabin-ports/boost-foreach", public = true },
+  { name = "cabin-ports/boost-function", public = true },
+  { name = "cabin-ports/boost-graph", public = true },
+  { name = "cabin-ports/boost-integer", public = true },
+  { name = "cabin-ports/boost-iterator", public = true },
+  "cabin-ports/boost-lexical-cast",
+  { name = "cabin-ports/boost-mpl", public = true },
+  { name = "cabin-ports/boost-optional", public = true },
+  { name = "cabin-ports/boost-serialization", public = true },
+  { name = "cabin-ports/boost-smart-ptr", public = true },
+  { name = "cabin-ports/boost-throw-exception", public = true },
+  { name = "cabin-ports/boost-type-traits", public = true },
+  "cabin-ports/boost-utility",
+  { name = "mpi", public = true },
+]

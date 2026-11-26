@@ -1,0 +1,83 @@
+[package.upstream]
+url = "https://github.com/boostorg/compute/archive/refs/tags/boost-1.92.0.tar.gz"
+checksum = "sha256:a63ef506dae6e5384cf5603dc0141e9a6af8974c23a6828ca2326de5338087e6"
+format = "tar.gz"
+strip-prefix = "compute-boost-1.92.0"
+
+[package]
+name = "cabin-ports/boost-compute"
+version = "1.92.0"
+# include/boost/compute/random/threefry_engine.hpp:147-175 carries
+# Random123's Threefry code under D. E. Shaw Research's BSD-3-Clause terms.
+license = "BSL-1.0 AND BSD-3-Clause"
+
+[dependencies]
+"cabin-ports/boost-algorithm" = "=1.92.0"
+"cabin-ports/boost-array" = "=1.92.0"
+"cabin-ports/boost-assert" = "=1.92.0"
+"cabin-ports/boost-atomic" = "=1.92.0"
+"cabin-ports/boost-chrono" = "=1.92.0"
+"cabin-ports/boost-config" = "=1.92.0"
+"cabin-ports/boost-core" = "=1.92.0"
+"cabin-ports/boost-filesystem" = "=1.92.0"
+"cabin-ports/boost-function" = "=1.92.0"
+"cabin-ports/boost-function-types" = "=1.92.0"
+"cabin-ports/boost-fusion" = "=1.92.0"
+"cabin-ports/boost-iterator" = "=1.92.0"
+"cabin-ports/boost-lexical-cast" = "=1.92.0"
+"cabin-ports/boost-mpl" = "=1.92.0"
+"cabin-ports/boost-optional" = "=1.92.0"
+"cabin-ports/boost-preprocessor" = "=1.92.0"
+"cabin-ports/boost-property-tree" = "=1.92.0"
+"cabin-ports/boost-proto" = "=1.92.0"
+"cabin-ports/boost-range" = "=1.92.0"
+"cabin-ports/boost-smart-ptr" = "=1.92.0"
+"cabin-ports/boost-thread" = "=1.92.0"
+"cabin-ports/boost-throw-exception" = "=1.92.0"
+"cabin-ports/boost-tuple" = "=1.92.0"
+"cabin-ports/boost-type-traits" = "=1.92.0"
+"cabin-ports/boost-typeof" = "=1.92.0"
+"cabin-ports/boost-utility" = "=1.92.0"
+"cabin-ports/boost-uuid" = "=1.92.0"
+"cabin-ports/opencl-headers" = "=2025.7.22"
+
+# Upstream's header-only target with the dependencies its build.jam lists.
+# Like upstream's target it links no OpenCL library: consumers link
+# cabin-ports/opencl-icd-loader or the platform's OpenCL library.  On Apple
+# platforms the headers include the SDK's <OpenCL/cl.h> and never reach
+# cabin-ports/opencl-headers.  Boost.Atomic, Chrono, Filesystem, Thread,
+# LexicalCast and PropertyTree set the C++14 floor.
+[target.boost_compute]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+deps = [
+  { name = "cabin-ports/boost-algorithm", public = true },
+  { name = "cabin-ports/boost-array", public = true },
+  { name = "cabin-ports/boost-assert", public = true },
+  { name = "cabin-ports/boost-atomic", public = true },
+  { name = "cabin-ports/boost-chrono", public = true },
+  { name = "cabin-ports/boost-config", public = true },
+  { name = "cabin-ports/boost-core", public = true },
+  { name = "cabin-ports/boost-filesystem", public = true },
+  { name = "cabin-ports/boost-function", public = true },
+  { name = "cabin-ports/boost-function-types", public = true },
+  { name = "cabin-ports/boost-fusion", public = true },
+  { name = "cabin-ports/boost-iterator", public = true },
+  { name = "cabin-ports/boost-lexical-cast", public = true },
+  { name = "cabin-ports/boost-mpl", public = true },
+  { name = "cabin-ports/boost-optional", public = true },
+  { name = "cabin-ports/boost-preprocessor", public = true },
+  { name = "cabin-ports/boost-property-tree", public = true },
+  { name = "cabin-ports/boost-proto", public = true },
+  { name = "cabin-ports/boost-range", public = true },
+  { name = "cabin-ports/boost-smart-ptr", public = true },
+  { name = "cabin-ports/boost-thread", public = true },
+  { name = "cabin-ports/boost-throw-exception", public = true },
+  { name = "cabin-ports/boost-tuple", public = true },
+  { name = "cabin-ports/boost-type-traits", public = true },
+  { name = "cabin-ports/boost-typeof", public = true },
+  { name = "cabin-ports/boost-utility", public = true },
+  { name = "cabin-ports/boost-uuid", public = true },
+  { name = "cabin-ports/opencl-headers", public = true },
+]

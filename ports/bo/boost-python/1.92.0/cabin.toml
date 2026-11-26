@@ -1,0 +1,132 @@
+[package.upstream]
+url = "https://github.com/boostorg/python/archive/refs/tags/boost-1.92.0.tar.gz"
+checksum = "sha256:5683ddec117d9b70b956ff02e4e4d7361b5baecf5c7f4d5bf7bb1f3f39ee3b75"
+format = "tar.gz"
+strip-prefix = "python-boost-1.92.0"
+# 0001 adds build.c, the package's build script.  It supplies the target
+# `python`, the system's Python 3.8 or newer: the installation
+# CABIN_SDK_PYTHON_DIR names, or else pkg-config's python3-embed, which
+# an MSVC build cannot use.
+patches = ["patches/0001-add-build-script.patch"]
+
+[package]
+name = "cabin-ports/boost-python"
+version = "1.92.0"
+# include/boost/python/detail/python22_fixed.h is Python 2.2's Python.h,
+# modified, under Python 2.2's terms.
+license = "BSL-1.0 AND Python-2.0"
+# `include` lists the tree without doc/, whose files carry terms of their
+# own or none: doc/article.rst reserves all rights.
+include = [
+  ".ci",
+  ".gitattributes",
+  ".github",
+  ".gitignore",
+  "CMakeLists.txt",
+  "LICENSE_1_0.txt",
+  "README.md",
+  "build",
+  "build.jam",
+  "example",
+  "fabscript",
+  "include",
+  "index.html",
+  "meta",
+  "src",
+  "test",
+  "todo.txt",
+]
+
+[dependencies]
+"cabin-ports/boost-align" = "=1.92.0"
+"cabin-ports/boost-bind" = "=1.92.0"
+"cabin-ports/boost-config" = "=1.92.0"
+"cabin-ports/boost-conversion" = "=1.92.0"
+"cabin-ports/boost-core" = "=1.92.0"
+"cabin-ports/boost-detail" = "=1.92.0"
+"cabin-ports/boost-foreach" = "=1.92.0"
+"cabin-ports/boost-function" = "=1.92.0"
+"cabin-ports/boost-graph" = "=1.92.0"
+"cabin-ports/boost-integer" = "=1.92.0"
+"cabin-ports/boost-iterator" = "=1.92.0"
+"cabin-ports/boost-lexical-cast" = "=1.92.0"
+"cabin-ports/boost-mpl" = "=1.92.0"
+"cabin-ports/boost-numeric-conversion" = "=1.92.0"
+"cabin-ports/boost-preprocessor" = "=1.92.0"
+"cabin-ports/boost-property-map" = "=1.92.0"
+"cabin-ports/boost-smart-ptr" = "=1.92.0"
+"cabin-ports/boost-tuple" = "=1.92.0"
+"cabin-ports/boost-type-traits" = "=1.92.0"
+"cabin-ports/boost-utility" = "=1.92.0"
+
+# The system's Python, which build.c supplies.
+[target.python]
+type = "library"
+sources = []
+interface-c-standard = "c11"
+
+# Cabin builds no shared library, so the library serves a program that
+# embeds Python, with its modules linked in (PyImport_AppendInittab), and
+# no extension module that Python loads from a file.  Upstream's
+# boost_numpy, which its CMake builds only where it finds NumPy, is not
+# built.
+[target.boost_python]
+type = "library"
+sources = [
+  "src/converter/arg_to_python_base.cpp",
+  "src/converter/builtin_converters.cpp",
+  "src/converter/from_python.cpp",
+  "src/converter/registry.cpp",
+  "src/converter/type_id.cpp",
+  "src/dict.cpp",
+  "src/errors.cpp",
+  "src/exec.cpp",
+  "src/import.cpp",
+  "src/list.cpp",
+  "src/long.cpp",
+  "src/module.cpp",
+  "src/object/class.cpp",
+  "src/object/enum.cpp",
+  "src/object/function.cpp",
+  "src/object/function_doc_signature.cpp",
+  "src/object/inheritance.cpp",
+  "src/object/iterator.cpp",
+  "src/object/life_support.cpp",
+  "src/object/pickle_support.cpp",
+  "src/object/stl_iterator.cpp",
+  "src/object_operators.cpp",
+  "src/object_protocol.cpp",
+  "src/slice.cpp",
+  "src/str.cpp",
+  "src/tuple.cpp",
+  "src/wrapper.cpp",
+]
+include-dirs = ["include"]
+defines = ["BOOST_PYTHON_SOURCE", "BOOST_PYTHON_STATIC_LINK", "BOOST_PYTHON_STATIC_LIB"]
+interface-defines = ["BOOST_PYTHON_STATIC_LINK", "BOOST_PYTHON_STATIC_LIB"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++14"
+links = "boost_python"
+deps = [
+  { name = "cabin-ports/boost-align", public = true },
+  { name = "cabin-ports/boost-bind", public = true },
+  { name = "cabin-ports/boost-config", public = true },
+  { name = "cabin-ports/boost-conversion", public = true },
+  { name = "cabin-ports/boost-core", public = true },
+  { name = "cabin-ports/boost-detail", public = true },
+  { name = "cabin-ports/boost-foreach", public = true },
+  { name = "cabin-ports/boost-function", public = true },
+  "cabin-ports/boost-graph",
+  "cabin-ports/boost-integer",
+  { name = "cabin-ports/boost-iterator", public = true },
+  { name = "cabin-ports/boost-lexical-cast", public = true },
+  { name = "cabin-ports/boost-mpl", public = true },
+  { name = "cabin-ports/boost-numeric-conversion", public = true },
+  { name = "cabin-ports/boost-preprocessor", public = true },
+  "cabin-ports/boost-property-map",
+  { name = "cabin-ports/boost-smart-ptr", public = true },
+  { name = "cabin-ports/boost-tuple", public = true },
+  { name = "cabin-ports/boost-type-traits", public = true },
+  { name = "cabin-ports/boost-utility", public = true },
+  { name = "python", public = true },
+]

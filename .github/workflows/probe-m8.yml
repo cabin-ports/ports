@@ -1,0 +1,83 @@
+name: probe-m8
+
+# A temporary probe, never merged: dry-runs the draft OpenCL, Python and
+# MPI ports with what each needs installed on the runner.
+on: pull_request
+
+permissions:
+  contents: read
+
+env:
+  CARGO_TERM_COLOR: always
+  CABIN_REV: e41d5ddd53d1ddd6618aafb4fe81f55a621f4aed
+
+jobs:
+  linux:
+    runs-on: ubuntu-24.04
+    steps: &probe
+      - uses: actions/checkout@v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions-rust-lang/setup-rust-toolchain@v2.0.0
+        with:
+          cache: false
+          rustflags: ""
+      - name: Install the pinned cabin
+        shell: bash
+        run: cargo install --locked --debug --git https://github.com/cabinpkg/cabin --rev "$CABIN_REV" cabinpkg --root "$RUNNER_TEMP/cabin"
+      - name: Set up MSVC environment
+        if: runner.os == 'Windows'
+        uses: ilammy/msvc-dev-cmd@v1.13.0
+
+      - name: Linux, PoCL and Open MPI
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends pocl-opencl-icd ocl-icd-opencl-dev libopenmpi-dev openmpi-bin
+      - name: macOS, Open MPI
+        if: runner.os == 'macOS'
+        run: brew install open-mpi
+      - name: Windows, Python's directory and Microsoft MPI
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Add-Content $env:GITHUB_ENV ("CABIN_SDK_PYTHON_DIR=" + (Split-Path (Get-Command python).Source))
+          $base = 'https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1'
+          Invoke-WebRequest "$base/msmpisetup.exe" -OutFile "$env:RUNNER_TEMP\msmpisetup.exe"
+          Invoke-WebRequest "$base/msmpisdk.msi" -OutFile "$env:RUNNER_TEMP\msmpisdk.msi"
+          if ((Get-FileHash "$env:RUNNER_TEMP\msmpisetup.exe" -Algorithm SHA256).Hash -ne '7308FD15E437D6829FD9C6EC5D801380FAA3BFF6E66E1DEE3E8E005106FB6A68') { exit 1 }
+          if ((Get-FileHash "$env:RUNNER_TEMP\msmpisdk.msi" -Algorithm SHA256).Hash -ne '6DF47378C0ACBB2B76989092165D7279EE096605FCAF7E455DE733B2FFDF4BCC') { exit 1 }
+          Start-Process -FilePath "$env:RUNNER_TEMP\msmpisetup.exe" -ArgumentList '-unattend' -Wait
+          Start-Process -FilePath msiexec.exe -ArgumentList '/quiet', '/i', "$env:RUNNER_TEMP\msmpisdk.msi" -Wait
+          Add-Content $env:GITHUB_ENV 'CABIN_SDK_MPI_DIR=C:\Program Files (x86)\Microsoft SDKs\MPI'
+          Add-Content $env:GITHUB_PATH 'C:\Program Files\Microsoft MPI\Bin'
+
+      - name: boost-compute
+        if: ${{ !cancelled() }}
+        env:
+          CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: cargo run --locked -- --dry-run --port boost-compute --cabin "${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}"
+      - name: boost-python
+        if: ${{ !cancelled() }}
+        env:
+          CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: cargo run --locked -- --dry-run --port boost-python --cabin "${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}"
+      - name: boost-mpi
+        if: ${{ !cancelled() }}
+        env:
+          CABIN_CACHE_DIR: ${{ runner.temp }}/cabin-cache
+          TMP: ${{ runner.temp }}
+          TEMP: ${{ runner.temp }}
+        run: cargo run --locked -- --dry-run --port boost-mpi --cabin "${{ runner.temp }}/cabin/bin/cabin${{ runner.os == 'Windows' && '.exe' || '' }}"
+
+  macos:
+    runs-on: macos-26
+    steps: *probe
+
+  windows:
+    runs-on: windows-2025-vs2026
+    steps: *probe
