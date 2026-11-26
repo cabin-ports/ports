@@ -1,0 +1,32 @@
+[package.upstream]
+url = "https://github.com/emilk/loguru/archive/refs/tags/v2.2.0.tar.gz"
+checksum = "sha256:519731aa253566048e89523343c39c46efa1c86b2ca1fb9df20343f8744b11ee"
+format = "tar.gz"
+strip-prefix = "loguru-2.2.0"
+
+[package]
+name = "cabin-ports/loguru"
+version = "2.2.0"
+# BSD-2-Clause covers the code loguru.cpp:1220-1263 (stacktrace_as_stdstring)
+# copies from Farooq Mela's gist fmela/591333; the rest is the Unlicense.
+license = "Unlicense AND BSD-2-Clause"
+include = ["LICENSE", "README.md", "loguru.hpp", "loguru.cpp"]
+
+# Upstream's default configuration is kept: the options keep the defaults
+# loguru.hpp sets, and consumers define any others in every translation unit.
+# Not ported: the fmt mode (LOGURU_USE_FMTLIB).
+# C++11 is upstream's floor (loguru.hpp:64, CMakeLists.txt:122); cl has no
+# C++11 mode and Cabin rejects it there, so the target itself builds as C++14.
+[target.loguru]
+type = "library"
+sources = ["loguru.cpp"]
+include-dirs = ["."]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "loguru"
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["dl"]
