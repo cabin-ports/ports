@@ -1,0 +1,16 @@
+[package.upstream]
+url = "https://github.com/philip82148/cpp-dump/archive/refs/tags/v0.7.0.tar.gz"
+checksum = "sha256:b27a0854a405aa10619f341f66e26a6c39dca1ad41a26dd4fa6d86ad6752c4f8"
+format = "tar.gz"
+strip-prefix = "cpp-dump-0.7.0"
+
+[package]
+name = "cabin-ports/cpp-dump"
+version = "0.7.0"
+license = "MIT"
+include = ["LICENSE", "README.md", "cpp-dump.hpp", "cpp-dump"]
+
+[target.cpp-dump]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++17"
