@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/linksplatform/equality/archive/refs/tags/0.0.1.tar.gz"
+checksum = "sha256:e3088785b10f74f0c3612328408edaace705c76d5924f45a21620569cf2f9cb0"
+format = "tar.gz"
+strip-prefix = "Equality-0.0.1"
+
+# ConanCenter's platform.equality; Cabin names reject '.'.
+[package]
+name = "cabin-ports/platform-equality"
+version = "0.0.1"
+# LICENSE at this tag is the GNU LGPL v3 text with no "or later" grant of its own.
+license = "LGPL-3.0-only"
+include = [
+  "LICENSE",
+  "README.md",
+  "cpp/Platform.Equality/Platform.Equality.h",
+  "cpp/Platform.Equality/Platform.Equality.Any.h",
+  "cpp/Platform.Equality/Platform.Equality.EqualityComparerFunctionType.h",
+  "cpp/Platform.Equality/Platform.Equality.Range.h",
+]
+
+# Any.h:30 keeps the comparer registry in a namespace-scope static, so each
+# translation unit has its own: a comparer registered in one .cc is unknown to
+# std::any comparisons in another, which throw (measured with two sources).
+[target.platform-equality]
+type = "header-only"
+include-dirs = ["cpp/Platform.Equality"]
+# cpp/Platform.Equality/CMakeLists.txt:5 sets CXX_STANDARD 20.
+interface-cxx-standard = "c++20"
