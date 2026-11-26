@@ -1,0 +1,350 @@
+[package.upstream]
+url = "https://github.com/ERGO-Code/HiGHS/archive/refs/tags/v1.16.0.tar.gz"
+checksum = "sha256:0fa9da512955fb08c6cca7bfb274ca12e8a0e8a12e44189bd6e0c355ce7701bc"
+format = "tar.gz"
+strip-prefix = "HiGHS-1.16.0"
+# CMake configures highs/HConfig.h from HConfig.h.in (CMakeLists.txt:722).
+# The copy places the template and patch 0001 fills it in as the default
+# configure of the release archive does: FAST_BUILD, zlib found, the CPU
+# PDLP, the shared-extras loader, a Release build type, and GITHASH "n/a"
+# outside a Git checkout (:44-58).  Its three compile checks (:510-541)
+# become tests of the predefined macros of the compilers they pass on.
+# MIT License notice of highs/HConfig.h.in (LICENSE.txt), whose lines 0001
+# carries (the License's condition that copies include it):
+# Copyright (c) 2026 HiGHS
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+patches = ["patches/0001-fill-in-hconfig-h.patch"]
+
+[[package.upstream.copy]]
+from = "highs/HConfig.h.in"
+to = "highs/HConfig.h"
+
+[package]
+name = "cabin-ports/highs"
+version = "1.16.0"
+# LGPL-2.1-or-later: CSparse, which highs/ipm/ipx/sparse_utils.h, ipm/basiclu/lu_dfs.c, ipm/hipo/factorhighs/Analyse.cpp, ipm/hipo/auxiliary/Auxiliary.cpp and pdlp/cupdlp/cupdlp_cs.c credit as the source of code they adapt or take.
+# highs/ipm/hipo/ipm/UpLookingSolver.h:11 credits Davis's book, CHOLMOD and QDLDL for the up-looking factorisation; its copyright significance is uncertain.
+# highs/ipm/hipo/auxiliary/KrylovMethods.cpp:50-54 credits Netlib's templates/cpp/gmres.h for GMRES; its copyright significance is uncertain.
+license = "MIT AND Zlib AND BSD-3-Clause AND LGPL-2.1-or-later"
+include = [
+  "LICENSE.txt",
+  "THIRD_PARTY_NOTICES.md",
+  "extern/HighsExtrasApi.h",
+  "extern/HighsExtrasApiBinding.h",
+  "extern/HighsExtrasExternalDeps.h",
+  "extern/HighsMetis.h",
+  "extern/amd/License.txt",
+  "extern/amd/SuiteSparse_config.h",
+  "extern/amd/amd.h",
+  "extern/blas/mycblas.h",
+  "extern/pdqsort",
+  "extern/rcm/LICENSE",
+  "extern/rcm/rcm.h",
+  "extern/zstr",
+  "highs",
+  "patches",
+]
+
+# zlib is upstream's default-on option (CMakeLists.txt:140, :676), which
+# reads .gz model files.
+[dependencies]
+"cabin-ports/zlib" = "^1.3"
+
+# The highs library CMake's default FAST_BUILD configuration builds: the
+# sources of cmake/sources.cmake that highs/CMakeLists.txt:6-7 compiles,
+# with BUILD.bazel's include directories (:99-114) except the test-only
+# extern/catch.  Not ported: the highs executable, the examples, and the
+# Fortran, C#, Python and GPU builds.  Not reproduced: the shared
+# highs_extras library (extern/CMakeLists.txt), which HiGHS loads at run
+# time if present and which provides nothing while HIPO is off, its default
+# (CMakeLists.txt:111); the libatomic link CheckAtomic adds where 64-bit
+# atomics need it (highs/CMakeLists.txt:487-497).
+[target.highs]
+type = "library"
+sources = [
+  "highs/HighsExternalApi.cpp",
+  "highs/HighsExternalDeps.cpp",
+  "highs/interfaces/highs_c_api.cpp",
+  "highs/io/Filereader.cpp",
+  "highs/io/FilereaderLp.cpp",
+  "highs/io/FilereaderMps.cpp",
+  "highs/io/HMPSIO.cpp",
+  "highs/io/HMpsFF.cpp",
+  "highs/io/HighsIO.cpp",
+  "highs/io/LoadOptions.cpp",
+  "highs/io/LpReader.cpp",
+  "highs/ipm/IpxWrapper.cpp",
+  "highs/ipm/basiclu/basiclu_factorize.c",
+  "highs/ipm/basiclu/basiclu_get_factors.c",
+  "highs/ipm/basiclu/basiclu_initialize.c",
+  "highs/ipm/basiclu/basiclu_object.c",
+  "highs/ipm/basiclu/basiclu_solve_dense.c",
+  "highs/ipm/basiclu/basiclu_solve_for_update.c",
+  "highs/ipm/basiclu/basiclu_solve_sparse.c",
+  "highs/ipm/basiclu/basiclu_update.c",
+  "highs/ipm/basiclu/lu_build_factors.c",
+  "highs/ipm/basiclu/lu_condest.c",
+  "highs/ipm/basiclu/lu_dfs.c",
+  "highs/ipm/basiclu/lu_factorize_bump.c",
+  "highs/ipm/basiclu/lu_file.c",
+  "highs/ipm/basiclu/lu_garbage_perm.c",
+  "highs/ipm/basiclu/lu_initialize.c",
+  "highs/ipm/basiclu/lu_internal.c",
+  "highs/ipm/basiclu/lu_markowitz.c",
+  "highs/ipm/basiclu/lu_matrix_norm.c",
+  "highs/ipm/basiclu/lu_pivot.c",
+  "highs/ipm/basiclu/lu_residual_test.c",
+  "highs/ipm/basiclu/lu_setup_bump.c",
+  "highs/ipm/basiclu/lu_singletons.c",
+  "highs/ipm/basiclu/lu_solve_dense.c",
+  "highs/ipm/basiclu/lu_solve_for_update.c",
+  "highs/ipm/basiclu/lu_solve_sparse.c",
+  "highs/ipm/basiclu/lu_solve_symbolic.c",
+  "highs/ipm/basiclu/lu_solve_triangular.c",
+  "highs/ipm/basiclu/lu_update.c",
+  "highs/ipm/hipo/auxiliary/Auxiliary.cpp",
+  "highs/ipm/hipo/auxiliary/KrylovMethods.cpp",
+  "highs/ipm/hipo/auxiliary/Logger.cpp",
+  "highs/ipm/hipo/auxiliary/VectorOperations.cpp",
+  "highs/ipm/hipo/factorhighs/Analyse.cpp",
+  "highs/ipm/hipo/factorhighs/CallAndTimeBlas.cpp",
+  "highs/ipm/hipo/factorhighs/CliqueStack.cpp",
+  "highs/ipm/hipo/factorhighs/DataCollector.cpp",
+  "highs/ipm/hipo/factorhighs/DenseFactHybrid.cpp",
+  "highs/ipm/hipo/factorhighs/DenseFactKernel.cpp",
+  "highs/ipm/hipo/factorhighs/DgemmParallel.cpp",
+  "highs/ipm/hipo/factorhighs/FactorHighs.cpp",
+  "highs/ipm/hipo/factorhighs/FactorHighs_c_api.cpp",
+  "highs/ipm/hipo/factorhighs/Factorise.cpp",
+  "highs/ipm/hipo/factorhighs/FormatHandler.cpp",
+  "highs/ipm/hipo/factorhighs/HybridHybridFormatHandler.cpp",
+  "highs/ipm/hipo/factorhighs/HybridSolveHandler.cpp",
+  "highs/ipm/hipo/factorhighs/KrylovMethodsIpm.cpp",
+  "highs/ipm/hipo/factorhighs/Numeric.cpp",
+  "highs/ipm/hipo/factorhighs/SolveHandler.cpp",
+  "highs/ipm/hipo/factorhighs/Swaps.cpp",
+  "highs/ipm/hipo/factorhighs/Symbolic.cpp",
+  "highs/ipm/hipo/ipm/Control.cpp",
+  "highs/ipm/hipo/ipm/FactorHighsSolver.cpp",
+  "highs/ipm/hipo/ipm/IpmData.cpp",
+  "highs/ipm/hipo/ipm/Iterate.cpp",
+  "highs/ipm/hipo/ipm/KktMatrix.cpp",
+  "highs/ipm/hipo/ipm/Model.cpp",
+  "highs/ipm/hipo/ipm/PreProcess.cpp",
+  "highs/ipm/hipo/ipm/Refine.cpp",
+  "highs/ipm/hipo/ipm/Solver.cpp",
+  "highs/ipm/hipo/ipm/UpLookingSolver.cpp",
+  "highs/ipm/ipx/basiclu_kernel.cc",
+  "highs/ipm/ipx/basiclu_wrapper.cc",
+  "highs/ipm/ipx/basis.cc",
+  "highs/ipm/ipx/conjugate_residuals.cc",
+  "highs/ipm/ipx/control.cc",
+  "highs/ipm/ipx/crossover.cc",
+  "highs/ipm/ipx/diagonal_precond.cc",
+  "highs/ipm/ipx/forrest_tomlin.cc",
+  "highs/ipm/ipx/guess_basis.cc",
+  "highs/ipm/ipx/indexed_vector.cc",
+  "highs/ipm/ipx/info.cc",
+  "highs/ipm/ipx/ipm.cc",
+  "highs/ipm/ipx/ipx_c.cc",
+  "highs/ipm/ipx/iterate.cc",
+  "highs/ipm/ipx/kkt_solver.cc",
+  "highs/ipm/ipx/kkt_solver_basis.cc",
+  "highs/ipm/ipx/kkt_solver_diag.cc",
+  "highs/ipm/ipx/linear_operator.cc",
+  "highs/ipm/ipx/lp_solver.cc",
+  "highs/ipm/ipx/lu_factorization.cc",
+  "highs/ipm/ipx/lu_update.cc",
+  "highs/ipm/ipx/maxvolume.cc",
+  "highs/ipm/ipx/model.cc",
+  "highs/ipm/ipx/normal_matrix.cc",
+  "highs/ipm/ipx/sparse_matrix.cc",
+  "highs/ipm/ipx/sparse_utils.cc",
+  "highs/ipm/ipx/splitted_normal_matrix.cc",
+  "highs/ipm/ipx/starting_basis.cc",
+  "highs/ipm/ipx/symbolic_invert.cc",
+  "highs/ipm/ipx/timer.cc",
+  "highs/ipm/ipx/utils.cc",
+  "highs/lp_data/Highs.cpp",
+  "highs/lp_data/HighsCallback.cpp",
+  "highs/lp_data/HighsDebug.cpp",
+  "highs/lp_data/HighsDeprecated.cpp",
+  "highs/lp_data/HighsIis.cpp",
+  "highs/lp_data/HighsInfo.cpp",
+  "highs/lp_data/HighsInfoDebug.cpp",
+  "highs/lp_data/HighsInterface.cpp",
+  "highs/lp_data/HighsLp.cpp",
+  "highs/lp_data/HighsLpUtils.cpp",
+  "highs/lp_data/HighsModelUtils.cpp",
+  "highs/lp_data/HighsOptions.cpp",
+  "highs/lp_data/HighsRanging.cpp",
+  "highs/lp_data/HighsRunData.cpp",
+  "highs/lp_data/HighsSolution.cpp",
+  "highs/lp_data/HighsSolutionDebug.cpp",
+  "highs/lp_data/HighsSolve.cpp",
+  "highs/lp_data/HighsStatus.cpp",
+  "highs/mip/HighsCliqueTable.cpp",
+  "highs/mip/HighsConflictPool.cpp",
+  "highs/mip/HighsCutGeneration.cpp",
+  "highs/mip/HighsCutPool.cpp",
+  "highs/mip/HighsDebugSol.cpp",
+  "highs/mip/HighsDomain.cpp",
+  "highs/mip/HighsDynamicRowMatrix.cpp",
+  "highs/mip/HighsFeasibilityJump.cpp",
+  "highs/mip/HighsGFkSolve.cpp",
+  "highs/mip/HighsImplications.cpp",
+  "highs/mip/HighsLpAggregator.cpp",
+  "highs/mip/HighsLpRelaxation.cpp",
+  "highs/mip/HighsMachineSchedSeparator.cpp",
+  "highs/mip/HighsMipSolver.cpp",
+  "highs/mip/HighsMipSolverData.cpp",
+  "highs/mip/HighsMipWorker.cpp",
+  "highs/mip/HighsModkSeparator.cpp",
+  "highs/mip/HighsNodeQueue.cpp",
+  "highs/mip/HighsObjectiveFunction.cpp",
+  "highs/mip/HighsPathSeparator.cpp",
+  "highs/mip/HighsPrimalHeuristics.cpp",
+  "highs/mip/HighsPseudocost.cpp",
+  "highs/mip/HighsRedcostFixing.cpp",
+  "highs/mip/HighsSearch.cpp",
+  "highs/mip/HighsSeparation.cpp",
+  "highs/mip/HighsSeparator.cpp",
+  "highs/mip/HighsTableauSeparator.cpp",
+  "highs/mip/HighsTransformedLp.cpp",
+  "highs/model/HighsHessian.cpp",
+  "highs/model/HighsHessianUtils.cpp",
+  "highs/model/HighsModel.cpp",
+  "highs/parallel/HighsTaskExecutor.cpp",
+  "highs/pdlp/CupdlpWrapper.cpp",
+  "highs/pdlp/HiPdlpWrapper.cpp",
+  "highs/pdlp/cupdlp/cupdlp_cs.c",
+  "highs/pdlp/cupdlp/cupdlp_linalg.c",
+  "highs/pdlp/cupdlp/cupdlp_proj.c",
+  "highs/pdlp/cupdlp/cupdlp_restart.c",
+  "highs/pdlp/cupdlp/cupdlp_scaling.c",
+  "highs/pdlp/cupdlp/cupdlp_solver.c",
+  "highs/pdlp/cupdlp/cupdlp_step.c",
+  "highs/pdlp/cupdlp/cupdlp_utils.c",
+  "highs/pdlp/hipdlp/linalg.cc",
+  "highs/pdlp/hipdlp/logger.cc",
+  "highs/pdlp/hipdlp/pdhg.cc",
+  "highs/pdlp/hipdlp/restart.cc",
+  "highs/pdlp/hipdlp/scaling.cc",
+  "highs/presolve/HPresolve.cpp",
+  "highs/presolve/HPresolveAggregator.cpp",
+  "highs/presolve/HPresolveAnalysis.cpp",
+  "highs/presolve/HPresolveCliqueTable.cpp",
+  "highs/presolve/HPresolveColStuffing.cpp",
+  "highs/presolve/HPresolveDependent.cpp",
+  "highs/presolve/HPresolveDominatedCols.cpp",
+  "highs/presolve/HPresolveDualFixing.cpp",
+  "highs/presolve/HPresolveEnumeration.cpp",
+  "highs/presolve/HPresolveFourierMotzkin.cpp",
+  "highs/presolve/HPresolveImpliedInts.cpp",
+  "highs/presolve/HPresolveInitialSweep.cpp",
+  "highs/presolve/HPresolveParallelRowsAndCols.cpp",
+  "highs/presolve/HPresolveProbing.cpp",
+  "highs/presolve/HPresolveProbingUtil.cpp",
+  "highs/presolve/HPresolveSparsify.cpp",
+  "highs/presolve/HPresolveStrengthenIneq.cpp",
+  "highs/presolve/HPresolveTest.cpp",
+  "highs/presolve/HPresolveUtils.cpp",
+  "highs/presolve/HPresolveVarBndAggregation.cpp",
+  "highs/presolve/HPresolveZeroCostSingleton.cpp",
+  "highs/presolve/HighsPostsolveStack.cpp",
+  "highs/presolve/HighsSymmetry.cpp",
+  "highs/presolve/ICrash.cpp",
+  "highs/presolve/ICrashUtil.cpp",
+  "highs/presolve/ICrashX.cpp",
+  "highs/presolve/PresolveComponent.cpp",
+  "highs/qpsolver/QpAsmWrapper.cpp",
+  "highs/qpsolver/a_asm.cpp",
+  "highs/qpsolver/a_quass.cpp",
+  "highs/qpsolver/basis.cpp",
+  "highs/qpsolver/quass.cpp",
+  "highs/qpsolver/ratiotest.cpp",
+  "highs/qpsolver/scaling.cpp",
+  "highs/simplex/HEkk.cpp",
+  "highs/simplex/HEkkControl.cpp",
+  "highs/simplex/HEkkDebug.cpp",
+  "highs/simplex/HEkkDual.cpp",
+  "highs/simplex/HEkkDualMulti.cpp",
+  "highs/simplex/HEkkDualRHS.cpp",
+  "highs/simplex/HEkkDualRow.cpp",
+  "highs/simplex/HEkkInterface.cpp",
+  "highs/simplex/HEkkPrimal.cpp",
+  "highs/simplex/HSimplex.cpp",
+  "highs/simplex/HSimplexDebug.cpp",
+  "highs/simplex/HSimplexNla.cpp",
+  "highs/simplex/HSimplexNlaDebug.cpp",
+  "highs/simplex/HSimplexNlaFreeze.cpp",
+  "highs/simplex/HSimplexNlaProductForm.cpp",
+  "highs/simplex/HSimplexReport.cpp",
+  "highs/simplex/HighsSimplexAnalysis.cpp",
+  "highs/util/HFactor.cpp",
+  "highs/util/HFactorDebug.cpp",
+  "highs/util/HFactorExtend.cpp",
+  "highs/util/HFactorRefactor.cpp",
+  "highs/util/HFactorUtils.cpp",
+  "highs/util/HSet.cpp",
+  "highs/util/HVectorBase.cpp",
+  "highs/util/HighsDynamicLibrary.cpp",
+  "highs/util/HighsHash.cpp",
+  "highs/util/HighsLinearSumBounds.cpp",
+  "highs/util/HighsMatrixPic.cpp",
+  "highs/util/HighsMatrixUtils.cpp",
+  "highs/util/HighsSort.cpp",
+  "highs/util/HighsSparseMatrix.cpp",
+  "highs/util/HighsUtils.cpp",
+  "highs/util/stringutil.cpp",
+]
+include-dirs = ["highs", "extern"]
+# Upstream requires C++11 (CMakeLists.txt:31-33); C++14 is the oldest standard
+# Cabin can request from MSVC, as C11 is for basiclu and cuPDLP-C, whose
+# build states no C standard.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+c-standard = "c11"
+# interfaces/highs_c_api.h has // comments (:10-12), which C89 lacks.
+interface-c-standard = "c99"
+links = "highs"
+deps = ["cabin-ports/zlib"]
+
+# highs/CMakeLists.txt:290-298: the definitions upstream adds for MSVC.
+[target.'cfg(any(cxx = "msvc", cxx = "clang-cl"))'.profile]
+defines = [
+  "NOMINMAX",
+  "WIN32_LEAN_AND_MEAN=1",
+  "_CRT_SECURE_NO_DEPRECATE",
+  "_CRT_SECURE_NO_WARNINGS",
+]
+
+# CMake's MSVC defaults and MinGW's GNU modes define WIN32, which
+# highs/pdlp/cupdlp/cupdlp_utils.c:1145 tests to time PDLP with clock().
+[target.'cfg(os = "windows")'.profile]
+defines = ["WIN32"]
+
+# Threads::Threads (highs/CMakeLists.txt:504).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# CMAKE_DL_LIBS (highs/CMakeLists.txt:505), for the dlopen of the extras.
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["dl"]
