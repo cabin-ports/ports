@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/ashtum/lazycsv/archive/6c36a9d66be1e652b0c06d4e34fb053b93caf0ff.tar.gz"
+checksum = "sha256:19bc1673d9a60b82ed71f3ae8cfaa36105c15d6f6f2dfa496ca8d2386f9c573f"
+format = "tar.gz"
+strip-prefix = "lazycsv-6c36a9d66be1e652b0c06d4e34fb053b93caf0ff"
+# lazycsv.hpp uses std::system_error without <system_error>, which libc++ does not provide
+# transitively (measured: macOS sandbox, "error: no member named 'system_error' in namespace
+# 'std'").
+patches = ["patches/0001-include-system-error.patch"]
+
+# Upstream has no tags; 1.2.0 is the VERSION its CMakeLists.txt declares at this commit.
+[package]
+name = "cabin-ports/lazycsv"
+version = "1.2.0"
+license = "MIT"
+include = ["LICENSE", "include", "patches"]
+
+# C++17 is stated in README.md:7 and CMakeLists.txt:8.
+[target.lazycsv]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
