@@ -19,8 +19,7 @@ include = ["LICENSE", "mapbox", "tiny_obj_loader.cc", "tiny_obj_loader.h"]
 # -std=c++98 -pedantic-errors, so the interface asks for c++98.  The library
 # itself builds as C++14 (CMakeLists.txt:58 asks C++11), the oldest standard
 # Cabin can request from MSVC.  The TINYOBJLOADER_USE_DOUBLE option builds a
-# second library under another name; link only one of the two targets, since
-# both define the same symbols.
+# second library under another name.
 # Not ported: the Python bindings, the example loader and stitcher applications,
 # and shared builds (CMakeLists.txt:12, :56, :89, :114).
 [features]
