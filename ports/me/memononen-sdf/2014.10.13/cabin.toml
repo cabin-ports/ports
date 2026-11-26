@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/memononen/SDF/archive/1ef5b4e4feb60ea84e47c01425de3edcf39bd83c.tar.gz"
+checksum = "sha256:46275d3f50aa9eec23a724cb5902967a216597e7e8ef2b3739c0b4fe7a187117"
+format = "tar.gz"
+strip-prefix = "SDF-1ef5b4e4feb60ea84e47c01425de3edcf39bd83c"
+
+[package]
+name = "cabin-ports/memononen-sdf"
+# Upstream has no tags or releases; 2014.10.13 is the date of the pinned
+# commit.
+version = "2014.10.13"
+license = "MIT"
+include = ["LICENSE.txt", "src/sdf.h"]
+
+# Upstream states no standard; C99 is the measured floor (// comments).
+# The header has no extern "C": a C++ file that includes it fails to link
+# against an implementation compiled as C (measured), so a C++ consumer
+# defines SDF_IMPLEMENTATION in a C++ translation unit.
+[target.memononen-sdf]
+type = "header-only"
+include-dirs = ["src"]
+interface-c-standard = "c99"
+
+# The implementation calls sqrtf and sqrt from libm.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
