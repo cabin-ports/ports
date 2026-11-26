@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/godotengine/godot-headers/archive/refs/tags/godot-4.7-stable.tar.gz"
+checksum = "sha256:b2831e0d3f71fa71c6afacdffd2e1a79da15255e6c0228abc10dd89d87f6c543"
+format = "tar.gz"
+strip-prefix = "godot-headers-godot-4.7-stable"
+
+# Upstream tags Godot releases as godot-4.7-stable.
+[package]
+name = "cabin-ports/godot-headers"
+version = "4.7.0"
+license = "MIT"
+include = ["LICENSE.txt", "gdextension_interface.h"]
+
+# Upstream states no standard.  Measured with clang -pedantic-errors: C89 and
+# C++98 fail at the trailing enumerator comma (gdextension_interface.h:90,
+# "commas at the end of enumerator lists are a C99-specific feature" and "a
+# C++11 extension"); C99 and C++11 pass.  extension_api.json, the generator
+# input, is not packaged.
+[target.godot-headers]
+type = "header-only"
+include-dirs = ["."]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
