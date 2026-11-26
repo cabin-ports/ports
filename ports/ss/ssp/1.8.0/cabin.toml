@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/red0124/ssp/archive/refs/tags/v1.8.0.tar.gz"
+checksum = "sha256:a4416746023c8a60f6808200193dd207f1044b6e37e6c5bc0462e85452307d1d"
+format = "tar.gz"
+strip-prefix = "ssp-1.8.0"
+
+[package]
+name = "cabin-ports/ssp"
+version = "1.8.0"
+# README.md:25 credits qt-creator for the function traits
+# (include/ss/function_traits.hpp); its copyright significance is uncertain.
+license = "MIT"
+# The root ssp.hpp single header disables fast_float, so it stays out.
+include = ["LICENSE", "README.md", "include"]
+
+[dependencies]
+"cabin-ports/fast_float" = "=8.3.3"
+
+[target.ssp]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:22 and CMakeLists.txt:45 (cxx_std_17).
+interface-cxx-standard = "c++17"
+deps = [{ name = "cabin-ports/fast_float", public = true }]
