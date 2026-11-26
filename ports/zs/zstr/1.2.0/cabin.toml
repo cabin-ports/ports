@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/mateidavid/zstr/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:943113ad166906a237a4c426c48ecf2f8d0ea8f6a8f051f6e5a8710fe441de11"
+format = "tar.gz"
+strip-prefix = "zstr-1.2.0"
+
+[package]
+name = "cabin-ports/zstr"
+version = "1.2.0"
+# src/strict_fstream.hpp:50-53 credits a Stack Overflow answer for its strerror
+# wrapper; its copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "README.org", "src"]
+
+[dependencies]
+"cabin-ports/zlib" = "^1.3"
+
+# C++11 per CMakeLists.txt (cxx_std_11).
+[target.zstr]
+type = "header-only"
+include-dirs = ["src"]
+interface-cxx-standard = "c++11"
+deps = [{ name = "cabin-ports/zlib", public = true }]
