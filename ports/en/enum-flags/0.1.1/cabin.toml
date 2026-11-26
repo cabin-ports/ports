@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/grisumbras/enum-flags/archive/48d25b470ee6971d0db15f020937abf6017ebf51.tar.gz"
+checksum = "sha256:0b490bf7cb3c8de13cb50a542ecc69f933642dab3d3170245c5fc35c4392b856"
+format = "tar.gz"
+strip-prefix = "enum-flags-48d25b470ee6971d0db15f020937abf6017ebf51"
+
+# The only tag, v0.1a, is a pre-release; 0.1.1 is what jamroot.jam declares at this commit.
+[package]
+name = "cabin-ports/enum-flags"
+version = "0.1.1"
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+# Upstream states no standard; C++11 is the lowest that compiles (measured):
+# -std=c++98 stops at iterator.hpp:24, "unknown type name 'constexpr'".
+[target.enum-flags]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
