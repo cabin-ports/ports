@@ -10,6 +10,8 @@ name = "cabin-ports/tinyobjloader"
 version = "2.0.0-rc.13"
 # tiny_obj_loader.h:765-799 (safeGetline) is the Stack Overflow answer it links
 # (question 6089231), under CC-BY-SA-3.0.  LICENSE adds mapbox/earcut.hpp's ISC.
+# tiny_obj_loader.h:1438 credits Franklin's pnpoly and :2028 credits Rosetta Code for
+# SplitString; their copyright significance is uncertain.
 license = "MIT AND ISC AND CC-BY-SA-3.0"
 include = ["LICENSE", "mapbox", "tiny_obj_loader.cc", "tiny_obj_loader.h"]
 
