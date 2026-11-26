@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/nonstd-lite/scope-lite/archive/refs/tags/v0.3.0.tar.gz"
+checksum = "sha256:c66b54c29c2982341945c7258b7e2c0b49558848f50ac42698cb34aa52f78446"
+format = "tar.gz"
+strip-prefix = "scope-lite-0.3.0"
+
+[package]
+name = "cabin-ports/scope-lite"
+version = "0.3.0"
+license = "BSL-1.0"
+include = ["LICENSE.txt", "include"]
+
+# Header-only, as upstream's CMake interface target nonstd::scope-lite
+# (CMakeLists.txt:66-76): include/ is the include root, so consumers write
+# `#include <nonstd/scope.hpp>`.  The header supports C++98 and later
+# (README.md:50) and takes the standard from _MSVC_LANG on cl.exe
+# (scope.hpp:60-63).  Where C++20's <scope>
+# exists, the guards are std's unless a consumer defines
+# scope_CONFIG_SELECT_SCOPE=scope_SCOPE_NONSTD (:44-46, 93-94); every
+# scope_CONFIG_* option keeps upstream's default.
+[target.scope-lite]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++98"
