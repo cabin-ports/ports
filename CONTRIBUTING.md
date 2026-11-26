@@ -108,8 +108,9 @@ normalize, re-wrap, or regenerate a committed patch.  See
 ## Build scripts
 
 Most ports need none.  A port carries a [build script](https://cabinpkg.com/docs/build-scripts/)
-only when Cabin's target model cannot build the library: its upstream build configures or
-generates what it compiles.  A library a manifest can describe stays a plain port built from its
+only when Cabin's target model cannot build the library - its upstream build configures or
+generates what it compiles - or the library needs one of the system's that the catalog has no
+port of.  A library a manifest can describe stays a plain port built from its
 sources, whether or not systems install it.  Cabin compiles the script and runs it confined
 before it builds the package, on every machine that builds it, so the port and every port that
 requires it build only
@@ -131,6 +132,11 @@ requires it build only
   it and a consumer passes the choice on with a feature named `vendored-<name>`
   (`vendored-openssl`).  What the default build links is the machine's library, not the port's
   version of it, so a port that requires it uses only what the oldest accepted version has.
+- A library that needs a system library the catalog has no port of, as Boost.Python needs Python,
+  takes it from a target of the port's own: a `library` target without sources, which the script
+  supplies the same way and offers no `vendored` build of, and which the port's library requires
+  with `public = true`.  The package then has two library targets, so whatever requires it names
+  the one it means (`cabin-ports/boost-python:boost_python`).
 - The default build has to pass the dry-run on Linux, macOS, and Windows and build in the publish
   workflow, on runner images that hold the library.  Where pkg-config does not supply it there,
   the workflows set the port's `CABIN_SDK_<NAME>_DIR` first, in a pull request of their own.
@@ -299,8 +305,9 @@ $ cargo run --locked -- --dry-run --cabin target/pinned-cabin/bin/cabin
 
 The tests that drive `cabin` read it from `PORT_PUBLISH_CABIN` and fail without it.  The dry-run
 downloads each pinned upstream archive once into Cabin's cache (`<cache>/ports/archives/`; see
-`--help`).  On Linux it also runs the probe packages that talk to a database server, which fail
-without the servers [CI](docs/maintaining.md#ci) starts on `127.0.0.1`.
+`--help`).  On Linux it also runs the probe packages that talk to a database server or run an
+OpenCL kernel, which fail without the servers [CI](docs/maintaining.md#ci) starts on `127.0.0.1`
+and the OpenCL implementation it installs.
 
 A change to `scripts/actions/` or `.github/workflows/` must also pass the `lint` job's
 `shellcheck`, `shfmt`, `actionlint`, and `check-inline-runs.sh` steps;
