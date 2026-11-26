@@ -1,0 +1,164 @@
+[package.upstream]
+url = "https://github.com/redis/hiredis/archive/refs/tags/v1.5.1.tar.gz"
+checksum = "sha256:f5ec19151c0f4f15ca018c22b17b6f6739a672a4fc0c085b692aef69a154ebef"
+format = "tar.gz"
+strip-prefix = "hiredis-1.5.1"
+
+# The headers upstream's CMake build installs (CMakeLists.txt:129-133, :208,
+# :135-136), under the hiredis/ directory it installs them in, so consumers
+# write <hiredis/hiredis.h> as with its installed package (README.md:683);
+# the archive root, with the tests and examples, stays off the include path.
+# The qt, redismoduleapi and libsdevent adapters are left out: 16 copy steps at most.
+[[package.upstream.copy]]
+from = "alloc.h"
+to = "include/hiredis/alloc.h"
+
+[[package.upstream.copy]]
+from = "async.h"
+to = "include/hiredis/async.h"
+
+[[package.upstream.copy]]
+from = "hiredis.h"
+to = "include/hiredis/hiredis.h"
+
+[[package.upstream.copy]]
+from = "hiredis_ssl.h"
+to = "include/hiredis/hiredis_ssl.h"
+
+[[package.upstream.copy]]
+from = "read.h"
+to = "include/hiredis/read.h"
+
+[[package.upstream.copy]]
+from = "sds.h"
+to = "include/hiredis/sds.h"
+
+[[package.upstream.copy]]
+from = "sockcompat.h"
+to = "include/hiredis/sockcompat.h"
+
+[[package.upstream.copy]]
+from = "adapters/ae.h"
+to = "include/hiredis/adapters/ae.h"
+
+[[package.upstream.copy]]
+from = "adapters/glib.h"
+to = "include/hiredis/adapters/glib.h"
+
+[[package.upstream.copy]]
+from = "adapters/ivykis.h"
+to = "include/hiredis/adapters/ivykis.h"
+
+[[package.upstream.copy]]
+from = "adapters/libev.h"
+to = "include/hiredis/adapters/libev.h"
+
+[[package.upstream.copy]]
+from = "adapters/libevent.h"
+to = "include/hiredis/adapters/libevent.h"
+
+[[package.upstream.copy]]
+from = "adapters/libhv.h"
+to = "include/hiredis/adapters/libhv.h"
+
+[[package.upstream.copy]]
+from = "adapters/libuv.h"
+to = "include/hiredis/adapters/libuv.h"
+
+[[package.upstream.copy]]
+from = "adapters/macosx.h"
+to = "include/hiredis/adapters/macosx.h"
+
+[[package.upstream.copy]]
+from = "adapters/poll.h"
+to = "include/hiredis/adapters/poll.h"
+
+[package]
+name = "cabin-ports/hiredis"
+version = "1.5.1"
+# COPYING is BSD-3-Clause.  ffc.h, which read.c includes (read.c:51-67), is
+# MIT (ffc.h:1, full text in the file).
+license = "BSD-3-Clause AND MIT"
+include = [
+  "COPYING",
+  "alloc.c",
+  "alloc.h",
+  "async.c",
+  "async.h",
+  "async_private.h",
+  "dict.c",
+  "dict.h",
+  "ffc.h",
+  "fmacros.h",
+  "hiredis.c",
+  "hiredis.h",
+  "hiredis_ssl.h",
+  "include",
+  "net.c",
+  "net.h",
+  "read.c",
+  "read.h",
+  "sds.c",
+  "sds.h",
+  "sdsalloc.h",
+  "sockcompat.c",
+  "sockcompat.h",
+  "ssl.c",
+  "win32.h",
+]
+# hiredis is C99 (CMakeLists.txt:38); C11 is the oldest standard Cabin can
+# request from MSVC.  The headers include <stdint.h>, which C++ has from
+# C++11; upstream states no C++ standard.
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# TLS is upstream's ENABLE_SSL (CMakeLists.txt:28, :165-190), off by default
+# as there: the `ssl` feature builds its hiredis_ssl library as the target
+# hiredis-ssl on this package's openssl, and vendored-openssl takes the
+# openssl port's own build of OpenSSL in place of the system's.  Not built
+# or run by the default dry-run, which enables no feature.
+[dependencies]
+"cabin-ports/openssl" = { version = "=4.1.0", optional = true }
+
+[features]
+default = []
+ssl = ["dep:cabin-ports/openssl"]
+vendored-openssl = ["ssl", "cabin-ports/openssl/vendored"]
+
+# Windows: upstream defines these for every source (CMakeLists.txt:52-54)
+# and links ws2_32 and crypt32 publicly (:69-70).
+[target.'cfg(os = "windows")'.profile]
+defines = ["_CRT_SECURE_NO_WARNINGS", "WIN32_LEAN_AND_MEAN"]
+link-libs = ["ws2_32", "crypt32"]
+
+[target.'cfg(os = "freebsd")'.profile]
+link-libs = ["m"]
+
+# Upstream's hiredis, built static.  dict.c is included by async.c, so it is
+# not listed as a source (CMakeLists.txt:41-48).
+[target.hiredis]
+type = "library"
+sources = [
+  "alloc.c",
+  "async.c",
+  "hiredis.c",
+  "net.c",
+  "read.c",
+  "sds.c",
+  "sockcompat.c",
+]
+include-dirs = ["include"]
+links = "hiredis"
+
+# Upstream's hiredis_ssl.
+[target.hiredis-ssl]
+type = "library"
+sources = ["ssl.c"]
+include-dirs = ["include"]
+deps = [
+  { name = "hiredis", public = true },
+  { name = "cabin-ports/openssl:ssl", public = true },
+]
+links = "hiredis_ssl"
+required-features = ["ssl"]
