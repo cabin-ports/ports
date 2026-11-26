@@ -1,6 +1,6 @@
 [package.upstream]
 url = "https://github.com/kuba--/zip/archive/refs/tags/v0.3.15.tar.gz"
-checksum = "sha256:0d66dd898f570cbb98bf4b2a1bf1bd9d113f7579ec35e65485b7711d0aebdef7"
+checksum = "sha256:98132de21f8cd8df203499c575201dea9fab99954461cd7877277ca38fe2e8db"
 format = "tar.gz"
 strip-prefix = "zip-0.3.15"
 patches = ["patches/0001-add-info-zip-license.patch"]
