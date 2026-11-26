@@ -1,0 +1,24 @@
+[package.upstream]
+# Upstream tags no releases; this is main on 2026-11-23, whose shipped plf_list.h is the
+# one of the commit with subject "v7.6.52".
+url = "https://github.com/mattreecebentley/plf_list/archive/c7966ffcb1febfc96fab587c057e91ea2eb6c038.tar.gz"
+checksum = "sha256:b3fa5593f4ede7536185e310d83c0fa20ba3b8b8ed6b35ab56453ea48fa10476"
+format = "tar.gz"
+strip-prefix = "plf_list-c7966ffcb1febfc96fab587c057e91ea2eb6c038"
+
+[package]
+name = "cabin-ports/plf-list"
+version = "7.6.52"
+license = "Zlib"
+# The archive's bundled plf_tools.h and plf_tools_undef.h are left out: plf-tools provides them.
+include = ["LICENSE.md", "plf_list.h"]
+
+[dependencies]
+"cabin-ports/plf-tools" = "^1.0.18"
+
+# README.md: "plf::list is C++98/03/11/14/17/20/23/etc compatible."
+[target.plf-list]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++98"
+deps = [{ name = "cabin-ports/plf-tools", public = true }]
