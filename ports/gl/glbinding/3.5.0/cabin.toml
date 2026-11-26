@@ -1,0 +1,207 @@
+[package.upstream]
+url = "https://github.com/cginternals/glbinding/archive/refs/tags/v3.5.0.tar.gz"
+checksum = "sha256:bb39a97d5d94f70fe6e9c2152e0d8d760758bb031b352e1707fa90f00a43fc69"
+format = "tar.gz"
+strip-prefix = "glbinding-3.5.0"
+# The public headers include <glbinding/glbinding_api.h>,
+# <glbinding/glbinding_features.h> and their glbinding-aux counterparts,
+# which CMake writes (source/glbinding/CMakeLists.txt:185-206,
+# source/glbinding-aux/CMakeLists.txt:155-176).  0001 adds the six headers,
+# and the installed glbinding/glbinding-version.h (source/CMakeLists.txt:7,
+# :46-47), as CMake 4.4.5 writes them for the static libraries:
+# <target>_export.h by generate_export_header, with the value it writes for
+# Windows (<TARGET>_DEPRECATED, which nothing uses) left to the preprocessor;
+# <target>_api.h from source/codegeneration/template_api.h.in, which the
+# MSVC template matches under <TARGET>_STATIC_DEFINE; <target>_features.h by
+# write_compiler_detection_header; and glbinding-version.h from
+# source/version.h.in with the revision "0" of a build without Git
+# information (CMakeLists.txt:70-80).
+# Upstream's SYSTEM_<CMAKE_SYSTEM_NAME> is a PUBLIC definition
+# (cmake/CompileOptions.cmake:52-54), and Function.h, the one public header
+# that reads it, takes WINAPI (__stdcall) from SYSTEM_WINDOWS for the
+# function-pointer type consumers call through.  Cabin's interface-defines
+# cannot depend on the platform (Cabin's docs/manifest.md:220), so 0002 has
+# Function.h also take _WIN32 for SYSTEM_WINDOWS.
+# MIT License notice (LICENSE) of source/codegeneration/template_api.h.in,
+# source/version.h.in and source/glbinding/include/glbinding/Function.h,
+# whose lines 0001 carries in both <target>_api.h and glbinding-version.h
+# and 0002 in Function.h (the License's condition that copies include it):
+# Copyright (c) 2014-2023 Computer Graphics Systems Group at the
+# Hasso-Plattner-Institute, Digital Engineering Company, University of
+# Potsdam and CG Internals, Germany.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a
+# copy of this software and associated documentation files (the
+# "Software"), to deal in the Software without restriction, including
+# without limitation the rights to use, copy, modify, merge, publish,
+# distribute, sublicense, and/or sell copies of the Software, and to permit
+# persons to whom the Software is furnished to do so, subject to the
+# following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+# FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+# DEALINGS IN THE SOFTWARE.
+patches = [
+  "patches/0001-add-the-generated-headers.patch",
+  "patches/0002-take-system-windows-from-win32-in-function-h.patch",
+]
+
+[package]
+name = "cabin-ports/glbinding"
+version = "3.5.0"
+license = "MIT"
+include = ["AUTHORS", "LICENSE", "patches", "source/glbinding", "source/glbinding-aux"]
+# Upstream builds C++11 (cmake/CompileOptions.cmake:22; README.md:168);
+# c++14 is the lowest implementation standard Cabin accepts on MSVC.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+
+[dependencies]
+"cabin-ports/egl-registry" = "=2024.9.9"
+
+# The two libraries CMake builds, as static libraries: upstream's default is
+# shared (CMakeLists.txt:57), for which Cabin has no target kind.
+# <KHR/khrplatform.h> comes from egl-registry, as from the KHR package that
+# upstream's find_package(KHR) prefers to its copy in source/3rdparty
+# (source/glbinding/CMakeLists.txt:7-12).  Not ported: the tools, examples
+# and tests; OPTION_BUILD_WITH_BOOST_THREAD (default off); and the CMake
+# files.  Not reproduced: the hidden visibility preset
+# (cmake/CompileOptions.cmake:25), which a static library keeps only if it
+# is linked into a shared one.
+[target.glbinding]
+type = "library"
+sources = [
+  "source/glbinding/source/AbstractFunction.cpp",
+  "source/glbinding/source/AbstractState.cpp",
+  "source/glbinding/source/AbstractValue.cpp",
+  "source/glbinding/source/Binding.cpp",
+  "source/glbinding/source/Binding_list.cpp",
+  "source/glbinding/source/Binding_objects_0.cpp",
+  "source/glbinding/source/Binding_objects_a.cpp",
+  "source/glbinding/source/Binding_objects_b.cpp",
+  "source/glbinding/source/Binding_objects_c.cpp",
+  "source/glbinding/source/Binding_objects_d.cpp",
+  "source/glbinding/source/Binding_objects_e.cpp",
+  "source/glbinding/source/Binding_objects_f.cpp",
+  "source/glbinding/source/Binding_objects_g.cpp",
+  "source/glbinding/source/Binding_objects_h.cpp",
+  "source/glbinding/source/Binding_objects_i.cpp",
+  "source/glbinding/source/Binding_objects_j.cpp",
+  "source/glbinding/source/Binding_objects_k.cpp",
+  "source/glbinding/source/Binding_objects_l.cpp",
+  "source/glbinding/source/Binding_objects_m.cpp",
+  "source/glbinding/source/Binding_objects_n.cpp",
+  "source/glbinding/source/Binding_objects_o.cpp",
+  "source/glbinding/source/Binding_objects_p.cpp",
+  "source/glbinding/source/Binding_objects_q.cpp",
+  "source/glbinding/source/Binding_objects_r.cpp",
+  "source/glbinding/source/Binding_objects_s.cpp",
+  "source/glbinding/source/Binding_objects_t.cpp",
+  "source/glbinding/source/Binding_objects_u.cpp",
+  "source/glbinding/source/Binding_objects_v.cpp",
+  "source/glbinding/source/Binding_objects_w.cpp",
+  "source/glbinding/source/Binding_objects_x.cpp",
+  "source/glbinding/source/Binding_objects_y.cpp",
+  "source/glbinding/source/Binding_objects_z.cpp",
+  "source/glbinding/source/FunctionCall.cpp",
+  "source/glbinding/source/State.cpp",
+  "source/glbinding/source/getProcAddress.cpp",
+  "source/glbinding/source/gl/functions-patches.cpp",
+  "source/glbinding/source/gl/functions_0.cpp",
+  "source/glbinding/source/gl/functions_a.cpp",
+  "source/glbinding/source/gl/functions_b.cpp",
+  "source/glbinding/source/gl/functions_c.cpp",
+  "source/glbinding/source/gl/functions_d.cpp",
+  "source/glbinding/source/gl/functions_e.cpp",
+  "source/glbinding/source/gl/functions_f.cpp",
+  "source/glbinding/source/gl/functions_g.cpp",
+  "source/glbinding/source/gl/functions_h.cpp",
+  "source/glbinding/source/gl/functions_i.cpp",
+  "source/glbinding/source/gl/functions_j.cpp",
+  "source/glbinding/source/gl/functions_k.cpp",
+  "source/glbinding/source/gl/functions_l.cpp",
+  "source/glbinding/source/gl/functions_m.cpp",
+  "source/glbinding/source/gl/functions_n.cpp",
+  "source/glbinding/source/gl/functions_o.cpp",
+  "source/glbinding/source/gl/functions_p.cpp",
+  "source/glbinding/source/gl/functions_q.cpp",
+  "source/glbinding/source/gl/functions_r.cpp",
+  "source/glbinding/source/gl/functions_s.cpp",
+  "source/glbinding/source/gl/functions_t.cpp",
+  "source/glbinding/source/gl/functions_u.cpp",
+  "source/glbinding/source/gl/functions_v.cpp",
+  "source/glbinding/source/gl/functions_w.cpp",
+  "source/glbinding/source/gl/functions_x.cpp",
+  "source/glbinding/source/gl/functions_y.cpp",
+  "source/glbinding/source/gl/functions_z.cpp",
+  "source/glbinding/source/glbinding.cpp",
+]
+include-dirs = ["source/glbinding/include"]
+# Upstream makes it public for the static build
+# (source/glbinding/CMakeLists.txt:282).
+defines = ["GLBINDING_STATIC_DEFINE"]
+interface-defines = ["GLBINDING_STATIC_DEFINE"]
+links = "glbinding"
+deps = [{ name = "cabin-ports/egl-registry", public = true }]
+
+[target.glbinding-aux]
+type = "library"
+sources = [
+  "source/glbinding-aux/source/ContextInfo.cpp",
+  "source/glbinding-aux/source/Meta.cpp",
+  "source/glbinding-aux/source/Meta_BitfieldsByString.cpp",
+  "source/glbinding-aux/source/Meta_BooleansByString.cpp",
+  "source/glbinding-aux/source/Meta_EnumsByString.cpp",
+  "source/glbinding-aux/source/Meta_ExtensionsByFunctionString.cpp",
+  "source/glbinding-aux/source/Meta_ExtensionsByString.cpp",
+  "source/glbinding-aux/source/Meta_FunctionStringsByExtension.cpp",
+  "source/glbinding-aux/source/Meta_FunctionStringsByVersion.cpp",
+  "source/glbinding-aux/source/Meta_ReqVersionsByExtension.cpp",
+  "source/glbinding-aux/source/Meta_StringsByBitfield.cpp",
+  "source/glbinding-aux/source/Meta_StringsByBoolean.cpp",
+  "source/glbinding-aux/source/Meta_StringsByEnum.cpp",
+  "source/glbinding-aux/source/Meta_StringsByExtension.cpp",
+  "source/glbinding-aux/source/Meta_getStringByBitfield.cpp",
+  "source/glbinding-aux/source/ValidVersions.cpp",
+  "source/glbinding-aux/source/ValidVersions_list.cpp",
+  "source/glbinding-aux/source/debug.cpp",
+  "source/glbinding-aux/source/logging.cpp",
+  "source/glbinding-aux/source/types_to_string.cpp",
+  "source/glbinding-aux/source/types_to_string_private.cpp",
+]
+include-dirs = ["source/glbinding-aux/include"]
+# Upstream makes it public for the static build
+# (source/glbinding-aux/CMakeLists.txt:239).
+defines = ["GLBINDING_AUX_STATIC_DEFINE"]
+interface-defines = ["GLBINDING_AUX_STATIC_DEFINE"]
+links = "glbinding-aux"
+deps = [{ name = "glbinding", public = true }]
+
+# Upstream's SYSTEM_<CMAKE_SYSTEM_NAME> (cmake/CompileOptions.cmake:52-54)
+# for the package's own compiles: getProcAddress.cpp reads it for Windows and
+# macOS.  Consumers' Function.h takes _WIN32 instead (patch 0002).
+[target.'cfg(os = "windows")'.profile]
+defines = ["SYSTEM_WINDOWS"]
+
+[target.'cfg(os = "macos")'.profile]
+defines = ["SYSTEM_DARWIN"]
+
+# Upstream's MSVC definitions (cmake/CompileOptions.cmake:56-63), which
+# clang-cl also meets.
+[target.'cfg(any(cxx = "msvc", cxx = "clang-cl"))'.profile]
+defines = ["_SCL_SECURE_NO_WARNINGS", "_CRT_SECURE_NO_WARNINGS"]
+
+# Upstream's -pthread (cmake/CompileOptions.cmake:155-159, :168-173) and
+# CMAKE_DL_LIBS, dl on Linux (:184-190).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["dl"]
