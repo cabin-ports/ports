@@ -1,0 +1,43 @@
+[package.upstream]
+url = "https://github.com/vincentlaucsb/csv-parser/archive/refs/tags/v5.8.0.tar.gz"
+checksum = "sha256:395b32a447b7cdf682293fd408f77ddf0bda799abf3e49c604da237fac453b03"
+format = "tar.gz"
+strip-prefix = "csv-parser-5.8.0"
+
+# vcpkg's name.  Built as upstream's regular multi-header form (the
+# single-header file is a generated release asset, not in the archive).
+# include/external holds the bundled mio (modified, MIT), classify_scalar
+# (MIT) and string-view lite (BSL-1.0).
+[package]
+name = "cabin-ports/vincentlaucsb-csv-parser"
+version = "5.8.0"
+license = "MIT AND BSL-1.0"
+include = ["LICENSE", "README.md", "include"]
+
+# Consumers include <csv.hpp>.
+[target.csv]
+type = "library"
+sources = [
+  "include/internal/col_names.cpp",
+  "include/internal/csv_format.cpp",
+  "include/internal/csv_reader.cpp",
+  "include/internal/csv_reader_iterator.cpp",
+  "include/internal/csv_row.cpp",
+  "include/internal/csv_utility.cpp",
+  "include/internal/parser/driver.cpp",
+  "include/internal/parser/guessing.cpp",
+  "include/internal/parser/mmap.cpp",
+]
+include-dirs = ["include"]
+# CMakeLists.txt:10-16, upstream's default C++ standard.
+cxx-standard = "c++20"
+# README.md:140 states C++11, but csv::string_view is nonstd::string_view
+# below C++17 and std::string_view from it, so a C++11/14 consumer of the
+# library built at C++20 fails to link (measured: undefined
+# CSVRow::operator[](nonstd::string_view)).
+interface-cxx-standard = "c++17"
+
+# The reader runs a parser thread (std::thread); CMakeLists.txt:94-100 links
+# Threads::Threads and names no Android exception.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
