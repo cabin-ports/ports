@@ -1,0 +1,33 @@
+[package.upstream]
+url = "https://github.com/r-lyeh-archived/sole/archive/refs/tags/1.0.4.tar.gz"
+checksum = "sha256:2801bd0d275903bfa1086901eb887cfde844bafe5beea6c2a57f28de4e0540cc"
+format = "tar.gz"
+strip-prefix = "sole-1.0.4"
+patches = ["patches/0001-use-thread-local-on-clang.patch"]
+
+# Build-only backport of upstream master 95612e5c: clang rejects __thread on
+# the non-trivial statics in uuid4() (measured: macOS clang, "type of
+# thread-local variable has non-trivial destruction").
+
+[package]
+name = "cabin-ports/sole"
+version = "1.0.4"
+# sole.hpp:6 credits Poco, Philip O'Toole and Dmitri Bouianov.  The Windows
+# adapter lookup (sole.hpp:492-537) matches Poco's Environment_WIN32.cpp
+# (BSL-1.0), and get_time() and uuid1() (sole.hpp:469-487, 682-715) match
+# cppuuid's uuid.cpp (MIT).  The clock_gettime() shim (sole.hpp:455-462)
+# credits Bouianov's Stack Overflow answer; its copyright significance is
+# uncertain.
+license = "Zlib AND BSL-1.0 AND MIT"
+include = ["LICENSE", "README.md", "patches", "sole.fwd.hpp", "sole.hpp"]
+
+# C++11 is stated in sole.hpp:1 and README.md.
+[target.sole]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
+
+# uuid1() lists adapters with GetAdaptersInfo; the header's
+# `#pragma comment(lib)` takes effect only under cl.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["iphlpapi"]
