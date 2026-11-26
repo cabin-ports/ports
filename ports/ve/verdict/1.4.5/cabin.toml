@@ -45,8 +45,6 @@ to = "verdict_config.h"
 name = "cabin-ports/verdict"
 version = "1.4.5"
 license = "BSD-3-Clause"
-# LICENSE is the BSD-3-Clause text with its <organization> and
-# <COPYRIGHT HOLDER> placeholders unfilled; the holder is NTESS.
 include = [
   "LICENSE",
   "README.md",
@@ -70,8 +68,7 @@ include = [
 ]
 
 # Upstream's verdict library (CMakeLists.txt:55-82): its ten sources with the
-# package root public, so consumers include <verdict.h>.  Not ported: shared
-# libraries, the namespace mangling option (VERDICT_MANGLE), CUDA and HIP
+# package root public.  Not ported: shared libraries, the namespace mangling option (VERDICT_MANGLE), CUDA and HIP
 # builds, the tests, the manual and the CMake package files.
 [target.verdict]
 type = "library"
