@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/jamboree/bustache/archive/af10816ce3d2ff8577fd27caa2c1005c01d8069b.tar.gz"
+checksum = "sha256:b5f8216609f139169d9770e82e709d719d186ecaec5a2f90b4961d8e7ee4b72f"
+format = "tar.gz"
+strip-prefix = "bustache-af10816ce3d2ff8577fd27caa2c1005c01d8069b"
+
+# Upstream has no tags or releases, and its CMake version (0.1.0) is not a
+# release identity: the version is the date of the pinned master commit.
+[package]
+name = "cabin-ports/bustache"
+version = "2024.11.18"
+license = "BSL-1.0"
+include = ["README.md", "include", "src"]
+
+# CMakeLists.txt:12-19, with cxx_std_20 PUBLIC.  Built with std::format, as
+# upstream's default (BUSTACHE_USE_FMT is off).  The shipped adapted/boost_*.hpp
+# headers include Boost, which this port does not provide; they are not tested.
+[target.bustache]
+type = "library"
+links = "bustache"
+sources = ["src/format.cpp", "src/render.cpp"]
+include-dirs = ["include"]
+cxx-standard = "c++20"
+interface-cxx-standard = "c++20"
