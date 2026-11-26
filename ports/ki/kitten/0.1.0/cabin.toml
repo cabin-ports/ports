@@ -3,12 +3,15 @@ url = "https://github.com/rvarago/kitten/archive/refs/tags/0.1.0.tar.gz"
 checksum = "sha256:fe04a3f58cd521effef2503ac6137eac37684d2d442034e9d19d77a2a01afd57"
 format = "tar.gz"
 strip-prefix = "kitten-0.1.0"
+# sequence_container.h uses std::back_inserter without <iterator>, which the MSVC STL does not
+# provide transitively (measured: check-windows, "'back_inserter': is not a member of 'std'").
+patches = ["patches/0001-include-iterator.patch"]
 
 [package]
 name = "cabin-ports/kitten"
 version = "0.1.0"
 license = "MIT"
-include = ["LICENSE", "include"]
+include = ["LICENSE", "include", "patches"]
 
 # C++17 as upstream's CMakeLists.txt (cxx_std_17) states.
 [target.kitten]

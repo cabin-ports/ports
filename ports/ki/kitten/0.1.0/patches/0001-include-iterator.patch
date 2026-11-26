@@ -1,0 +1,10 @@
+--- a/include/kitten/instances/sequence_container.h
++++ b/include/kitten/instances/sequence_container.h
+@@ -2,6 +2,7 @@
+ #define RVARAGO_KITTEN_SEQUENCE_CONTAINER_H
+ 
+ #include <deque>
++#include <iterator>
+ #include <list>
+ #include <type_traits>
+ #include <vector>
