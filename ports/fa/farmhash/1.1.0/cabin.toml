@@ -9,8 +9,8 @@ strip-prefix = "farmhash-9d99331eb762e9ee22fd97d15a594525ad98310a"
 [package]
 name = "cabin-ports/farmhash"
 version = "1.1.0"
-# src/farmhash.cc:366-370 credits Murmur3 for its constants and fmix(); its
-# copyright significance is uncertain.
+# src/farmhash.cc:366-370 takes Murmur3's constants and fmix(), which their
+# author placed in the public domain, so they add no term.
 license = "MIT"
 include = ["COPYING", "src/farmhash.cc", "src/farmhash.h"]
 
