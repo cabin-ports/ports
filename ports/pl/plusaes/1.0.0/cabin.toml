@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/kkAyataka/plusaes/archive/refs/tags/v1.0.0.tar.gz"
+checksum = "sha256:0e33e8d0e2ea5e6f9eb7a06093f576350ce8ef58339ce9de791514a8f433087d"
+format = "tar.gz"
+strip-prefix = "plusaes-1.0.0"
+
+[package]
+name = "cabin-ports/plusaes"
+version = "1.0.0"
+license = "BSL-1.0"
+include = ["LICENSE_1_0.txt", "include"]
+
+# interface-cxx-standard: lin/unit_test/Makefile.am builds upstream's tests with -std=c++11.
+[target.plusaes]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
