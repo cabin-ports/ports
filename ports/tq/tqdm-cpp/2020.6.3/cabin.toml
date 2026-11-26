@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/mraggi/tqdm-cpp/archive/7e57e58550ac14e580ac9eeb948956e541402083.tar.gz"
+checksum = "sha256:cf16dfc270d096bd301dca3207126f1584ed3294f2348c3c20777a0b2137d3cb"
+format = "tar.gz"
+strip-prefix = "tqdm-cpp-7e57e58550ac14e580ac9eeb948956e541402083"
+
+# Upstream has no tags or releases; 2020.6.3 is the date of commit 7e57e58.
+[package]
+name = "cabin-ports/tqdm-cpp"
+version = "2020.6.3"
+license = "MIT"
+include = ["LICENSE", "README.md", "tqdm.hpp"]
+
+# C++17 is the standard README.md:5 states ("TQDM for C++17").
+[target.tqdm-cpp]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++17"
