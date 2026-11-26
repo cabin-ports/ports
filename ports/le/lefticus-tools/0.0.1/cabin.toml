@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/lefticus/tools/archive/8f3702fb70bfee80ef28e48472dc62bdb4713b1f.tar.gz"
+checksum = "sha256:f3dbbe988a1211f6a4135c8279b00eb1976ab111eac1d2ecd6a29a5aba6f7cf7"
+format = "tar.gz"
+strip-prefix = "tools-8f3702fb70bfee80ef28e48472dc62bdb4713b1f"
+
+# Upstream has no tags; 0.0.1 is the VERSION in CMakeLists.txt at this commit.
+[package]
+name = "cabin-ports/lefticus-tools"
+version = "0.0.1"
+# lambda_coroutines.hpp:39 and has_move_ctor.hpp:46 credit Stack Overflow posts
+# for short snippets; their copyright significance is uncertain.
+license = "MIT AND Unlicense"
+include = ["LICENSE", "include"]
+
+# Upstream states no standard (CMakeLists.txt:8 only sets a C++26 default).  C++20 is
+# measured: curry.hpp:35 (auto parameters) and has_move_ctor.hpp:43 (a concept) fail at c++17.
+# forwarding_ref.hpp and moving_ref.hpp use C++26's = delete("reason"), which cl and
+# check-linux's GCC reject at c++20 (measured: check-windows C2059, check-linux "expected ';' at
+# end of member declaration").
+[target.lefticus-tools]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
