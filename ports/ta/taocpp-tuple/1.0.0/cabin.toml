@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/taocpp/tuple/archive/refs/tags/1.0.0.tar.gz"
+checksum = "sha256:a35de253039fa1095244c2cc399458975a87b7f835e4d841fc10e8c8c14cc9dc"
+format = "tar.gz"
+strip-prefix = "tuple-1.0.0"
+
+[package]
+name = "cabin-ports/taocpp-tuple"
+version = "1.0.0"
+# include/tao/seq/at_index.hpp:15 credits talesofcpp.fusionfenix.com/post-22 for its
+# indexed-type fallback; its copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# README.md:8 and :37 state C++11.  The 14 headers of include/tao/seq/ have the same paths and
+# include guards as taocpp-sequences 3.0.1 headers but define tao::seq, not tao::sequence.
+[target.taocpp-tuple]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
