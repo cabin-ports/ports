@@ -1,0 +1,59 @@
+[package.upstream]
+url = "https://github.com/libsndfile/libsamplerate/archive/refs/tags/0.2.2.tar.gz"
+checksum = "sha256:16e881487f184250deb4fcb60432d7556ab12cb58caea71ef23960aec6c0405a"
+format = "tar.gz"
+strip-prefix = "libsamplerate-0.2.2"
+
+[package]
+name = "cabin-ports/libsamplerate"
+version = "0.2.2"
+# src/common.h:45-47 credits sourcefrog.net for the UNUSED macro; its copyright
+# significance is uncertain.
+license = "BSD-2-Clause"
+# src/check_asm.sh is GPL-2.0-or-later and unused, so src is listed by file.
+include = ["AUTHORS", "COPYING", "docs/license.md", "include", "src/common.h", "src/fastest_coeffs.h",
+  "src/high_qual_coeffs.h", "src/mid_qual_coeffs.h", "src/samplerate.c", "src/src_linear.c",
+  "src/src_sinc.c", "src/src_zoh.c"]
+# CMakeLists.txt:35 asks for C99; C11 is the oldest standard Cabin can lower
+# for MSVC.  samplerate.h's enum ends in a trailing comma (C99, C++11).
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# src/CMakeLists.txt:13-40 builds samplerate from these four sources; the
+# sinc filter tables are the shipped *_coeffs.h.  src/ is private (common.h
+# and the tables); include/ holds the public samplerate.h.
+# Not ported: the shared build (BUILD_SHARED_LIBS) and the examples/ programs.
+[target.samplerate]
+type = "library"
+sources = ["src/samplerate.c", "src/src_linear.c", "src/src_sinc.c", "src/src_zoh.c"]
+include-dirs = ["include"]
+links = "samplerate"
+
+# config.h.cmake's macros that the sources read, set without HAVE_CONFIG_H as
+# CMake's configure would (all three converters are on by default,
+# src/CMakeLists.txt:3-5).  CPU_CLIPS_* are 0, the value of ClipMode.cmake when
+# cross-compiling: the sources then clamp explicitly, with the same results.
+[profile]
+defines = [
+  "PACKAGE=\"libsamplerate\"",
+  "VERSION=\"0.2.2\"",
+  "ENABLE_SINC_FAST_CONVERTER",
+  "ENABLE_SINC_MEDIUM_CONVERTER",
+  "ENABLE_SINC_BEST_CONVERTER",
+  "HAVE_STDBOOL_H",
+  "CPU_CLIPS_POSITIVE=0",
+  "CPU_CLIPS_NEGATIVE=0",
+]
+
+# CMakeLists.txt:57-67 links libm except on Windows, macOS, Cygwin and Haiku.
+[target.'cfg(all(family = "unix", not(os = "macos")))'.profile]
+link-libs = ["m"]
+
+# src/CMakeLists.txt:21-29 probes -fvisibility support, which every non-MSVC
+# compiler Cabin targets has; common.h then hides the private symbols.
+[target.'cfg(not(env = "msvc"))'.profile]
+defines = ["HAVE_VISIBILITY"]
+
+[target.'cfg(env = "msvc")'.profile]
+defines = ["_CRT_SECURE_NO_WARNINGS"]
