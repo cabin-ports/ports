@@ -1,0 +1,528 @@
+--- /dev/null
++++ b/include/taglib/aifffile.h
+@@ -0,0 +1 @@
++#include "../../taglib/riff/aiff/aifffile.h"
+--- /dev/null
++++ b/include/taglib/aiffproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/riff/aiff/aiffproperties.h"
+--- /dev/null
++++ b/include/taglib/apefile.h
+@@ -0,0 +1 @@
++#include "../../taglib/ape/apefile.h"
+--- /dev/null
++++ b/include/taglib/apefooter.h
+@@ -0,0 +1 @@
++#include "../../taglib/ape/apefooter.h"
+--- /dev/null
++++ b/include/taglib/apeitem.h
+@@ -0,0 +1 @@
++#include "../../taglib/ape/apeitem.h"
+--- /dev/null
++++ b/include/taglib/apeproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/ape/apeproperties.h"
+--- /dev/null
++++ b/include/taglib/apetag.h
+@@ -0,0 +1 @@
++#include "../../taglib/ape/apetag.h"
+--- /dev/null
++++ b/include/taglib/asfattribute.h
+@@ -0,0 +1 @@
++#include "../../taglib/asf/asfattribute.h"
+--- /dev/null
++++ b/include/taglib/asffile.h
+@@ -0,0 +1 @@
++#include "../../taglib/asf/asffile.h"
+--- /dev/null
++++ b/include/taglib/asfpicture.h
+@@ -0,0 +1 @@
++#include "../../taglib/asf/asfpicture.h"
+--- /dev/null
++++ b/include/taglib/asfproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/asf/asfproperties.h"
+--- /dev/null
++++ b/include/taglib/asftag.h
+@@ -0,0 +1 @@
++#include "../../taglib/asf/asftag.h"
+--- /dev/null
++++ b/include/taglib/attachedpictureframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/attachedpictureframe.h"
+--- /dev/null
++++ b/include/taglib/audioproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/audioproperties.h"
+--- /dev/null
++++ b/include/taglib/chapterframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/chapterframe.h"
+--- /dev/null
++++ b/include/taglib/commentsframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/commentsframe.h"
+--- /dev/null
++++ b/include/taglib/dsdiffdiintag.h
+@@ -0,0 +1 @@
++#include "../../taglib/dsdiff/dsdiffdiintag.h"
+--- /dev/null
++++ b/include/taglib/dsdifffile.h
+@@ -0,0 +1 @@
++#include "../../taglib/dsdiff/dsdifffile.h"
+--- /dev/null
++++ b/include/taglib/dsdiffproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/dsdiff/dsdiffproperties.h"
+--- /dev/null
++++ b/include/taglib/dsffile.h
+@@ -0,0 +1 @@
++#include "../../taglib/dsf/dsffile.h"
+--- /dev/null
++++ b/include/taglib/dsfproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/dsf/dsfproperties.h"
+--- /dev/null
++++ b/include/taglib/eventtimingcodesframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/eventtimingcodesframe.h"
+--- /dev/null
++++ b/include/taglib/fileref.h
+@@ -0,0 +1 @@
++#include "../../taglib/fileref.h"
+--- /dev/null
++++ b/include/taglib/flacfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/flac/flacfile.h"
+--- /dev/null
++++ b/include/taglib/flacmetadatablock.h
+@@ -0,0 +1 @@
++#include "../../taglib/flac/flacmetadatablock.h"
+--- /dev/null
++++ b/include/taglib/flacpicture.h
+@@ -0,0 +1 @@
++#include "../../taglib/flac/flacpicture.h"
+--- /dev/null
++++ b/include/taglib/flacproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/flac/flacproperties.h"
+--- /dev/null
++++ b/include/taglib/generalencapsulatedobjectframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/generalencapsulatedobjectframe.h"
+--- /dev/null
++++ b/include/taglib/id3v1genres.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v1/id3v1genres.h"
+--- /dev/null
++++ b/include/taglib/id3v1tag.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v1/id3v1tag.h"
+--- /dev/null
++++ b/include/taglib/id3v2.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/id3v2.h"
+--- /dev/null
++++ b/include/taglib/id3v2extendedheader.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/id3v2extendedheader.h"
+--- /dev/null
++++ b/include/taglib/id3v2footer.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/id3v2footer.h"
+--- /dev/null
++++ b/include/taglib/id3v2frame.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/id3v2frame.h"
+--- /dev/null
++++ b/include/taglib/id3v2framefactory.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/id3v2framefactory.h"
+--- /dev/null
++++ b/include/taglib/id3v2header.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/id3v2header.h"
+--- /dev/null
++++ b/include/taglib/id3v2synchdata.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/id3v2synchdata.h"
+--- /dev/null
++++ b/include/taglib/id3v2tag.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/id3v2tag.h"
+--- /dev/null
++++ b/include/taglib/infotag.h
+@@ -0,0 +1 @@
++#include "../../taglib/riff/wav/infotag.h"
+--- /dev/null
++++ b/include/taglib/itfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/it/itfile.h"
+--- /dev/null
++++ b/include/taglib/itproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/it/itproperties.h"
+--- /dev/null
++++ b/include/taglib/matroskaattachedfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/matroska/matroskaattachedfile.h"
+--- /dev/null
++++ b/include/taglib/matroskaattachments.h
+@@ -0,0 +1 @@
++#include "../../taglib/matroska/matroskaattachments.h"
+--- /dev/null
++++ b/include/taglib/matroskachapter.h
+@@ -0,0 +1 @@
++#include "../../taglib/matroska/matroskachapter.h"
+--- /dev/null
++++ b/include/taglib/matroskachapteredition.h
+@@ -0,0 +1 @@
++#include "../../taglib/matroska/matroskachapteredition.h"
+--- /dev/null
++++ b/include/taglib/matroskachapters.h
+@@ -0,0 +1 @@
++#include "../../taglib/matroska/matroskachapters.h"
+--- /dev/null
++++ b/include/taglib/matroskaelement.h
+@@ -0,0 +1 @@
++#include "../../taglib/matroska/matroskaelement.h"
+--- /dev/null
++++ b/include/taglib/matroskafile.h
+@@ -0,0 +1 @@
++#include "../../taglib/matroska/matroskafile.h"
+--- /dev/null
++++ b/include/taglib/matroskaproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/matroska/matroskaproperties.h"
+--- /dev/null
++++ b/include/taglib/matroskasimpletag.h
+@@ -0,0 +1 @@
++#include "../../taglib/matroska/matroskasimpletag.h"
+--- /dev/null
++++ b/include/taglib/matroskatag.h
+@@ -0,0 +1 @@
++#include "../../taglib/matroska/matroskatag.h"
+--- /dev/null
++++ b/include/taglib/matroskawritestyle.h
+@@ -0,0 +1 @@
++#include "../../taglib/matroska/matroskawritestyle.h"
+--- /dev/null
++++ b/include/taglib/modfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/mod/modfile.h"
+--- /dev/null
++++ b/include/taglib/modfilebase.h
+@@ -0,0 +1 @@
++#include "../../taglib/mod/modfilebase.h"
+--- /dev/null
++++ b/include/taglib/modproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/mod/modproperties.h"
+--- /dev/null
++++ b/include/taglib/modtag.h
+@@ -0,0 +1 @@
++#include "../../taglib/mod/modtag.h"
+--- /dev/null
++++ b/include/taglib/mp4atom.h
+@@ -0,0 +1 @@
++#include "../../taglib/mp4/mp4atom.h"
+--- /dev/null
++++ b/include/taglib/mp4chapter.h
+@@ -0,0 +1 @@
++#include "../../taglib/mp4/mp4chapter.h"
+--- /dev/null
++++ b/include/taglib/mp4chapterholder.h
+@@ -0,0 +1 @@
++#include "../../taglib/mp4/mp4chapterholder.h"
+--- /dev/null
++++ b/include/taglib/mp4coverart.h
+@@ -0,0 +1 @@
++#include "../../taglib/mp4/mp4coverart.h"
+--- /dev/null
++++ b/include/taglib/mp4file.h
+@@ -0,0 +1 @@
++#include "../../taglib/mp4/mp4file.h"
+--- /dev/null
++++ b/include/taglib/mp4item.h
+@@ -0,0 +1 @@
++#include "../../taglib/mp4/mp4item.h"
+--- /dev/null
++++ b/include/taglib/mp4itemfactory.h
+@@ -0,0 +1 @@
++#include "../../taglib/mp4/mp4itemfactory.h"
+--- /dev/null
++++ b/include/taglib/mp4nerochapterlist.h
+@@ -0,0 +1 @@
++#include "../../taglib/mp4/mp4nerochapterlist.h"
+--- /dev/null
++++ b/include/taglib/mp4properties.h
+@@ -0,0 +1 @@
++#include "../../taglib/mp4/mp4properties.h"
+--- /dev/null
++++ b/include/taglib/mp4qtchapterlist.h
+@@ -0,0 +1 @@
++#include "../../taglib/mp4/mp4qtchapterlist.h"
+--- /dev/null
++++ b/include/taglib/mp4stem.h
+@@ -0,0 +1 @@
++#include "../../taglib/mp4/mp4stem.h"
+--- /dev/null
++++ b/include/taglib/mp4tag.h
+@@ -0,0 +1 @@
++#include "../../taglib/mp4/mp4tag.h"
+--- /dev/null
++++ b/include/taglib/mpcfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpc/mpcfile.h"
+--- /dev/null
++++ b/include/taglib/mpcproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpc/mpcproperties.h"
+--- /dev/null
++++ b/include/taglib/mpegfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/mpegfile.h"
+--- /dev/null
++++ b/include/taglib/mpegheader.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/mpegheader.h"
+--- /dev/null
++++ b/include/taglib/mpegproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/mpegproperties.h"
+--- /dev/null
++++ b/include/taglib/oggfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/ogg/oggfile.h"
+--- /dev/null
++++ b/include/taglib/oggflacfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/ogg/flac/oggflacfile.h"
+--- /dev/null
++++ b/include/taglib/oggpage.h
+@@ -0,0 +1 @@
++#include "../../taglib/ogg/oggpage.h"
+--- /dev/null
++++ b/include/taglib/oggpageheader.h
+@@ -0,0 +1 @@
++#include "../../taglib/ogg/oggpageheader.h"
+--- /dev/null
++++ b/include/taglib/opusfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/ogg/opus/opusfile.h"
+--- /dev/null
++++ b/include/taglib/opusproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/ogg/opus/opusproperties.h"
+--- /dev/null
++++ b/include/taglib/ownershipframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/ownershipframe.h"
+--- /dev/null
++++ b/include/taglib/podcastframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/podcastframe.h"
+--- /dev/null
++++ b/include/taglib/popularimeterframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/popularimeterframe.h"
+--- /dev/null
++++ b/include/taglib/privateframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/privateframe.h"
+--- /dev/null
++++ b/include/taglib/relativevolumeframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/relativevolumeframe.h"
+--- /dev/null
++++ b/include/taglib/rifffile.h
+@@ -0,0 +1 @@
++#include "../../taglib/riff/rifffile.h"
+--- /dev/null
++++ b/include/taglib/s3mfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/s3m/s3mfile.h"
+--- /dev/null
++++ b/include/taglib/s3mproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/s3m/s3mproperties.h"
+--- /dev/null
++++ b/include/taglib/shortenfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/shorten/shortenfile.h"
+--- /dev/null
++++ b/include/taglib/shortenproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/shorten/shortenproperties.h"
+--- /dev/null
++++ b/include/taglib/shortentag.h
+@@ -0,0 +1 @@
++#include "../../taglib/shorten/shortentag.h"
+--- /dev/null
++++ b/include/taglib/speexfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/ogg/speex/speexfile.h"
+--- /dev/null
++++ b/include/taglib/speexproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/ogg/speex/speexproperties.h"
+--- /dev/null
++++ b/include/taglib/synchronizedlyricsframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/synchronizedlyricsframe.h"
+--- /dev/null
++++ b/include/taglib/tableofcontentsframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/tableofcontentsframe.h"
+--- /dev/null
++++ b/include/taglib/tag.h
+@@ -0,0 +1 @@
++#include "../../taglib/tag.h"
+--- /dev/null
++++ b/include/taglib/tag_c.h
+@@ -0,0 +1 @@
++#include "../../bindings/c/tag_c.h"
+--- /dev/null
++++ b/include/taglib/taglib.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/taglib.h"
+--- /dev/null
++++ b/include/taglib/taglib_export.h
+@@ -0,0 +1 @@
++#include "../../taglib/taglib_export.h"
+--- /dev/null
++++ b/include/taglib/tbytevector.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tbytevector.h"
+--- /dev/null
++++ b/include/taglib/tbytevectorlist.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tbytevectorlist.h"
+--- /dev/null
++++ b/include/taglib/tbytevectorstream.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tbytevectorstream.h"
+--- /dev/null
++++ b/include/taglib/tdebuglistener.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tdebuglistener.h"
+--- /dev/null
++++ b/include/taglib/textidentificationframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/textidentificationframe.h"
+--- /dev/null
++++ b/include/taglib/tfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tfile.h"
+--- /dev/null
++++ b/include/taglib/tfilestream.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tfilestream.h"
+--- /dev/null
++++ b/include/taglib/tiostream.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tiostream.h"
+--- /dev/null
++++ b/include/taglib/tlist.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tlist.h"
+--- /dev/null
++++ b/include/taglib/tlist.tcc
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tlist.tcc"
+--- /dev/null
++++ b/include/taglib/tmap.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tmap.h"
+--- /dev/null
++++ b/include/taglib/tmap.tcc
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tmap.tcc"
+--- /dev/null
++++ b/include/taglib/tpicturetype.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tpicturetype.h"
+--- /dev/null
++++ b/include/taglib/tpropertymap.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tpropertymap.h"
+--- /dev/null
++++ b/include/taglib/trueaudiofile.h
+@@ -0,0 +1 @@
++#include "../../taglib/trueaudio/trueaudiofile.h"
+--- /dev/null
++++ b/include/taglib/trueaudioproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/trueaudio/trueaudioproperties.h"
+--- /dev/null
++++ b/include/taglib/tstring.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tstring.h"
+--- /dev/null
++++ b/include/taglib/tstringlist.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tstringlist.h"
+--- /dev/null
++++ b/include/taglib/tvariant.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tvariant.h"
+--- /dev/null
++++ b/include/taglib/tversionnumber.h
+@@ -0,0 +1 @@
++#include "../../taglib/toolkit/tversionnumber.h"
+--- /dev/null
++++ b/include/taglib/uniquefileidentifierframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/uniquefileidentifierframe.h"
+--- /dev/null
++++ b/include/taglib/unknownframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/unknownframe.h"
+--- /dev/null
++++ b/include/taglib/unsynchronizedlyricsframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/unsynchronizedlyricsframe.h"
+--- /dev/null
++++ b/include/taglib/urllinkframe.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/id3v2/frames/urllinkframe.h"
+--- /dev/null
++++ b/include/taglib/vorbisfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/ogg/vorbis/vorbisfile.h"
+--- /dev/null
++++ b/include/taglib/vorbisproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/ogg/vorbis/vorbisproperties.h"
+--- /dev/null
++++ b/include/taglib/wavfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/riff/wav/wavfile.h"
+--- /dev/null
++++ b/include/taglib/wavpackfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/wavpack/wavpackfile.h"
+--- /dev/null
++++ b/include/taglib/wavpackproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/wavpack/wavpackproperties.h"
+--- /dev/null
++++ b/include/taglib/wavproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/riff/wav/wavproperties.h"
+--- /dev/null
++++ b/include/taglib/xingheader.h
+@@ -0,0 +1 @@
++#include "../../taglib/mpeg/xingheader.h"
+--- /dev/null
++++ b/include/taglib/xiphcomment.h
+@@ -0,0 +1 @@
++#include "../../taglib/ogg/xiphcomment.h"
+--- /dev/null
++++ b/include/taglib/xmfile.h
+@@ -0,0 +1 @@
++#include "../../taglib/xm/xmfile.h"
+--- /dev/null
++++ b/include/taglib/xmproperties.h
+@@ -0,0 +1 @@
++#include "../../taglib/xm/xmproperties.h"
