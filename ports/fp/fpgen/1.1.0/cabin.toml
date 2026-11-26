@@ -11,13 +11,12 @@ patches = ["patches/0001-use-std-coroutine-on-clang.patch"]
 
 [package]
 name = "cabin-ports/fpgen"
-version = "1.1.0"
-license = "MPL-2.0"
 # The archive is the v1.1.0-clang tag, the release that builds with Clang;
 # the v1.1.0 tag is its predecessor.
+version = "1.1.0"
+license = "MPL-2.0"
 include = ["LICENSE", "README.md", "inc", "patches"]
 
-# Consumers include "fpgen.hpp".
 [target.fpgen]
 type = "header-only"
 include-dirs = ["inc"]
