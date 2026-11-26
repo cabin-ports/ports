@@ -1,0 +1,30 @@
+[package.upstream]
+url = "https://github.com/Thalhammer/jwt-cpp/archive/refs/tags/v0.7.3.tar.gz"
+checksum = "sha256:d24f49f05e18f283935f511af0f62f73a042d512123a1865a8ce929f56a52735"
+format = "tar.gz"
+strip-prefix = "jwt-cpp-0.7.3"
+
+[package]
+name = "cabin-ports/jwt-cpp"
+version = "0.7.3"
+# include/jwt-cpp/jwt.h:2322 and :2345 credit cppreference, and :2431 a Stack
+# Overflow answer, for short standard idioms; their copyright significance is
+# uncertain.
+license = "MIT AND BSD-2-Clause"
+include = ["LICENSE", "README.md", "include"]
+
+[dependencies]
+"cabin-ports/openssl" = "=4.1.0"
+
+# Upstream's CMake jwt-cpp: header-only, C++11 (README.md:135,
+# CMakeLists.txt:106), linking OpenSSL's ssl and crypto libraries.  The
+# bundled include/picojson/picojson.h (BSD-2-Clause) ships as upstream
+# installs it, beside include/jwt-cpp.
+[target.jwt-cpp]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+deps = [
+  { name = "cabin-ports/openssl:ssl", public = true },
+  { name = "cabin-ports/openssl:crypto", public = true },
+]
