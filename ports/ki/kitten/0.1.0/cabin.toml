@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/rvarago/kitten/archive/refs/tags/0.1.0.tar.gz"
+checksum = "sha256:fe04a3f58cd521effef2503ac6137eac37684d2d442034e9d19d77a2a01afd57"
+format = "tar.gz"
+strip-prefix = "kitten-0.1.0"
+
+[package]
+name = "cabin-ports/kitten"
+version = "0.1.0"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# C++17 as upstream's CMakeLists.txt (cxx_std_17) states.
+[target.kitten]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
