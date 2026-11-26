@@ -79,5 +79,9 @@ include-dirs = ["librabbitmq/unix"]
 link-libs = ["pthread"]
 
 # clock_gettime needs librt on older glibc (CLOCK_GETTIME_NEEDS_LIBRT).
+# Upstream builds a GNU dialect (CMakeLists.txt:31 CMAKE_C_EXTENSIONS ON), where
+# glibc declares addrinfo and strdup; _DEFAULT_SOURCE restores that under
+# -std=c11 (measured: check-linux, amqp_socket.c:368 'struct addrinfo' undefined).
 [target.'cfg(os = "linux")'.profile]
+defines = ["_DEFAULT_SOURCE"]
 link-libs = ["rt"]
