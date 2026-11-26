@@ -1,0 +1,114 @@
+[package.upstream]
+url = "https://github.com/laurikari/tre/releases/download/v0.9.0/tre-0.9.0.tar.gz"
+checksum = "sha256:f57f5698cafdfe516d11fb0b71705916fe1162f14b08cf69d7cf86923b5a2477"
+format = "tar.gz"
+strip-prefix = "tre-0.9.0"
+
+# The headers as local_includes/Makefile.am installs them, under tre/.
+[[package.upstream.copy]]
+from = "local_includes/tre.h"
+to = "include/tre/tre.h"
+
+[[package.upstream.copy]]
+from = "local_includes/tre-config.h"
+to = "include/tre/tre-config.h"
+
+[[package.upstream.copy]]
+from = "local_includes/regex.h"
+to = "include/tre/regex.h"
+
+[package]
+name = "cabin-ports/tre"
+version = "0.9.0"
+license = "BSD-2-Clause"
+include = [
+  "AUTHORS",
+  "LICENSE",
+  "NEWS",
+  "README.md",
+  "THANKS",
+  "include",
+  "lib/regcomp.c",
+  "lib/regerror.c",
+  "lib/regexec.c",
+  "lib/tre-ast.c",
+  "lib/tre-ast.h",
+  "lib/tre-compile.c",
+  "lib/tre-compile.h",
+  "lib/tre-internal.h",
+  "lib/tre-match-approx.c",
+  "lib/tre-match-backtrack.c",
+  "lib/tre-match-parallel.c",
+  "lib/tre-match-utils.h",
+  "lib/tre-mem.c",
+  "lib/tre-mem.h",
+  "lib/tre-parse.c",
+  "lib/tre-parse.h",
+  "lib/tre-stack.c",
+  "lib/tre-stack.h",
+  "lib/xmalloc.h",
+  "local_includes/regex.h",
+  "local_includes/tre-config.h",
+  "local_includes/tre.h",
+]
+
+# libtre as lib/Makefile.am builds it, with the default configuration:
+# approximate matching, wchar_t and multibyte support (tre-config.h, which
+# the release ships as configure generated it).  Not ported: the agrep
+# program, the Python binding, and message translation (configure uses
+# gettext when found; without it tre_regerror returns the English
+# strings, as upstream's Windows build does).
+# Upstream states no standard; tre.h:134 ends an enum with a trailing comma (C99, C++11).
+[target.tre]
+type = "library"
+sources = [
+  "lib/regcomp.c",
+  "lib/regerror.c",
+  "lib/regexec.c",
+  "lib/tre-ast.c",
+  "lib/tre-compile.c",
+  "lib/tre-match-approx.c",
+  "lib/tre-match-backtrack.c",
+  "lib/tre-match-parallel.c",
+  "lib/tre-mem.c",
+  "lib/tre-parse.c",
+  "lib/tre-stack.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "tre"
+
+# What configure.ac and its C library checks define in config.h, which this
+# build replaces (HAVE_CONFIG_H stays undefined).  TRE_REGEX_T_FIELD is the
+# regex_t field holding the compiled pattern (configure.ac:263), and
+# USE_LOCAL_TRE_H and NDEBUG are its defaults (:52, :104).
+[profile]
+defines = [
+  "HAVE_ISWCTYPE",
+  "HAVE_MBRTOWC",
+  "HAVE_MBSTATE_T",
+  "HAVE_MBTOWC",
+  "HAVE_WCHAR_H",
+  "HAVE_WCSRTOMBS",
+  "HAVE_WCSTOMBS",
+  "HAVE_WCTYPE",
+  "HAVE_WCTYPE_H",
+  "NDEBUG",
+  "TRE_REGEX_T_FIELD=value",
+  "USE_LOCAL_TRE_H",
+]
+
+# configure.ac:106-121 uses alloca wherever AC_FUNC_ALLOCA finds it.
+[target.'cfg(family = "unix")'.profile]
+defines = ["TRE_USE_ALLOCA"]
+
+# AC_USE_SYSTEM_EXTENSIONS (configure.ac:16) defines _GNU_SOURCE, which
+# glibc's <stdlib.h> needs to declare alloca under strict -std=c11.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_GNU_SOURCE"]
+
+# win32/config.h, upstream's Windows configuration: no alloca.
+[target.'cfg(os = "windows")'.profile]
+defines = ["HAVE_MALLOC_H"]
