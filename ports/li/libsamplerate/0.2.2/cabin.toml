@@ -14,9 +14,12 @@ license = "BSD-2-Clause"
 include = ["AUTHORS", "COPYING", "docs/license.md", "include", "src/common.h", "src/fastest_coeffs.h",
   "src/high_qual_coeffs.h", "src/mid_qual_coeffs.h", "src/samplerate.c", "src/src_linear.c",
   "src/src_sinc.c", "src/src_zoh.c"]
-# CMakeLists.txt:35 asks for C99; C11 is the oldest standard Cabin can lower
-# for MSVC.  samplerate.h's enum ends in a trailing comma (C99, C++11).
+# CMakeLists.txt:35 asks for C99 for the library; C11 is the oldest standard
+# Cabin can lower for MSVC.
 c-standard = "c11"
+# Upstream states no interface standard; c99 and c++11 are the measured floors of
+# samplerate.h (c89 fails on "commas at the end of enumerator lists are a
+# C99-specific feature", c++98 on the same as a C++11 extension).
 interface-c-standard = "c99"
 interface-cxx-standard = "c++11"
 
