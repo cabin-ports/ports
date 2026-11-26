@@ -1,0 +1,5 @@
+--- /dev/null
++++ b/ixwebsocket/IXWebSocketCodecConfig.h
+@@ -0,0 +1,2 @@
++#pragma once
++#define IXWEBSOCKET_CODEC_USE_ZLIB 1
