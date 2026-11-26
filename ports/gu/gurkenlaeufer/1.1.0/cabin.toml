@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/paulelsner/gurkenlaeufer/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:0781b873d45522c05645504c2b03165754d21359b8eef6bde30fb133d1179260"
+format = "tar.gz"
+strip-prefix = "gurkenlaeufer-1.1.0"
+
+[package]
+name = "cabin-ports/gurkenlaeufer"
+version = "1.1.0"
+include = ["LICENSE", "include"]
+interface-cxx-standard = "c++11"
+# ParserCommon.h:11 credits Stack Overflow answer 236803 for split and
+# ParserCommon.h:36 credits answer 17976541 for trim; their copyright
+# significance is uncertain.
+license = "MIT"
+
+# Upstream's CMakeLists.txt:8 and README.md state C++11.  Only GTestRunner.h
+# needs GoogleTest, which a consumer using it adds as its own dependency (built
+# and run with googletest 1.17.0 from a throwaway probe package); a second,
+# feature-gated target for it would make the bare package name ambiguous in a
+# consumer's deps (measured).  Run.h:62 (runScenario) and ParserCommon.h:37
+# (trim) are non-inline definitions, so a program includes each header in one
+# translation unit only (measured: duplicate-symbol link errors).
+[target.gurkenlaeufer]
+type = "header-only"
+include-dirs = ["include"]
