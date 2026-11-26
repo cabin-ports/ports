@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/c42f/tinyformat/archive/refs/tags/v2.3.0.tar.gz"
+checksum = "sha256:ecba2fbbd3829002a63e141b77b9f1fc30e920962f68466b50c3244652d69391"
+format = "tar.gz"
+strip-prefix = "tinyformat-2.3.0"
+
+[package]
+name = "cabin-ports/tinyformat"
+version = "2.3.0"
+license = "BSL-1.0"
+include = ["README.md", "tinyformat.h"]
+
+# C++98 with optional C++11 niceties (README.md:15, tinyformat.h:40).
+[target.tinyformat]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++98"
