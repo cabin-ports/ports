@@ -1,0 +1,371 @@
+diff --git a/include/aubio/aubio.h b/include/aubio/aubio.h
+new file mode 100644
+index 0000000..5927260
+--- /dev/null
++++ b/include/aubio/aubio.h
+@@ -0,0 +1 @@
++#include "../../src/aubio.h"
+diff --git a/include/aubio/cvec.h b/include/aubio/cvec.h
+new file mode 100644
+index 0000000..66c13c4
+--- /dev/null
++++ b/include/aubio/cvec.h
+@@ -0,0 +1 @@
++#include "../../src/cvec.h"
+diff --git a/include/aubio/fmat.h b/include/aubio/fmat.h
+new file mode 100644
+index 0000000..e828f04
+--- /dev/null
++++ b/include/aubio/fmat.h
+@@ -0,0 +1 @@
++#include "../../src/fmat.h"
+diff --git a/include/aubio/fvec.h b/include/aubio/fvec.h
+new file mode 100644
+index 0000000..cd0b12b
+--- /dev/null
++++ b/include/aubio/fvec.h
+@@ -0,0 +1 @@
++#include "../../src/fvec.h"
+diff --git a/include/aubio/io/audio_unit.h b/include/aubio/io/audio_unit.h
+new file mode 100644
+index 0000000..4390734
+--- /dev/null
++++ b/include/aubio/io/audio_unit.h
+@@ -0,0 +1 @@
++#include "../../../src/io/audio_unit.h"
+diff --git a/include/aubio/io/ioutils.h b/include/aubio/io/ioutils.h
+new file mode 100644
+index 0000000..a4972d6
+--- /dev/null
++++ b/include/aubio/io/ioutils.h
+@@ -0,0 +1 @@
++#include "../../../src/io/ioutils.h"
+diff --git a/include/aubio/io/sink.h b/include/aubio/io/sink.h
+new file mode 100644
+index 0000000..a7a017e
+--- /dev/null
++++ b/include/aubio/io/sink.h
+@@ -0,0 +1 @@
++#include "../../../src/io/sink.h"
+diff --git a/include/aubio/io/sink_apple_audio.h b/include/aubio/io/sink_apple_audio.h
+new file mode 100644
+index 0000000..6a74f32
+--- /dev/null
++++ b/include/aubio/io/sink_apple_audio.h
+@@ -0,0 +1 @@
++#include "../../../src/io/sink_apple_audio.h"
+diff --git a/include/aubio/io/sink_sndfile.h b/include/aubio/io/sink_sndfile.h
+new file mode 100644
+index 0000000..e5a0f66
+--- /dev/null
++++ b/include/aubio/io/sink_sndfile.h
+@@ -0,0 +1 @@
++#include "../../../src/io/sink_sndfile.h"
+diff --git a/include/aubio/io/sink_wavwrite.h b/include/aubio/io/sink_wavwrite.h
+new file mode 100644
+index 0000000..9c71697
+--- /dev/null
++++ b/include/aubio/io/sink_wavwrite.h
+@@ -0,0 +1 @@
++#include "../../../src/io/sink_wavwrite.h"
+diff --git a/include/aubio/io/source.h b/include/aubio/io/source.h
+new file mode 100644
+index 0000000..7c2e584
+--- /dev/null
++++ b/include/aubio/io/source.h
+@@ -0,0 +1 @@
++#include "../../../src/io/source.h"
+diff --git a/include/aubio/io/source_apple_audio.h b/include/aubio/io/source_apple_audio.h
+new file mode 100644
+index 0000000..97f951b
+--- /dev/null
++++ b/include/aubio/io/source_apple_audio.h
+@@ -0,0 +1 @@
++#include "../../../src/io/source_apple_audio.h"
+diff --git a/include/aubio/io/source_avcodec.h b/include/aubio/io/source_avcodec.h
+new file mode 100644
+index 0000000..8d34141
+--- /dev/null
++++ b/include/aubio/io/source_avcodec.h
+@@ -0,0 +1 @@
++#include "../../../src/io/source_avcodec.h"
+diff --git a/include/aubio/io/source_sndfile.h b/include/aubio/io/source_sndfile.h
+new file mode 100644
+index 0000000..958e77e
+--- /dev/null
++++ b/include/aubio/io/source_sndfile.h
+@@ -0,0 +1 @@
++#include "../../../src/io/source_sndfile.h"
+diff --git a/include/aubio/io/source_wavread.h b/include/aubio/io/source_wavread.h
+new file mode 100644
+index 0000000..a6a2ff8
+--- /dev/null
++++ b/include/aubio/io/source_wavread.h
+@@ -0,0 +1 @@
++#include "../../../src/io/source_wavread.h"
+diff --git a/include/aubio/lvec.h b/include/aubio/lvec.h
+new file mode 100644
+index 0000000..a6f4ddc
+--- /dev/null
++++ b/include/aubio/lvec.h
+@@ -0,0 +1 @@
++#include "../../src/lvec.h"
+diff --git a/include/aubio/mathutils.h b/include/aubio/mathutils.h
+new file mode 100644
+index 0000000..1d70df5
+--- /dev/null
++++ b/include/aubio/mathutils.h
+@@ -0,0 +1 @@
++#include "../../src/mathutils.h"
+diff --git a/include/aubio/musicutils.h b/include/aubio/musicutils.h
+new file mode 100644
+index 0000000..bf33f0e
+--- /dev/null
++++ b/include/aubio/musicutils.h
+@@ -0,0 +1 @@
++#include "../../src/musicutils.h"
+diff --git a/include/aubio/notes/notes.h b/include/aubio/notes/notes.h
+new file mode 100644
+index 0000000..b9fceb2
+--- /dev/null
++++ b/include/aubio/notes/notes.h
+@@ -0,0 +1 @@
++#include "../../../src/notes/notes.h"
+diff --git a/include/aubio/onset/onset.h b/include/aubio/onset/onset.h
+new file mode 100644
+index 0000000..c33bc36
+--- /dev/null
++++ b/include/aubio/onset/onset.h
+@@ -0,0 +1 @@
++#include "../../../src/onset/onset.h"
+diff --git a/include/aubio/onset/peakpicker.h b/include/aubio/onset/peakpicker.h
+new file mode 100644
+index 0000000..4b98ee1
+--- /dev/null
++++ b/include/aubio/onset/peakpicker.h
+@@ -0,0 +1 @@
++#include "../../../src/onset/peakpicker.h"
+diff --git a/include/aubio/pitch/pitch.h b/include/aubio/pitch/pitch.h
+new file mode 100644
+index 0000000..03143c5
+--- /dev/null
++++ b/include/aubio/pitch/pitch.h
+@@ -0,0 +1 @@
++#include "../../../src/pitch/pitch.h"
+diff --git a/include/aubio/pitch/pitchfcomb.h b/include/aubio/pitch/pitchfcomb.h
+new file mode 100644
+index 0000000..1b18315
+--- /dev/null
++++ b/include/aubio/pitch/pitchfcomb.h
+@@ -0,0 +1 @@
++#include "../../../src/pitch/pitchfcomb.h"
+diff --git a/include/aubio/pitch/pitchmcomb.h b/include/aubio/pitch/pitchmcomb.h
+new file mode 100644
+index 0000000..dc2f85e
+--- /dev/null
++++ b/include/aubio/pitch/pitchmcomb.h
+@@ -0,0 +1 @@
++#include "../../../src/pitch/pitchmcomb.h"
+diff --git a/include/aubio/pitch/pitchschmitt.h b/include/aubio/pitch/pitchschmitt.h
+new file mode 100644
+index 0000000..6ef30c3
+--- /dev/null
++++ b/include/aubio/pitch/pitchschmitt.h
+@@ -0,0 +1 @@
++#include "../../../src/pitch/pitchschmitt.h"
+diff --git a/include/aubio/pitch/pitchspecacf.h b/include/aubio/pitch/pitchspecacf.h
+new file mode 100644
+index 0000000..81053e5
+--- /dev/null
++++ b/include/aubio/pitch/pitchspecacf.h
+@@ -0,0 +1 @@
++#include "../../../src/pitch/pitchspecacf.h"
+diff --git a/include/aubio/pitch/pitchyin.h b/include/aubio/pitch/pitchyin.h
+new file mode 100644
+index 0000000..31b8c7e
+--- /dev/null
++++ b/include/aubio/pitch/pitchyin.h
+@@ -0,0 +1 @@
++#include "../../../src/pitch/pitchyin.h"
+diff --git a/include/aubio/pitch/pitchyinfast.h b/include/aubio/pitch/pitchyinfast.h
+new file mode 100644
+index 0000000..402ad9e
+--- /dev/null
++++ b/include/aubio/pitch/pitchyinfast.h
+@@ -0,0 +1 @@
++#include "../../../src/pitch/pitchyinfast.h"
+diff --git a/include/aubio/pitch/pitchyinfft.h b/include/aubio/pitch/pitchyinfft.h
+new file mode 100644
+index 0000000..e7e0350
+--- /dev/null
++++ b/include/aubio/pitch/pitchyinfft.h
+@@ -0,0 +1 @@
++#include "../../../src/pitch/pitchyinfft.h"
+diff --git a/include/aubio/spectral/awhitening.h b/include/aubio/spectral/awhitening.h
+new file mode 100644
+index 0000000..2c08006
+--- /dev/null
++++ b/include/aubio/spectral/awhitening.h
+@@ -0,0 +1 @@
++#include "../../../src/spectral/awhitening.h"
+diff --git a/include/aubio/spectral/dct.h b/include/aubio/spectral/dct.h
+new file mode 100644
+index 0000000..c47eed0
+--- /dev/null
++++ b/include/aubio/spectral/dct.h
+@@ -0,0 +1 @@
++#include "../../../src/spectral/dct.h"
+diff --git a/include/aubio/spectral/fft.h b/include/aubio/spectral/fft.h
+new file mode 100644
+index 0000000..44ade37
+--- /dev/null
++++ b/include/aubio/spectral/fft.h
+@@ -0,0 +1 @@
++#include "../../../src/spectral/fft.h"
+diff --git a/include/aubio/spectral/filterbank.h b/include/aubio/spectral/filterbank.h
+new file mode 100644
+index 0000000..75dcf7a
+--- /dev/null
++++ b/include/aubio/spectral/filterbank.h
+@@ -0,0 +1 @@
++#include "../../../src/spectral/filterbank.h"
+diff --git a/include/aubio/spectral/filterbank_mel.h b/include/aubio/spectral/filterbank_mel.h
+new file mode 100644
+index 0000000..37735fc
+--- /dev/null
++++ b/include/aubio/spectral/filterbank_mel.h
+@@ -0,0 +1 @@
++#include "../../../src/spectral/filterbank_mel.h"
+diff --git a/include/aubio/spectral/mfcc.h b/include/aubio/spectral/mfcc.h
+new file mode 100644
+index 0000000..558a0fc
+--- /dev/null
++++ b/include/aubio/spectral/mfcc.h
+@@ -0,0 +1 @@
++#include "../../../src/spectral/mfcc.h"
+diff --git a/include/aubio/spectral/phasevoc.h b/include/aubio/spectral/phasevoc.h
+new file mode 100644
+index 0000000..f3af25a
+--- /dev/null
++++ b/include/aubio/spectral/phasevoc.h
+@@ -0,0 +1 @@
++#include "../../../src/spectral/phasevoc.h"
+diff --git a/include/aubio/spectral/specdesc.h b/include/aubio/spectral/specdesc.h
+new file mode 100644
+index 0000000..114d388
+--- /dev/null
++++ b/include/aubio/spectral/specdesc.h
+@@ -0,0 +1 @@
++#include "../../../src/spectral/specdesc.h"
+diff --git a/include/aubio/spectral/tss.h b/include/aubio/spectral/tss.h
+new file mode 100644
+index 0000000..584ded3
+--- /dev/null
++++ b/include/aubio/spectral/tss.h
+@@ -0,0 +1 @@
++#include "../../../src/spectral/tss.h"
+diff --git a/include/aubio/synth/sampler.h b/include/aubio/synth/sampler.h
+new file mode 100644
+index 0000000..6fd177e
+--- /dev/null
++++ b/include/aubio/synth/sampler.h
+@@ -0,0 +1 @@
++#include "../../../src/synth/sampler.h"
+diff --git a/include/aubio/synth/wavetable.h b/include/aubio/synth/wavetable.h
+new file mode 100644
+index 0000000..94cbb6d
+--- /dev/null
++++ b/include/aubio/synth/wavetable.h
+@@ -0,0 +1 @@
++#include "../../../src/synth/wavetable.h"
+diff --git a/include/aubio/tempo/beattracking.h b/include/aubio/tempo/beattracking.h
+new file mode 100644
+index 0000000..dcfa488
+--- /dev/null
++++ b/include/aubio/tempo/beattracking.h
+@@ -0,0 +1 @@
++#include "../../../src/tempo/beattracking.h"
+diff --git a/include/aubio/tempo/tempo.h b/include/aubio/tempo/tempo.h
+new file mode 100644
+index 0000000..7fe1964
+--- /dev/null
++++ b/include/aubio/tempo/tempo.h
+@@ -0,0 +1 @@
++#include "../../../src/tempo/tempo.h"
+diff --git a/include/aubio/temporal/a_weighting.h b/include/aubio/temporal/a_weighting.h
+new file mode 100644
+index 0000000..d950d7b
+--- /dev/null
++++ b/include/aubio/temporal/a_weighting.h
+@@ -0,0 +1 @@
++#include "../../../src/temporal/a_weighting.h"
+diff --git a/include/aubio/temporal/biquad.h b/include/aubio/temporal/biquad.h
+new file mode 100644
+index 0000000..d7007a0
+--- /dev/null
++++ b/include/aubio/temporal/biquad.h
+@@ -0,0 +1 @@
++#include "../../../src/temporal/biquad.h"
+diff --git a/include/aubio/temporal/c_weighting.h b/include/aubio/temporal/c_weighting.h
+new file mode 100644
+index 0000000..c34654f
+--- /dev/null
++++ b/include/aubio/temporal/c_weighting.h
+@@ -0,0 +1 @@
++#include "../../../src/temporal/c_weighting.h"
+diff --git a/include/aubio/temporal/filter.h b/include/aubio/temporal/filter.h
+new file mode 100644
+index 0000000..089060b
+--- /dev/null
++++ b/include/aubio/temporal/filter.h
+@@ -0,0 +1 @@
++#include "../../../src/temporal/filter.h"
+diff --git a/include/aubio/temporal/resampler.h b/include/aubio/temporal/resampler.h
+new file mode 100644
+index 0000000..dff6ad3
+--- /dev/null
++++ b/include/aubio/temporal/resampler.h
+@@ -0,0 +1 @@
++#include "../../../src/temporal/resampler.h"
+diff --git a/include/aubio/types.h b/include/aubio/types.h
+new file mode 100644
+index 0000000..7e7a470
+--- /dev/null
++++ b/include/aubio/types.h
+@@ -0,0 +1 @@
++#include "../../src/types.h"
+diff --git a/include/aubio/utils/hist.h b/include/aubio/utils/hist.h
+new file mode 100644
+index 0000000..7ed9ce7
+--- /dev/null
++++ b/include/aubio/utils/hist.h
+@@ -0,0 +1 @@
++#include "../../../src/utils/hist.h"
+diff --git a/include/aubio/utils/log.h b/include/aubio/utils/log.h
+new file mode 100644
+index 0000000..19784f2
+--- /dev/null
++++ b/include/aubio/utils/log.h
+@@ -0,0 +1 @@
++#include "../../../src/utils/log.h"
+diff --git a/include/aubio/utils/parameter.h b/include/aubio/utils/parameter.h
+new file mode 100644
+index 0000000..92f6bc7
+--- /dev/null
++++ b/include/aubio/utils/parameter.h
+@@ -0,0 +1 @@
++#include "../../../src/utils/parameter.h"
+diff --git a/include/aubio/utils/scale.h b/include/aubio/utils/scale.h
+new file mode 100644
+index 0000000..1a3f3c0
+--- /dev/null
++++ b/include/aubio/utils/scale.h
+@@ -0,0 +1 @@
++#include "../../../src/utils/scale.h"
+diff --git a/include/aubio/vecutils.h b/include/aubio/vecutils.h
+new file mode 100644
+index 0000000..1e3146b
+--- /dev/null
++++ b/include/aubio/vecutils.h
+@@ -0,0 +1 @@
++#include "../../src/vecutils.h"
