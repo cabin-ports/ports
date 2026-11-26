@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/yixuan/spectra/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:fdfccacba1c77d9b4ffefae7258c760c99e3c8a2823ca87ea5b11a50d297a73b"
+format = "tar.gz"
+strip-prefix = "spectra-1.2.0"
+
+[package]
+name = "cabin-ports/spectra"
+version = "1.2.0"
+# include/Spectra/contrib/LOBPCGSolver.h is MIT (its own header); every
+# other header is MPL-2.0.  AUTHORS.md carries the attributions.
+license = "MPL-2.0 AND MIT"
+include = ["AUTHORS.md", "LICENSE", "README.md", "include"]
+
+[dependencies]
+"cabin-ports/eigen3" = "=5.0.1"
+
+# Upstream requires Eigen >= 3.4.0 (CMakeLists.txt:25-31) and tests only
+# 3.4.
+[target.spectra]
+type = "header-only"
+include-dirs = ["include"]
+# Upstream states C++11 (CMakeLists.txt:10); Eigen 5's interface needs
+# C++14, so a consumer of this port compiles at least that.
+interface-cxx-standard = "c++14"
+deps = [{ name = "cabin-ports/eigen3", public = true }]
