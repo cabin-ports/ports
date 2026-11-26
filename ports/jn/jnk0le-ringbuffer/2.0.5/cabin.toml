@@ -11,9 +11,7 @@ license = "MIT"
 include = ["LICENSE", "ringbuffer.hpp"]
 
 # Upstream has no tags; this is the commit ConanCenter packages, and ringbuffer.hpp declares
-# `\version 2.0.5`.  The master head differs only by one added comment.
-# Header-only SPSC ring buffer at the archive root, so consumers write
-# `#include <ringbuffer.hpp>`.  README.md states "pure C++11".
+# `\version 2.0.5`.  README.md states "pure C++11".
 [target.jnk0le-ringbuffer]
 type = "header-only"
 include-dirs = ["."]
