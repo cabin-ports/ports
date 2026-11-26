@@ -10,7 +10,11 @@ strip-prefix = "libb64-2.0.0.1"
 name = "cabin-ports/b64"
 version = "2.0.0"
 license = "CC-PDDC"
-include = ["AUTHORS.md", "LICENSE.md", "include", "src"]
+include = ["AUTHORS.md", "LICENSE.md", "include", "patches", "src"]
+# Patch 0001 spells ccommon.h's `#elseif` as `#elif`, which MSVC rejects
+# inside the taken _WIN32 group (measured: check-windows, "ccommon.h(17): fatal
+# error C1021: invalid preprocessor command 'elseif'").
+patches = ["patches/0001-spell-elif-in-ccommon-h.patch"]
 # Upstream states ANSI C (README.md:6); C11 is the oldest standard Cabin can
 # request from MSVC.
 c-standard = "c11"
