@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/Reputeless/PerlinNoise/archive/refs/tags/v3.0.0.tar.gz"
+checksum = "sha256:1fea1e7ebeb3c66b79d60c2c398aa83ccfadcef343bd396c0f0a684380e827fc"
+format = "tar.gz"
+strip-prefix = "PerlinNoise-3.0.0"
+
+[package]
+name = "cabin-ports/perlinnoise"
+version = "3.0.0"
+license = "MIT"
+include = ["LICENSE", "PerlinNoise.hpp", "README.md"]
+
+# README.md ("modern C++ (C++17/20)") and the Makefile's -std=c++17 state the floor.
+[target.perlinnoise]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++17"
