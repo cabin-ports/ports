@@ -30,6 +30,10 @@ type = "library"
 sources = ["eight_bit_int_gemm/eight_bit_int_gemm.cc"]
 include-dirs = ["."]
 links = "eight_bit_int_gemm"
+# Public headers include <windows.h> and then call std::min and std::max
+# (measured: check-windows, consumer probe, "simd_wrappers.h(33): error C2589:
+# '(': illegal token on right side of '::'").
+interface-defines = ["NOMINMAX"]
 # Upstream states C++11 (README.md, contrib/CMakeLists.txt); cl's floor is C++14.
 cxx-standard = "c++14"
 interface-cxx-standard = "c++11"
