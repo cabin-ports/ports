@@ -1,0 +1,110 @@
+[package.upstream]
+url = "https://github.com/syoyo/tinyexr/archive/refs/tags/v3.4.0.tar.gz"
+checksum = "sha256:1eed7356fcc8525d08b72deec4e8c1c822a2af888c8debc8094bc77000bd2481"
+format = "tar.gz"
+strip-prefix = "tinyexr-3.4.0"
+
+# The private zstd wrapper header goes next to its includer, so deps/zstd
+# stays off consumers' include path.
+[[package.upstream.copy]]
+from = "deps/zstd/tinyexr_zstd.h"
+to = "src/tinyexr_zstd.h"
+
+[package]
+name = "cabin-ports/tinyexr"
+version = "3.4.0"
+# The tinyexr files are BSD-3-Clause; deps/zstd is zstd under its BSD option;
+# NOTICE credits Apache-2.0 code from fpnge and Unlicense code from fpng, and
+# src/exr_jph.c and exr_jph_table*.inc carry OpenJPH's BSD-2-Clause tables.
+license = "BSD-3-Clause AND BSD-2-Clause AND Apache-2.0 AND Unlicense"
+include = [
+  "LICENSE",
+  "NOTICE",
+  "deps/zstd",
+  "exr_reader.hh",
+  "include",
+  "src",
+  "streamreader.hh",
+  "tinyexr.cc",
+  "tinyexr.h",
+]
+
+[dependencies]
+"cabin-ports/libdeflate" = "^1.26"
+"cabin-ports/miniz" = "^3.1"
+
+# The Makefile's lib target (libtinyexr3.a): -std=c11 (V3_CSTD), every
+# src/*.c plus deps/zstd/tinyexr_zstd.c, and the default DEFLATE=auto
+# definitions, with libdeflate supplied by the libdeflate port instead of the
+# vendored deps/libdeflate; src/exr_libdeflate.c uses only libdeflate's public
+# zlib API.  The CUDA and Vulkan sources compile as inert stubs without
+# EXR_USE_CUDA and EXR_USE_VULKAN.  Not ported: the CUDA and Vulkan backends,
+# the v3 threads (EXR_USE_THREADS) and the legacy API's zfp, which upstream
+# leaves off by default.
+[target.exr]
+type = "library"
+sources = [
+  "src/exr_attr.c",
+  "src/exr_b44.c",
+  "src/exr_codec.c",
+  "src/exr_color.c",
+  "src/exr_context.c",
+  "src/exr_convert.c",
+  "src/exr_core.c",
+  "src/exr_cpu.c",
+  "src/exr_deep.c",
+  "src/exr_deflate.c",
+  "src/exr_fpnge.c",
+  "src/exr_freestanding.c",
+  "src/exr_gpu_cuda.c",
+  "src/exr_half.c",
+  "src/exr_jph_simd_neon.c",
+  "src/exr_jph_simd.c",
+  "src/exr_jph.c",
+  "src/exr_libdeflate.c",
+  "src/exr_mip.c",
+  "src/exr_piz.c",
+  "src/exr_pxr24.c",
+  "src/exr_reader.c",
+  "src/exr_resize.c",
+  "src/exr_rle.c",
+  "src/exr_simd_neon.c",
+  "src/exr_simd_x86.c",
+  "src/exr_source_part.c",
+  "src/exr_source.c",
+  "src/exr_spectral.c",
+  "src/exr_stdio.c",
+  "src/exr_thread.c",
+  "src/exr_tonemap.c",
+  "src/exr_util_simd_neon.c",
+  "src/exr_util_simd_x86.c",
+  "src/exr_vk_vulkan.c",
+  "src/exr_writer.c",
+  "src/exr_zip.c",
+  "src/exr_zstd.c",
+  "deps/zstd/tinyexr_zstd.c",
+]
+include-dirs = ["include"]
+defines = [
+  "EXR_JPH_ENABLE_AVX2_FOUR_QUAD16=1",
+  "EXR_USE_LIBDEFLATE",
+  "EXR_ZLIB_DEFAULT_LIBDEFLATE=1",
+]
+c-standard = "c11"
+interface-c-standard = "c11"
+deps = ["cabin-ports/libdeflate"]
+
+# Upstream builds the legacy API with C++11 (CMakeLists.txt:20); c++14 is the
+# lowest implementation standard Cabin accepts on MSVC.  Consumers need C++11.
+# tinyexr.h defaults to miniz (TINYEXR_USE_MINIZ).
+[target.tinyexr]
+type = "library"
+sources = ["tinyexr.cc"]
+include-dirs = ["."]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+deps = [{ name = "cabin-ports/miniz", public = true }]
+
+# The Makefile links the v3 library's programs with -lm.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
