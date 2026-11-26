@@ -1,0 +1,58 @@
+[package.upstream]
+url = "https://github.com/IronsDu/brynet/archive/refs/tags/v1.12.2.tar.gz"
+checksum = "sha256:b8b740cae39804d1e7037866046321065856c0ea9f565d26f67aeccc7ccd3d51"
+format = "tar.gz"
+strip-prefix = "brynet-1.12.2"
+
+[package]
+name = "cabin-ports/brynet"
+version = "1.12.2"
+# MIT: LICENSE and net/http/http_parser.h (Joyent's http-parser 2.9.2).
+# LicenseRef-PublicDomain: base/crypto/SHA1.hpp, "100% free public domain" by
+# Dominik Reichl.
+# net/Socket.hpp:167 credits libev and muduo for its EMFILE recovery; its
+# copyright significance is uncertain.
+license = "MIT AND LicenseRef-PublicDomain"
+include = ["LICENSE", "include"]
+
+[dependencies]
+"cabin-ports/openssl" = { version = "=4.1.0", optional = true }
+
+# Upstream's CMakeLists.txt defines BRYNET_USE_OPENSSL where it finds OpenSSL;
+# the brynet_openssl target is that build, and the default brynet target is
+# the build without it.
+# vendored-openssl is not supported on Windows, as the openssl port's is not.
+[features]
+default = []
+openssl = ["dep:cabin-ports/openssl"]
+vendored-openssl = ["openssl", "cabin-ports/openssl/vendored"]
+
+# Upstream's installed headers (CMakeLists.txt installs include/brynet), without
+# TLS.  C++11 is the standard README.md states; base/Platform.hpp pulls in
+# ws2_32 on MSVC only, so MinGW needs the explicit library.  Linux, macOS and
+# Windows are the platforms upstream names (README.md).
+[target.brynet]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32"]
+
+# Upstream's tests link pthread (tests/CMakeLists.txt); nothing in its build
+# mentions Android.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# Upstream's TLS build: net/SSLHelper.hpp includes OpenSSL only under
+# BRYNET_USE_OPENSSL.  Use this target in place of brynet, never both.
+[target.brynet_openssl]
+type = "header-only"
+interface-cxx-standard = "c++11"
+interface-defines = ["BRYNET_USE_OPENSSL"]
+required-features = ["openssl"]
+deps = [
+  { name = "brynet", public = true },
+  { name = "cabin-ports/openssl:ssl", public = true },
+  { name = "cabin-ports/openssl:crypto", public = true },
+]
