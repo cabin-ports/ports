@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/ICreateYank/cpp-lazy/archive/refs/tags/v9.0.1.tar.gz"
+checksum = "sha256:16cbaf58002ed46d369e8b87df4ac4b1fc47265fdffed0c5009b3ff8c7f013db"
+format = "tar.gz"
+strip-prefix = "cpp-lazy-9.0.1"
+
+[package]
+name = "cabin-ports/cpp-lazy"
+version = "9.0.1"
+# include/Lz/detail/iterators/flatten.hpp:89 credits a Stack Overflow answer
+# (a/21076724) for flatten_wrapper; its copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE.md", "README.md", "include"]
+
+[dependencies]
+# Upstream's default build links {fmt}; CMakeLists.txt accepts any installed
+# version, and its own fetch is 12.1.0.
+"cabin-ports/fmt" = "^12.2"
+
+# LZ_STANDALONE stays undefined: upstream's default build uses {fmt}.
+[target.cpp-lazy]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:10 states C++11.
+interface-cxx-standard = "c++11"
+deps = [{ name = "cabin-ports/fmt", public = true }]
