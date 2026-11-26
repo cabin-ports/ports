@@ -29,28 +29,19 @@ jobs:
         if: runner.os == 'Windows'
         uses: ilammy/msvc-dev-cmd@v1.13.0
 
-      - name: Linux, PoCL and Open MPI
+      - name: Install an OpenCL implementation
         if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install --yes --no-install-recommends pocl-opencl-icd ocl-icd-opencl-dev libopenmpi-dev openmpi-bin
-      - name: macOS, Open MPI
-        if: runner.os == 'macOS'
-        run: brew install open-mpi
-      - name: Windows, Python's directory and Microsoft MPI
+          sudo apt-get install --yes --no-install-recommends pocl-opencl-icd ocl-icd-opencl-dev
+      - name: Name the image's Python for build scripts
         if: runner.os == 'Windows'
         shell: pwsh
-        run: |
-          Add-Content $env:GITHUB_ENV ("CABIN_SDK_PYTHON_DIR=" + (Split-Path (Get-Command python).Source))
-          $base = 'https://github.com/microsoft/Microsoft-MPI/releases/download/v10.1.1'
-          Invoke-WebRequest "$base/msmpisetup.exe" -OutFile "$env:RUNNER_TEMP\msmpisetup.exe"
-          Invoke-WebRequest "$base/msmpisdk.msi" -OutFile "$env:RUNNER_TEMP\msmpisdk.msi"
-          if ((Get-FileHash "$env:RUNNER_TEMP\msmpisetup.exe" -Algorithm SHA256).Hash -ne '7308FD15E437D6829FD9C6EC5D801380FAA3BFF6E66E1DEE3E8E005106FB6A68') { exit 1 }
-          if ((Get-FileHash "$env:RUNNER_TEMP\msmpisdk.msi" -Algorithm SHA256).Hash -ne '6DF47378C0ACBB2B76989092165D7279EE096605FCAF7E455DE733B2FFDF4BCC') { exit 1 }
-          Start-Process -FilePath "$env:RUNNER_TEMP\msmpisetup.exe" -ArgumentList '-unattend' -Wait
-          Start-Process -FilePath msiexec.exe -ArgumentList '/quiet', '/i', "$env:RUNNER_TEMP\msmpisdk.msi" -Wait
-          Add-Content $env:GITHUB_ENV 'CABIN_SDK_MPI_DIR=C:\Program Files (x86)\Microsoft SDKs\MPI'
-          Add-Content $env:GITHUB_PATH 'C:\Program Files\Microsoft MPI\Bin'
+        run: Add-Content $env:GITHUB_ENV ("CABIN_SDK_PYTHON_DIR=" + (Split-Path (Get-Command python).Source))
+      - name: Install MPI
+        uses: mpi4py/setup-mpi@v1.4.4
+        with:
+          mpi: ${{ runner.os == 'Windows' && 'msmpi' || 'openmpi' }}
 
       - name: boost-compute
         if: ${{ !cancelled() }}
@@ -88,4 +79,6 @@ jobs:
 
   windows:
     runs-on: windows-2025-vs2026
+    env:
+      CABIN_SDK_MPI_DIR: C:\Program Files (x86)\Microsoft SDKs\MPI
     steps: *probe
