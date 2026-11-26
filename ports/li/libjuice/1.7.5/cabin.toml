@@ -9,8 +9,10 @@ name = "cabin-ports/libjuice"
 version = "1.7.5"
 license = "MPL-2.0"
 include = ["LICENSE", "include", "src"]
-# Upstream states C11 (CMakeLists.txt); the public header needs only C99.
+# Upstream states C11 (CMakeLists.txt:20).
 c-standard = "c11"
+# Upstream states no C standard; c99 is the measured floor of juice.h (c89 fails:
+# juice.h:20:22: // comments are not allowed in this language).
 interface-c-standard = "c99"
 
 # The static library of upstream's CMake build, with its default
