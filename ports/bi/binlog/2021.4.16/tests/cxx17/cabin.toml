@@ -1,0 +1,12 @@
+[package]
+name = "cxx17"
+version = "0.0.0"
+
+[dependencies]
+"cabin-ports/binlog" = "=2021.4.16"
+
+[target.cxx17]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/binlog"]
+cxx-standard = "c++17"
