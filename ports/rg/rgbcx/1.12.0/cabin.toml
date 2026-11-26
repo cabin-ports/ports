@@ -1,0 +1,22 @@
+
+[package.upstream]
+url = "https://github.com/richgel999/bc7enc/archive/f66c2e489b07138f2673a2fb3d27c1aa1d565c48.tar.gz"
+checksum = "sha256:5c3632dcf5227c15ef987696c23d34be993f2341278ff8a5a37bd23ea714dce9"
+format = "tar.gz"
+strip-prefix = "bc7enc-f66c2e489b07138f2673a2fb3d27c1aa1d565c48"
+
+[package]
+name = "cabin-ports/rgbcx"
+# Upstream is untagged; rgbcx.h:1 says "v1.12", and this is the archived
+# repository's last commit (f66c2e48).
+version = "1.12.0"
+license = "MIT OR Unlicense"
+include = ["LICENSE", "rgbcx.h", "rgbcx_table4.h"]
+
+# Exactly one consumer translation unit defines RGBCX_IMPLEMENTATION before
+# including rgbcx.h, after <string.h> and <math.h>, which it uses without
+# including.  Upstream states no standard; c++11 is the measured floor.
+[target.rgbcx]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
