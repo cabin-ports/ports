@@ -1,3 +1,5 @@
+#include <com/amazonaws/kinesis/video/heap/Include.h>
+#include <com/amazonaws/kinesis/video/mkvgen/Include.h>
 #include <com/amazonaws/kinesis/video/utils/Include.h>
 
 #include <stdio.h>
@@ -19,6 +21,13 @@ int main(void) {
   UINT32 len, count, value;
   UINT64 item;
   PStackQueue queue = NULL;
+  PHeap heap = NULL;
+  ALLOCATION_HANDLE handle = 0;
+  UINT64 size;
+  PVOID mapped = NULL;
+  BYTE cpd[KVS_PCM_CPD_SIZE_BYTE];
+  static const BYTE mulawCpd[KVS_PCM_CPD_SIZE_BYTE] = {0x07, 0x00, 0x01, 0x00, 0x40, 0x1f, 0x00, 0x00, 0xe8,
+                                                      0x03, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00};
 
   /* CRC-32 (ISO-HDLC) check value. */
   EXPECT(COMPUTE_CRC32((PBYTE) "123456789", 9) == 0xCBF43926u);
@@ -53,6 +62,24 @@ int main(void) {
   EXPECT(stackQueueDequeue(queue, &item) == STATUS_SUCCESS && item == 10);
   EXPECT(stackQueueGetIndexOf(queue, 30, &count) == STATUS_SUCCESS && count == 1);
   EXPECT(stackQueueFree(queue) == STATUS_SUCCESS);
+
+  /* Heap: the system heap allocates, maps and frees, and rejects a zero-size request. */
+  EXPECT(heapInitialize(MIN_HEAP_SIZE, 20, FLAGS_USE_SYSTEM_HEAP, NULL, &heap) == STATUS_SUCCESS);
+  EXPECT(heapAlloc(heap, 1024, &handle) == STATUS_SUCCESS && IS_VALID_ALLOCATION_HANDLE(handle));
+  EXPECT(heapGetAllocSize(heap, handle, &size) == STATUS_SUCCESS && size == 1024);
+  EXPECT(heapMap(heap, handle, &mapped, &size) == STATUS_SUCCESS && size == 1024);
+  memset(mapped, 0x5a, 1024);
+  EXPECT(heapUnmap(heap, mapped) == STATUS_SUCCESS);
+  EXPECT(heap->numAlloc == 1);
+  EXPECT(heapFree(heap, handle) == STATUS_SUCCESS && heap->numAlloc == 0);
+  EXPECT(heapAlloc(heap, 0, &handle) == STATUS_INVALID_ARG);
+  EXPECT(heapRelease(heap) == STATUS_SUCCESS);
+
+  /* MKV generator: the mu-law codec private data is a fixed little-endian WAVEFORMATEX. */
+  memset(cpd, 0xff, sizeof(cpd));
+  EXPECT(mkvgenGeneratePcmCpd(KVS_PCM_FORMAT_CODE_MULAW, 8000, 1, cpd, sizeof(cpd)) == STATUS_SUCCESS);
+  EXPECT(memcmp(cpd, mulawCpd, sizeof(cpd)) == 0);
+  EXPECT(mkvgenGeneratePcmCpd(KVS_PCM_FORMAT_CODE_MULAW, 100, 1, cpd, sizeof(cpd)) == STATUS_INVALID_ARG);
 
   if (failures == 0) {
     puts("ok");

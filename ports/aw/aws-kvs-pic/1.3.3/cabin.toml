@@ -101,6 +101,8 @@ interface-cxx-standard = "c++11"
 [target.kvspicClient]
 type = "library"
 links = "kvspicClient"
+# Upstream leaves the other modules to the consumer's link line.
+deps = [{ name = "kvspic", public = true }]
 sources = [
   "src/client/src/AckParser.c",
   "src/client/src/AuthIntegration.c",
@@ -132,6 +134,8 @@ interface-cxx-standard = "c++11"
 [target.kvspicState]
 type = "library"
 links = "kvspicState"
+# Upstream leaves the other modules to the consumer's link line.
+deps = [{ name = "kvspicUtils", public = true }]
 sources = [
   "src/state/src/State.c",
 ]
