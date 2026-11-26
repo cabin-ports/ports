@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/jfalcou/spy/archive/refs/tags/3.0.0.tar.gz"
+checksum = "sha256:2bdbb346515e1067b5215a412bfe9eb0babec2fb93ffd2d75f7a39a97c72e9ce"
+format = "tar.gz"
+strip-prefix = "spy-3.0.0"
+
+[package]
+name = "cabin-ports/spy"
+version = "3.0.0"
+license = "BSL-1.0"
+include = ["LICENSE.md", "README.md", "include"]
+
+# C++20 is stated by README.md ("SPY is a C++20 library") and enforced by an #error in
+# include/spy/spy.hpp.
+[target.spy]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
