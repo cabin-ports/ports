@@ -1,0 +1,46 @@
+[package.upstream]
+url = "https://github.com/osqp/qdldl/archive/refs/tags/v0.1.9.tar.gz"
+checksum = "sha256:7d1285b2db15cf2730dc83b3d16ed28412f558591108cca4f28d4438bf72ceed"
+format = "tar.gz"
+strip-prefix = "qdldl-0.1.9"
+# CMake configures include/qdldl_types.h and include/qdldl_version.h from
+# configure/*.h.in (CMakeLists.txt:111-141), and include/qdldl.h includes
+# both.  Copy steps place the templates and patch 0001 fills them in as
+# CMake's defaults write them: double values, 64-bit "long long" indices
+# (QDLDL_LONG on, :57), version 0.1.9.  Both templates are Apache-2.0, so the
+# patch adds the change line to each.
+# Not reproduced: CMake switches QDLDL_LONG off where pointers are not
+# 8 bytes (:59-62), which Cabin's cfg predicates cannot test, so a 32-bit
+# target keeps 64-bit indices instead of upstream's int.
+patches = ["patches/0001-configure-qdldl-headers.patch"]
+
+[[package.upstream.copy]]
+from = "configure/qdldl_types.h.in"
+to = "include/qdldl_types.h"
+
+[[package.upstream.copy]]
+from = "configure/qdldl_version.h.in"
+to = "include/qdldl_version.h"
+
+[package]
+name = "cabin-ports/qdldl"
+version = "0.1.9"
+license = "Apache-2.0"
+include = ["LICENSE", "include", "patches", "src"]
+# Upstream's CMake sets no C standard; C11 is the oldest Cabin lowers for MSVC.
+c-standard = "c11"
+# Upstream states no interface standard; measured: the headers pass
+# -std=c99 and -std=c++11 with -pedantic-errors, and fail c89 and c++98
+# (// comments, long long).
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# The static library of upstream's CMake build (CMakeLists.txt:175-183).
+# Not ported: the shared library (:206-213), the object library, the demo
+# executable, the minunit tests, the CMake package files, and the
+# QDLDL_FLOAT and QDLDL_LONG=OFF variants, which the fill-in fixes.
+[target.qdldl]
+type = "library"
+sources = ["src/qdldl.c"]
+include-dirs = ["include"]
+links = "qdldl"
