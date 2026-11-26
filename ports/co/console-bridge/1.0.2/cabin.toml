@@ -1,0 +1,37 @@
+[package.upstream]
+url = "https://github.com/ros/console_bridge/archive/refs/tags/1.0.2.tar.gz"
+checksum = "sha256:303a619c01a9e14a3c82eb9762b8a428ef5311a6d46353872ab9a904358be4a4"
+format = "tar.gz"
+strip-prefix = "console_bridge-1.0.2"
+# include/console_bridge/console.h:42 includes console_bridge_export.h,
+# which CMake's generate_export_header writes (CMakeLists.txt:58-59).  The
+# patch adds it as CMake writes it for the static library, with
+# CONSOLE_BRIDGE_DLLAPI and CONSOLE_BRIDGE_NO_EXPORT empty under
+# CONSOLE_BRIDGE_STATIC_DEFINE, and the value it writes for Windows
+# (CONSOLE_BRIDGE_DEPRECATED, which nothing uses) left to the preprocessor.
+patches = ["patches/0001-add-the-generated-export-header.patch"]
+
+[package]
+name = "cabin-ports/console-bridge"
+version = "1.0.2"
+# LICENSE is the BSD-3-Clause text; include/console_bridge/console.h and
+# src/console.cpp carry the same terms, Copyright (c) 2008, Willow Garage.
+license = "BSD-3-Clause"
+include = ["LICENSE", "include", "patches", "src"]
+# Upstream compiles with -std=c++11 (CMakeLists.txt:29-32); cl has no
+# /std:c++11, so the build lowers to C++14.
+cxx-standard = "c++14"
+
+# The static library; upstream builds shared by default (CMakeLists.txt:42-44).
+# Not reproduced: -fvisibility=hidden (:22-27), which only narrows a shared
+# object's exports; the CMake and pkg-config files.
+[target.console_bridge]
+type = "library"
+sources = ["src/console.cpp"]
+include-dirs = ["include"]
+defines = ["CONSOLE_BRIDGE_STATIC_DEFINE"]
+interface-defines = ["CONSOLE_BRIDGE_STATIC_DEFINE"]
+# Upstream's -std=c++11 (CMakeLists.txt:29-32); the header's variadic macros
+# need C++11.
+interface-cxx-standard = "c++11"
+links = "console_bridge"
