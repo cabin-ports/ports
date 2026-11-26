@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://github.com/ryanhaining/cppitertools/archive/refs/tags/v2.3.tar.gz"
+checksum = "sha256:419c8192691859650cca8ae7c7a8d633af42dfc453af87b7645338536c6e9e82"
+format = "tar.gz"
+strip-prefix = "cppitertools-2.3"
+
+# Upstream's tag is v2.3; its own version fields (CMakeLists.txt, conanfile.py) are stale.
+[package]
+name = "cabin-ports/cppitertools"
+version = "2.3.0"
+license = "BSD-2-Clause"
+include = ["LICENSE.md", "cppitertools"]
+
+# Only zip_longest.hpp includes boost/optional.hpp; the dependency is plain
+# so that header is always usable.
+[dependencies]
+"cabin-ports/boost-optional" = "=1.92.0"
+
+# C++17 is upstream's stated requirement (CMakeLists.txt:16-17).
+[target.cppitertools]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++17"
+deps = [{ name = "cabin-ports/boost-optional", public = true }]
