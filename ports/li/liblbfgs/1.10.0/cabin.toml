@@ -1,0 +1,41 @@
+[package.upstream]
+url = "https://github.com/chokkan/liblbfgs/archive/refs/tags/v1.10.tar.gz"
+checksum = "sha256:95c1997e6c215c58738f5f723ca225d64c8070056081a23d636160ff2169bd2f"
+format = "tar.gz"
+strip-prefix = "liblbfgs-1.10"
+
+[package]
+name = "cabin-ports/liblbfgs"
+# Tag v1.10 (configure.in:21); a third component is appended.
+version = "1.10.0"
+license = "MIT"
+include = [
+  "AUTHORS",
+  "COPYING",
+  "include",
+  "lib/arithmetic_ansi.h",
+  "lib/arithmetic_sse_double.h",
+  "lib/arithmetic_sse_float.h",
+  "lib/lbfgs.c",
+]
+# Upstream states no standard; lib/lbfgs.c uses `inline static`, which is C99,
+# and C11 is the oldest standard Cabin can request from MSVC.
+c-standard = "c11"
+# Upstream states no C standard; c99 is the measured floor of lbfgs.h (under
+# -std=c89 -pedantic-errors, clang: "commas at the end of enumerator lists are
+# a C99-specific feature", lbfgs.h:146).
+interface-c-standard = "c99"
+
+# Upstream's default build: double precision and the portable arithmetic_ansi.h.
+# Not ported: the SSE arithmetic (configure.in's --enable-sse2, off by default),
+# the sample, the docs and the autotools and Visual Studio files.  Not
+# reproduced: configure.in's -O3 -ffast-math.
+[target.lbfgs]
+type = "library"
+sources = ["lib/lbfgs.c"]
+include-dirs = ["include"]
+links = "lbfgs"
+
+# sqrt and fabs come from libm (configure.in:92).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
