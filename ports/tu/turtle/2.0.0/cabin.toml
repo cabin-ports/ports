@@ -1,0 +1,41 @@
+[package.upstream]
+url = "https://github.com/mat007/turtle/archive/refs/tags/v2.0.0.tar.gz"
+checksum = "sha256:636a552fc442d452955eca1f554e6a962b38270c1a6290538c6405da59b49e45"
+format = "tar.gz"
+strip-prefix = "turtle-2.0.0"
+
+[package]
+name = "cabin-ports/turtle"
+version = "2.0.0"
+license = "BSL-1.0"
+include = ["LICENSE_1_0.txt", "include"]
+
+[dependencies]
+"cabin-ports/boost-algorithm" = "=1.92.0"
+"cabin-ports/boost-config" = "=1.92.0"
+"cabin-ports/boost-detail" = "=1.92.0"
+"cabin-ports/boost-exception" = "=1.92.0"
+"cabin-ports/boost-optional" = "=1.92.0"
+"cabin-ports/boost-preprocessor" = "=1.92.0"
+"cabin-ports/boost-test" = "=1.92.0"
+
+# Not provided: turtle/version.hpp, which upstream's CMake generates and no
+# header includes (an include of it fails, measured), and the Catch error
+# policy turtle/catch.hpp, which needs Catch v1/v2's <catch.hpp>, supplied by
+# no port (including it fails to compile, measured). MOCK_THREAD_SAFE with
+# MOCK_NO_HDR_MUTEX needs Boost.Thread, which is not a dependency (fails with
+# "boost/thread/lock_guard.hpp" not found, measured).
+[target.turtle]
+type = "header-only"
+include-dirs = ["include"]
+# Upstream requires C++14 (CMakeLists.txt:30, target_compile_features).
+interface-cxx-standard = "c++14"
+deps = [
+  { name = "cabin-ports/boost-algorithm", public = true },
+  { name = "cabin-ports/boost-config", public = true },
+  { name = "cabin-ports/boost-detail", public = true },
+  { name = "cabin-ports/boost-exception", public = true },
+  { name = "cabin-ports/boost-optional", public = true },
+  { name = "cabin-ports/boost-preprocessor", public = true },
+  { name = "cabin-ports/boost-test", public = true },
+]
