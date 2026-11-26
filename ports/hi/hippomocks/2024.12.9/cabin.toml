@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/dascandy/hippomocks/archive/f301ad727e7efb6cae53253a0b0876938e2296b5.tar.gz"
+checksum = "sha256:33452008ad83704c17f9bfe738479dafa94ee3dd0c9087e0b0bbdbf614b4b4d6"
+format = "tar.gz"
+strip-prefix = "hippomocks-f301ad727e7efb6cae53253a0b0876938e2296b5"
+
+[package]
+name = "cabin-ports/hippomocks"
+# Upstream's v5.0 tag (2016) predates hippomocks.h's MSVC, MinGW and C++20
+# fixes; this is commit f301ad72 on master, versioned by its commit date.
+version = "2024.12.9"
+license = "LGPL-2.1-or-later"
+include = ["LICENSE", "HippoMocks/hippomocks.h"]
+
+# C-function mocking (ExpectCallFunc, OnCallFunc) crashes on macOS arm64 when
+# the expectation is registered (measured: SIGBUS with Apple clang and GCC 16).
+# At C++26 hippomocks.h does not compile against libc++: from C++20 on it uses
+# std::wstring_convert, which libc++ removes at C++26 (measured with Apple
+# clang).
+# Not ported: HippoMocks/comsupport.h, the MSVC COM helpers that upstream's
+# install (CMakeLists.txt:10-11) leaves out.
+[target.hippomocks]
+type = "header-only"
+include-dirs = ["HippoMocks"]
+# Upstream's stated standard (HippoMocksTest/makefile:2, .travis.yml:18).
+interface-cxx-standard = "c++98"
