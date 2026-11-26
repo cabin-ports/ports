@@ -1,0 +1,72 @@
+--- a/crc32.cpp
++++ b/crc32.cpp
+@@ -7,7 +7,8 @@
+ #include "crc32.h"
+ 
+ // big endian architectures need #define __BYTE_ORDER __BIG_ENDIAN
+-#ifndef _MSC_VER
++// Changed for cabin-ports on 2026-11-26: skip <endian.h> on macOS, which has none.
++#if !defined(_MSC_VER) && !defined(__APPLE__)
+ #include <endian.h>
+ #endif
+ 
+--- a/keccak.cpp
++++ b/keccak.cpp
+@@ -7,7 +7,8 @@
+ #include "keccak.h"
+ 
+ // big endian architectures need #define __BYTE_ORDER __BIG_ENDIAN
+-#ifndef _MSC_VER
++// Changed for cabin-ports on 2026-11-26: skip <endian.h> on macOS, which has none.
++#if !defined(_MSC_VER) && !defined(__APPLE__)
+ #include <endian.h>
+ #endif
+ 
+--- a/md5.cpp
++++ b/md5.cpp
+@@ -6,7 +6,8 @@
+ 
+ #include "md5.h"
+ 
+-#ifndef _MSC_VER
++// Changed for cabin-ports on 2026-11-26: skip <endian.h> on macOS, which has none.
++#if !defined(_MSC_VER) && !defined(__APPLE__)
+ #include <endian.h>
+ #endif
+ 
+--- a/sha1.cpp
++++ b/sha1.cpp
+@@ -7,7 +7,8 @@
+ #include "sha1.h"
+ 
+ // big endian architectures need #define __BYTE_ORDER __BIG_ENDIAN
+-#ifndef _MSC_VER
++// Changed for cabin-ports on 2026-11-26: skip <endian.h> on macOS, which has none.
++#if !defined(_MSC_VER) && !defined(__APPLE__)
+ #include <endian.h>
+ #endif
+ 
+--- a/sha256.cpp
++++ b/sha256.cpp
+@@ -7,7 +7,8 @@
+ #include "sha256.h"
+ 
+ // big endian architectures need #define __BYTE_ORDER __BIG_ENDIAN
+-#ifndef _MSC_VER
++// Changed for cabin-ports on 2026-11-26: skip <endian.h> on macOS, which has none.
++#if !defined(_MSC_VER) && !defined(__APPLE__)
+ #include <endian.h>
+ #endif
+ 
+--- a/sha3.cpp
++++ b/sha3.cpp
+@@ -7,7 +7,8 @@
+ #include "sha3.h"
+ 
+ // big endian architectures need #define __BYTE_ORDER __BIG_ENDIAN
+-#ifndef _MSC_VER
++// Changed for cabin-ports on 2026-11-26: skip <endian.h> on macOS, which has none.
++#if !defined(_MSC_VER) && !defined(__APPLE__)
+ #include <endian.h>
+ #endif
+ 
