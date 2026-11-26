@@ -16,11 +16,8 @@ include = ["LICENSE", "patches", "ruapu.h"]
 
 # Define RUAPU_IMPLEMENTATION before including ruapu.h in exactly one source
 # file (README.md).  Upstream states no C standard; C99 is measured.
-# interface-defines: under a strict -std=c99, glibc hides the sigaction and
-# sigsetjmp declarations the header uses on Linux.
 # Not ported: main.c (a sample) and the Python binding.
 [target.ruapu]
 type = "header-only"
 include-dirs = ["."]
 interface-c-standard = "c99"
-interface-defines = ["_POSIX_C_SOURCE=200809L"]
