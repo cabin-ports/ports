@@ -5,6 +5,7 @@
 #include <functional>
 #include <future>
 #include <numeric>
+#include <random>
 #include <vector>
 
 namespace {
@@ -58,6 +59,8 @@ int main() {
   check(data == expected, "parallel_sort ascending");
   check(data.front() == 0 && data.back() == 1008, "sorted ends");
 
+  // Sorted input recurses once per element (first-element pivot).
+  std::shuffle(data.begin(), data.end(), std::mt19937(1));
   pool.parallel_sort<std::vector<int>::iterator, std::greater<int>, 64>(
       data.begin(), data.end(), std::greater<int>());
   std::reverse(expected.begin(), expected.end());

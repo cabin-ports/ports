@@ -14,6 +14,9 @@ include = ["License", "include"]
 # ThreadPool.tcc defines the non-template ThreadPool members without
 # `inline`: a program with two translation units that include ThreadPool.h
 # fails to link with duplicate symbols (measured on macOS).
+# parallel_sort pivots on the first element, so sorted input recurses once per
+# element on a worker thread; 1000 sorted ints overflowed macOS's 512 KiB
+# secondary-thread stack in a debug build (measured, 25-43 of 500 runs).
 [target.leopard]
 type = "header-only"
 include-dirs = ["include"]
