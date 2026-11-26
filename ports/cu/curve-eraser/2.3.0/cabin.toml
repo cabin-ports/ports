@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/Curve/eraser/archive/refs/tags/v2.3.0.tar.gz"
+checksum = "sha256:213ba2ea8717318d1c6c477a7e50fd5c6e4d85d1320a8b8bb51df30a93dfe70e"
+format = "tar.gz"
+strip-prefix = "eraser-2.3.0"
+
+[package]
+name = "cabin-ports/curve-eraser"
+version = "2.3.0"
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+# Consumers include <eraser/erased.hpp>.
+[target.eraser]
+type = "header-only"
+include-dirs = ["include"]
+# CMakeLists.txt:17, cxx_std_20.
+interface-cxx-standard = "c++20"
