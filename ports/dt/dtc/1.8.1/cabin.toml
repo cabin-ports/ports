@@ -1,0 +1,61 @@
+[package.upstream]
+url = "https://github.com/dgibson/dtc/archive/refs/tags/v1.8.1.tar.gz"
+checksum = "sha256:74b50bb19134f6562490afea53e59953dd6c4afb17e5ccb60be32221262d3390"
+format = "tar.gz"
+strip-prefix = "dtc-1.8.1"
+
+[package]
+name = "cabin-ports/dtc"
+version = "1.8.1"
+license = "GPL-2.0-or-later OR BSD-2-Clause"
+# README.license: libfdt (libfdt/) is GPL/BSD dual-licensed, while dtc's own
+# sources are GPL only and are left out.
+include = [
+  "BSD-2-Clause",
+  "GPL",
+  "README.license",
+  "libfdt/fdt.c",
+  "libfdt/fdt.h",
+  "libfdt/fdt_addresses.c",
+  "libfdt/fdt_check.c",
+  "libfdt/fdt_empty_tree.c",
+  "libfdt/fdt_overlay.c",
+  "libfdt/fdt_ro.c",
+  "libfdt/fdt_rw.c",
+  "libfdt/fdt_strerror.c",
+  "libfdt/fdt_sw.c",
+  "libfdt/fdt_wip.c",
+  "libfdt/libfdt.h",
+  "libfdt/libfdt_env.h",
+  "libfdt/libfdt_internal.h",
+]
+
+# libfdt, as libfdt/meson.build builds it.  Not ported: the dtc, fdtdump,
+# fdtget, fdtput and fdtoverlay programs (the archive lacks the flex and bison
+# output dtc needs), YAML output and pylibfdt.
+[target.fdt]
+type = "library"
+sources = [
+  "libfdt/fdt.c",
+  "libfdt/fdt_addresses.c",
+  "libfdt/fdt_check.c",
+  "libfdt/fdt_empty_tree.c",
+  "libfdt/fdt_overlay.c",
+  "libfdt/fdt_ro.c",
+  "libfdt/fdt_rw.c",
+  "libfdt/fdt_strerror.c",
+  "libfdt/fdt_sw.c",
+  "libfdt/fdt_wip.c",
+]
+include-dirs = ["libfdt"]
+# Upstream states no standard.  c11 is the oldest C standard cl accepts; the
+# headers fail to compile at c89 (measured), so the C interface floor is c99.
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+links = "fdt"
+
+# Strict -std=c11 hides glibc's strnlen, which fdt_ro.c calls; upstream's
+# build compiles in GCC's default GNU dialect.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_POSIX_C_SOURCE=200809L"]
