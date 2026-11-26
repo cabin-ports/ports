@@ -1,0 +1,60 @@
+[package.upstream]
+# The Apache source release ADBC Libraries 25 (tag apache-arrow-adbc-25),
+# which versions its C libraries 1.13.0 (c/cmake_modules/AdbcVersion.cmake:24).
+url = "https://github.com/apache/arrow-adbc/releases/download/apache-arrow-adbc-25/apache-arrow-adbc-25.tar.gz"
+checksum = "sha256:de2910f951eeb3c57d882e621a32d133580cc6b0ad01ac25056f4ac709b8b2c0"
+format = "tar.gz"
+strip-prefix = "apache-arrow-adbc-25"
+
+[package]
+name = "cabin-ports/arrow-adbc"
+version = "1.13.0"
+# c/driver_manager/adbc_driver_manager.cc:170 credits Stack Overflow question
+# 58177815 for the musl check, :462-466 credit Go's filepath.SplitList for the
+# Windows path-list split, and adbc_driver_manager_driver_loading.cc:810
+# credits Stack Overflow question 1878001 for the lib-prefix test; their
+# copyright significance is uncertain.
+license = "Apache-2.0 AND MIT"
+include = [
+  "LICENSE.txt",
+  "NOTICE.txt",
+  "c/driver_manager/adbc_driver_manager.cc",
+  "c/driver_manager/adbc_driver_manager_api.cc",
+  "c/driver_manager/adbc_driver_manager_driver_loading.cc",
+  "c/driver_manager/adbc_driver_manager_internal.h",
+  "c/driver_manager/adbc_driver_manager_profiles.cc",
+  "c/driver_manager/current_arch.h",
+  "c/include/adbc.h",
+  "c/include/adbc_driver_manager.h",
+  "c/include/arrow-adbc/adbc.h",
+  "c/include/arrow-adbc/adbc_driver_manager.h",
+  "c/vendor/toml++/toml.hpp",
+]
+# Upstream builds its C as C99 and its C++ as C++20 (c/CMakeLists.txt:25-26);
+# the headers' C++ floor, C++11, is measured.
+cxx-standard = "c++20"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+[profile]
+include-dirs = ["c/vendor"]
+
+# Not ported: the SQLite, PostgreSQL and FlightSQL (Go) drivers, which
+# upstream builds as libraries of their own, and shared libraries.
+[target.adbc_driver_manager]
+type = "library"
+sources = [
+  "c/driver_manager/adbc_driver_manager.cc",
+  "c/driver_manager/adbc_driver_manager_api.cc",
+  "c/driver_manager/adbc_driver_manager_driver_loading.cc",
+  "c/driver_manager/adbc_driver_manager_profiles.cc",
+]
+include-dirs = ["c/include"]
+defines = ["ADBC_EXPORTING", "ADBC_CONDA_BUILD=0"]
+links = "adbc_driver_manager"
+
+[target.'cfg(any(os = "linux", os = "android"))'.profile]
+link-libs = ["dl"]
+
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["advapi32", "uuid", "shell32"]
