@@ -1,0 +1,37 @@
+[package.upstream]
+url = "https://github.com/yhirose/cpp-httplib/archive/refs/tags/v0.67.0.tar.gz"
+checksum = "sha256:be711ddaf7a3655d8f23aa5655709250b24d247aedd4b2629989d18b6164e5be"
+format = "tar.gz"
+strip-prefix = "cpp-httplib-0.67.0"
+
+[package]
+name = "cabin-ports/cpp-httplib"
+version = "0.67.0"
+# httplib.h:623-640 and :5745 credit Stack Overflow for make_unique and base64_encode; their
+# copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "httplib.h"]
+
+# Upstream's default CMake target is the header-only INTERFACE one
+# (CMakeLists.txt:114, HTTPLIB_COMPILE OFF).  The C++11 standard is stated at
+# README.md:5 and CMakeLists.txt:371.  HTTPLIB_USE_NON_BLOCKING_GETADDRINFO
+# defaults to ON (CMakeLists.txt:121) and defines the macro (:411) on every
+# platform except Windows without GetAddrInfoExCancel (:184-199, not
+# reproduced); on macOS it links CFNetwork and CoreFoundation (:388), on
+# Windows it also needs ws2_32 and crypt32 (:383-384), and Threads::Threads is
+# always linked (:381).  Not ported: the TLS and compression backends that
+# upstream's CMake enables when found.
+[target.cpp-httplib]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
+interface-defines = ["CPPHTTPLIB_USE_NON_BLOCKING_GETADDRINFO"]
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(os = "macos")'.profile]
+frameworks = ["CFNetwork", "CoreFoundation"]
+
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32", "crypt32"]
