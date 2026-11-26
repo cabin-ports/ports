@@ -23,6 +23,8 @@ interface-c-standard = "c99"
 # and CHARLS_STATIC public (src/CMakeLists.txt), so that Windows consumers
 # do not declare the API dllimport.  Not ported: the shared library, the
 # Windows resources and export list, samples, tests and benchmarks.
+# (measured: check-windows, C2664) cl rejects the container overloads of
+# jpegls_encoder::encode and jpegls_decoder::decode; pass pointer and size.
 [target.charls]
 type = "library"
 sources = [

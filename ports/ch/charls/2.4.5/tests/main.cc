@@ -32,27 +32,35 @@ int main()
 
     try
     {
-        const auto encoded = charls::jpegls_encoder::encode(source, frame);
+        // Pointer+size overloads: cl rejects the container overloads (C2664).
+        charls::jpegls_encoder lossless;
+        lossless.frame_info(frame);
+        std::vector<uint8_t> encoded(lossless.estimated_destination_size());
+        lossless.destination(encoded.data(), encoded.size());
+        encoded.resize(lossless.encode(source.data(), source.size()));
         check(encoded.size() > 0 && encoded.size() < source.size(), "lossless stream is compressed");
 
-        std::vector<uint8_t> decoded;
-        const auto result = charls::jpegls_decoder::decode(encoded, decoded);
-        check(result.first.width == width, "width");
-        check(result.first.height == height, "height");
-        check(result.first.bits_per_sample == 8, "bits per sample");
-        check(result.first.component_count == 1, "component count");
-        check(result.second == charls::interleave_mode::none, "interleave mode");
+        charls::jpegls_decoder reader{encoded.data(), encoded.size(), true};
+        const charls::frame_info info = reader.frame_info();
+        check(info.width == width, "width");
+        check(info.height == height, "height");
+        check(info.bits_per_sample == 8, "bits per sample");
+        check(info.component_count == 1, "component count");
+        check(reader.interleave_mode() == charls::interleave_mode::none, "interleave mode");
+        std::vector<uint8_t> decoded(reader.destination_size());
+        reader.decode(decoded.data(), decoded.size());
         check(decoded == source, "lossless round trip");
 
         charls::jpegls_encoder encoder;
         encoder.frame_info(frame).near_lossless(2);
         std::vector<uint8_t> lossy(encoder.estimated_destination_size());
-        encoder.destination(lossy);
-        lossy.resize(encoder.encode(source));
+        encoder.destination(lossy.data(), lossy.size());
+        lossy.resize(encoder.encode(source.data(), source.size()));
 
-        charls::jpegls_decoder decoder{lossy, true};
+        charls::jpegls_decoder decoder{lossy.data(), lossy.size(), true};
         check(decoder.near_lossless() == 2, "near-lossless parameter");
-        const auto approx = decoder.decode<std::vector<uint8_t>>();
+        std::vector<uint8_t> approx(decoder.destination_size());
+        decoder.decode(approx.data(), approx.size());
         check(approx.size() == source.size(), "near-lossless size");
         for (size_t i = 0; i < approx.size() && i < source.size(); ++i)
             if (std::abs(static_cast<int>(approx[i]) - static_cast<int>(source[i])) > 2)
@@ -65,7 +73,7 @@ int main()
         bool threw = false;
         try
         {
-            const charls::jpegls_decoder bad{garbage, true};
+            const charls::jpegls_decoder bad{garbage.data(), garbage.size(), true};
             (void)bad;
         }
         catch (const charls::jpegls_error&)
