@@ -1,4 +1,6 @@
 #include <lefticus/tools/curry.hpp>
+#include <lefticus/tools/forwarding_ref.hpp>
+#include <lefticus/tools/moving_ref.hpp>
 #include <lefticus/tools/simple_stack_flat_map.hpp>
 #include <lefticus/tools/simple_stack_vector.hpp>
 #include <lefticus/tools/type_lists.hpp>
@@ -6,6 +8,7 @@
 #include <cstdio>
 #include <stdexcept>
 #include <type_traits>
+#include <utility>
 
 namespace tools = lefticus::tools;
 
@@ -32,6 +35,41 @@ static_assert(std::is_same_v<tools::split_n_t<1, list>,
 static_assert(std::is_same_v<tools::join_t<tools::type_list<float>, tools::type_list<double, int>>, list>);
 static_assert(std::is_same_v<tools::sub_t<1, 1, list>, tools::type_list<double>>);
 
+struct CountsMovesCopies {
+  CountsMovesCopies() = default;
+  CountsMovesCopies(CountsMovesCopies &&other) noexcept { ++other.moved_from; }
+  CountsMovesCopies(const CountsMovesCopies &other) noexcept { ++other.copied_from; }
+  CountsMovesCopies &operator=(CountsMovesCopies &&other) noexcept {
+    ++other.move_assigned_from;
+    return *this;
+  }
+  CountsMovesCopies &operator=(const CountsMovesCopies &other) noexcept {
+    ++other.copy_assigned_from;
+    return *this;
+  }
+
+  mutable int moved_from = 0;
+  mutable int copied_from = 0;
+  mutable int move_assigned_from = 0;
+  mutable int copy_assigned_from = 0;
+};
+
+struct CopyOnly {
+  CopyOnly() = default;
+  CopyOnly(const CopyOnly &) = default;
+  CopyOnly &operator=(const CopyOnly &) = default;
+};
+
+template <typename T> constexpr bool can_make_moving_ref() {
+  return requires(T t) { tools::moving_ref<T>{std::move(t)}; };
+}
+template <typename T> constexpr bool can_make_moving_ref_from_const() {
+  return requires(const T t) { tools::moving_ref<T>{std::move(t)}; };
+}
+static_assert(can_make_moving_ref<CountsMovesCopies>());
+static_assert(!can_make_moving_ref_from_const<CountsMovesCopies>());
+static_assert(!can_make_moving_ref<CopyOnly>());
+
 }  // namespace
 
 int main() {
@@ -39,6 +77,33 @@ int main() {
   check(tools::curry(sum3)(1, 2, 3) == 6, "curry no args");
   check(tools::curry(sum3, 10)(20)(30) == 60, "curry one at a time");
   check(tools::curry(sum3, 1, 2)(4) == 7, "curry two then one");
+
+  // forwarding_ref: converting back to a value copies from an lvalue and moves from an rvalue
+  {
+    CountsMovesCopies lvalue;
+    tools::forwarding_ref ref{lvalue};
+    [[maybe_unused]] CountsMovesCopies copy = ref;
+    check(lvalue.copied_from == 1 && lvalue.moved_from == 0, "forwarding_ref lvalue copies");
+
+    CountsMovesCopies rvalue;
+    tools::forwarding_ref mref{std::move(rvalue)};
+    [[maybe_unused]] CountsMovesCopies moved = mref;
+    check(rvalue.moved_from == 1 && rvalue.copied_from == 0, "forwarding_ref rvalue moves");
+  }
+
+  // moving_ref: construction and assignment through it move
+  {
+    CountsMovesCopies source;
+    tools::moving_ref ref{std::move(source)};
+    [[maybe_unused]] CountsMovesCopies constructed = ref;
+    check(source.moved_from == 1 && source.copied_from == 0, "moving_ref move construct");
+
+    CountsMovesCopies source2;
+    tools::moving_ref ref2{std::move(source2)};
+    CountsMovesCopies target;
+    target = ref2;
+    check(source2.move_assigned_from == 1 && source2.copy_assigned_from == 0, "moving_ref move assign");
+  }
 
   // simple_stack_vector
   tools::simple_stack_vector<int, 3> vec{1, 2};
