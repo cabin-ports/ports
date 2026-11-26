@@ -87,6 +87,9 @@ sources = [
 ]
 include-dirs = ["headers"]
 deps = [{ name = "cabin-ports/geos:geos_c", public = true }]
+# Upstream states no C standard; c99 is the measured floor of librttopo.h
+# (c89 fails in geos_c.h: commas at the end of enumerator lists are a
+# C99-specific feature).
 interface-c-standard = "c99"
 links = "rttopo"
 
