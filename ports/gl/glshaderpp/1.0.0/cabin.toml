@@ -1,0 +1,24 @@
+[package.upstream]
+url = "https://gitlab-lepuy.iut.uca.fr/opengl/glshaderpp/-/archive/v1.0.0/glshaderpp-v1.0.0.tar.gz"
+checksum = "sha256:b0790d8ce834b9041d88ab23ec6bfde7b17f5c87d2cd6fac93f8b8ed8ad101d6"
+format = "tar.gz"
+strip-prefix = "glshaderpp-v1.0.0"
+# Shader.h and ShaderProgram.h write to std::cerr when a consumer defines
+# _DONT_USE_SHADER_EXCEPTION but include no <iostream>; 0001 adds it to Shader.h
+# (measured on macOS: no member named 'cerr' in namespace 'std').
+patches = ["patches/0001-include-iostream.patch"]
+
+[package]
+name = "cabin-ports/glshaderpp"
+version = "1.0.0"
+# LICENSE is the LGPL-3.0 text and each header's banner says "GNU Lesser Public
+# License v3"; neither grants "or any later version".
+license = "LGPL-3.0-only"
+include = ["LICENSE", "GLShaderPP/public", "patches"]
+
+# Upstream states no standard; c++17 is what ShaderProgram.h's fold expression
+# needs (measured: -std=c++14 only warns, on clang and g++ 16).
+[target.glshaderpp]
+type = "header-only"
+include-dirs = ["GLShaderPP/public"]
+interface-cxx-standard = "c++17"
