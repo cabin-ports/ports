@@ -1,0 +1,46 @@
+[package.upstream]
+url = "https://github.com/dpilger26/NumCpp/archive/refs/tags/Version_2.18.0.tar.gz"
+checksum = "sha256:41af597c563ad1d094a21cb6c8147ff75ce8dc1ee0a9f829c704c0fd2388b180"
+format = "tar.gz"
+strip-prefix = "NumCpp-Version_2.18.0"
+
+[package]
+name = "cabin-ports/numcpp"
+version = "2.18.0"
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+[dependencies]
+"cabin-ports/boost-algorithm" = "=1.92.0"
+"cabin-ports/boost-core" = "=1.92.0"
+"cabin-ports/boost-date-time" = "=1.92.0"
+"cabin-ports/boost-dynamic-bitset" = "=1.92.0"
+"cabin-ports/boost-integer" = "=1.92.0"
+"cabin-ports/boost-log" = "=1.92.0"
+"cabin-ports/boost-math" = "=1.92.0"
+"cabin-ports/boost-random" = "=1.92.0"
+"cabin-ports/boost-smart-ptr" = "=1.92.0"
+
+# Upstream's default build uses Boost (CMakeLists.txt:70-86), so
+# NUMCPP_NO_USE_BOOST is not defined.  Not ported: the Boost.Python and
+# pybind11 interfaces and NUMCPP_USE_MULTITHREAD, all off by default.
+# C++17 is upstream's stated standard (README.md:22-25, CMakeLists.txt:161).
+# NOMINMAX is upstream's interface definition on MSVC only (CMakeLists.txt:69);
+# Cabin has no conditional interface definitions, so it is defined everywhere.
+[target.numcpp]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+interface-defines = ["NOMINMAX"]
+deps = [
+  { name = "cabin-ports/boost-algorithm", public = true },
+  { name = "cabin-ports/boost-core", public = true },
+  { name = "cabin-ports/boost-date-time", public = true },
+  { name = "cabin-ports/boost-dynamic-bitset", public = true },
+  { name = "cabin-ports/boost-integer", public = true },
+  { name = "cabin-ports/boost-log:boost_log", public = true },
+  { name = "cabin-ports/boost-log:boost_log_setup", public = true },
+  { name = "cabin-ports/boost-math", public = true },
+  { name = "cabin-ports/boost-random", public = true },
+  { name = "cabin-ports/boost-smart-ptr", public = true },
+]
