@@ -366,3 +366,9 @@ links = "ACE"
 # carry raw compiler flags, so it builds as upstream's clang and CMake builds do.
 [target.'cfg(os = "linux")'.profile]
 link-libs = ["pthread", "dl", "rt"]
+
+# The system libraries upstream's Windows builds link for ACE
+# (bin/MakeProjectCreator/config/acedefaults.mpb:12-14 and :30-31,
+# MPC/templates/nmakedll.mpt:10).
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["advapi32", "iphlpapi", "mswsock", "netapi32", "user32", "ws2_32"]
