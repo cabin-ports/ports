@@ -1,0 +1,45 @@
+--- a/src/udfread.h
++++ b/src/udfread.h
+@@ -28,6 +28,12 @@
+ 
+ #include <stdint.h>    /* *int_t */
+ #include <sys/types.h> /* *size_t */
++
++#if defined(_MSC_VER) && !defined(ssize_t)
++/* Changed for cabin-ports on 2026-11-26: backported upstream's MSVC ssize_t typedef (92016f87). */
++#include <basetsd.h>
++typedef SSIZE_T ssize_t;
++#endif
+ 
+ #ifdef UDFREAD_API_EXPORT
+ #include "attributes.h"
+--- a/include/udfread/udfread.h
++++ b/include/udfread/udfread.h
+@@ -28,6 +28,12 @@
+ 
+ #include <stdint.h>    /* *int_t */
+ #include <sys/types.h> /* *size_t */
++
++#if defined(_MSC_VER) && !defined(ssize_t)
++/* Changed for cabin-ports on 2026-11-26: backported upstream's MSVC ssize_t typedef (92016f87). */
++#include <basetsd.h>
++typedef SSIZE_T ssize_t;
++#endif
+ 
+ #ifdef UDFREAD_API_EXPORT
+ #include "attributes.h"
+--- a/src/default_blockinput.c
++++ b/src/default_blockinput.c
+@@ -47,6 +47,12 @@
+ # define off_t int64_t
+ #endif
+ 
++#if defined(_MSC_VER) && !defined(ssize_t)
++/* Changed for cabin-ports on 2026-11-26: backported upstream's MSVC ssize_t typedef (92016f87). */
++#include <basetsd.h>
++typedef SSIZE_T ssize_t;
++#endif
++
+ #ifdef __ANDROID__
+ # undef  lseek
+ # define lseek lseek64

@@ -6,10 +6,17 @@ strip-prefix = "libudfread-1.2.0"
 # The copy steps install the public headers under include/udfread/ as
 # meson does (src/udfread/meson.build:7-30), and 0001 fills in the version
 # template there as meson's configure_file would.
-# LGPL-2.1 section 1 notice of src/udfread-version.h.in, whose lines 0001
-# carries (the License's condition that copies keep it):
+# Patch 0002 backports upstream's MSVC ssize_t typedef (92016f87), which
+# udfread.h's API needs (measured: check-windows, udfread.h(285) C2061
+# 'udfread_file_read').
+# LGPL-2.1 section 1 notices of src/udfread-version.h.in (0001) and of
+# src/udfread.h and src/default_blockinput.c (0002), whose lines those
+# patches carry (the License's condition that copies keep them).  They
+# differ only in the copyright line, given here in that order:
 # This file is part of libudfread
 # Copyright (C) 2014 VLC authors and VideoLAN
+# Copyright (C) 2014-2015 VLC authors and VideoLAN
+# Copyright (C) 2014-2017 VLC authors and VideoLAN
 #
 # Authors: Petri Hintukainen <phintuka@users.sourceforge.net>
 #
@@ -26,7 +33,10 @@ strip-prefix = "libudfread-1.2.0"
 # You should have received a copy of the GNU Lesser General Public
 # License along with this library. If not, see
 # <http://www.gnu.org/licenses/>.
-patches = ["patches/0001-fill-in-udfread-version-h.patch"]
+patches = [
+  "patches/0001-fill-in-udfread-version-h.patch",
+  "patches/0002-define-ssize-t-on-msvc.patch",
+]
 
 [[package.upstream.copy]]
 from = "src/udfread.h"
