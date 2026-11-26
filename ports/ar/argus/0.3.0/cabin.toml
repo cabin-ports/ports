@@ -1,0 +1,94 @@
+[package.upstream]
+url = "https://github.com/lucocozz/argus/archive/refs/tags/v0.3.0.tar.gz"
+checksum = "sha256:8310c402fa3c822874c933c308edf4dc4857e8a9efd57236105cd4eee5946169"
+format = "tar.gz"
+strip-prefix = "Argus-0.3.0"
+
+[package]
+name = "cabin-ports/argus"
+version = "0.3.0"
+license = "MIT"
+include = ["LICENSE", "README.md", "includes", "source"]
+# Not ported: the regex feature (-Dregex, which needs PCRE2), tests, examples
+# and benchmarks.
+# README.md ("Requirements") states C11.
+c-standard = "c11"
+
+[target.argus]
+type = "library"
+sources = [
+  "source/api/argus_display.c",
+  "source/api/argus_exec.c",
+  "source/api/argus_free.c",
+  "source/api/argus_init.c",
+  "source/api/argus_parse.c",
+  "source/api/argus_value_access.c",
+  "source/callbacks/handlers/array_float_handler.c",
+  "source/callbacks/handlers/array_int_handler.c",
+  "source/callbacks/handlers/array_string_handler.c",
+  "source/callbacks/handlers/bool_handler.c",
+  "source/callbacks/handlers/default_free.c",
+  "source/callbacks/handlers/flag_handler.c",
+  "source/callbacks/handlers/float_handler.c",
+  "source/callbacks/handlers/help_handler.c",
+  "source/callbacks/handlers/int_handler.c",
+  "source/callbacks/handlers/map_bool_handler.c",
+  "source/callbacks/handlers/map_float_handler.c",
+  "source/callbacks/handlers/map_int_handler.c",
+  "source/callbacks/handlers/map_string_handler.c",
+  "source/callbacks/handlers/string_handler.c",
+  "source/callbacks/handlers/variadic_float_handler.c",
+  "source/callbacks/handlers/variadic_int_handler.c",
+  "source/callbacks/handlers/variadic_string_handler.c",
+  "source/callbacks/handlers/version_handler.c",
+  "source/callbacks/validators/choices_validator.c",
+  "source/callbacks/validators/count_validator.c",
+  "source/callbacks/validators/length_validator.c",
+  "source/callbacks/validators/range_validator.c",
+  "source/callbacks/validators/regex_validator.c",
+  "source/core/error.c",
+  "source/core/parsing/execute_callbacks.c",
+  "source/core/parsing/load_env_vars.c",
+  "source/core/parsing/option_handle_long.c",
+  "source/core/parsing/option_handle_positional.c",
+  "source/core/parsing/option_handle_short.c",
+  "source/core/parsing/option_handle_subcommand.c",
+  "source/core/parsing/parse_args.c",
+  "source/core/parsing/post_parse_validation.c",
+  "source/core/validation/validate_arguments.c",
+  "source/core/validation/validate_containers.c",
+  "source/core/validation/validate_structure.c",
+  "source/display/command_display.c",
+  "source/display/help_display.c",
+  "source/display/help/help_formatter.c",
+  "source/display/help/help_organizer.c",
+  "source/display/help/help_renderer.c",
+  "source/display/usage_display.c",
+  "source/display/version_display.c",
+  "source/utils/multi_values.c",
+  "source/utils/option_lookup.c",
+  "source/utils/stream.c",
+  "source/utils/strings.c",
+  "source/utils/value_utils.c",
+]
+include-dirs = ["includes"]
+# ARGUS_BUILDING is for the library and its consumers: the library is static,
+# and without it compiler.h makes ARGUS_API dllimport on Windows.  Other
+# platforms ignore it.
+defines = ["ARGUS_BUILDING"]
+interface-defines = ["ARGUS_BUILDING"]
+interface-c-standard = "c11"
+# The macros use compound literals and designated initializers and the
+# headers have no extern "C".
+interface-cxx-standard = "none"
+links = "argus"
+
+# upstream's meson.build defines this on Windows.
+[target.'cfg(os = "windows")'.profile]
+defines = ["_CRT_SECURE_NO_WARNINGS"]
+
+# regex_validator.c includes system headers before types.h defines
+# _GNU_SOURCE, so strict -std=c11 hides strdup on glibc; upstream builds
+# gnu11.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_DEFAULT_SOURCE"]
