@@ -1,0 +1,105 @@
+[package.upstream]
+url = "https://github.com/sass/libsass/archive/refs/tags/3.6.6.tar.gz"
+checksum = "sha256:11f0bb3709a4f20285507419d7618f3877a425c0131ea8df40fe6196129df15d"
+format = "tar.gz"
+strip-prefix = "libsass-3.6.6"
+
+[package]
+name = "cabin-ports/libsass"
+version = "3.6.6"
+# LICENSE is MIT; src/utf8 and src/utf8.h are BSL-1.0.  cencode.c (libb64) and
+# MurmurHash2.hpp are in the public domain, which adds no term.
+# CC-BY-SA-3.0: the Stack Overflow safeGetline() in src/sass2scss.cpp:799-828
+# (stackoverflow.com/a/6089413).
+license = "MIT AND BSL-1.0 AND CC-BY-SA-3.0"
+include = ["COPYING", "LICENSE", "include", "src"]
+
+# Sources are Makefile.conf's SOURCES and CSOURCES; src/c99func.c is built
+# only for Visual Studio before 2015 (win/libsass.targets).  Upstream's
+# Makefile sets LIBSASS_VERSION to `git describe`, which names the tag.
+# Upstream builds C++11 (LIBSASS_CPPSTD, Makefile:60); C++14 is the oldest
+# standard Cabin accepts from MSVC.  Upstream states no C standard; the
+# interface is C99 for base.h's <stdbool.h>.
+[target.sass]
+type = "library"
+sources = [
+  "src/ast.cpp",
+  "src/ast2c.cpp",
+  "src/ast_fwd_decl.cpp",
+  "src/ast_sel_cmp.cpp",
+  "src/ast_sel_unify.cpp",
+  "src/ast_sel_super.cpp",
+  "src/ast_sel_weave.cpp",
+  "src/ast_selectors.cpp",
+  "src/ast_supports.cpp",
+  "src/ast_values.cpp",
+  "src/backtrace.cpp",
+  "src/base64vlq.cpp",
+  "src/bind.cpp",
+  "src/c2ast.cpp",
+  "src/cencode.c",
+  "src/check_nesting.cpp",
+  "src/color_maps.cpp",
+  "src/constants.cpp",
+  "src/context.cpp",
+  "src/cssize.cpp",
+  "src/emitter.cpp",
+  "src/environment.cpp",
+  "src/error_handling.cpp",
+  "src/eval.cpp",
+  "src/eval_selectors.cpp",
+  "src/expand.cpp",
+  "src/extender.cpp",
+  "src/extension.cpp",
+  "src/file.cpp",
+  "src/fn_colors.cpp",
+  "src/fn_lists.cpp",
+  "src/fn_maps.cpp",
+  "src/fn_miscs.cpp",
+  "src/fn_numbers.cpp",
+  "src/fn_selectors.cpp",
+  "src/fn_strings.cpp",
+  "src/fn_utils.cpp",
+  "src/inspect.cpp",
+  "src/json.cpp",
+  "src/lexer.cpp",
+  "src/listize.cpp",
+  "src/memory/allocator.cpp",
+  "src/memory/shared_ptr.cpp",
+  "src/operators.cpp",
+  "src/output.cpp",
+  "src/parser.cpp",
+  "src/parser_selectors.cpp",
+  "src/plugins.cpp",
+  "src/position.cpp",
+  "src/prelexer.cpp",
+  "src/remove_placeholders.cpp",
+  "src/sass.cpp",
+  "src/sass2scss.cpp",
+  "src/sass_context.cpp",
+  "src/sass_functions.cpp",
+  "src/sass_values.cpp",
+  "src/source.cpp",
+  "src/source_map.cpp",
+  "src/stylesheet.cpp",
+  "src/to_value.cpp",
+  "src/units.cpp",
+  "src/utf8_string.cpp",
+  "src/util.cpp",
+  "src/util_string.cpp",
+  "src/values.cpp",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+cxx-standard = "c++14"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+defines = ["LIBSASS_VERSION=\"3.6.6\""]
+links = "sass"
+
+# Upstream links libm (Makefile LDLIBS) and, for plugin loading, libdl on Linux.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
+
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["dl"]
