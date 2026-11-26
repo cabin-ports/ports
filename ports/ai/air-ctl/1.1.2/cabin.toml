@@ -31,7 +31,8 @@ defines = ["_DEFAULT_SOURCE"]
 #
 # Static build of src/CMakeLists.txt.  Upstream builds the lockfree allocator,
 # queue and stack only for 8-byte pointers (aba_pointer.h needs them); Cabin has
-# no pointer-width key, so the 64-bit arches are listed.
+# no pointer-width key, so the 64-bit arches are listed and their ILP32 ABIs
+# (for example x86_64 x32) are not distinguished.
 [target.air-ctl]
 type = "library"
 sources = [
