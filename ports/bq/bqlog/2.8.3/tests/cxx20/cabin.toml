@@ -1,0 +1,12 @@
+[package]
+name = "cxx20"
+version = "0.0.0"
+
+[dependencies]
+"cabin-ports/bqlog" = "=2.8.3"
+
+[target.cxx20]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/bqlog"]
+cxx-standard = "c++20"
