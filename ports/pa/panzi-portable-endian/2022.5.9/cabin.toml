@@ -10,16 +10,21 @@ strip-prefix = "6856583-f6512b0830a4e9e06b26e32fc2509d67bbfa93d8"
 [package]
 name = "cabin-ports/panzi-portable-endian"
 version = "2022.5.9"
-license = "LicenseRef-panzi-portable-endian-public-domain"
 # Licence: portable_endian.h:1-5 places the file in the public domain, with
 # BSD, MIT and Apache-2.0 as an optional fallback.
+license = "LicenseRef-panzi-portable-endian-public-domain"
 include = ["portable_endian.h"]
 
-# Upstream states no standard; C99 for the // comments (portable_endian.h:1).
+# Upstream states no standard; c99 is the measured floor (-std=c89: "error: //
+# comments are not allowed in this language").
 [target.panzi-portable-endian]
 type = "header-only"
 include-dirs = ["."]
 interface-c-standard = "c99"
+# In strict C, glibc's <endian.h> declares htobe16 and the rest only under
+# _DEFAULT_SOURCE (measured: check-linux, "implicit declaration of function
+# 'htobe16'").
+interface-defines = ["_DEFAULT_SOURCE"]
 
 [target.'cfg(os = "windows")'.profile]
 link-libs = ["ws2_32"]
