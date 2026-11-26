@@ -3,7 +3,6 @@ url = "https://github.com/flann-lib/flann/archive/refs/tags/1.9.2.tar.gz"
 checksum = "sha256:e26829bb0017f317d9cc45ab83ddcb8b16d75ada1ae07157006c1e7d601c8824"
 format = "tar.gz"
 strip-prefix = "flann-1.9.2"
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 # The 1.9.2 release tag, as conan-center-index packages it.  vcpkg's pin,
 # master f9caaf6, adds CUDA and CMake changes; outside CUDA it differs only
@@ -17,8 +16,7 @@ name = "cabin-ports/flann"
 version = "1.9.2"
 # COPYING (BSD-3-Clause) covers algorithms/center_chooser.h and
 # util/serialization.h, which have no header; every other source file but
-# util/any.h has a BSD-2-Clause header.  any.h is BSL-1.0, and its text,
-# which upstream does not ship, is in THIRD_PARTY_NOTICES (patch 0001).
+# util/any.h has a BSD-2-Clause header.  any.h is BSL-1.0.
 license = "BSD-3-Clause AND BSD-2-Clause AND BSL-1.0"
 # The CPU library's sources and headers.  Not shipped: the CUDA index
 # (algorithms/kdtree_cuda_*, util/cuda/, and util/cutil_math.h, which is
@@ -27,8 +25,6 @@ license = "BSD-3-Clause AND BSD-2-Clause AND BSL-1.0"
 # examples, tests and datasets.
 include = [
   "COPYING",
-  "THIRD_PARTY_NOTICES",
-  "patches",
   "src/cpp/flann/algorithms/all_indices.h",
   "src/cpp/flann/algorithms/autotuned_index.h",
   "src/cpp/flann/algorithms/center_chooser.h",

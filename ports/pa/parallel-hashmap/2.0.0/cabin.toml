@@ -4,8 +4,6 @@ url = "https://github.com/greg7mdp/parallel-hashmap/archive/refs/tags/v2.0.0.tar
 checksum = "sha256:4f462f51a3468166ea4cf87c80e001dc1999093264cf55cbda3492ca39a7730b"
 format = "tar.gz"
 strip-prefix = "parallel-hashmap-2.0.0"
-# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/parallel-hashmap"
@@ -14,12 +12,10 @@ version = "2.0.0"
 # CC-BY-SA-3.0: the Stack Overflow code in parallel_hashmap/meminfo.h.
 license = "Apache-2.0 AND BSL-1.0 AND CC-BY-SA-3.0"
 # parallel_hashmap/ is what upstream's CMake installs, whole (CMakeLists.txt:
-# 73-75), with the licenses above; upstream ships no NOTICE file.
+# 73-75), with LICENSE.
 include = [
   "LICENSE",
-  "THIRD_PARTY_NOTICES",
   "parallel_hashmap",
-  "patches",
 ]
 
 # Upstream's header-only phmap target (CMakeLists.txt:41, 60), whose include

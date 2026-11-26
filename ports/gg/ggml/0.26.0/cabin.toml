@@ -19,7 +19,6 @@ strip-prefix = "ggml-0.26.0"
 # in the last bits.
 patches = [
   "patches/0001-add-the-generated-version-header.patch",
-  "patches/0002-add-third-party-notices.patch",
   "patches/0003-use-the-iso-spellings-of-gnu-keywords.patch",
 ]
 
@@ -29,11 +28,9 @@ version = "0.26.0"
 # LICENSE is MIT; the MIT code the sources credit to others, the YaRN rope
 # in src/ggml-cpu/ops.cpp and include/ggml-sycl.h, keeps its copyright line.
 # Apache-2.0 is OpenVINO's exp_ps_sve in src/ggml-cpu/vec.h.
-# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0002).
 license = "MIT AND Apache-2.0"
 include = [
   "LICENSE",
-  "THIRD_PARTY_NOTICES",
   "include",
   "patches",
   "src/ggml-alloc.c",

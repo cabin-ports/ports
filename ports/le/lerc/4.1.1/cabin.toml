@@ -5,8 +5,6 @@ url = "https://github.com/Esri/lerc/archive/refs/tags/v4.1.1.tar.gz"
 checksum = "sha256:fe2860e10635166cd9f2144e429ec6b870d471e9957f5812ba2da0973770b022"
 format = "tar.gz"
 strip-prefix = "lerc-4.1.1"
-# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/lerc"
@@ -15,8 +13,6 @@ license = "Apache-2.0 AND CC-BY-SA-3.0"
 include = [
   "LICENSE",
   "NOTICE",
-  "THIRD_PARTY_NOTICES",
-  "patches",
   "src/LercLib",
 ]
 # Upstream builds C++17; Lerc_c_api.h is C99 and Lerc_types.h C++11.

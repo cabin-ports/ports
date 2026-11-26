@@ -10,7 +10,6 @@ patches = [
   # so requires sized deallocation, which Apple clang leaves off by default.
   # Upstream main (e263b11, 2026-11-11) still has the check.
   "patches/0002-skip-the-sized-deallocation-check-on-apple-clang.patch",
-  "patches/0003-add-third-party-notices.patch",
 ]
 
 [package]
@@ -40,16 +39,13 @@ version = "4.39.0"
 #   header: ten generated ones (e.g. balxml_decoderoptions.h) and
 #   bdlmt_signaler.{h,cpp}.  Bloomberg publishes them in its repository,
 #   whose LICENSE is Apache-2.0.
-# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0003),
-#   including those for the RFC 3629, 2781 and 1952 text that bdlde quotes
-#   in comments, which adds no term.
+# bdlde quotes RFC 3629, 2781 and 1952 text in comments, which adds no term.
 license = "Apache-2.0 AND Apache-2.0 WITH LLVM-exception AND MIT WITH fmt-exception AND MIT AND Boehm-GC-without-fee AND HPND-sell-variant AND RSA-MD AND Unicode-3.0 AND Unicode-DFS-2016 AND BSD-3-Clause AND CC0-1.0 AND Unlicense"
 # The components' headers and sources, the bundled Intel decimal and Ryu
 # libraries, and the license texts; the test drivers (*.t.cpp), package
 # documentation and build metadata stay out.
 include = [
   "LICENSE",
-  "THIRD_PARTY_NOTICES",
   "groups/bal/balb/balb_controlmanager.cpp",
   "groups/bal/balb/balb_controlmanager.h",
   "groups/bal/balb/balb_filecleanerconfiguration.cpp",

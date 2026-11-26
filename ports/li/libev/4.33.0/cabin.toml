@@ -8,11 +8,10 @@ strip-prefix = "libev-4.33"
 # cabin/, outside the public include directory, and the profiles below
 # define the HAVE_* macros those checks find.  Patch 0002 adds cabin/event.c,
 # which compiles event.c, first declaring struct timeval for it on MSVC
-# (target below).  Patch 0003 adds LICENSE.io_uring (package below).
+# (target below).
 patches = [
   "patches/0001-add-a-config-h-for-the-cabin-profiles.patch",
   "patches/0002-compile-event-c-with-winsock-on-msvc.patch",
-  "patches/0003-add-the-mit-license-of-the-io-uring-declarations.patch",
 ]
 
 [package]
@@ -24,14 +23,13 @@ version = "4.33.0"
 # declarations of Linux's include/uapi/linux/io_uring.h (Copyright (C) 2019
 # Jens Axboe and Christoph Hellwig), which Jens Axboe dual-licensed
 # "(GPL-2.0 WITH Linux-syscall-note) OR MIT" for Linux 5.7 (commit
-# bbbdeb4720a0); LICENSE.io_uring carries the MIT terms.  Not shipped:
+# bbbdeb4720a0), hence MIT.  Not shipped:
 # ev_linuxaio.c, which ev.c compiles only for the linuxaio backend
 # (:3092-3094), off in this build (:121-122), and whose struct aio_ring
 # comes from Linux's GPL-2.0 fs/aio.c (ev_linuxaio.c:99-118).
 license = "(BSD-2-Clause OR GPL-2.0-or-later) AND MIT"
 include = [
   "LICENSE",
-  "LICENSE.io_uring",
   "cabin/config.h",
   "cabin/event.c",
   "ev++.h",

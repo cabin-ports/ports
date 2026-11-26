@@ -3,16 +3,14 @@ url = "https://github.com/chusitoo/flatbush/archive/refs/tags/v1.7.0.tar.gz"
 checksum = "sha256:7b437bc25001d1f10178b58aefa24e1ae86c331785f65ad2a333d35b5b966084"
 format = "tar.gz"
 strip-prefix = "flatbush-1.7.0"
-# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/flatbush"
 version = "1.7.0"
 # MIT, and BSL-1.0 for the Boost-derived bit_cast: LICENSE.  ISC: flatbush.h
-# translates mourner/flatbush's index.js (THIRD_PARTY_NOTICES).
+# translates mourner/flatbush's index.js.
 license = "MIT AND BSL-1.0 AND ISC"
-include = ["LICENSE", "THIRD_PARTY_NOTICES", "flatbush.h", "patches"]
+include = ["LICENSE", "flatbush.h"]
 
 # Upstream's flatbush::flatbush, with flatbush.h at the include root as its
 # build and install trees have it.  C++11 is upstream's stated floor

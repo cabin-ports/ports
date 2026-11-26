@@ -3,17 +3,14 @@ url = "https://github.com/ashvardanian/StringZilla/archive/refs/tags/v5.3.2.tar.
 checksum = "sha256:c64f6359015205f6a492fecfbc6f092e5ae45b54ce44998c4a96f9e1e91a88ae"
 format = "tar.gz"
 strip-prefix = "StringZilla-5.3.2"
-# Patch 0001 adds THIRD_PARTY_NOTICES with the Unicode License V3 for the
-# utf8_* tables: https://www.unicode.org/license.txt as fetched 2026-11-18
-# (sha256 e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/stringzilla"
 # The newest release; vcpkg's recipe pins 5.1.2 and conan-center's 4.6.0.
 version = "5.3.2"
+# Unicode-3.0: the Unicode data tables in include/stringzilla's utf8_* headers.
 license = "Apache-2.0 AND Unicode-3.0"
-include = ["LICENSE", "THIRD_PARTY_NOTICES", "include/stringzilla", "patches"]
+include = ["LICENSE", "include/stringzilla"]
 
 # The header-only C and C++ library, upstream's stringzilla::header target
 # (CMakeLists.txt:402-408).  The SIMD backends follow the consumer's compiler

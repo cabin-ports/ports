@@ -3,13 +3,9 @@ url = "https://github.com/KhronosGroup/SPIRV-Cross/archive/refs/tags/vulkan-sdk-
 checksum = "sha256:f708982e88b763ef5b0394ed468fc2c3628f68cdab89f2e7a946cd628c04e721"
 format = "tar.gz"
 strip-prefix = "SPIRV-Cross-vulkan-sdk-1.4.363.0"
-# Patch 0001 adds LICENSE.glm and LICENSE.openexr for f16_to_f32 in
-# spirv_common.hpp:1266-1316, "based on the GLM implementation": GLM's
-# toFloat32 (glm/detail/type_half.inl; MIT, Copyright (c) 2005 - G-Truc
-# Creation), itself OpenEXR's halfToFloat (IlmBase/Half/toFloat.cpp;
-# BSD-3-Clause, Copyright (c) 2002, Industrial Light & Magic, a division of
-# Lucas Digital Ltd. LLC).
-patches = ["patches/0001-add-glm-and-openexr-terms-for-half-conversion.patch"]
+# f16_to_f32 in spirv_common.hpp:1266-1316, "based on the GLM implementation",
+# is GLM's toFloat32 (glm/detail/type_half.inl; MIT), itself OpenEXR's
+# halfToFloat (IlmBase/Half/toFloat.cpp; BSD-3-Clause).
 
 # Upstream releases with the Vulkan SDK under tags such as
 # vulkan-sdk-1.4.363.0; the version drops the tag's fourth component, which
@@ -38,13 +34,10 @@ license = "(Apache-2.0 OR MIT) AND Apache-2.0 AND MIT AND BSD-3-Clause AND MIT-K
 include = [
   "GLSL.std.450.h",
   "LICENSE",
-  "LICENSE.glm",
-  "LICENSE.openexr",
   "LICENSES/Apache-2.0.txt",
   "LICENSES/LicenseRef-KhronosFreeUse.txt",
   "LICENSES/MIT.txt",
   "NonSemanticShaderDebugInfo100.h",
-  "patches",
   "spirv.h",
   "spirv.hpp",
   "spirv_cfg.cpp",

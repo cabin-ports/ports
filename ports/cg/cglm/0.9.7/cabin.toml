@@ -3,14 +3,12 @@ url = "https://github.com/recp/cglm/archive/refs/tags/v0.9.7.tar.gz"
 checksum = "sha256:cc0862eee2885d2a2b4870eb29b97c6e9b9ebc7c66e8854e1fa8f3d18d9d8475"
 format = "tar.gz"
 strip-prefix = "cglm-0.9.7"
-# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/cglm"
 version = "0.9.7"
 license = "MIT"
-include = ["CREDITS", "LICENSE", "THIRD_PARTY_NOTICES", "include/cglm", "patches", "src"]
+include = ["CREDITS", "LICENSE", "include/cglm", "src"]
 
 # Upstream's static library from the sources its CMake build lists
 # (CMakeLists.txt:73-121).  The sources build as C11 (CMAKE_C_STANDARD); the

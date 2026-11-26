@@ -3,8 +3,6 @@ url = "https://github.com/xtensor-stack/xsimd/archive/refs/tags/14.3.0.tar.gz"
 checksum = "sha256:b3d50e7a73fbf4642ceef30131c93414901d69eee41c2a5302db650b03e2c792"
 format = "tar.gz"
 strip-prefix = "xsimd-14.3.0"
-# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/xsimd"
@@ -36,9 +34,7 @@ license = "BSD-3-Clause AND BSL-1.0 AND CC-BY-SA-3.0 AND CC-BY-SA-4.0 AND MIT AN
 # set" articles (CC BY-SA 4.0), each marked with its URL.
 include = [
   "LICENSE",
-  "THIRD_PARTY_NOTICES",
   "include",
-  "patches",
 ]
 
 # Upstream's header-only xsimd::xsimd target.  The instruction sets come

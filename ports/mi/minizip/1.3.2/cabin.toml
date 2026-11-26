@@ -3,13 +3,6 @@ url = "https://github.com/madler/zlib/releases/download/v1.3.2/zlib-1.3.2.tar.gz
 checksum = "sha256:bb329a0a2cd0274d05519d61c667c062e06990d72e125ee2dfa8de64f0119d16"
 format = "tar.gz"
 strip-prefix = "zlib-1.3.2"
-# skipset.h embeds PCG32 code it marks "Licensed under Apache License
-# 2.0" (contrib/minizip/skipset.h:74-75), and the release ships no copy
-# of that license, which Apache-2.0 section 4(a) requires redistributors
-# to give.  The patch adds the license text, verbatim from
-# https://www.apache.org/licenses/LICENSE-2.0.txt, beside
-# LICENSE.Info-Zip.
-patches = ["patches/0001-add-apache-2.0-license-for-pcg.patch"]
 
 # The headers upstream installs, under include/minizip as its autotools
 # build and vcpkg place them.  contrib/minizip itself is not exported: its
@@ -45,11 +38,9 @@ version = "1.3.2"
 license = "Zlib AND Info-ZIP AND Apache-2.0"
 # minizip is under the zlib license (contrib/minizip/MiniZip64_info.txt);
 # crypt.h derives from Info-ZIP code (contrib/minizip/LICENSE.Info-Zip),
-# and skipset.h's random-number generator is Apache-2.0 PCG32 code
-# (contrib/minizip/LICENSE.Apache-2.0, added by the patch above).
+# and skipset.h's random-number generator is Apache-2.0 PCG32 code.
 include = [
   "LICENSE",
-  "contrib/minizip/LICENSE.Apache-2.0",
   "contrib/minizip/LICENSE.Info-Zip",
   "contrib/minizip/MiniZip64_info.txt",
   "contrib/minizip/crypt.h",
@@ -64,7 +55,6 @@ include = [
   "contrib/minizip/zip.c",
   "contrib/minizip/zip.h",
   "include",
-  "patches",
 ]
 
 [dependencies]

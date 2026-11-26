@@ -3,8 +3,6 @@ url = "https://github.com/boostorg/process/archive/refs/tags/boost-1.92.0.tar.gz
 checksum = "sha256:036ed9f1bf07c3a77e3e17040592e7ebf88b3e167ce9f91e5857d631ed34b6be"
 format = "tar.gz"
 strip-prefix = "process-boost-1.92.0"
-# Third-party notices are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 [package]
 name = "cabin-ports/boost-process"

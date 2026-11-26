@@ -3,11 +3,6 @@ url = "https://www.oberhumer.com/opensource/lzo/download/lzo-2.10.tar.gz"
 checksum = "sha256:c0f892943208266f9b6543b3ae308fab6284c5c90e627931446fb49b4221a072"
 format = "tar.gz"
 strip-prefix = "lzo-2.10"
-# Patch 0001 adds LICENSE.zlib, the notice of zlib 1.0.4 (Jean-loup Gailly
-# and Mark Adler, zlib License), for lzo_adler32 (src/lzo_util.c:94-145) and
-# lzo_crc32 with its table (src/lzo_crc.c:32-150), adapted from Mark Adler's
-# adler32.c and crc32.c; that license asks source distributions to keep it.
-patches = ["patches/0001-add-zlib-license-for-checksum-code.patch"]
 
 # Upstream's version is two-part (2.10); Cabin versions are SemVer.
 [package]
@@ -16,7 +11,10 @@ version = "2.10.0"
 license = "GPL-2.0-or-later AND Zlib"
 # COPYING is the GPL v2, which every source file offers as version 2 or
 # later; a binary linking lzo is a work based on it under those terms.
-include = ["COPYING", "LICENSE.zlib", "include", "patches", "src"]
+# Zlib: lzo_adler32 (src/lzo_util.c:94-145) and lzo_crc32 with its table
+# (src/lzo_crc.c:32-150), adapted from Mark Adler's adler32.c and crc32.c in
+# zlib 1.0.4.
+include = ["COPYING", "include", "src"]
 
 # Every src/*.c, as upstream's builds compile them (B/src.rsp, CMake's
 # glob), with B/generic/build.sh's LZO_LIBC_ISOC90.  lzodefs.h and

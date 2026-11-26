@@ -10,15 +10,7 @@ strip-prefix = "harfbuzz-15.1.0"
 # that name in src/, and patch 0001 fills it in as meson writes it for this
 # port: HB_HAS_FREETYPE is defined and every other HB_HAS_* is #undef, since
 # this port does not build those parts.
-# Patch 0002 adds LICENSE.unicode for src/hb-unicode-emoji-table.hh, whose
-# quoted emoji-data.txt header points to unicode.org/terms_of_use.html;
-# those terms put Unicode Data Files under the Unicode License V3:
-# https://www.unicode.org/license.txt as fetched 2026-11-11 (sha256
-# e7a93b009565cfce55919a381437ac4db883e9da2126fa28b91d12732bc53d96).
-patches = [
-  "patches/0001-configure-hb-features-h.patch",
-  "patches/0002-add-the-unicode-license-for-the-emoji-table.patch",
-]
+patches = ["patches/0001-configure-hb-features-h.patch"]
 
 [[package.upstream.copy]]
 from = "src/hb-features.h.in"
@@ -28,13 +20,13 @@ to = "src/hb-features.h"
 name = "cabin-ports/harfbuzz"
 version = "15.1.0"
 license = "MIT-Modern-Variant AND MIT AND ISC AND Unicode-3.0"
+# Unicode-3.0: src/hb-unicode-emoji-table.hh, from Unicode's emoji-data.txt.
 # COPYING is the Old MIT license; src/ms-use/COPYING, hb-algs.hh's
 # fasthash and hb-ucd.cc carry their own notices.  The list is src/
 # without src/wasm/sample, whose test.ttf, a Roboto subset, states no
 # licence; the samples are not built.
 include = [
   "COPYING",
-  "LICENSE.unicode",
   "patches",
   "src/ArabicPUASimplified.txt",
   "src/ArabicPUATraditional.txt",

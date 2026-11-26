@@ -5,13 +5,7 @@ format = "tar.gz"
 strip-prefix = "thread-boost-1.92.0"
 # include/boost/thread/detail/{invoke,invoker,make_tuple_indices}.hpp and 260
 # tests adapt libc++ code under its MIT and University of Illinois/NCSA dual
-# licence, whose text the release does not ship.  Patch 0001 adds libc++'s
-# LICENSE.TXT, verbatim from llvm-project llvmorg-8.0.1 libcxx/LICENSE.TXT
-# (sha256:c3b21ee90de785b9e45590253fd08fb22b269abccaadb175c4d96d7f420340cd), as
-# LICENSE.libcxx.txt.
-patches = [
-  "patches/0001-add-mit-and-ncsa-licenses-for-libcxx-code.patch",
-]
+# licence.
 
 [package]
 name = "cabin-ports/boost-thread"
@@ -26,7 +20,6 @@ include = [
   ".gitignore",
   ".travis.yml",
   "CMakeLists.txt",
-  "LICENSE.libcxx.txt",
   "README.md",
   "appveyor.yml",
   "build.jam",
@@ -35,7 +28,6 @@ include = [
   "include",
   "index.html",
   "meta",
-  "patches",
   "src",
   "test",
   "tutorial",

@@ -3,8 +3,6 @@ url = "https://github.com/spotify/annoy/archive/refs/tags/v1.17.3.tar.gz"
 checksum = "sha256:c121d38cacd98f5103b24ca4e94ca097f18179eed3037e9eb93ad70ec1e6356e"
 format = "tar.gz"
 strip-prefix = "annoy-1.17.3"
-# Notices that upstream's files lack are in THIRD_PARTY_NOTICES (patch 0001).
-patches = ["patches/0001-add-third-party-notices.patch"]
 
 # The three headers upstream's CMake build copies to include/annoy/ and
 # installs from there (CMakeLists.txt:11-13), so consumers write
@@ -26,7 +24,7 @@ name = "cabin-ports/annoy"
 version = "1.17.3"
 # MIT: include/annoy/mman.h, from mman-win32.
 license = "Apache-2.0 AND MIT"
-include = ["LICENSE", "THIRD_PARTY_NOTICES", "include", "patches"]
+include = ["LICENSE", "include"]
 
 # Header-only, as upstream's Annoy::Annoy target is; the headers keep
 # fallbacks for compilers before C++11.  Consumer configuration macros:
