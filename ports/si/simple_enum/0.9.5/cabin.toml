@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/arturbac/simple_enum/archive/refs/tags/v0.9.5.tar.gz"
+checksum = "sha256:f58c6a9c8fc1b6d4dfc1fce8ba0efd80521551ac389ae997835388bded3d8eab"
+format = "tar.gz"
+strip-prefix = "simple_enum-0.9.5"
+
+[package]
+name = "cabin-ports/simple_enum"
+version = "0.9.5"
+license = "BSL-1.0"
+include = ["LICENSE", "include"]
+
+# C++20 is the standard upstream documents for the core (docs/compiler_and_standard_support.md:18).
+# Not ported: ext_support/ (fmt and glaze support) and module/.
+# enum_bitfield.h uses explicit object parameters and needs C++23, which Cabin cannot request
+# from cl (measured, Apple clang 21 -std=c++20: "explicit object parameters are incompatible
+# with C++ standards before C++2b").
+[target.simple_enum]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
