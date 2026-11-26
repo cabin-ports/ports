@@ -7,10 +7,36 @@ strip-prefix = "antlr4-4.13.2"
 # including <chrono>, as MSVC's STL no longer provides it transitively; the patch,
 # upstream's df4d68c0 after 4.13.2, adds the include (measured: check-windows,
 # "ProfilingATNSimulator.cpp(38): error C2653: 'high_resolution_clock': is not a class or namespace name").
-# The patch carries lines of that BSD-3-Clause file, so its notice (clause 1) stays here:
-#   Copyright (c) 2012-2017 The ANTLR Project. All rights reserved.
-#   Use of this file is governed by the BSD 3-clause license that
-#   can be found in the LICENSE.txt file in the project root.
+# BSD 3-Clause License notice of ProfilingATNSimulator.cpp (its header defers to
+# LICENSE.txt), whose lines 0001 carries (clause 1: source redistributions keep it):
+# Copyright (c) 2012-2022 The ANTLR Project. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# 1. Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#
+# 2. Redistributions in binary form must reproduce the above copyright
+# notice, this list of conditions and the following disclaimer in the
+# documentation and/or other materials provided with the distribution.
+#
+# 3. Neither name of copyright holders nor the names of its contributors
+# may be used to endorse or promote products derived from this software
+# without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE REGENTS OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 patches = ["patches/0001-include-chrono-in-profiling-atn-simulator.patch"]
 
 [package]
