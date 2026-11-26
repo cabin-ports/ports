@@ -1,0 +1,95 @@
+[package.upstream]
+url = "https://github.com/ArtifexSoftware/jbig2dec/archive/refs/tags/0.20.tar.gz"
+checksum = "sha256:a9705369a6633aba532693450ec802c562397e1b824662de809ede92f67aff21"
+format = "tar.gz"
+strip-prefix = "jbig2dec-0.20"
+patches = ["patches/0001-include-stddef-stdint-in-jbig2-h.patch"]
+
+# jbig2.h is the one header upstream installs (Makefile.am:9).  The patch makes
+# the installed copy self-contained: it uses size_t and uint32_t but includes
+# nothing, so a consumer that includes it first fails (measured: "unknown type
+# name 'uint32_t'").  The patch adds a change notice to the
+# AGPL-licensed header, as the license asks of changed files.
+[[package.upstream.copy]]
+from = "jbig2.h"
+to = "include/jbig2.h"
+
+[package]
+name = "cabin-ports/jbig2dec"
+version = "0.20.0"
+license = "AGPL-3.0-or-later"
+include = [
+  "patches",
+  "LICENSE",
+  "COPYING",
+  "include",
+  "config_win32.h",
+  "memento.c",
+  "memento.h",
+  "os_types.h",
+  "jbig2.c",
+  "jbig2.h",
+  "jbig2_arith.c",
+  "jbig2_arith.h",
+  "jbig2_arith_iaid.c",
+  "jbig2_arith_iaid.h",
+  "jbig2_arith_int.c",
+  "jbig2_arith_int.h",
+  "jbig2_generic.c",
+  "jbig2_generic.h",
+  "jbig2_halftone.c",
+  "jbig2_halftone.h",
+  "jbig2_huffman.c",
+  "jbig2_huffman.h",
+  "jbig2_hufftab.c",
+  "jbig2_hufftab.h",
+  "jbig2_image.c",
+  "jbig2_image.h",
+  "jbig2_image_pbm.c",
+  "jbig2_image_rw.h",
+  "jbig2_mmr.c",
+  "jbig2_mmr.h",
+  "jbig2_page.c",
+  "jbig2_page.h",
+  "jbig2_priv.h",
+  "jbig2_refinement.c",
+  "jbig2_refinement.h",
+  "jbig2_segment.c",
+  "jbig2_segment.h",
+  "jbig2_symbol_dict.c",
+  "jbig2_symbol_dict.h",
+  "jbig2_text.c",
+  "jbig2_text.h",
+]
+
+# The library of Makefile.am (libjbig2dec_la_SOURCES, :14-26) built without
+# config.h, as Makefile.unix and msvc.mak build it: os_types.h falls back to
+# <stdint.h>.  Not ported: the jbig2dec command-line tool and its PNG output.
+# Upstream states no standard: C11 is the oldest Cabin can request from MSVC,
+# and the interface needs only <stdint.h> (C99, C++11).
+[target.jbig2dec]
+type = "library"
+sources = [
+  "jbig2.c",
+  "jbig2_arith.c",
+  "jbig2_arith_iaid.c",
+  "jbig2_arith_int.c",
+  "jbig2_generic.c",
+  "jbig2_halftone.c",
+  "jbig2_huffman.c",
+  "jbig2_hufftab.c",
+  "jbig2_image.c",
+  "jbig2_image_pbm.c",
+  "jbig2_mmr.c",
+  "jbig2_page.c",
+  "jbig2_refinement.c",
+  "jbig2_segment.c",
+  "jbig2_symbol_dict.c",
+  "jbig2_text.c",
+  "memento.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "jbig2dec"

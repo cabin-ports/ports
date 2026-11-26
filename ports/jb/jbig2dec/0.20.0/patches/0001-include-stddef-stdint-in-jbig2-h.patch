@@ -1,0 +1,15 @@
+diff --git a/include/jbig2.h b/include/jbig2.h
+index 94989fa..9d9c89d 100644
+--- a/include/jbig2.h
++++ b/include/jbig2.h
+@@ -20,6 +20,10 @@
+ #ifndef _JBIG2_H
+ #define _JBIG2_H
+ 
++/* Changed for cabin-ports on 2026-11-26: include <stddef.h> and <stdint.h> for size_t and uint32_t. */
++#include <stddef.h>
++#include <stdint.h>
++
+ #ifdef __cplusplus
+ extern "C"
+ {
