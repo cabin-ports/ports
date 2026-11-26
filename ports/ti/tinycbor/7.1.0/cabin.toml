@@ -1,0 +1,75 @@
+[package.upstream]
+url = "https://github.com/intel/tinycbor/archive/refs/tags/v7.1.tar.gz"
+checksum = "sha256:08c0a4c0a983000806f3d8c1599ec07995789ae49e9a23034db4cbfccc81c2e5"
+format = "tar.gz"
+strip-prefix = "tinycbor-7.1"
+# Patch 0001 fills the version template as configure_file does.  The version
+# is the v7.1 tag's; CMakeLists.txt:27 still says 7.0, and the filled header
+# follows it.
+patches = ["patches/0001-fill-in-version-header.patch"]
+
+# Upstream installs cbor.h and the two generated headers to include/tinycbor
+# (CMakeLists.txt:187-192); the copies reproduce that layout so that both
+# <tinycbor/cbor.h> and <cbor.h> work.  cborjson.h is copied as well: 7.1's
+# install omits it, but it declares the JSON converter that is built.  src/ is
+# not an include directory because its private memory.h would shadow the
+# system header.
+[[package.upstream.copy]]
+from = "src/cbor.h"
+to = "include/tinycbor/cbor.h"
+
+[[package.upstream.copy]]
+from = "src/cborjson.h"
+to = "include/tinycbor/cborjson.h"
+
+# The template is CMake's fallback for builds without generate_export_header,
+# and defines CBOR_API as the empty static-library build does.
+[[package.upstream.copy]]
+from = "src/tinycbor-export.h.in"
+to = "include/tinycbor/tinycbor-export.h"
+
+[[package.upstream.copy]]
+from = "src/tinycbor-version.h.in"
+to = "include/tinycbor/tinycbor-version.h"
+
+[package]
+name = "cabin-ports/tinycbor"
+version = "7.1.0"
+license = "MIT"
+include = ["LICENSE", "README", "include", "patches", "src"]
+
+# The library as upstream's CMake default builds it (CMakeLists.txt:49-78):
+# floating point and the CBOR-to-JSON converter on, freestanding off.  Not
+# ported: the tools, examples, tests and the shared-library build.
+# src/cborinternal_p.h:118 credits RFC 7049 Appendix D for decode_half; its
+# copyright significance is uncertain.
+[target.tinycbor]
+type = "library"
+sources = [
+  "src/cborencoder.c",
+  "src/cborencoder_close_container_checked.c",
+  "src/cborencoder_float.c",
+  "src/cborerrorstrings.c",
+  "src/cborparser.c",
+  "src/cborparser_dup_string.c",
+  "src/cborparser_float.c",
+  "src/cborpretty.c",
+  "src/cborpretty_stdio.c",
+  "src/cbortojson.c",
+  "src/cborvalidation.c",
+]
+include-dirs = ["include", "include/tinycbor"]
+# Upstream compiles C99 (CMakeLists.txt:85); C11 is the oldest standard Cabin
+# can lower for MSVC.  The header is tested as C90 (tests/c90/CMakeLists.txt).
+c-standard = "c11"
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
+links = "tinycbor"
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
+
+# Where CMake finds none of open_memstream, funopen and fopencookie it
+# defines this (CMakeLists.txt:155); open_memstream.c is then not built.
+[target.'cfg(os = "windows")'.profile]
+defines = ["WITHOUT_OPEN_MEMSTREAM"]
