@@ -1,0 +1,54 @@
+[package.upstream]
+url = "https://github.com/ada-url/ada/archive/refs/tags/v4.1.1.tar.gz"
+checksum = "sha256:ed818cfe260ec063e1f1d93fdafca4d158162ba515369bef085adc366a03a41c"
+format = "tar.gz"
+strip-prefix = "ada-4.1.1"
+
+# MIT: include/ada/character_sets-inl.h, whose tables follow Node.js's
+#   src/node_url_tables.cc; ada's own Apache-2.0 OR MIT files and the bundled
+#   ada-idna (src/ada_idna.cpp, include/ada/ada_idna.h) add no further term.
+# CC0-1.0: tl::expected in include/ada/expected.h.
+# CC-BY-SA-3.0: Stack Overflow answers adapted in expected.h:296-320 and :344-411.
+# Unicode-3.0: src/ada_idna.cpp packs Unicode data tables without a notice;
+#   their Unicode version and license term are uncertain.
+[package]
+name = "cabin-ports/ada-url"
+version = "4.1.1"
+license = "MIT AND CC0-1.0 AND CC-BY-SA-3.0 AND Unicode-3.0"
+include = ["LICENSE-APACHE", "LICENSE-MIT", "include", "src"]
+
+# The three translation units of upstream's CMake `ada` target
+# (src/CMakeLists.txt:10, :71-79); src/ada.cpp is a unity file that includes
+# the other .cpp files, and the two separate ones need their defines.  C++20
+# is upstream's stated standard (README.md, src/CMakeLists.txt).  <ada_c.h>
+# is plain C (stdbool.h, stdint.h, stddef.h); C99 is inferred from it.
+#
+# Like upstream, the package compiles in its own ada-idna (the
+# ada::idna functions) and tl::expected 1.1.0 (include/ada/expected.h, under
+# TL_EXPECTED_HPP and namespace tl), and offers no build with external
+# copies.  With cabin-ports/tl-expected in the same program, a translation unit
+# gets whichever <tl/expected.hpp> or <ada.h> it includes first and the
+# program has two definitions of tl::expected, an ODR violation.
+# Not ported: tools/ (adaparse), benchmarks, fuzz, tests, the singleheader
+# amalgamation, and the optional ADA_USE_SIMDUTF.  URLPattern matching needs
+# a regex provider, which upstream leaves to the consumer
+# (ADA_USE_UNSAFE_STD_REGEX_PROVIDER is off outside its tests).
+[profile]
+include-dirs = ["src"]
+
+[target.ada]
+type = "library"
+sources = [
+  "src/ada.cpp",
+  "src/unicode_percent_encode.cpp",
+  "src/url_pattern_list.cpp",
+]
+include-dirs = ["include"]
+defines = [
+  "ADA_PERCENT_ENCODE_SIMD_SEPARATE_TU=1",
+  "ADA_URL_PATTERN_LIST_SEPARATE_TU=1",
+]
+cxx-standard = "c++20"
+interface-cxx-standard = "c++20"
+interface-c-standard = "c99"
+links = "ada"
