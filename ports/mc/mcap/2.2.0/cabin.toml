@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/foxglove/mcap/archive/refs/tags/releases/cpp/v2.2.0.tar.gz"
+checksum = "sha256:68d9b81b1c0454b139d1e7adaa572d415525edc6ee9c57c7bae2dd4eaa4a42b0"
+format = "tar.gz"
+strip-prefix = "mcap-releases-cpp-v2.2.0"
+
+[package]
+name = "cabin-ports/mcap"
+version = "2.2.0"
+# intervaltree.hpp is adapted from ekg/intervaltree, which is MIT as well.
+license = "MIT"
+# The archive is the whole monorepo; only the C++ library and its license are kept.
+include = ["LICENSE", "cpp/mcap/LICENSE", "cpp/mcap/include"]
+
+# Lower bounds are the versions cpp/README.md:83-84 lists, which :104 asks to meet or exceed.
+[dependencies]
+"cabin-ports/lz4" = "^1.10"
+"cabin-ports/zstd" = "^1.5.2"
+
+# Header-only: exactly one translation unit defines MCAP_IMPLEMENTATION before
+# including <mcap/...>.  C++17 is declared by cpp/mcap/conanfile.py:31.
+[target.mcap]
+type = "header-only"
+include-dirs = ["cpp/mcap/include"]
+interface-cxx-standard = "c++17"
+deps = [
+  { name = "cabin-ports/lz4", public = true },
+  { name = "cabin-ports/zstd", public = true },
+]
