@@ -1,0 +1,36 @@
+[package.upstream]
+url = "https://github.com/hrydgard/minitrace/archive/679ac44bfa1f6537a08dd4638c2ae4ae8c62f556.tar.gz"
+checksum = "sha256:a76578a7190ec878ef56ee83556a034a1423ad1d14ea9cb265fd584686cb3e0d"
+format = "tar.gz"
+strip-prefix = "minitrace-679ac44bfa1f6537a08dd4638c2ae4ae8c62f556"
+# Upstream has no tags or releases; 2026.8.31 is the date of the commit
+# above (master's head, 2026-08-31).
+
+[package]
+name = "cabin-ports/minitrace"
+version = "2026.8.31"
+license = "MIT"
+include = ["LICENSE", "minitrace.c", "minitrace.h"]
+# Upstream states no C standard.  C11 is measured: under -pedantic-errors
+# minitrace.c:53 (an anonymous union) is an error in C99.
+c-standard = "c11"
+# Measured: minitrace.h needs C99 (// comments, trailing enumerator comma)
+# and C++11 (trailing enumerator comma) under -pedantic-errors.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# The static library upstream's CMake builds by default.  MTR_ENABLED is
+# public there too (its option defaults to ON); without it every macro and
+# function is empty.  MTR_BUILDING_WITH_CMAKE is not defined: it only
+# includes the CMake-generated minitrace_export.h, which is empty for a
+# static library.  Not ported: the shared library and the test programs.
+[target.minitrace]
+type = "library"
+sources = ["minitrace.c"]
+include-dirs = ["."]
+defines = ["MTR_ENABLED"]
+interface-defines = ["MTR_ENABLED"]
+links = "minitrace"
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
