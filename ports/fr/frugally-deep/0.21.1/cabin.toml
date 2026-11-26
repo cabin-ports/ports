@@ -1,0 +1,39 @@
+[package.upstream]
+url = "https://github.com/Dobiasd/frugally-deep/archive/refs/tags/v0.21.1.tar.gz"
+checksum = "sha256:0b3390eb07d0e832e81956a63b942259f9e2c2326d956042f86cb2f91a57152c"
+format = "tar.gz"
+strip-prefix = "frugally-deep-0.21.1"
+
+[package]
+name = "cabin-ports/frugally-deep"
+version = "0.21.1"
+# LICENSE is the MIT License.  include/fdeep/base64.hpp:65-108 (the decode
+# table, the alphabet and Base64_decode, which every build compiles) is
+# copied from the answer to "Base64 decode snippet in C++",
+# https://stackoverflow.com/a/31322410, by DaedalusAlpha
+# (https://stackoverflow.com/users/3476764), CC BY-SA 3.0, which the file
+# credits at :64.  Those lines are distributed under CC BY-SA 3.0; the rest
+# of the package stays under the MIT License.
+license = "MIT AND CC-BY-SA-3.0"
+include = ["LICENSE", "include"]
+
+[dependencies]
+"cabin-ports/eigen3" = "=5.0.1"
+"cabin-ports/functionalplus" = "=0.2.28"
+"cabin-ports/nlohmann_json" = "=3.12.0"
+
+# interface-cxx-standard: README.md:144 states a C++14-compatible compiler.
+[target.frugally_deep]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+deps = [
+  { name = "cabin-ports/eigen3", public = true },
+  { name = "cabin-ports/functionalplus", public = true },
+  { name = "cabin-ports/nlohmann_json", public = true },
+]
+
+# Upstream links Threads::Threads (CMakeLists.txt:31-32); model.hpp's
+# predict_multi runs fplus::transform_parallelly, which uses std::async.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
