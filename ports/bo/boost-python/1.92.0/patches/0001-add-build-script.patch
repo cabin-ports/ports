@@ -1,0 +1,129 @@
+--- /dev/null
++++ b/build.c
+@@ -0,0 +1,126 @@
++/* Boost.Python for Cabin: supplies the target `python`, the system's
++ * Python 3.8 or newer, which the library and its consumers embed or
++ * extend.
++ *
++ * Python comes from the installation CABIN_SDK_PYTHON_DIR names, laid
++ * out as the Windows installers lay it out (`include`, `libs`) or as an
++ * installation prefix (`include/python3.N`, the shared `lib/libpython3.N`),
++ * and without it from pkg-config (`python3-embed`), which an MSVC build
++ * cannot use. */
++#define _POSIX_C_SOURCE 200809L
++#define _CRT_SECURE_NO_WARNINGS
++#include <stdarg.h>
++#include <stdio.h>
++#include <stdlib.h>
++#include <string.h>
++
++#ifdef _WIN32
++#include <io.h>
++#define exists(path) (_access(path, 0) == 0)
++#else
++#include <dirent.h>
++#include <unistd.h>
++#define exists(path) (access(path, F_OK) == 0)
++#endif
++
++/* The oldest Python 3 this script accepts: the first with the
++ * pkg-config module `python3-embed`. */
++#define OLDEST_MINOR 8
++
++static void fail(const char *format, ...) {
++    va_list args;
++    va_start(args, format);
++    fputs("boost-python: ", stderr);
++    vfprintf(stderr, format, args);
++    fputc('\n', stderr);
++    va_end(args);
++    exit(1);
++}
++
++static const char *need(const char *name) {
++    const char *value = getenv(name);
++    if (!value || !*value) fail("%s is not set", name);
++    return value;
++}
++
++static int is(const char *name, const char *value) { return strcmp(need(name), value) == 0; }
++
++/* The version patchlevel.h in `include` declares. */
++static void headers_version(const char *include, int *major, int *minor) {
++    char path[4096], line[512];
++    FILE *file;
++    *major = *minor = -1;
++    snprintf(path, sizeof path, "%s/patchlevel.h", include);
++    if (!(file = fopen(path, "r"))) fail("no Python headers in %s (cannot read %s)", include, path);
++    while (fgets(line, sizeof line, file)) {
++        sscanf(line, " # define PY_MAJOR_VERSION %d", major);
++        sscanf(line, " # define PY_MINOR_VERSION %d", minor);
++    }
++    fclose(file);
++    if (*major < 0 || *minor < 0) fail("%s declares no Python version", path);
++}
++
++#ifndef _WIN32
++/* The one `include/python3.N` directory of an installation prefix. */
++static void prefix_include(const char *sdk, char *include, size_t size) {
++    char dir[4096];
++    struct dirent *entry;
++    int found = 0, minor, end;
++    DIR *entries;
++    snprintf(dir, sizeof dir, "%s/include", sdk);
++    if (!(entries = opendir(dir))) fail("no Python headers in CABIN_SDK_PYTHON_DIR (%s)", sdk);
++    while ((entry = readdir(entries))) {
++        end = 0;
++        if (sscanf(entry->d_name, "python3.%d%n", &minor, &end) == 1 && entry->d_name[end] == '\0') {
++            if (found++) fail("%s holds the headers of more than one Python", dir);
++            snprintf(include, size, "%s/%s", dir, entry->d_name);
++        }
++    }
++    closedir(entries);
++    if (!found) fail("no Python headers in CABIN_SDK_PYTHON_DIR (%s)", sdk);
++}
++#endif
++
++static void from_sdk(FILE *result, const char *sdk) {
++    char include[4096], header[4096], library[4096];
++    int major, minor;
++    snprintf(include, sizeof include, "%s/include", sdk);
++    snprintf(header, sizeof header, "%s/Python.h", include);
++    if (exists(header)) {
++        headers_version(include, &major, &minor);
++        snprintf(library, sizeof library, "%s/libs/python%d%d.lib", sdk, major, minor);
++    } else {
++#ifdef _WIN32
++        fail("no Python headers in CABIN_SDK_PYTHON_DIR (%s)", sdk);
++#else
++        /* The shared library only: a static libpython needs further
++         * libraries that only its own python3-config names. */
++        const char *shared = is("CABIN_TARGET_OS", "macos") ? "dylib" : "so";
++        prefix_include(sdk, include, sizeof include);
++        headers_version(include, &major, &minor);
++        snprintf(library, sizeof library, "%s/lib/libpython%d.%d.%s", sdk, major, minor, shared);
++#endif
++    }
++    if (major != 3 || minor < OLDEST_MINOR) {
++        fail("the Python in CABIN_SDK_PYTHON_DIR (%s) is %d.%d, not 3.%d or newer", sdk, major, minor,
++             OLDEST_MINOR);
++    }
++    if (!exists(library)) fail("no Python %d.%d library in CABIN_SDK_PYTHON_DIR (%s): %s", major, minor, sdk, library);
++    fprintf(result, "external python\ninclude-dir python %s\nlink-file python %s\nrerun-if-changed %s/patchlevel.h\n",
++            include, library, include);
++}
++
++int main(void) {
++    const char *sdk = getenv("CABIN_SDK_PYTHON_DIR");
++    FILE *result = fopen(need("CABIN_RESULT_FILE"), "w");
++    if (!result) fail("cannot write the result file");
++    if (sdk && *sdk) {
++        from_sdk(result, sdk);
++    } else if (is("CABIN_TARGET_DIALECT", "msvc")) {
++        fail("an MSVC build takes Python from a directory: set CABIN_SDK_PYTHON_DIR to a Python 3.%d or "
++             "newer installation (the directory holding `include` and `libs`)", OLDEST_MINOR);
++    } else {
++        fprintf(result, "external python\npkg-config python python3-embed >=3.%d\n", OLDEST_MINOR);
++    }
++    return fclose(result) != 0;
++}
