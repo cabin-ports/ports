@@ -1,0 +1,35 @@
+--- a/src/exr_internal.h
++++ b/src/exr_internal.h
+@@ -32,6 +32,32 @@
+ 
+ #if defined(_MSC_VER)
+ #include <intrin.h>
++#endif
++
++#if defined(_MSC_VER) && !defined(__clang__)
++/* cl has no __builtin_ctz/clz; same contract, argument must be nonzero. */
++static __forceinline int exr_msvc_ctz(unsigned long v) {
++    unsigned long i;
++    _BitScanForward(&i, v);
++    return (int)i;
++}
++static __forceinline int exr_msvc_clz(unsigned long v) {
++    unsigned long i;
++    _BitScanReverse(&i, v);
++    return 31 - (int)i;
++}
++static __forceinline int exr_msvc_ctzll(unsigned long long v) {
++    return (unsigned long)v ? exr_msvc_ctz((unsigned long)v)
++                            : 32 + exr_msvc_ctz((unsigned long)(v >> 32));
++}
++static __forceinline int exr_msvc_clzll(unsigned long long v) {
++    return (v >> 32) ? exr_msvc_clz((unsigned long)(v >> 32))
++                     : 32 + exr_msvc_clz((unsigned long)v);
++}
++#define __builtin_ctz(v) exr_msvc_ctz(v)
++#define __builtin_clz(v) exr_msvc_clz(v)
++#define __builtin_ctzll(v) exr_msvc_ctzll(v)
++#define __builtin_clzll(v) exr_msvc_clzll(v)
+ #endif
+ 
+ /* 0 = uninitialized, 1 = one thread initializing, 2 = ready. */
