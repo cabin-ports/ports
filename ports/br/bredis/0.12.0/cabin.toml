@@ -1,0 +1,45 @@
+[package.upstream]
+url = "https://github.com/basiliscos/cpp-bredis/archive/refs/tags/v0.12.tar.gz"
+checksum = "sha256:c5a6aa58835d5ef8cd97c4ae7e677f6237ef4ee01ae4a609293e2351c01db6cc"
+format = "tar.gz"
+strip-prefix = "cpp-bredis-0.12"
+
+[package]
+name = "cabin-ports/bredis"
+# Upstream's tag is v0.12.
+version = "0.12.0"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+[dependencies]
+"cabin-ports/boost-algorithm" = "=1.92.0"
+"cabin-ports/boost-asio" = "=1.92.0"
+"cabin-ports/boost-convert" = "=1.92.0"
+"cabin-ports/boost-core" = "=1.92.0"
+"cabin-ports/boost-lexical-cast" = "=1.92.0"
+"cabin-ports/boost-system" = "=1.92.0"
+"cabin-ports/boost-type-traits" = "=1.92.0"
+"cabin-ports/boost-utility" = "=1.92.0"
+"cabin-ports/boost-variant" = "=1.92.0"
+
+# Header-only.  Upstream's minimum is C++11 (README.md:43, CMakeLists.txt:4);
+# the package declares C++14, which the public Boost.Asio port requires of
+# its consumers.  Upstream's CMake build defines
+# BOOST_ERROR_CODE_HEADER_ONLY, BOOST_COROUTINES_NO_DEPRECATION_WARNING and
+# BOOST_ASIO_NO_DEPRECATED for its own tests and examples; the package adds
+# none of them.
+[target.bredis]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+deps = [
+  { name = "cabin-ports/boost-algorithm", public = true },
+  { name = "cabin-ports/boost-asio", public = true },
+  { name = "cabin-ports/boost-convert", public = true },
+  { name = "cabin-ports/boost-core", public = true },
+  { name = "cabin-ports/boost-lexical-cast", public = true },
+  { name = "cabin-ports/boost-system", public = true },
+  { name = "cabin-ports/boost-type-traits", public = true },
+  { name = "cabin-ports/boost-utility", public = true },
+  { name = "cabin-ports/boost-variant", public = true },
+]
