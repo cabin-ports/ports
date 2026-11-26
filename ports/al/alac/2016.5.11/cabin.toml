@@ -1,0 +1,49 @@
+[package.upstream]
+url = "https://github.com/macosforge/alac/archive/c38887c5c5e64a4b31108733bd79ca9b2496d987.tar.gz"
+checksum = "sha256:98635ece42fb1c3fceb75eaa4b5164d866e09f0195b3e7ec4085f1123c5e272f"
+format = "tar.gz"
+strip-prefix = "alac-c38887c5c5e64a4b31108733bd79ca9b2496d987"
+
+[package]
+name = "cabin-ports/alac"
+# Upstream has no releases or tags; the version is YYYY.M.D of the pinned commit (2016-05-11).
+version = "2016.5.11"
+license = "Apache-2.0"
+include = ["LICENSE", "codec"]
+
+# The library is codec/, as upstream's codec/makefile lists it.  Upstream's
+# convert-utility/ demo tool is not ported.
+# Upstream states no standard.  The floor measured with clang -pedantic-errors
+# is C99 (c89 fails at ag_dec.c:91, `inline`) and C++11 (c++98 fails at
+# ALACAudioTypes.h:85, a trailing enumerator comma); c11 and c++14 are the
+# oldest standards cl accepts.
+[target.alac]
+type = "library"
+links = "alac"
+sources = [
+  "codec/ALACBitUtilities.c",
+  "codec/ALACDecoder.cpp",
+  "codec/ALACEncoder.cpp",
+  "codec/EndianPortable.c",
+  "codec/ag_dec.c",
+  "codec/ag_enc.c",
+  "codec/dp_dec.c",
+  "codec/dp_enc.c",
+  "codec/matrix_dec.c",
+  "codec/matrix_enc.c",
+]
+include-dirs = ["codec"]
+c-standard = "c11"
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+interface-c-standard = "none"
+
+# EndianPortable.c:41 selects little-endian only for TARGET_OS_WIN32 where
+# neither __i386__ nor __x86_64__ is defined, as on MSVC.
+[target.'cfg(os = "windows")'.profile]
+defines = ["TARGET_OS_WIN32"]
+
+# EndianPortable.c:37-43 also lacks aarch64, so off Apple (whose SDK defines it) the
+# byte swaps would be no-ops.
+[target.'cfg(arch = "aarch64")'.profile]
+defines = ["TARGET_RT_LITTLE_ENDIAN=1"]
