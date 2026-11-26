@@ -34,3 +34,7 @@ links = "minitrace"
 
 [target.'cfg(family = "unix")'.profile]
 link-libs = ["pthread"]
+
+# Strict -std=c11 hides glibc's strdup (measured: check-linux, "minitrace.c:487:52: warning: implicit declaration of function 'strdup'").
+[target.'cfg(os = "linux")'.profile]
+defines = ["_POSIX_C_SOURCE=200809L"]
