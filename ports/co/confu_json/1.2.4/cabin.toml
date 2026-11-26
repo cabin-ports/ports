@@ -1,0 +1,50 @@
+[package.upstream]
+url = "https://github.com/werto87/confu_json/archive/refs/tags/v1.2.4.tar.gz"
+checksum = "sha256:adb87ecd8181f4ac4bb1eac0fbd9d803ce2f4c5bb7982b84b8a1aa95814228c5"
+format = "tar.gz"
+strip-prefix = "confu_json-1.2.4"
+
+# The version is the v1.2.4 tag; CMakeLists.txt's `VERSION 0.0.1` is never
+# bumped.
+[package]
+name = "cabin-ports/confu_json"
+version = "1.2.4"
+include = ["LICENSE.md", "README.md", "confu_json"]
+# confu_json/concept.hxx:20 credits Stack Overflow (questions/65752626) for
+# is_shared_ptr; its copyright significance is uncertain.
+license = "BSL-1.0"
+
+# Upstream's INTERFACE target (confu_json/CMakeLists.txt:8-31) requires C++20
+# (:31).  cabin-ports/boost-json builds Boost.JSON's compiled library, so a
+# consumer does not include <boost/json/src.hpp>, which README.md:17 suggests
+# for header-only Boost.JSON.
+[target.confu_json]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++20"
+deps = [
+  { name = "cabin-ports/magic_enum", public = true },
+  { name = "cabin-ports/boost-algorithm", public = true },
+  { name = "cabin-ports/boost-core", public = true },
+  { name = "cabin-ports/boost-fusion", public = true },
+  { name = "cabin-ports/boost-json", public = true },
+  { name = "cabin-ports/boost-lambda", public = true },
+  { name = "cabin-ports/boost-mpl", public = true },
+  { name = "cabin-ports/boost-numeric-conversion", public = true },
+  { name = "cabin-ports/boost-optional", public = true },
+  { name = "cabin-ports/boost-system", public = true },
+  { name = "cabin-ports/boost-type-index", public = true },
+]
+
+[dependencies]
+"cabin-ports/magic_enum" = "=0.9.8"
+"cabin-ports/boost-algorithm" = "=1.92.0"
+"cabin-ports/boost-core" = "=1.92.0"
+"cabin-ports/boost-fusion" = "=1.92.0"
+"cabin-ports/boost-json" = "=1.92.0"
+"cabin-ports/boost-lambda" = "=1.92.0"
+"cabin-ports/boost-mpl" = "=1.92.0"
+"cabin-ports/boost-numeric-conversion" = "=1.92.0"
+"cabin-ports/boost-optional" = "=1.92.0"
+"cabin-ports/boost-system" = "=1.92.0"
+"cabin-ports/boost-type-index" = "=1.92.0"
