@@ -15,7 +15,7 @@ include = ["LICENSE", "README.md", "ChangeLog.md", "doc", "include", "src"]
 
 # Not ported: include/argumentum/argparse-h.h, upstream's header-only variant
 # (ARGUMENTUM_INSTALL_HEADERONLY, off by default); it ships in the package but
-# is no target, and a program must not mix it with this library.
+# is no target.
 [target.argumentum]
 type = "library"
 sources = ["src/argparser.cpp"]
