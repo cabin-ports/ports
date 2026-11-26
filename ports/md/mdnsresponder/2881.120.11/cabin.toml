@@ -74,8 +74,11 @@ include-dirs = ["mDNSCore", "mDNSShared"]
 [target.'cfg(family = "unix")'.profile]
 defines = ["MDNS_NO_STRICT=1", "MDNS_UDS_SERVERPATH=\"/var/run/mdnsd\""]
 
+# _GNU_SOURCE (mDNSPosix/Makefile:112): without it glibc hides u_char under
+# strict -std=c11 (measured: check-linux, dnssd_clientstub.c:1563: error:
+# unknown type name 'u_char').
 [target.'cfg(os = "linux")'.profile]
-defines = ["NOT_HAVE_SA_LEN"]
+defines = ["NOT_HAVE_SA_LEN", "_GNU_SOURCE"]
 
 [target.'cfg(os = "windows")'.profile]
 defines = [
