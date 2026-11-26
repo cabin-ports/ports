@@ -1,0 +1,9 @@
+--- /dev/null
++++ b/c/include/brunsli/brunsli_export.h
+@@ -0,0 +1,6 @@
++#ifndef BRUNSLI_EXPORT_H
++#define BRUNSLI_EXPORT_H
++
++#define BRUNSLI_EXPORT
++
++#endif
