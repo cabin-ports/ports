@@ -1,0 +1,293 @@
+[package.upstream]
+url = "https://github.com/ampl/asl/archive/refs/tags/v1.0.2.tar.gz"
+checksum = "sha256:cf907bcd14ed172d75e3d0fd34f11b3f8e42154d696cf0f8c73e217f5bf149c6"
+format = "tar.gz"
+strip-prefix = "asl-1.0.2"
+# Patch 0001 fills in include/details.c, where CMake writes its build
+# machine's system name and processor (CMakeLists.txt:107-111), with an
+# empty sysdetails_ASL, which getstub.c leaves out of a solver's version
+# line: one fixed string would misname every other platform.
+# BSD 3-Clause License notice of LICENSE, which covers src/solvers/details.c0,
+# whose lines 0001 carries (the License's condition that redistributions of
+# source code retain it):
+# Copyright (c) 2017-2023, AMPL Optimization, Inc.
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+#
+# * Neither the name of the copyright holder nor the names of its
+#   contributors may be used to endorse or promote products derived from
+#   this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+patches = ["patches/0001-fill-in-details-c.patch"]
+
+# The files CMake generates in its build tree's include directory, which
+# asl and asl2 share (CMakeLists.txt:107-114, 198-202).
+[[package.upstream.copy]]
+from = "src/solvers/arith.h1"
+to = "include/arith.h"
+
+[[package.upstream.copy]]
+from = "src/solvers/stdio1.h0"
+to = "include/stdio1.h"
+
+[[package.upstream.copy]]
+from = "src/solvers/details.c0"
+to = "include/details.c"
+
+[package]
+name = "cabin-ports/ampl-asl"
+version = "1.0.2"
+# SMLNJ: LICENSE.2 and the Lucent file headers.  LicenseRef-AMPL-SMLNJ-variant:
+# the AMPL Optimization and David M. Gay file headers (e.g. asl.h,
+# avltree.c), SMLNJ's grant without its name clause.  dtoa: dtoa.c, which
+# dtoa1.c includes.  Files without a header fall under LICENSE.
+license = "BSD-3-Clause AND SMLNJ AND LicenseRef-AMPL-SMLNJ-variant AND dtoa"
+include = [
+  "LICENSE",
+  "LICENSE.2",
+  "README.md",
+  "include",
+  "patches",
+  "src/solvers",
+  "src/solvers2",
+]
+# Upstream states no C standard; C11 is the oldest Cabin can lower for
+# MSVC.  The headers are C89 and C++98 (measured).
+c-standard = "c11"
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
+
+# CMake builds asl and asl2 by default.  They define the same functions,
+# and their headers have the same names, so a program uses one of them:
+# asl2 needs the non-default `asl2` feature, and a consumer that enables it
+# names cabin-ports/ampl-asl:asl2 in deps.  Not ported: what CMake's
+# options add (the aslcpp C++ wrapper, the OpenMP asl-mt and asl2-mt, the
+# dynamic-runtime, mcmodel=large and licence-check variants, f2c, the
+# examples and GENERATE_ARITH's arithchk).
+[features]
+default = []
+asl2 = []
+
+# Upstream's CMake sets no C standard (no C_STANDARD, C_EXTENSIONS or -std),
+# so it compiles in the compiler's default GNU dialect, where glibc exposes
+# ssize_t, fdopen, fileno, popen and tempnam (asl.h, func_add.c, printf.c);
+# Cabin's strict -std=c11 hides them without _DEFAULT_SOURCE.
+# Consumers need it too, for asl.h's ssize_t (measured: check-linux, C probe
+# at c89, "asl.h:108:9: error: unknown type name 'ssize_t'").
+[target.asl]
+type = "library"
+sources = [
+  "include/details.c",
+  "src/solvers/asldate.c",
+  "src/solvers/atof.c",
+  "src/solvers/auxinfo.c",
+  "src/solvers/avltree.c",
+  "src/solvers/b_search.c",
+  "src/solvers/basename.c",
+  "src/solvers/bscanf.c",
+  "src/solvers/com2eval.c",
+  "src/solvers/comeval.c",
+  "src/solvers/con1ival.c",
+  "src/solvers/con2ival.c",
+  "src/solvers/con2val.c",
+  "src/solvers/conadj.c",
+  "src/solvers/conpval.c",
+  "src/solvers/conscale.c",
+  "src/solvers/conval.c",
+  "src/solvers/degree.c",
+  "src/solvers/derprop.c",
+  "src/solvers/dtoa1.c",
+  "src/solvers/duthes.c",
+  "src/solvers/dynlink.c",
+  "src/solvers/f_read.c",
+  "src/solvers/fg_read.c",
+  "src/solvers/fg_write.c",
+  "src/solvers/fgh_read.c",
+  "src/solvers/fpecatch.c",
+  "src/solvers/fpinit.c",
+  "src/solvers/fullhes.c",
+  "src/solvers/func_add.c",
+  "src/solvers/funcadd1.c",
+  "src/solvers/g_fmt.c",
+  "src/solvers/genrowno.c",
+  "src/solvers/getenv.c",
+  "src/solvers/getstub.c",
+  "src/solvers/htcl.c",
+  "src/solvers/indic_cons.c",
+  "src/solvers/jac0dim.c",
+  "src/solvers/jac2dim.c",
+  "src/solvers/jacdim.c",
+  "src/solvers/jacinc.c",
+  "src/solvers/jacinc1.c",
+  "src/solvers/libnamsave.c",
+  "src/solvers/mach.c",
+  "src/solvers/mainexit.c",
+  "src/solvers/mip_pri.c",
+  "src/solvers/misc.c",
+  "src/solvers/mpec_adj.c",
+  "src/solvers/mqpcheckv.c",
+  "src/solvers/mypow.c",
+  "src/solvers/names.c",
+  "src/solvers/nl_obj.c",
+  "src/solvers/nqpcheck.c",
+  "src/solvers/obj2val.c",
+  "src/solvers/obj_adj.c",
+  "src/solvers/obj_prec.c",
+  "src/solvers/objconst.c",
+  "src/solvers/objval.c",
+  "src/solvers/objval_.c",
+  "src/solvers/op_type.c",
+  "src/solvers/pfg_read.c",
+  "src/solvers/pfghread.c",
+  "src/solvers/printf.c",
+  "src/solvers/pshvprod.c",
+  "src/solvers/punknown.c",
+  "src/solvers/qp_read.c",
+  "src/solvers/qpcheck.c",
+  "src/solvers/qsortv.c",
+  "src/solvers/readsol.c",
+  "src/solvers/repwhere.c",
+  "src/solvers/rops.c",
+  "src/solvers/rops2.c",
+  "src/solvers/sigcatch.c",
+  "src/solvers/sos_add.c",
+  "src/solvers/sphes.c",
+  "src/solvers/sscanf.c",
+  "src/solvers/stderr.c",
+  "src/solvers/studchk0.c",
+  "src/solvers/suf_sos.c",
+  "src/solvers/value.c",
+  "src/solvers/writesol.c",
+  "src/solvers/wrtsol_.c",
+  "src/solvers/ws_desc.c",
+  "src/solvers/wsu_desc.c",
+  "src/solvers/x2check.c",
+  "src/solvers/xectim.c",
+  "src/solvers/xp1known.c",
+  "src/solvers/xp2known.c",
+]
+include-dirs = ["include", "src/solvers"]
+defines = ["_DEFAULT_SOURCE"]
+interface-defines = ["_DEFAULT_SOURCE"]
+links = "asl"
+
+[target.asl2]
+type = "library"
+sources = [
+  "include/details.c",
+  "src/solvers2/asldate.c",
+  "src/solvers2/atof.c",
+  "src/solvers2/auxinfo.c",
+  "src/solvers2/avltree.c",
+  "src/solvers2/b_search.c",
+  "src/solvers2/basename.c",
+  "src/solvers2/bscanf.c",
+  "src/solvers2/conscale.c",
+  "src/solvers2/degree.c",
+  "src/solvers2/derprop.c",
+  "src/solvers2/dtoa1.c",
+  "src/solvers2/duthes.c",
+  "src/solvers2/dynlink.c",
+  "src/solvers2/eval1.c",
+  "src/solvers2/eval2.c",
+  "src/solvers2/ewalloc1.c",
+  "src/solvers2/ewalloc2.c",
+  "src/solvers2/f_read.c",
+  "src/solvers2/fg_read.c",
+  "src/solvers2/fg_write.c",
+  "src/solvers2/fpecatch.c",
+  "src/solvers2/fpinit.c",
+  "src/solvers2/fullhes.c",
+  "src/solvers2/func_add.c",
+  "src/solvers2/funcadd1.c",
+  "src/solvers2/g_fmt.c",
+  "src/solvers2/genrowno.c",
+  "src/solvers2/getenv.c",
+  "src/solvers2/getstub.c",
+  "src/solvers2/htcl.c",
+  "src/solvers2/indic_cons.c",
+  "src/solvers2/jac0dim.c",
+  "src/solvers2/jac2dim.c",
+  "src/solvers2/jacdim.c",
+  "src/solvers2/jacinc.c",
+  "src/solvers2/jacinc1.c",
+  "src/solvers2/libnamsave.c",
+  "src/solvers2/mach.c",
+  "src/solvers2/mainexit.c",
+  "src/solvers2/mip_pri.c",
+  "src/solvers2/misc.c",
+  "src/solvers2/mpec_adj.c",
+  "src/solvers2/mqpcheckv.c",
+  "src/solvers2/mypow.c",
+  "src/solvers2/names.c",
+  "src/solvers2/nl_obj.c",
+  "src/solvers2/nqpcheck.c",
+  "src/solvers2/nqpcheckZ.c",
+  "src/solvers2/obj_adj.c",
+  "src/solvers2/obj_prec.c",
+  "src/solvers2/objconst.c",
+  "src/solvers2/objval_.c",
+  "src/solvers2/op_type.c",
+  "src/solvers2/pfghread.c",
+  "src/solvers2/printf.c",
+  "src/solvers2/pshvprod.c",
+  "src/solvers2/punknown.c",
+  "src/solvers2/qpcheck.c",
+  "src/solvers2/qpcheckZ.c",
+  "src/solvers2/qsortv.c",
+  "src/solvers2/readsol.c",
+  "src/solvers2/repwhere.c",
+  "src/solvers2/sigcatch.c",
+  "src/solvers2/sos_add.c",
+  "src/solvers2/sphes.c",
+  "src/solvers2/sscanf.c",
+  "src/solvers2/stderr.c",
+  "src/solvers2/studchk0.c",
+  "src/solvers2/suf_sos.c",
+  "src/solvers2/value.c",
+  "src/solvers2/writesol.c",
+  "src/solvers2/wrtsol_.c",
+  "src/solvers2/ws_desc.c",
+  "src/solvers2/wsu_desc.c",
+  "src/solvers2/xectim.c",
+  "src/solvers2/xp2known.c",
+]
+include-dirs = ["include", "src/solvers2"]
+defines = ["_DEFAULT_SOURCE"]
+interface-defines = ["_DEFAULT_SOURCE"]
+links = "asl2"
+required-features = ["asl2"]
+
+# CMake defines No_Control87 for 64-bit pointers (CMakeLists.txt:303-306).
+# Only Windows reads it (fpinitmt.c:186), whose 64-bit targets are these,
+# to skip a _control87 precision change that x64 does not support.
+[target.'cfg(any(arch = "x86_64", arch = "aarch64"))'.profile]
+defines = ["No_Control87"]
+
+# CMAKE_DL_LIBS (CMakeLists.txt:348), for funcadd1.c's dlopen, which lives
+# in libdl before glibc 2.34.
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["dl"]
+
+# CMakeLists.txt:349-351.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
