@@ -6,13 +6,7 @@ strip-prefix = "ruapu-0.1.0"
 # Patch 0001 spells the inline-assembly keyword __asm__: the header writes asm,
 # which a strict -std=c99 compile rejects (measured on macOS arm64: use of
 # undeclared identifier 'asm').
-# Patch 0002 defines _DEFAULT_SOURCE on Linux ahead of the header's libc includes
-# (measured: check-linux, "unknown type name 'sigjmp_buf'" under -std=c99); a
-# consumer must include ruapu.h in the implementation file before any libc header.
-patches = [
-  "patches/0001-use-__asm__-for-strict-c-standards.patch",
-  "patches/0002-expose-posix-signal-api-under-strict-c.patch",
-]
+patches = ["patches/0001-use-__asm__-for-strict-c-standards.patch"]
 
 [package]
 name = "cabin-ports/ruapu"
@@ -27,3 +21,6 @@ include = ["LICENSE", "patches", "ruapu.h"]
 type = "header-only"
 include-dirs = ["."]
 interface-c-standard = "c99"
+# In strict C, glibc declares sigjmp_buf, siginfo_t and SA_ONSTACK only under
+# _DEFAULT_SOURCE (measured: check-linux, "unknown type name 'sigjmp_buf'").
+interface-defines = ["_DEFAULT_SOURCE"]

@@ -1,7 +1,7 @@
+#include <stdio.h>
+
 #define RUAPU_IMPLEMENTATION
 #include "ruapu.h"
-
-#include <stdio.h>
 
 #define CHECK(cond)                                         \
   do {                                                      \
