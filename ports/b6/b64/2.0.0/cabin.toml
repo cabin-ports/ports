@@ -5,16 +5,16 @@ url = "https://github.com/libb64/libb64/archive/refs/tags/v2.0.0.1.tar.gz"
 checksum = "sha256:ce8e578a953a591bd4a6f157eec310b9a4c2e6f10ade2fdda6ae6bafaf798b98"
 format = "tar.gz"
 strip-prefix = "libb64-2.0.0.1"
+# Patch 0001 spells ccommon.h's `#elseif` as `#elif`, which MSVC rejects
+# inside the taken _WIN32 group (measured: check-windows, "ccommon.h(17): fatal
+# error C1021: invalid preprocessor command 'elseif'").
+patches = ["patches/0001-spell-elif-in-ccommon-h.patch"]
 
 [package]
 name = "cabin-ports/b64"
 version = "2.0.0"
 license = "CC-PDDC"
 include = ["AUTHORS.md", "LICENSE.md", "include", "patches", "src"]
-# Patch 0001 spells ccommon.h's `#elseif` as `#elif`, which MSVC rejects
-# inside the taken _WIN32 group (measured: check-windows, "ccommon.h(17): fatal
-# error C1021: invalid preprocessor command 'elseif'").
-patches = ["patches/0001-spell-elif-in-ccommon-h.patch"]
 # Upstream states ANSI C (README.md:6); C11 is the oldest standard Cabin can
 # request from MSVC.
 c-standard = "c11"
