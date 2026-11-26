@@ -1,0 +1,49 @@
+[package.upstream]
+url = "https://github.com/cppalliance/NuDB/archive/refs/tags/2.0.9.tar.gz"
+checksum = "sha256:a088dac72931f7b51b4def1f1b505e4e6c4d1c8c8b41fa3c5f70b989ddcaeba9"
+format = "tar.gz"
+strip-prefix = "NuDB-2.0.9"
+
+[package]
+name = "cabin-ports/nudb"
+version = "2.0.9"
+# include/nudb/detail/xxhash.hpp:8-41 is a derivative of xxHash 0.6.2 under
+# BSD-2-Clause; everything else is BSL-1.0 (LICENSE_1_0.txt).
+license = "BSL-1.0 AND BSD-2-Clause"
+include = ["LICENSE_1_0.txt", "include"]
+
+[dependencies]
+"cabin-ports/boost-assert" = "=1.92.0"
+"cabin-ports/boost-core" = "=1.92.0"
+"cabin-ports/boost-iterator" = "=1.92.0"
+"cabin-ports/boost-optional" = "=1.92.0"
+"cabin-ports/boost-system" = "=1.92.0"
+"cabin-ports/boost-thread" = "=1.92.0"
+
+# Header-only, as upstream's INTERFACE target nudb_core
+# (include/nudb/CMakeLists.txt:6-17), which links Boost::thread and
+# Boost::system.  Upstream states C++11 (README.md:66,
+# include/nudb/CMakeLists.txt:17), but boost-thread 1.92.0 requires its
+# consumers at C++14, so that is the interface standard here.  Not ported:
+# upstream's tests, examples, benchmarks, documentation and the nudb command
+# line tool (tools/).  The debug macros NUDB_DEBUG_LOG and NUDB_DEBUG_ARENA
+# include a Boost.Beast header, and _experimental/test/temp_dir.hpp includes
+# <boost/filesystem.hpp>; upstream's interface target links neither library
+# and neither is a dependency here.
+[target.nudb]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+deps = [
+  { name = "cabin-ports/boost-assert", public = true },
+  { name = "cabin-ports/boost-core", public = true },
+  { name = "cabin-ports/boost-iterator", public = true },
+  { name = "cabin-ports/boost-optional", public = true },
+  { name = "cabin-ports/boost-system", public = true },
+  { name = "cabin-ports/boost-thread", public = true },
+]
+
+# context::start() runs a std::thread (include/nudb/impl/context.ipp:31);
+# upstream's CMake finds Threads everywhere but MSVC (CMakeLists.txt:28-31).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
