@@ -1,0 +1,28 @@
+[package.upstream]
+# Upstream tags no releases and master is frozen at this commit, committed
+# 2014-09-26; the version is that date.
+url = "https://github.com/progschj/ThreadPool/archive/9a42ec1329f259a5f4881a291db1dcb8f2ad9040.tar.gz"
+checksum = "sha256:954e0ecdac1aa0da1e0fa78577ff0d352e53094df43762fbc1884f76a7e1dcd2"
+format = "tar.gz"
+strip-prefix = "ThreadPool-9a42ec1329f259a5f4881a291db1dcb8f2ad9040"
+
+[package]
+name = "cabin-ports/threadpool"
+version = "2014.9.26"
+# Licence: Zlib (COPYING).
+license = "Zlib"
+include = ["COPYING", "README.md", "ThreadPool.h"]
+
+[target.threadpool]
+type = "header-only"
+include-dirs = ["."]
+# C++11 (README.md:4).  ThreadPool.h:19,:64 use std::result_of, which libc++
+# removes in C++20: under -std=c++20 on macOS clang the first error is "no
+# type named 'result_of' in namespace 'std'" (measured), so the range stops
+# at C++17.
+interface-cxx-standard = { min = "c++11", max = "c++17" }
+
+# The workers are std::thread, pthreads on Unix.  Upstream has no build files
+# and says nothing about Android.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
