@@ -14,13 +14,11 @@ include = ["LICENSE", "include", "src"]
 
 # The sources of upstream's footprint, astc_utils and astc-codec libraries
 # (src/decoder/CMakeLists.txt), built as one.  The C++ standard is
-# CMakeLists.txt:23.  The sources include "src/..." from the root, which
-# upstream keeps private (src/decoder/CMakeLists.txt:28,33), so only a private
-# header-only target carries it.  Not ported: astc_inspector_cli and the tests.
-[target.astc-root]
-type = "header-only"
+# CMakeLists.txt:23.  Not ported: astc_inspector_cli and the tests.
+[profile]
+# The sources include "src/..." from the root, on the package's own include
+# path only, as upstream keeps it private (src/decoder/CMakeLists.txt:28,33).
 include-dirs = ["."]
-interface-cxx-standard = "c++11"
 
 [target.astc-codec]
 type = "library"
@@ -40,4 +38,3 @@ sources = [
 include-dirs = ["include"]
 cxx-standard = "c++11"
 links = "astc-codec"
-deps = ["astc-root"]
