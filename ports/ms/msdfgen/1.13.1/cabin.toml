@@ -1,0 +1,104 @@
+[package.upstream]
+url = "https://github.com/Chlumsky/msdfgen/archive/refs/tags/v1.13.1.tar.gz"
+checksum = "sha256:ad381b09ef61af235690ea96eefafd01fd35f5163bcb6ad73db7904997675b71"
+format = "tar.gz"
+strip-prefix = "msdfgen-1.13.1"
+
+[package]
+name = "cabin-ports/msdfgen"
+version = "1.13.1"
+license = "MIT"
+include = ["LICENSE.txt", "core", "ext", "msdfgen-ext.h", "msdfgen.h"]
+# Upstream requires C++11 (cxx_std_11, CMakeLists.txt:118-120); C++14 is the
+# oldest standard Cabin can request from MSVC.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+
+[dependencies]
+"cabin-ports/freetype" = "^2.15"
+"cabin-ports/libpng" = "^1.6"
+"cabin-ports/tinyxml2" = "^11"
+
+# The two static libraries of upstream's CMake build.  Not ported: the
+# standalone msdfgen program, and Skia (MSDFGEN_USE_SKIA), so
+# resolveShapeGeometry() is not declared and loadSvgShape() imports one
+# <path> of a file instead of its whole geometry.
+[target.msdfgen-core]
+type = "library"
+sources = [
+  "core/Contour.cpp",
+  "core/DistanceMapping.cpp",
+  "core/EdgeHolder.cpp",
+  "core/MSDFErrorCorrection.cpp",
+  "core/Projection.cpp",
+  "core/Scanline.cpp",
+  "core/Shape.cpp",
+  "core/contour-combiners.cpp",
+  "core/convergent-curve-ordering.cpp",
+  "core/edge-coloring.cpp",
+  "core/edge-segments.cpp",
+  "core/edge-selectors.cpp",
+  "core/equation-solver.cpp",
+  "core/export-svg.cpp",
+  "core/msdf-error-correction.cpp",
+  "core/msdfgen.cpp",
+  "core/rasterization.cpp",
+  "core/render-sdf.cpp",
+  "core/save-bmp.cpp",
+  "core/save-fl32.cpp",
+  "core/save-rgba.cpp",
+  "core/save-tiff.cpp",
+  "core/sdf-error-estimation.cpp",
+  "core/shape-description.cpp",
+]
+include-dirs = ["."]
+# CMake stamps MSDFGEN_COPYRIGHT_YEAR with the year of the build; 2026 is
+# the release's.
+defines = [
+  "MSDFGEN_COPYRIGHT_YEAR=2026",
+  "MSDFGEN_PUBLIC=",
+  "MSDFGEN_USE_CPP11",
+  "MSDFGEN_VERSION=1.13.1",
+  "MSDFGEN_VERSION_MAJOR=1",
+  "MSDFGEN_VERSION_MINOR=13",
+  "MSDFGEN_VERSION_REVISION=1",
+]
+interface-defines = [
+  "MSDFGEN_COPYRIGHT_YEAR=2026",
+  "MSDFGEN_PUBLIC=",
+  "MSDFGEN_USE_CPP11",
+  "MSDFGEN_VERSION=1.13.1",
+  "MSDFGEN_VERSION_MAJOR=1",
+  "MSDFGEN_VERSION_MINOR=13",
+  "MSDFGEN_VERSION_REVISION=1",
+]
+links = "msdfgen-core"
+
+[target.msdfgen-ext]
+type = "library"
+sources = [
+  "ext/import-font.cpp",
+  "ext/import-svg.cpp",
+  "ext/resolve-shape-geometry.cpp",
+  "ext/save-png.cpp",
+]
+include-dirs = ["."]
+defines = ["MSDFGEN_EXT_PUBLIC=", "MSDFGEN_USE_LIBPNG", "MSDFGEN_USE_TINYXML2"]
+interface-defines = [
+  "MSDFGEN_EXTENSIONS",
+  "MSDFGEN_EXT_PUBLIC=",
+  "MSDFGEN_USE_LIBPNG",
+  "MSDFGEN_USE_TINYXML2",
+]
+# Cabin refuses c++14 here: cabin-ports/tinyxml2 accepts C++ consumers at
+# c++17 or newer (measured).
+cxx-standard = "c++17"
+links = "msdfgen-ext"
+# The edge to msdfgen-core is public, where upstream links it privately,
+# because ext's headers include core's.
+deps = [
+  { name = "msdfgen-core", public = true },
+  "cabin-ports/freetype",
+  "cabin-ports/libpng",
+  "cabin-ports/tinyxml2",
+]
