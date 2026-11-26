@@ -1,0 +1,36 @@
+[package.upstream]
+url = "https://github.com/linksplatform/Converters/archive/refs/tags/cpp_0.2.0.tar.gz"
+checksum = "sha256:9d8e95711b96f8d0b2d6d087687fd97d0f02333ed8c388fa76fee236b572c2da"
+format = "tar.gz"
+strip-prefix = "Converters-cpp_0.2.0"
+
+# Upstream's C++ release tag cpp_0.2.0 (commit 61673f00); ConanCenter's
+# platform.converters, but Cabin names reject '.'.
+[package]
+name = "cabin-ports/platform-converters"
+version = "0.2.0"
+# The nuspec says MIT; LICENSE, the only licence text, decides.
+license = "Unlicense"
+include = [
+  "LICENSE",
+  "README.md",
+  "cpp/Platform.Converters/CachingConverterDecorator.h",
+  "cpp/Platform.Converters/CheckedConverter.h",
+  "cpp/Platform.Converters/Convert.h",
+  "cpp/Platform.Converters/Converter.h",
+  "cpp/Platform.Converters/ConverterBase.h",
+  "cpp/Platform.Converters/IConverter[T].h",
+  "cpp/Platform.Converters/IConverter[TSource, TTarget].h",
+  "cpp/Platform.Converters/Platform.Converters.h",
+  "cpp/Platform.Converters/StringConverter.h",
+  "cpp/Platform.Converters/To.h",
+  "cpp/Platform.Converters/UncheckedConverter.h",
+  "cpp/Platform.Converters/UncheckedSignExtendingConverter.h",
+]
+
+# Consumers include <Platform.Converters.h> (namespace Platform::Converters).
+[target.platform-converters]
+type = "header-only"
+include-dirs = ["cpp/Platform.Converters"]
+# cpp/CMakeLists.txt:13 sets CXX_STANDARD 20 for upstream's tests.
+interface-cxx-standard = "c++20"
