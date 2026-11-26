@@ -69,6 +69,9 @@ links = "tinycbor"
 [target.'cfg(family = "unix")'.profile]
 link-libs = ["m"]
 
+# On Windows (MSVC), cbor_value_to_json returns an error for {"ab": 1}, a map
+# with a two-character key (measured, check-windows).
+
 # Where CMake finds none of open_memstream, funopen and fopencookie it
 # defines this (CMakeLists.txt:155); open_memstream.c is then not built.
 [target.'cfg(os = "windows")'.profile]
