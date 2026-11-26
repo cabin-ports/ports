@@ -1,0 +1,35 @@
+[package.upstream]
+url = "https://github.com/Stiffstream/json_dto/archive/refs/tags/v.0.3.4.tar.gz"
+checksum = "sha256:1b9595dbd86fa90edf621b72f5f4dac43170339250e9e650ede5269ff6fa3f2e"
+format = "tar.gz"
+strip-prefix = "json_dto-v.0.3.4"
+
+# Upstream installs the headers to include/json_dto/ (dev/json_dto/CMakeLists.txt:53,91);
+# the copies give the sources the same layout.
+[[package.upstream.copy]]
+from = "dev/json_dto/pub.hpp"
+to = "include/json_dto/pub.hpp"
+
+[[package.upstream.copy]]
+from = "dev/json_dto/validators.hpp"
+to = "include/json_dto/validators.hpp"
+
+[package]
+name = "cabin-ports/json-dto"
+version = "0.3.4"
+# dev/json_dto/pub.hpp:82 credits cppreference for the void_t idiom (:83-84);
+# its copyright significance is uncertain.
+license = "BSD-3-Clause"
+include = ["LICENSE", "README.md", "include"]
+
+[dependencies]
+"cabin-ports/rapidjson" = "^1.1"
+
+[target.json_dto]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:559 states C++14.
+interface-cxx-standard = "c++14"
+# Upstream's interface target sets both (dev/json_dto/CMakeLists.txt:36-38).
+interface-defines = ["RAPIDJSON_HAS_STDSTRING=1", "RAPIDJSON_HAS_CXX11_RVALUE_REFS=1"]
+deps = [{ name = "cabin-ports/rapidjson", public = true }]
