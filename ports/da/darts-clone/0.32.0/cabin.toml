@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/s-yata/darts-clone/archive/refs/tags/v0.32h.tar.gz"
+checksum = "sha256:5d4fa1e103f6d543208b75fc06c2001533fa8c20a3470e43860aba56ee7888a3"
+format = "tar.gz"
+strip-prefix = "darts-clone-0.32h"
+
+[package]
+name = "cabin-ports/darts-clone"
+# Upstream tag v0.32h; the header's DARTS_VERSION is "0.32" (darts.h:8), and
+# Cabin versions have three components.
+version = "0.32.0"
+license = "BSD-2-Clause"
+include = ["COPYING.md", "include"]
+
+[target.darts-clone]
+type = "header-only"
+include-dirs = ["include"]
+# Upstream states no standard; C++98 is measured: the header and consumer
+# test build at c++98, c++17, c++20 and c++26.
+interface-cxx-standard = "c++98"
