@@ -1,0 +1,42 @@
+[package.upstream]
+# The unpacked distributable from upstream's duktape-releases repository
+# (its README); the official duktape-2.7.0.tar.xz is not a format Cabin
+# accepts.  Every file here is byte-identical to that release asset.
+url = "https://github.com/svaarala/duktape-releases/archive/refs/tags/v2.7.0.tar.gz"
+checksum = "sha256:38ce0698e4d6837cadbd83fe5d6a5323f532c34962fd7e6f5cf3c71e5542f5e0"
+format = "tar.gz"
+strip-prefix = "duktape-releases-2.7.0"
+
+[package]
+name = "cabin-ports/duktape"
+version = "2.7.0"
+# CC0-1.0: src/duktape.c:101223 credits the xoroshiro128+ and SplitMix64
+# generators of Vigna and Blackman (licenses/*.txt) for Math.random.
+license = "MIT AND CC0-1.0"
+include = [
+  "AUTHORS.rst",
+  "LICENSE.txt",
+  "README.rst",
+  "licenses",
+  "src/duk_config.h",
+  "src/duktape.c",
+  "src/duktape.h",
+]
+
+# The pre-configured single-source distribution in src/ (README.rst:73-76),
+# built in Duktape's default configuration; DUK_F_DLL_BUILD is for shared
+# builds only.  Not ported: configure.py options, the extras/ modules, and
+# the duk command-line tool.
+[target.duktape]
+type = "library"
+sources = ["src/duktape.c"]
+include-dirs = ["src"]
+# Upstream sets no standard for consumers; C11 is the oldest Cabin can lower
+# for MSVC.  Upstream's own build uses -std=c99 (Makefile.cmdline:13).
+c-standard = "c11"
+interface-c-standard = "c99"
+links = "duktape"
+
+# The Math built-ins call libm.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
