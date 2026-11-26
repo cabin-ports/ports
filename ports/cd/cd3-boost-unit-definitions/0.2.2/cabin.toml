@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/CD3/BoostUnitDefinitions/archive/refs/tags/0.2.2.tar.gz"
+checksum = "sha256:84b374ce94bd4792994205a40e3a92b4d70694203f596c18f00de2520ba55db3"
+format = "tar.gz"
+strip-prefix = "BoostUnitDefinitions-0.2.2"
+
+[package]
+name = "cabin-ports/cd3-boost-unit-definitions"
+version = "0.2.2"
+license = "MIT"
+include = ["LICENSE.md", "src"]
+
+[dependencies]
+"cabin-ports/boost-units" = "=1.92.0"
+
+# Upstream's INTERFACE target exposes src/, so consumers write
+# `#include <BoostUnitDefinitions/Units.hpp>`.  C++14 is upstream's tests' standard
+# (testing/CMakeLists.txt:25) and the floor boost-units declares.  Upstream states no
+# Boost version (conanfile.py requires 1.72.0); it is built against boost-units 1.92.0.
+# Not ported: upstream's tests, docs, scripts and CMake files.
+[target.cd3_boost_unit_definitions]
+type = "header-only"
+include-dirs = ["src"]
+interface-cxx-standard = "c++14"
+deps = [{ name = "cabin-ports/boost-units", public = true }]
