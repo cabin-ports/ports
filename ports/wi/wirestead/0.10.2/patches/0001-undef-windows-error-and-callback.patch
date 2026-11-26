@@ -1,0 +1,12 @@
+--- a/wirestead/diagnostics/logger.cc
++++ b/wirestead/diagnostics/logger.cc
+@@ -35,6 +35,9 @@
+ #include <mutex>
+ #include <sstream>
+ #include <string_view>
++// Changed for cabin-ports on 2026-11-26: undefine the ERROR and CALLBACK macros that spdlog's <windows.h> defines.
++#undef ERROR
++#undef CALLBACK
+ 
+ namespace wirestead {
+ namespace diagnostics {

@@ -3,6 +3,11 @@ url = "https://github.com/wirestead/wirestead/archive/refs/tags/v0.10.2.tar.gz"
 checksum = "sha256:efc66037103f5572b0bdc9638a6e5726f43785c75bab48f439d55648c42f315e"
 format = "tar.gz"
 strip-prefix = "wirestead-0.10.2"
+# logger.cc uses LogLevel::ERROR and LogOutput::CALLBACK after spdlog's
+# <windows.h> defines both as macros; logger.hpp's #undef runs before it
+# (MSVC C2589 on check-windows).  Apache-2.0 notice: the patch adds a change
+# notice line to wirestead/diagnostics/logger.cc.
+patches = ["patches/0001-undef-windows-error-and-callback.patch"]
 
 [package]
 name = "cabin-ports/wirestead"
@@ -11,7 +16,7 @@ license = "Apache-2.0"
 # Not ported: the optional TLS support (WIRESTEAD_ENABLE_TLS, needs OpenSSL)
 # and memory tracking (WIRESTEAD_ENABLE_MEMORY_TRACKING); both are off by
 # default upstream.
-include = ["LICENSE", "NOTICE", "wirestead"]
+include = ["LICENSE", "NOTICE", "patches", "wirestead"]
 
 [dependencies]
 "cabin-ports/boost-asio" = "=1.92.0"
@@ -95,9 +100,6 @@ defines = ["_POSIX_C_SOURCE=200809L"]
 [target.'cfg(os = "macos")'.profile]
 defines = ["_DARWIN_C_SOURCE"]
 
-# NOGDI: spdlog's <windows.h>, included after logger.hpp's #undef ERROR,
-# redefines ERROR and breaks LogLevel::ERROR in logger.cc (MSVC C2589 on
-# check-windows).
 [target.'cfg(os = "windows")'.profile]
-defines = ["_WIN32_WINNT=0x0A00", "NOGDI"]
+defines = ["_WIN32_WINNT=0x0A00"]
 link-libs = ["iphlpapi", "mswsock", "ws2_32"]
