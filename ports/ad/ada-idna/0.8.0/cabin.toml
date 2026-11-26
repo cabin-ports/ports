@@ -1,0 +1,31 @@
+[package.upstream]
+url = "https://github.com/ada-url/idna/archive/refs/tags/v0.8.0.tar.gz"
+checksum = "sha256:66912d2a6a7d2b5316222309945a460e1af3e0a63b9d054bf1caacc39d1259da"
+format = "tar.gz"
+strip-prefix = "idna-0.8.0"
+
+# "(Apache-2.0 OR MIT) AND Unicode-3.0": the library is under either of
+# LICENSE-APACHE and LICENSE-MIT (README.md, "License"); src/table_blob.inc
+# packs data derived from the Unicode Character Database and IdnaMappingTable.txt
+# (scripts/idna_table.py:24, scripts/derived_table.py:55), under the Unicode
+# License v3.  No shipped file names that license; the term is inferred from the
+# data's origin.
+# src/normalization.cpp:9-10 credits uni-algo for the Hangul composition
+# constants; their copyright significance is uncertain.
+[package]
+name = "cabin-ports/ada-idna"
+version = "0.8.0"
+license = "(Apache-2.0 OR MIT) AND Unicode-3.0"
+include = ["LICENSE-APACHE", "LICENSE-MIT", "README.md", "include", "src"]
+
+# src/idna.cpp is upstream's single translation unit and #includes the other
+# sources, so it is the only one listed.  C++20 is upstream's stated standard
+# (src/CMakeLists.txt, README.md "Requirements").  Not ported: the optional
+# simdutf transcoding (ADA_USE_SIMDUTF, off by default upstream).
+[target.ada-idna]
+type = "library"
+sources = ["src/idna.cpp"]
+include-dirs = ["include"]
+cxx-standard = "c++20"
+interface-cxx-standard = "c++20"
+links = "ada-idna"
