@@ -1,0 +1,100 @@
+[package.upstream]
+url = "https://github.com/civetweb/civetweb/archive/refs/tags/v1.16.tar.gz"
+checksum = "sha256:f0e471c1bf4e7804a6cfb41ea9d13e7d623b2bcc7bc1e2a4dd54951a24d60285"
+format = "tar.gz"
+strip-prefix = "civetweb-1.16"
+
+[package]
+name = "cabin-ports/civetweb"
+# Upstream's tag is v1.16 (include/civetweb.h:26-29: 1.16, patch 0).
+version = "1.16.0"
+# MIT (LICENSE.md and the file headers), except src/md5.inl (L. Peter Deutsch's
+# MD5 under the zlib-style license at md5.inl:80-101) and src/sha1.inl
+# (Steve Reid's SHA-1, public domain, sha1.inl:1-9).
+license = "MIT AND Zlib AND LicenseRef-PublicDomain"
+# src/third_party (Lua, Duktape, SQLite) and src/main.c, the server
+# executable, are left out; USE_LUA and USE_DUKTAPE need them.
+include = [
+  "CREDITS.md",
+  "LICENSE.md",
+  "README.md",
+  "include",
+  "src/CivetServer.cpp",
+  "src/civetweb.c",
+  "src/civetweb_private_lua.h",
+  "src/handle_form.inl",
+  "src/http2.inl",
+  "src/match.inl",
+  "src/md5.inl",
+  "src/mod_duktape.inl",
+  "src/mod_lua.inl",
+  "src/mod_lua_shared.inl",
+  "src/mod_mbedtls.inl",
+  "src/mod_zlib.inl",
+  "src/openssl_dl.inl",
+  "src/response.inl",
+  "src/sha1.inl",
+  "src/sort.inl",
+  "src/timer.inl",
+  "src/wolfssl_extras.inl",
+]
+# Upstream's CMake takes -std=c11, else c99 (CMakeLists.txt:298-308), and for
+# the C++ wrapper -std=c++14, else c++11 (:358-362).
+c-standard = "c11"
+cxx-standard = "c++14"
+# The public headers compile as C99 and C++98 (measured).
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+
+[dependencies]
+"cabin-ports/openssl" = "=4.1.0"
+"cabin-ports/zlib" = "^1.3"
+
+# Upstream's CIVETWEB_ENABLE_SSL is on by default and loads libssl at run
+# time (CIVETWEB_ENABLE_SSL_DYNAMIC_LOADING); `ssl` instead links the openssl
+# port and uses the OpenSSL 3 API.  `zlib` is CIVETWEB_ENABLE_ZLIB, off by
+# default.  Cabin cannot gate a target's dependency on a feature (measured: a
+# disabled optional dependency in `deps` fails the build), so openssl and zlib
+# are always built and linked and the features only select the defines.
+[features]
+default = ["ssl"]
+ssl = []
+zlib = []
+vendored-openssl = ["cabin-ports/openssl/vendored"]
+
+[target.'cfg(feature = "ssl")'.profile]
+defines = ["NO_SSL_DL", "OPENSSL_API_3_0"]
+
+[target.'cfg(not(feature = "ssl"))'.profile]
+defines = ["NO_SSL"]
+
+[target.'cfg(feature = "zlib")'.profile]
+defines = ["USE_ZLIB"]
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32"]
+
+# USE_WEBSOCKET is off in upstream's CMake but is what CivetServer's WebSocket
+# handlers need; USE_IPV6 and USE_STACK_SIZE are its defaults
+# (CMakeLists.txt:84, :59, :88, :494, :557).
+[target.civetweb]
+type = "library"
+sources = ["src/civetweb.c"]
+include-dirs = ["include"]
+defines = ["USE_IPV6", "USE_WEBSOCKET", "USE_STACK_SIZE=102400"]
+links = "civetweb"
+deps = [
+  "cabin-ports/openssl:ssl",
+  "cabin-ports/openssl:crypto",
+  "cabin-ports/zlib:z",
+]
+
+[target.civetweb-cpp]
+type = "library"
+sources = ["src/CivetServer.cpp"]
+defines = ["USE_IPV6", "USE_WEBSOCKET", "USE_STACK_SIZE=102400"]
+links = "civetweb-cpp"
+deps = [{ name = "civetweb", public = true }]
