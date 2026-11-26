@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/kthohr/stats/archive/refs/tags/v3.4.0.tar.gz"
+checksum = "sha256:aee9cadf0ab8c6fc26963d502eb62cd551f0e0e83388b72d61819308cc8bb17f"
+format = "tar.gz"
+strip-prefix = "stats-3.4.0"
+
+# NOTICE.txt travels with the Apache-2.0 LICENSE (LICENSE section 4(d)).
+[package]
+name = "cabin-ports/statslib"
+version = "3.4.0"
+license = "Apache-2.0"
+include = ["LICENSE", "NOTICE.txt", "README.md", "include"]
+
+[dependencies]
+"cabin-ports/gcem" = "^1.18"
+
+# Header-only: stats.hpp includes gcem.hpp, so gcem is a public dependency.
+# Limitation: the one-argument dnorm(x) calls pnorm (dens/dnorm.ipp:106),
+# which is declared later, and does not compile (measured, Apple clang 21:
+# "call to function 'pnorm' that is neither visible in the template
+# definition nor found by argument-dependent lookup"); use dnorm(x, 0, 1).
+[target.statslib]
+type = "header-only"
+include-dirs = ["include"]
+deps = [{ name = "cabin-ports/gcem", public = true }]
+# README.md:8, :65: "a C++11 compatible compiler".
+interface-cxx-standard = "c++11"
