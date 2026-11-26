@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/bw-hro/sqlitemap/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:c99358d8dd362a244fab388eb8ba1893a419612afc2cd0025e23d38db394af74"
+format = "tar.gz"
+strip-prefix = "sqlitemap-1.2.0"
+
+[package]
+name = "cabin-ports/bw-sqlitemap"
+version = "1.2.0"
+license = "MIT"
+include = ["LICENSE.txt", "readme.md", "include"]
+
+[dependencies]
+"cabin-ports/sqlite3" = "^3"
+
+# C++17: upstream's CMakeLists.txt sets CMAKE_CXX_STANDARD 17.
+[target.bw-sqlitemap]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++17"
+deps = [{ name = "cabin-ports/sqlite3", public = true }]
