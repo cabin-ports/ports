@@ -1,0 +1,40 @@
+[package.upstream]
+url = "https://github.com/linksplatform/Exceptions/archive/refs/tags/cpp_0.3.2.tar.gz"
+checksum = "sha256:f2d3af59fd66ef47f93557a2b64d0c8e7a1a0cd033f0e3ae2f09153f81117f71"
+format = "tar.gz"
+strip-prefix = "Exceptions-cpp_0.3.2"
+
+# ConanCenter's platform.exceptions; Cabin names reject '.'.
+[package]
+name = "cabin-ports/platform-exceptions"
+version = "0.3.2"
+# The nuspec and ConanCenter say MIT; LICENSE, the only licence text, decides.
+license = "Unlicense"
+include = [
+  "LICENSE",
+  "README.md",
+  "cpp/Platform.Exceptions/Platform.Exceptions.h",
+  "cpp/Platform.Exceptions/Ensure.h",
+  "cpp/Platform.Exceptions/EnsureExtensions.h",
+  "cpp/Platform.Exceptions/ExceptionExtensions.h",
+  "cpp/Platform.Exceptions/IgnoredExceptions.h",
+  "cpp/Platform.Exceptions/Throw.h",
+  "cpp/Platform.Exceptions/ThrowExtensions.h",
+  "cpp/Platform.Exceptions/ExtensionRoots/EnsureAlwaysExtensionRoot.h",
+  "cpp/Platform.Exceptions/ExtensionRoots/EnsureOnDebugExtensionRoot.h",
+  "cpp/Platform.Exceptions/ExtensionRoots/ThrowExtensionRoot.h",
+]
+
+[dependencies]
+"cabin-ports/platform-delegates" = "=0.3.7"
+
+# Consumers include <Platform.Exceptions.h> (namespace Platform::Exceptions);
+# the part headers include nothing and work only through it. Including it in
+# two translation units of one program fails to link: ThrowExtensions.h
+# defines six non-inline functions ("ld: 6 duplicate symbols"; measured).
+[target.platform-exceptions]
+type = "header-only"
+include-dirs = ["cpp/Platform.Exceptions"]
+# cpp/CMakeLists.txt:17 sets CXX_STANDARD 20.
+interface-cxx-standard = "c++20"
+deps = [{ name = "cabin-ports/platform-delegates", public = true }]
