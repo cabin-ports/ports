@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/FernandoVelcic/hexdump/archive/refs/tags/1.0.0.tar.gz"
+checksum = "sha256:6745f9a528c0932d99ff7c400109784688e9948f298c3cc26c4cb5bd7ec002c5"
+format = "tar.gz"
+strip-prefix = "hexdump-1.0.0"
+
+[package]
+name = "cabin-ports/fernandovelcic-hexdump"
+version = "1.0.0"
+license = "BSD-3-Clause"
+include = ["COPYING", "README.md", "hexdump.hpp"]
+
+# A fork of zmb3/hexdump whose 1.0.0 tag ConanCenter packages under this name.
+# Upstream states no standard; c++11 is measured.  operator<< leaves the
+# caller's stream in hex with fill '0' (measured by the consumer test).
+[target.fernandovelcic-hexdump]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++11"
