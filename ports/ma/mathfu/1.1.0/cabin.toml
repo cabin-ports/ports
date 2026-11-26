@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/google/mathfu/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:98f167002085c0ae1b2ac1668d3342fc4bafbe6b2185b3b9e88436d19332f8ca"
+format = "tar.gz"
+strip-prefix = "mathfu-1.1.0"
+
+[package]
+name = "cabin-ports/mathfu"
+version = "1.1.0"
+license = "Apache-2.0"
+include = ["LICENSE", "include"]
+
+[dependencies]
+"cabin-ports/vectorial" = "=2019.6.28"
+
+[target.mathfu]
+type = "header-only"
+include-dirs = ["include"]
+# Upstream states no standard; this is the measured floor.  The optional
+# MATHFU_DEFINE_GLOBAL_SIMD_AWARE_NEW_DELETE macro needs C++11 (measured: Apple
+# Clang -std=c++98 rejects its unconditional noexcept).
+interface-cxx-standard = "c++98"
+deps = [{ name = "cabin-ports/vectorial", public = true }]
+
+# Upstream links libm only for Android (jni/Android.mk:73).
+[target.'cfg(os = "android")'.profile]
+link-libs = ["m"]
