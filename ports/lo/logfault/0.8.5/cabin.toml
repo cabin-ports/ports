@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/jgaa/logfault/archive/refs/tags/v0.8.5.tar.gz"
+checksum = "sha256:0cb8b83eff06f34f4dea8b61926a2c63796569728f898efd618e166949b0e808"
+format = "tar.gz"
+strip-prefix = "logfault-0.8.5"
+
+[package]
+name = "cabin-ports/logfault"
+version = "0.8.5"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+[target.logfault]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:7 names C++11, but JsonHandler's generic lambda (logfault.h:949)
+# is unguarded and Apple clang rejects it in C++11 (measured); C++14 builds.
+interface-cxx-standard = "c++14"
+
+# The default build takes std::mutex and std::thread::get_id
+# (logfault.h:40-44, 259); upstream's CMakeLists.txt finds Threads.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
