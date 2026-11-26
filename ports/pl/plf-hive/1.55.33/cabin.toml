@@ -12,10 +12,10 @@ license = "Zlib"
 include = ["LICENSE.md", "plf_hive.h"]
 
 # README.MD: "C++20 and above only".
+# Limitation (measured: macOS Apple clang, libc++): std::next(h.begin(), 3)
+# and std::prev(h.end()) are ambiguous with plf_hive.h:103 and :112 ("call to
+# 'next' is ambiguous"); ++ and -- work.
 [target.plf-hive]
 type = "header-only"
 include-dirs = ["."]
 interface-cxx-standard = "c++20"
-# Measured with Apple clang and libc++ (macOS 27.2 SDK): std::next(h.begin(), 3)
-# and std::prev(h.end()) are ambiguous with plf_hive.h:103 and :112 ("call to
-# 'next' is ambiguous"); ++ and -- work.
