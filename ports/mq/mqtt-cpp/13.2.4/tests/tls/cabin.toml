@@ -1,0 +1,12 @@
+[package]
+name = "tls"
+version = "0.0.0"
+cxx-standard = "c++14"
+
+[dependencies]
+"cabin-ports/mqtt-cpp" = { version = "=13.2.4", features = ["tls"] }
+
+[target.tls]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/mqtt-cpp:mqtt_cpp_tls"]

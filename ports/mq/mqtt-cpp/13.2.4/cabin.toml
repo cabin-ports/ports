@@ -1,0 +1,180 @@
+[package.upstream]
+url = "https://github.com/redboltz/mqtt_cpp/archive/refs/tags/v13.2.4.tar.gz"
+checksum = "sha256:98c680151e27fb2435a343cf46789df195f5ca37cfb0f4df1b970649a1edc0e9"
+format = "tar.gz"
+strip-prefix = "mqtt_cpp-13.2.4"
+
+[package]
+name = "cabin-ports/mqtt-cpp"
+version = "13.2.4"
+# include/mqtt/utf8encoded_strings.hpp:48 credits Markus Kuhn's utf8_check.c for
+# the UTF-8 validator; its copyright significance is uncertain.
+license = "BSL-1.0"
+include = [
+  "LICENSE_1_0.txt",
+  "include/mqtt_client_cpp.hpp",
+  "include/mqtt_server_cpp.hpp",
+  "include/mqtt/any.hpp",
+  "include/mqtt/async_client.hpp",
+  "include/mqtt/attributes.hpp",
+  "include/mqtt/buffer.hpp",
+  "include/mqtt/callable_overlay.hpp",
+  "include/mqtt/client.hpp",
+  "include/mqtt/config.hpp",
+  "include/mqtt/connect_flags.hpp",
+  "include/mqtt/connect_return_code.hpp",
+  "include/mqtt/const_buffer_util.hpp",
+  "include/mqtt/constant.hpp",
+  "include/mqtt/control_packet_type.hpp",
+  "include/mqtt/deprecated.hpp",
+  "include/mqtt/deprecated_msg.hpp",
+  "include/mqtt/endpoint.hpp",
+  "include/mqtt/error_code.hpp",
+  "include/mqtt/exception.hpp",
+  "include/mqtt/fixed_header.hpp",
+  "include/mqtt/four_byte_util.hpp",
+  "include/mqtt/hexdump.hpp",
+  "include/mqtt/log.hpp",
+  "include/mqtt/message.hpp",
+  "include/mqtt/message_variant.hpp",
+  "include/mqtt/move.hpp",
+  "include/mqtt/namespace.hpp",
+  "include/mqtt/null_strand.hpp",
+  "include/mqtt/optional.hpp",
+  "include/mqtt/packet_id_manager.hpp",
+  "include/mqtt/packet_id_type.hpp",
+  "include/mqtt/property.hpp",
+  "include/mqtt/property_id.hpp",
+  "include/mqtt/property_parse.hpp",
+  "include/mqtt/property_variant.hpp",
+  "include/mqtt/protocol_version.hpp",
+  "include/mqtt/publish.hpp",
+  "include/mqtt/reason_code.hpp",
+  "include/mqtt/remaining_length.hpp",
+  "include/mqtt/server.hpp",
+  "include/mqtt/session_present.hpp",
+  "include/mqtt/setup_log.hpp",
+  "include/mqtt/shared_ptr_array.hpp",
+  "include/mqtt/shared_scope_guard.hpp",
+  "include/mqtt/shared_subscriptions.hpp",
+  "include/mqtt/store.hpp",
+  "include/mqtt/strand.hpp",
+  "include/mqtt/string_check.hpp",
+  "include/mqtt/string_view.hpp",
+  "include/mqtt/subscribe_entry.hpp",
+  "include/mqtt/subscribe_options.hpp",
+  "include/mqtt/sync_client.hpp",
+  "include/mqtt/tcp_endpoint.hpp",
+  "include/mqtt/time_point_t.hpp",
+  "include/mqtt/tls.hpp",
+  "include/mqtt/topic_alias_recv.hpp",
+  "include/mqtt/topic_alias_send.hpp",
+  "include/mqtt/two_byte_util.hpp",
+  "include/mqtt/two_or_four_byte_util.hpp",
+  "include/mqtt/type.hpp",
+  "include/mqtt/type_erased_socket.hpp",
+  "include/mqtt/unique_scope_guard.hpp",
+  "include/mqtt/utf8encoded_strings.hpp",
+  "include/mqtt/v5_message.hpp",
+  "include/mqtt/value_allocator.hpp",
+  "include/mqtt/variable_length.hpp",
+  "include/mqtt/variant.hpp",
+  "include/mqtt/variant_visit.hpp",
+  "include/mqtt/visitor_util.hpp",
+  "include/mqtt/will.hpp",
+  "include/mqtt/ws_endpoint.hpp",
+]
+
+[dependencies]
+"cabin-ports/boost-any" = "=1.92.0"
+"cabin-ports/boost-asio" = "=1.92.0"
+"cabin-ports/boost-assert" = "=1.92.0"
+"cabin-ports/boost-config" = "=1.92.0"
+"cabin-ports/boost-container" = "=1.92.0"
+"cabin-ports/boost-container-hash" = "=1.92.0"
+"cabin-ports/boost-lexical-cast" = "=1.92.0"
+"cabin-ports/boost-multi-index" = "=1.92.0"
+"cabin-ports/boost-numeric-conversion" = "=1.92.0"
+"cabin-ports/boost-optional" = "=1.92.0"
+"cabin-ports/boost-smart-ptr" = "=1.92.0"
+"cabin-ports/boost-system" = "=1.92.0"
+"cabin-ports/boost-utility" = "=1.92.0"
+"cabin-ports/boost-variant" = "=1.92.0"
+"cabin-ports/boost-beast" = { version = "=1.92.0", optional = true }
+"cabin-ports/openssl" = { version = "=4.1.0", optional = true }
+
+# Upstream's CMakeLists.txt defines MQTT_USE_TLS and MQTT_USE_WS where its
+# options are on, both off by default.  The mqtt_cpp target is the default
+# build; mqtt_cpp_tls, mqtt_cpp_ws and mqtt_cpp_tls_ws are the builds with the
+# options on.  Use one of them in place of mqtt_cpp, never several.
+[features]
+default = []
+tls = ["dep:cabin-ports/openssl"]
+ws = ["dep:cabin-ports/boost-beast"]
+# Requests the openssl port's own build of OpenSSL in place of the system's;
+# Windows refuses it (the openssl port's tests/vendored).
+vendored-openssl = ["tls", "cabin-ports/openssl/vendored"]
+
+# C++14 is the standard CMakeLists.txt sets (CMAKE_CXX_STANDARD 14).
+# The defines are upstream's defaults for MQTT_USE_STR_CHECK and
+# MQTT_ALWAYS_SEND_REASON_CODE.  Upstream's MQTT_USE_LOG build, which needs
+# Boost.Log, is not provided.
+[target.mqtt_cpp]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++14"
+interface-defines = ["MQTT_USE_STR_CHECK", "MQTT_ALWAYS_SEND_REASON_CODE=1"]
+deps = [
+  { name = "cabin-ports/boost-any", public = true },
+  { name = "cabin-ports/boost-asio", public = true },
+  { name = "cabin-ports/boost-assert", public = true },
+  { name = "cabin-ports/boost-config", public = true },
+  { name = "cabin-ports/boost-container", public = true },
+  { name = "cabin-ports/boost-container-hash", public = true },
+  { name = "cabin-ports/boost-lexical-cast", public = true },
+  { name = "cabin-ports/boost-multi-index", public = true },
+  { name = "cabin-ports/boost-numeric-conversion", public = true },
+  { name = "cabin-ports/boost-optional", public = true },
+  { name = "cabin-ports/boost-smart-ptr", public = true },
+  { name = "cabin-ports/boost-system", public = true },
+  { name = "cabin-ports/boost-utility", public = true },
+  { name = "cabin-ports/boost-variant", public = true },
+]
+
+# Upstream's interface library links Threads::Threads (include/CMakeLists.txt);
+# nothing in its build mentions Android.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+[target.mqtt_cpp_tls]
+type = "header-only"
+interface-cxx-standard = "c++14"
+interface-defines = ["MQTT_USE_TLS"]
+required-features = ["tls"]
+deps = [
+  { name = "mqtt_cpp", public = true },
+  { name = "cabin-ports/openssl:ssl", public = true },
+  { name = "cabin-ports/openssl:crypto", public = true },
+]
+
+[target.mqtt_cpp_ws]
+type = "header-only"
+interface-cxx-standard = "c++14"
+interface-defines = ["MQTT_USE_WS"]
+required-features = ["ws"]
+deps = [
+  { name = "mqtt_cpp", public = true },
+  { name = "cabin-ports/boost-beast", public = true },
+]
+
+[target.mqtt_cpp_tls_ws]
+type = "header-only"
+interface-cxx-standard = "c++14"
+interface-defines = ["MQTT_USE_TLS", "MQTT_USE_WS"]
+required-features = ["tls", "ws"]
+deps = [
+  { name = "mqtt_cpp", public = true },
+  { name = "cabin-ports/openssl:ssl", public = true },
+  { name = "cabin-ports/openssl:crypto", public = true },
+  { name = "cabin-ports/boost-beast", public = true },
+]
