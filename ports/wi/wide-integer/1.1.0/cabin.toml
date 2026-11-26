@@ -1,0 +1,19 @@
+[package.upstream]
+url = "https://github.com/ckormanyos/wide-integer/archive/refs/tags/v1.01.tar.gz"
+checksum = "sha256:d295c92a6c70b89f8901f31bcc3f0e8128b5ff5e60e549f4063196b0b3bc9603"
+format = "tar.gz"
+strip-prefix = "wide-integer-1.01"
+
+# Upstream numbers the release "Version 1.01" (tag v1.01) and declares no X.Y.Z, so 1.01 maps to 1.1.0.
+[package]
+name = "cabin-ports/wide-integer"
+version = "1.1.0"
+license = "BSL-1.0"
+# boost/ is left out: its Boost.Multiprecision backend would need a dependency every consumer then pulls in.
+include = ["LICENSE_1_0.txt", "README.md", "math"]
+
+# interface-cxx-standard follows README.md:64 and :73 (C++14).
+[target.wide-integer]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++14"
