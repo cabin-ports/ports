@@ -1,0 +1,29 @@
+[package.upstream]
+url = "https://github.com/edouarda/brigand/archive/refs/tags/cpp11-1.3.0.tar.gz"
+checksum = "sha256:33c8fc780d2f2c9c0d21cbea909429ae9a64765496f66f6ab2f1e978502aa295"
+format = "tar.gz"
+strip-prefix = "brigand-cpp11-1.3.0"
+
+[package]
+name = "cabin-ports/brigand"
+version = "1.3.0"
+# Version 1.3.0 is the tag cpp11-1.3.0, whose include/brigand/version.hpp
+# declares it; the older tag 1.3.0 predates version.hpp.
+license = "BSL-1.0"
+include = ["LICENSE", "README.md", "include/brigand"]
+
+[dependencies]
+"cabin-ports/boost-fusion" = "=1.92.0"
+"cabin-ports/boost-variant" = "=1.92.0"
+
+# brigand.hpp includes the Boost.Fusion and Boost.Variant adapters unless
+# BRIGAND_NO_BOOST_SUPPORT is defined; the dependencies keep them available.
+[target.brigand]
+type = "header-only"
+include-dirs = ["include"]
+# README.md states C++11.
+interface-cxx-standard = "c++11"
+deps = [
+  { name = "cabin-ports/boost-fusion", public = true },
+  { name = "cabin-ports/boost-variant", public = true },
+]
