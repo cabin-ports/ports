@@ -1,0 +1,49 @@
+[package.upstream]
+# GitLab generates this tag archive on request, so its bytes could change;
+# the checksum, whose archive vcpkg pins by SHA-512 too, would catch that.
+url = "https://gitlab.com/drobilla/sord/-/archive/v0.16.22/sord-v0.16.22.tar.gz"
+checksum = "sha256:040fb3f369dd49a7717eb28ca0a66766352e25e760729903fc8a01e117122901"
+format = "tar.gz"
+strip-prefix = "sord-v0.16.22"
+
+[package]
+name = "cabin-ports/sord"
+version = "0.16.22"
+license = "ISC"
+# Licence: ISC (COPYING), under which every published file is available;
+# LICENSES/ also holds the other texts REUSE cites.
+include = ["COPYING", "LICENSES", "include", "src"]
+# Upstream builds C99 (meson.build:10); C11 is the oldest standard Cabin can
+# request from MSVC.
+c-standard = "c11"
+interface-c-standard = "c99"
+# The header-only sordmm.hpp needs C++11 (deleted functions, nullptr), and
+# sord.h includes serd.h, whose enums end in trailing commas.
+interface-cxx-standard = "c++11"
+
+[dependencies]
+"cabin-ports/serd" = "=0.32.10"
+"cabin-ports/zix" = "=0.8.2"
+
+[profile]
+defines = ["SORD_INTERNAL", "SORD_STATIC"]
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
+
+# Meson's default_library=static build; SORD_STATIC keeps sord.h from
+# declaring the API dllimport on Windows.  include/ also holds the header-only
+# C++ wrapper sordmm.hpp, which upstream installs with the C header, so this
+# one target serves both.  Not ported: the shared library and the tools sordi
+# and sord_validate.  Not reproduced: hidden symbol visibility
+# (meson.build:186), since Cabin drops a dependency's raw compiler flags.
+[target.sord]
+type = "library"
+sources = ["src/sord.c", "src/syntax.c"]
+include-dirs = ["include"]
+interface-defines = ["SORD_STATIC"]
+links = "sord"
+deps = [
+  { name = "cabin-ports/serd", public = true },
+  "cabin-ports/zix",
+]
