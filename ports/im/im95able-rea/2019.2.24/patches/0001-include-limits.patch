@@ -1,0 +1,10 @@
+--- a/Rea/rea.h
++++ b/Rea/rea.h
+@@ -30,6 +30,7 @@
+ #include <utility>
+ #include <memory>
+ #include <algorithm>
++#include <limits>
+ 
+ 
+ namespace rea {
