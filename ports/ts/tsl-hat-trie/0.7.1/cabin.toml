@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/Tessil/hat-trie/archive/refs/tags/v0.7.1.tar.gz"
+checksum = "sha256:58ffec5a3fcbd0f1574195054a0822016b49f0cfe9ce1cb80cce3a8afd83a5ab"
+format = "tar.gz"
+strip-prefix = "hat-trie-0.7.1"
+
+[package]
+name = "cabin-ports/tsl-hat-trie"
+version = "0.7.1"
+license = "MIT"
+include = ["LICENSE", "README.md", "include"]
+
+# include/tsl/array-hash/ is upstream's bundled copy of Tessil/array-hash 0.7.2.
+# C++11 is upstream's floor (README.md, CMakeLists.txt).
+[target.tsl-hat-trie]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
