@@ -1,0 +1,32 @@
+--- a/cpp/src/include/stmpct/gk.hpp
++++ b/cpp/src/include/stmpct/gk.hpp
+@@ -1,6 +1,8 @@
+ #pragma once
+ 
++#include <cassert>
+ #include <cmath>
++#include <vector>
+ 
+ // The Greenwald-Khanna algorithm as defined in the paper
+ // Space-Efficient Online Computation of Quantile Summaries
+--- a/cpp/src/include/stmpct/ckms_impl.hpp
++++ b/cpp/src/include/stmpct/ckms_impl.hpp
+@@ -1,5 +1,6 @@
+ #pragma once
+ 
++#include <cassert>
+ #include <vector>
+ #include <cmath>
+ 
+--- a/cpp/src/include/stmpct/ckms_tq.hpp
++++ b/cpp/src/include/stmpct/ckms_tq.hpp
+@@ -4,6 +4,9 @@
+ // quantiles as defined in the paper _Effective Computation of Biased
+ // Quantiles over Data Streams_
+ 
++#include <algorithm>
++#include <limits>
++
+ #include "ckms_impl.hpp"
+ #include "targeted_quantile.hpp"
+ 
