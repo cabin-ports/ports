@@ -1,0 +1,44 @@
+[package.upstream]
+url = "https://github.com/ddemidov/amgcl/archive/refs/tags/1.5.1.tar.gz"
+checksum = "sha256:46b0dea88ccdcefb2dccd8aabaabbe09f660ca90f1f0290d0169adeb324b679a"
+format = "tar.gz"
+strip-prefix = "amgcl-1.5.1"
+
+[package]
+name = "cabin-ports/amgcl"
+version = "1.5.1"
+# MIT, plus third-party code kept under its own notice in
+# amgcl/reorder/cuthill_mckee.hpp and amgcl/solver/skyline_lu.hpp (Kratos,
+# BSD-4-Clause), amgcl/solver/bicgstabl.hpp (PETSc, BSD-2-Clause) and
+# amgcl/solver/lgmres.hpp (SciPy, BSD-3-Clause) and amgcl/detail/qr.hpp
+# (LAPACK, BSD-3-Clause-Open-MPI: its extra patent disclaimer).
+license = "MIT AND BSD-2-Clause AND BSD-3-Clause AND BSD-3-Clause-Open-MPI AND BSD-4-Clause"
+include = ["LICENSE.md", "amgcl"]
+
+[dependencies]
+"cabin-ports/boost-iterator" = "=1.92.0"
+"cabin-ports/boost-property-tree" = "=1.92.0"
+"cabin-ports/boost-range" = "=1.92.0"
+"cabin-ports/boost-ublas" = "=1.92.0"
+
+# Upstream's CMake defines AMGCL_NO_BOOST only when it finds no Boost
+# (CMakeLists.txt:55-57); here Boost is always present, so the runtime
+# interface and the Boost-based adapters (ublas, reorder, complex) work.
+# Upstream's CMake links OpenMP when it finds it (CMakeLists.txt:64-72) and this
+# port does not; backends that need outside libraries are consumer-supplied.
+[target.amgcl]
+type = "header-only"
+include-dirs = ["."]
+# Upstream asks for C++11 (target_compile_features cxx_auto_type, cxx_range_for,
+# ..., CMakeLists.txt:43-49); C++14 is what the Boost 1.92 dependencies
+# declare as their own interface standard.
+interface-cxx-standard = "c++14"
+# Upstream's CMake defines NOMINMAX for MSVC consumers (CMakeLists.txt:87-93),
+# so a <windows.h> included before AMGCL does not break its std::min/max calls.
+interface-defines = ["NOMINMAX"]
+deps = [
+  { name = "cabin-ports/boost-iterator", public = true },
+  { name = "cabin-ports/boost-property-tree", public = true },
+  { name = "cabin-ports/boost-range", public = true },
+  { name = "cabin-ports/boost-ublas", public = true },
+]
