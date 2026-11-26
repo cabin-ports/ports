@@ -1,0 +1,57 @@
+[package.upstream]
+url = "https://github.com/BelledonneCommunications/bcg729/archive/refs/tags/1.1.2.tar.gz"
+checksum = "sha256:9c22d98c2debc1e37163b8a703f05278ad5d9c03f1c6b373629d8a072092184a"
+format = "tar.gz"
+strip-prefix = "bcg729-1.1.2"
+
+[package]
+name = "cabin-ports/bcg729"
+version = "1.1.2"
+license = "GPL-3.0-or-later"
+include = ["AUTHORS.md", "CHANGELOG.md", "LICENSE.txt", "README.md", "include/bcg729", "src"]
+
+# Every src/*.c, as src/CMakeLists.txt lists them.  Nothing generated is
+# needed: config.h is read only under HAVE_CONFIG_H (src/typedef.h).
+# BCG729_STATIC is upstream's define for a static build, which keeps the
+# headers from declaring __declspec(dllimport) on Windows.
+[target.bcg729]
+type = "library"
+sources = [
+  "src/LP2LSPConversion.c",
+  "src/LPSynthesisFilter.c",
+  "src/LSPQuantization.c",
+  "src/adaptativeCodebookSearch.c",
+  "src/cng.c",
+  "src/codebooks.c",
+  "src/computeAdaptativeCodebookGain.c",
+  "src/computeLP.c",
+  "src/computeWeightedSpeech.c",
+  "src/decodeAdaptativeCodeVector.c",
+  "src/decodeFixedCodeVector.c",
+  "src/decodeGains.c",
+  "src/decodeLSP.c",
+  "src/decoder.c",
+  "src/dtx.c",
+  "src/encoder.c",
+  "src/findOpenLoopPitchDelay.c",
+  "src/fixedCodebookSearch.c",
+  "src/gainQuantization.c",
+  "src/interpolateqLSP.c",
+  "src/postFilter.c",
+  "src/postProcessing.c",
+  "src/preProcessing.c",
+  "src/qLSP2LP.c",
+  "src/utils.c",
+  "src/vad.c",
+]
+include-dirs = ["include"]
+defines = ["BCG729_STATIC"]
+interface-defines = ["BCG729_STATIC"]
+# C11 is the oldest standard Cabin can lower for MSVC; README.md says
+# the library is written in C99.
+c-standard = "c11"
+interface-c-standard = "c99"
+# The headers have no extern "C", so a C++ consumer's call fails to link
+# (measured: clang++, undefined symbols).
+interface-cxx-standard = "none"
+links = "bcg729"
