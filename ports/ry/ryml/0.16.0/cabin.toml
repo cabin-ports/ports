@@ -1,0 +1,44 @@
+[package.upstream]
+url = "https://github.com/biojppm/rapidyaml/archive/refs/tags/v0.16.0.tar.gz"
+checksum = "sha256:ad4337d468c5f5d8624651bdc2900f7fe601c83fc3cff669dc972bf8634af4e9"
+format = "tar.gz"
+strip-prefix = "rapidyaml-0.16.0"
+
+[package]
+name = "cabin-ports/ryml"
+version = "0.16.0"
+license = "MIT"
+include = ["LICENSE.txt", "README.md", "src/c4", "src/ryml.hpp", "src/ryml.natvis", "src/ryml_std.hpp"]
+
+# Upstream's ryml library (CMakeLists.txt:34-97): the ten sources under src/c4/yml,
+# with src public.  c4core comes from cabin-ports/c4core, upstream's
+# RYML_SYSTEM_C4CORE route (CMakeLists.txt:99-102); ext/c4core.src, a copy of
+# c4core 0.6.0 (ext/c4core.mk:6), is not compiled.  Not ported: the shared library
+# (RYML_SHARED), the Python bindings, the src_extra int event handlers
+# (RYML_EXTRA_*), the tools, tests and benchmarks.  The library is built in upstream's
+# default configuration: no RYML_WITH_TAB_TOKENS, RYML_DEFAULT_CALLBACK_USES_EXCEPTIONS,
+# RYML_USE_ASSERT or RYML_NO_DEFAULT_CALLBACKS.
+# Standard: c++11 is upstream's (README.md:50).
+[target.ryml]
+type = "library"
+links = "ryml"
+sources = [
+  "src/c4/yml/common.cpp",
+  "src/c4/yml/emit_buf.cpp",
+  "src/c4/yml/emit_file.cpp",
+  "src/c4/yml/node_type.cpp",
+  "src/c4/yml/parse.cpp",
+  "src/c4/yml/reference_resolver.cpp",
+  "src/c4/yml/scalar_style.cpp",
+  "src/c4/yml/tag.cpp",
+  "src/c4/yml/tree.cpp",
+  "src/c4/yml/version.cpp",
+]
+include-dirs = ["src"]
+# C++14 is the oldest standard Cabin can request from MSVC.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+deps = [{ name = "cabin-ports/c4core", public = true }]
+
+[dependencies]
+"cabin-ports/c4core" = "=0.6.0"
