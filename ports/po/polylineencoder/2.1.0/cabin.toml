@@ -1,0 +1,17 @@
+[package.upstream]
+url = "https://github.com/vahancho/polylineencoder/archive/refs/tags/v2.1.0.tar.gz"
+checksum = "sha256:3b2dd1cc1e369fde872013b571526f0f3c29a8689515eb36934395d3b8a75092"
+format = "tar.gz"
+strip-prefix = "polylineencoder-2.1.0"
+
+[package]
+name = "cabin-ports/polylineencoder"
+version = "2.1.0"
+license = "MIT"
+include = ["LICENSE", "src"]
+
+# c++11 is upstream's stated standard (README.md, CMakeLists.txt).
+[target.polylineencoder]
+type = "header-only"
+include-dirs = ["src"]
+interface-cxx-standard = "c++11"
