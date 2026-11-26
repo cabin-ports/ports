@@ -19,6 +19,9 @@ cxx-standard = "c++17"
 # to its own compiles (:28).  Not ported: the Linux TCP module, src/linux_tcp
 # and its handlers and event-loop adapter headers (AMQP-CPP_LINUX_TCP,
 # CMakeLists.txt:24, :61), and the shared library.
+# Limitation (measured, UBSan): without /proc/self/exe (macOS), a connection whose
+# properties lack product or connection_name makes src/programname.h:72 write
+# one byte before its buffer; set both in onProperties.
 [target.amqpcpp]
 type = "library"
 sources = [
