@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/foonathan/type_safe/archive/refs/tags/v0.2.4.tar.gz"
+checksum = "sha256:a631d03c18c65726b3d1b7d41ac5806e9121367afe10dd2f408a2d75e144b734"
+format = "tar.gz"
+strip-prefix = "type_safe-0.2.4"
+
+[package]
+name = "cabin-ports/type_safe"
+version = "0.2.4"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+[dependencies]
+"cabin-ports/debug-assert" = "=1.3.4"
+
+# C++11 as README.md:70 states.  The headers include <debug_assert.hpp>
+# (detail/assert.hpp:8), so debug-assert is a public dependency, taken from
+# the catalog instead of upstream's vendored external/ copy.  Upstream's
+# INTERFACE definitions (CMakeLists.txt:100-104) equal config.hpp's own
+# defaults, except that upstream's Debug build turns assertions on
+# (:11-15); none are set.  Not ported: the tests, examples, docs and the
+# CMake and Conan files.
+[target.type_safe]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+deps = [{ name = "cabin-ports/debug-assert", public = true }]
