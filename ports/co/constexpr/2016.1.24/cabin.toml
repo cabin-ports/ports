@@ -6,10 +6,10 @@ strip-prefix = "constexpr-a98b1db39c909e0130d21d3910d4faf97035a625"
 # Patch 0001 declares the inserter, sorter and merger specializations of cx_array.h under
 # the access of their primary templates (measured, check-linux, GCC: "redeclared with
 # different access").  Patch 0002 leaves out the unnamed namespace around the undefined
-# error sentinels of cx_math.h under cl (measured, check-windows: C7631 "variable with
-# internal linkage declared but not defined").
-# MIT License notice of cx_array.h and cx_math.h, whose lines the patches carry (the
-# License's condition that copies include it):
+# error sentinels in every header that declares them, under cl only (measured,
+# check-windows: C7631 "variable with internal linkage declared but not defined").
+# MIT License notice of the headers whose lines the patches carry (the License's
+# condition that copies include it):
 # Copyright (c) 2015, 2016 Ben Deane
 #
 # Permission is hereby granted, free of charge, to any person obtaining a copy
