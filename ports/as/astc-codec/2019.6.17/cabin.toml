@@ -1,0 +1,43 @@
+[package.upstream]
+# Upstream tags no releases and declares no version; this is master's head
+# (archived), versioned YYYY.M.D by its commit date (2019-06-17).
+url = "https://github.com/google/astc-codec/archive/9757befb64db6662aad45de09ca87cd6f599ac02.tar.gz"
+checksum = "sha256:19034fed68401a612655b026e713c351df8caa768f55ce29a0f628378e988eac"
+format = "tar.gz"
+strip-prefix = "astc-codec-9757befb64db6662aad45de09ca87cd6f599ac02"
+
+[package]
+name = "cabin-ports/astc-codec"
+version = "2019.6.17"
+license = "Apache-2.0"
+include = ["LICENSE", "include", "src"]
+
+# The sources of upstream's footprint, astc_utils and astc-codec libraries
+# (src/decoder/CMakeLists.txt), built as one.  The C++ standard is
+# CMakeLists.txt:23.  Not ported: astc_inspector_cli and the tests.
+[profile]
+# The sources include "src/..." from the root, on the package's own include
+# path only, as upstream keeps it private (src/decoder/CMakeLists.txt:28,33).
+include-dirs = ["."]
+
+[target.astc-codec]
+type = "library"
+sources = [
+  "src/decoder/codec.cc",
+  "src/decoder/footprint.cc",
+  "src/decoder/astc_file.cc",
+  "src/decoder/endpoint_codec.cc",
+  "src/decoder/integer_sequence_codec.cc",
+  "src/decoder/intermediate_astc_block.cc",
+  "src/decoder/logical_astc_block.cc",
+  "src/decoder/partition.cc",
+  "src/decoder/physical_astc_block.cc",
+  "src/decoder/quantization.cc",
+  "src/decoder/weight_infill.cc",
+]
+include-dirs = ["include"]
+# Upstream requires C++11 (CMakeLists.txt:23); C++14 is the oldest standard
+# Cabin accepts on MSVC, so consumers still need only C++11.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "astc-codec"
