@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/brunocodutra/metal/archive/refs/tags/v2.1.4.tar.gz"
+checksum = "sha256:66140e89e424d89bc24bd296884a51487a72c04faf0d0254f3f5950648ffbba1"
+format = "tar.gz"
+strip-prefix = "metal-2.1.4"
+
+[package]
+name = "cabin-ports/brunocodutra-metal"
+version = "2.1.4"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# Metal, header-only, with include/ as the include root as upstream installs
+# it, so consumers write `#include <metal.hpp>`.  C++11 is README.md:3's
+# stated requirement.  Upstream's install bundles the headers into one
+# metal.hpp; this port ships the unbundled tree.
+[target.brunocodutra-metal]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
