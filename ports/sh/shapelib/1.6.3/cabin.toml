@@ -1,0 +1,46 @@
+[package.upstream]
+url = "https://github.com/OSGeo/shapelib/archive/refs/tags/v1.6.3.tar.gz"
+checksum = "sha256:3f9cb7526332144ccc83bb56ead6cd3a6765761a611481901a431458a1899dec"
+format = "tar.gz"
+strip-prefix = "shapelib-1.6.3"
+
+# The one public header (upstream installs only it); the archive root also holds
+# the private shapefil_private.h, so it is not the consumer include root.
+[[package.upstream.copy]]
+from = "shapefil.h"
+to = "include/shapefil.h"
+
+[package]
+name = "cabin-ports/shapelib"
+version = "1.6.3"
+license = "MIT OR LGPL-2.0-or-later"
+include = [
+  "include",
+  "LICENSE-LGPL",
+  "LICENSE-MIT",
+  "dbfopen.c",
+  "safileio.c",
+  "sbnsearch.c",
+  "shapefil.h",
+  "shapefil_private.h",
+  "shpopen.c",
+  "shptree.c",
+]
+
+# The five sources of upstream's CMake library target (CMakeLists.txt:117-125),
+# built static.  Upstream states no C or C++ standard: the sources build as C11
+# (the oldest Cabin can lower for MSVC); the header is measured to compile in a
+# C89 and a C++98 consumer.  Not ported: the shared library, the command-line tools,
+# contrib/ (which holds GPL-2.0-or-later code) and the GDAL-only USE_CPL mode.
+[target.shp]
+type = "library"
+sources = ["shpopen.c", "dbfopen.c", "safileio.c", "shptree.c", "sbnsearch.c"]
+include-dirs = ["include"]
+links = "shp"
+c-standard = "c11"
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
+
+# Upstream's CMake links libm wherever it finds one.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
