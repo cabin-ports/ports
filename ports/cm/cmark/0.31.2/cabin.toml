@@ -1,0 +1,99 @@
+[package.upstream]
+url = "https://github.com/commonmark/cmark/archive/refs/tags/0.31.2.tar.gz"
+checksum = "sha256:f9bc5ca38bcb0b727f0056100fac4d743e768872e3bacec7746de28f5700d697"
+format = "tar.gz"
+strip-prefix = "cmark-0.31.2"
+
+# Patch 0001 fills the version template as CMake's configure_file does and
+# adds cmark_export.h as generate_export_header writes it for the static
+# library (src/CMakeLists.txt:2-3, 47-48): CMARK_EXPORT and CMARK_NO_EXPORT
+# are empty under CMARK_STATIC_DEFINE, and CMARK_DEPRECATED, which nothing
+# uses, takes the value CMake writes for Windows or elsewhere.
+# BSD-2-Clause notice of cmark_version.h.in, whose lines 0001 carries (the
+# License's conditions on source copies), from COPYING:
+# Copyright (c) 2014, John MacFarlane
+#
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+patches = ["patches/0001-fill-the-version-header-and-add-the-export-header.patch"]
+
+# Upstream installs cmark.h, cmark_export.h and cmark_version.h flat into
+# include/ (src/CMakeLists.txt:73-78); copying them to include/ keeps the
+# private headers beside them in src/ off the include path.
+[[package.upstream.copy]]
+from = "src/cmark.h"
+to = "include/cmark.h"
+
+[[package.upstream.copy]]
+from = "src/cmark_version.h.in"
+to = "include/cmark_version.h"
+
+[package]
+name = "cabin-ports/cmark"
+version = "0.31.2"
+# COPYING: BSD-2-Clause for cmark, MIT for the houdini, buffer.[ch]/chunk.h
+# and utf8 parts.  Unicode-3.0: src/case_fold.inc, generated from
+# data/CaseFolding.txt, whose header names the Unicode terms of use.
+license = "BSD-2-Clause AND MIT AND Unicode-3.0"
+include = ["COPYING", "README.md", "data/CaseFolding.txt", "include", "patches", "src"]
+# Upstream states C99 (CMakeLists.txt:7-9); C11 is the oldest standard Cabin
+# can lower for MSVC.
+c-standard = "c11"
+
+# Not ported: the cmark program (src/main.c) and the CMake and pkg-config
+# files; -fvisibility=hidden (CMakeLists.txt:57-59), which only narrows a
+# shared object's exports.
+[target.cmark]
+type = "library"
+sources = [
+  "src/blocks.c",
+  "src/buffer.c",
+  "src/cmark.c",
+  "src/cmark_ctype.c",
+  "src/commonmark.c",
+  "src/houdini_href_e.c",
+  "src/houdini_html_e.c",
+  "src/houdini_html_u.c",
+  "src/html.c",
+  "src/inlines.c",
+  "src/iterator.c",
+  "src/latex.c",
+  "src/man.c",
+  "src/node.c",
+  "src/references.c",
+  "src/render.c",
+  "src/scanners.c",
+  "src/utf8.c",
+  "src/xml.c",
+]
+include-dirs = ["include"]
+defines = ["CMARK_STATIC_DEFINE"]
+interface-defines = ["CMARK_STATIC_DEFINE"]
+interface-c-standard = "c99"
+links = "cmark"
+
+# As upstream's CMakeLists.txt:86-93 does for MSVC.
+[target.'cfg(cc = "msvc")'.profile]
+defines = ["_CRT_SECURE_NO_WARNINGS"]
