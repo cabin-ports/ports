@@ -1,0 +1,12 @@
+[package]
+name = "service"
+version = "0.0.0"
+cxx-standard = "c++20"
+
+[dependencies]
+"cabin-ports/cppgraphqlgen" = "=4.5.9"
+
+[target.service]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/cppgraphqlgen:graphqlservice"]
