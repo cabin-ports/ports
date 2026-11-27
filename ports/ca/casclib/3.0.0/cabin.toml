@@ -1,0 +1,159 @@
+[package.upstream]
+url = "https://github.com/ladislav-zezula/CascLib/archive/refs/tags/3.0.tar.gz"
+checksum = "sha256:2bbd1b62c3e161a7204345d89afdcf5160649c220e1a043460ba72ff0ab1b070"
+format = "tar.gz"
+strip-prefix = "CascLib-3.0"
+# Patch 0001 includes <assert.h> instead of <cassert> in the macOS block of
+# the consumers' CascPort.h, which a C consumer cannot compile (measured on
+# macOS arm64: 'cassert' file not found).
+# MIT License notice of CascLib (LICENSE), covering src/CascPort.h, whose lines
+# 0001 carries (the License's condition that copies include it):
+# Copyright (c) 2014 Ladislav Zezula
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+patches = ["patches/0001-include-assert-h-for-c-consumers.patch"]
+
+# The two headers upstream installs (CMakeLists.txt:179); src/ also holds the
+# private headers.
+[[package.upstream.copy]]
+from = "src/CascLib.h"
+to = "include/CascLib.h"
+
+[[package.upstream.copy]]
+from = "src/CascPort.h"
+to = "include/CascPort.h"
+
+[package]
+name = "cabin-ports/casclib"
+# Upstream's tag is 3.0 (src/CascLib.h: CASCLIB_VERSION 0x0300).
+version = "3.0.0"
+# MIT: LICENSE, and the TACTLib (MIT) key providers that src/overwatch/cmf.cpp
+# and cmf-key.cpp credit.  OpenSSL: src/overwatch/aes.cpp, aes.h and
+# aes_local.h.  GPL-2.0-only OR BSD-3-Clause: src/hashes/sha1.cpp and sha1.h
+# (Jouni Malinen).  src/hashes/md5.cpp and md5.h (Solar Designer) and
+# src/jenkins/lookup3.c (Bob Jenkins) are in the public domain, which adds
+# no term.
+license = "MIT AND OpenSSL AND (GPL-2.0-only OR BSD-3-Clause)"
+# Upstream's bundled zlib (src/zlib), listfile/, test/ and the Visual Studio
+# and WDK build files are left out.
+include = [
+  "LICENSE",
+  "debian/copyright",
+  "include",
+  "README.md",
+  "patches",
+  "src/CascCommon.h",
+  "src/CascDecompress.cpp",
+  "src/CascDecrypt.cpp",
+  "src/CascDumpData.cpp",
+  "src/CascFiles.cpp",
+  "src/CascFindFile.cpp",
+  "src/CascIndexFiles.cpp",
+  "src/CascLib.h",
+  "src/CascOpenFile.cpp",
+  "src/CascOpenStorage.cpp",
+  "src/CascPort.h",
+  "src/CascReadFile.cpp",
+  "src/CascRootFile_Diablo3.cpp",
+  "src/CascRootFile_Install.cpp",
+  "src/CascRootFile_MNDX.cpp",
+  "src/CascRootFile_OW.cpp",
+  "src/CascRootFile_TVFS.cpp",
+  "src/CascRootFile_Text.cpp",
+  "src/CascRootFile_WoW.cpp",
+  "src/CascStructs.h",
+  "src/common",
+  "src/hashes",
+  "src/jenkins",
+  "src/overwatch",
+]
+
+[dependencies]
+"cabin-ports/zlib" = "=1.3.1"
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# Upstream's CMake also links wininet on Windows, which no source uses.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32"]
+
+# The static library of upstream's CMakeLists.txt, built against the zlib
+# port as with its CASC_USE_SYSTEM_ZLIB.  Not ported: the shared library and
+# the Windows-only CASC_UNICODE option (off by default).  CMake makes
+# CASCLIB_DETECT_UNICODE_MISMATCHES public on Windows only; interface-defines
+# cannot vary by platform, so elsewhere too CascLib.h then rejects a consumer
+# that defines _UNICODE.
+# Upstream states no standard.  The headers compile as C99 and C++98
+# (measured: clang and GCC -pedantic-errors, the headers on -isystem as Cabin
+# passes them); c11 and c++14 are the oldest standards cl accepts.
+[target.casc]
+type = "library"
+sources = [
+  "src/CascDecompress.cpp",
+  "src/CascDecrypt.cpp",
+  "src/CascDumpData.cpp",
+  "src/CascFiles.cpp",
+  "src/CascFindFile.cpp",
+  "src/CascIndexFiles.cpp",
+  "src/CascOpenFile.cpp",
+  "src/CascOpenStorage.cpp",
+  "src/CascReadFile.cpp",
+  "src/CascRootFile_Diablo3.cpp",
+  "src/CascRootFile_Install.cpp",
+  "src/CascRootFile_MNDX.cpp",
+  "src/CascRootFile_OW.cpp",
+  "src/CascRootFile_TVFS.cpp",
+  "src/CascRootFile_Text.cpp",
+  "src/CascRootFile_WoW.cpp",
+  "src/common/Common.cpp",
+  "src/common/Csv.cpp",
+  "src/common/Directory.cpp",
+  "src/common/FileStream.cpp",
+  "src/common/FileTree.cpp",
+  "src/common/ListFile.cpp",
+  "src/common/Mime.cpp",
+  "src/common/RootHandler.cpp",
+  "src/common/Sockets.cpp",
+  "src/hashes/md5.cpp",
+  "src/hashes/sha1.cpp",
+  "src/jenkins/lookup3.c",
+  "src/overwatch/aes.cpp",
+  "src/overwatch/apm.cpp",
+  "src/overwatch/cmf.cpp",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+cxx-standard = "c++14"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+defines = [
+  "CASC_USE_SYSTEM_ZLIB",
+  "CASCLIB_NO_AUTO_LINK_LIBRARY",
+  "CASCLIB_NODEBUG",
+  "CASCLIB_DETECT_UNICODE_MISMATCHES",
+]
+interface-defines = [
+  "CASCLIB_NO_AUTO_LINK_LIBRARY",
+  "CASCLIB_NODEBUG",
+  "CASCLIB_DETECT_UNICODE_MISMATCHES",
+]
+# src/overwatch/aes.cpp exports libcrypto's AES_set_encrypt_key and AES_set_decrypt_key.
+links = "crypto"
+deps = ["cabin-ports/zlib"]
