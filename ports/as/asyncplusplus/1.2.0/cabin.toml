@@ -1,0 +1,65 @@
+[package.upstream]
+# Tag v1.2 ("Version 1.2"); the sources carry no version number, so the
+# version is 1.2.0.
+url = "https://github.com/Amanieu/asyncplusplus/archive/refs/tags/v1.2.tar.gz"
+checksum = "sha256:0711c8db231bf3eb1066400f49ed73b5c3211a10eb3b8c3e64da3d5fdee8a4bf"
+format = "tar.gz"
+strip-prefix = "asyncplusplus-1.2"
+
+# Patch 0001 tests _MSVC_LANG at task.h's spawn() conditional: cl reports
+# __cplusplus as 199711L without /Zc:__cplusplus, so a C++20 consumer took the
+# std::result_of branch (measured: check-windows, cl C++20 consumer,
+# "include\async++/task.h(482): error C2039: 'result_of': is not a member of
+# 'std'").
+# MIT License notice of include/async++/task.h, whose lines 0001 carries (the
+# License's condition that copies include it):
+# Copyright (c) 2015 Amanieu d'Antras
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+patches = ["patches/0001-test-msvc-lang-for-invoke-result.patch"]
+
+[package]
+name = "cabin-ports/asyncplusplus"
+version = "1.2.0"
+license = "MIT"
+# Not ported: examples/ and the CMake package files.
+include = ["LICENSE", "include", "patches", "src"]
+
+# Upstream's static async++ library (CMakeLists.txt:36-87), with exceptions on
+# as its USE_CXX_EXCEPTIONS default.  Upstream states C++11 (README.md,
+# CMakeLists.txt:66-69); cl has no /std:c++11, so the library builds at c++14
+# while consumers need only c++11.  Its private -fno-rtti and warning flags are
+# not reproduced.
+[target.asyncplusplus]
+type = "library"
+links = "async++"
+sources = ["src/scheduler.cpp", "src/threadpool_scheduler.cpp"]
+include-dirs = ["include"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+# Upstream's static build defines LIBASYNC_STATIC for the library and its
+# consumers (CMakeLists.txt:87); without it, include/async++.h:42-57 marks the
+# API dllimport on Windows.
+defines = ["LIBASYNC_STATIC"]
+interface-defines = ["LIBASYNC_STATIC"]
+
+# Upstream links Threads::Threads (CMakeLists.txt:76-78) and says nothing of
+# Android.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
