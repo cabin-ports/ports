@@ -97,3 +97,9 @@ chunkio = ["src/cio_file_unix.c"]
 # functions, which CMake's build gets from MSVC's default libraries.
 [target.'cfg(os = "windows")'.profile]
 link-libs = ["advapi32", "shell32", "ws2_32"]
+
+# glibc hides POSIX and BSD declarations under strict C11, which upstream's
+# GNU dialect exposes (measured, check-linux: src/cio_memfs.c:141: 'PATH_MAX'
+# undeclared).
+[target.'cfg(os = "linux")'.profile]
+defines = ["_DEFAULT_SOURCE"]
