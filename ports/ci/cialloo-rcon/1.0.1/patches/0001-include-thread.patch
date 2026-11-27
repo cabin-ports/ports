@@ -1,0 +1,10 @@
+--- a/include/rcon.hpp
++++ b/include/rcon.hpp
+@@ -2,6 +2,7 @@
+ #define RCON
+ 
+ #include <string>
++#include <thread>
+ #include <asio.hpp>
+ 
+ namespace valve {
