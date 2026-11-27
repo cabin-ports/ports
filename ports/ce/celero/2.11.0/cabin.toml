@@ -1,0 +1,66 @@
+[package.upstream]
+url = "https://github.com/DigitalInBlue/Celero/archive/refs/tags/v2.11.0.tar.gz"
+checksum = "sha256:c01aca0d991331e5f96804ba8e5e1abf1c4209b012a1ebe8b98df76e0478f87b"
+format = "tar.gz"
+strip-prefix = "Celero-2.11.0"
+
+[package]
+name = "cabin-ports/celero"
+version = "2.11.0"
+# include/celero/Statistics.h:33 credits John D. Cook's skewness/kurtosis page
+# for the running-statistics code; its copyright significance is uncertain.
+# src/Print.cpp:50 credits a Stack Overflow answer for its column-formatting
+# helpers; their copyright significance is uncertain.
+# src/Memory.cpp:48-56 credits Stack Overflow answers and nadeausoftware.com
+# articles for its memory queries; their copyright significance is uncertain.
+# include/celero/Pimpl.h:33 credits Herb Sutter for the pimpl helper, and
+# src/Utilities.cpp:56 credits cppreference for Random(); their copyright
+# significance is uncertain.
+# src/Exceptions.cpp:33-36 credits Google Test (BSD-3-Clause) for its macros.
+# include/celero/CommandLine.h is Hideyuki Tanaka's cmdline, BSD-3-Clause.
+license = "Apache-2.0 AND BSD-3-Clause"
+include = ["include", "license.txt", "src"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++14"
+
+# Upstream's celero library (CMakeLists.txt:190-243), static.  The C++ standard
+# is upstream's own (CMakeLists.txt:171, README.md:38).
+# Not ported: experiments/ (demo and experiment programs), test/ and tools/, and
+# the shared library that upstream's CMake builds by default.
+[target.celero]
+type = "library"
+sources = [
+  "src/Archive.cpp",
+  "src/Benchmark.cpp",
+  "src/Callbacks.cpp",
+  "src/Celero.cpp",
+  "src/Console.cpp",
+  "src/Distribution.cpp",
+  "src/Exceptions.cpp",
+  "src/Executor.cpp",
+  "src/JUnit.cpp",
+  "src/Memory.cpp",
+  "src/Print.cpp",
+  "src/Experiment.cpp",
+  "src/ExperimentResult.cpp",
+  "src/ResultTable.cpp",
+  "src/TestVector.cpp",
+  "src/TestFixture.cpp",
+  "src/ThreadTestFixture.cpp",
+  "src/Timer.cpp",
+  "src/UserDefinedMeasurementCollector.cpp",
+  "src/Utilities.cpp",
+]
+include-dirs = ["include"]
+# Upstream's static build defines CELERO_STATIC for the library
+# (CMakeLists.txt:184-188); without it include/celero/Export.h:21-36 marks the
+# API dllimport on Windows, so consumers need it too.
+defines = ["CELERO_STATIC"]
+interface-defines = ["CELERO_STATIC"]
+links = "celero"
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["powrprof", "psapi"]
