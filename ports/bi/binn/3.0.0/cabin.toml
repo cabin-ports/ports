@@ -1,0 +1,35 @@
+[package.upstream]
+url = "https://github.com/liteserver/binn/archive/refs/tags/v3.0.tar.gz"
+checksum = "sha256:cc5cc8a178484de8d46983cc459ab8ae7ec1227f05ec7bf527e4b9067c54a237"
+format = "tar.gz"
+strip-prefix = "binn-3.0"
+# Patch 0001 includes <stddef.h> in binn.h, which uses size_t without it, as
+# upstream's later commit 6b774df9 does (measured on macOS arm64: a consumer
+# that includes <binn.h> first fails with "unknown type name 'size_t'").
+patches = ["patches/0001-include-stddef-h.patch"]
+
+[package]
+name = "cabin-ports/binn"
+version = "3.0.0"
+license = "Apache-2.0"
+include = ["LICENSE", "README.md", "patches", "src/binn.c", "src/binn.h"]
+c-standard = "c11"
+# Upstream states no standard; c99 and c++98 are measured (c89 fails on //
+# comments, inline and long long).
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+
+# Upstream's tag is v3.0; src/binn.h declares BINN_VERSION "3.0.0".  The
+# library is the single object binn.o of upstream's makefile.  Not ported: the
+# shared library (src/win32), the JSON conversion (needs jansson) and the
+# tests.
+[target.binn]
+type = "library"
+sources = ["src/binn.c"]
+links = "binn"
+include-dirs = ["src"]
+
+# Strict -std=c11 hides glibc's BYTE_ORDER, strdup and strcasecmp, which
+# binn.c needs (it takes the byte order from <endian.h>).
+[target.'cfg(os = "linux")'.profile]
+defines = ["_DEFAULT_SOURCE"]
