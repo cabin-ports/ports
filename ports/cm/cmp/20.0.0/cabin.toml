@@ -1,0 +1,32 @@
+[package.upstream]
+url = "https://github.com/camgunz/cmp/archive/refs/tags/v20.tar.gz"
+checksum = "sha256:cde6db84cb04913d4ce4880c4db665555f92c163f362de151e350d8f30113362"
+format = "tar.gz"
+strip-prefix = "cmp-20"
+
+# The one public header.  The archive root also holds cmp.c, so it is not
+# the consumer include root.
+[[package.upstream.copy]]
+from = "cmp.h"
+to = "include/cmp.h"
+
+[package]
+name = "cabin-ports/cmp"
+version = "20.0.0"
+license = "MIT"
+include = ["LICENSE", "include", "cmp.c", "cmp.h"]
+
+# Upstream's version is the one-part tag v20 (cmp_version() returns 20).
+# Not backported: master's fix for cmp_skip_object* ignoring a failing
+# skipper (eeceeea7), which is unreleased.
+[target.cmp]
+type = "library"
+sources = ["cmp.c"]
+include-dirs = ["include"]
+# Upstream compiles with -std=c89 (Makefile:9); c11 is cl's floor.
+c-standard = "c11"
+# README.md:131-132 states C89, but cmp.h declares bool, which
+# clang -std=c89 -pedantic-errors rejects (measured): '_Bool' is a C99 extension.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+links = "cmp"
