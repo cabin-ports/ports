@@ -1,0 +1,24 @@
+[package.upstream]
+# Upstream has no tags.  The registry version is the one the sources declare
+# (include/tanuki/tanuki.hpp TANUKI_VERSION_*, CMakeLists.txt project()) at the
+# last commit before 446a15e2 "Bump to version 2 for devel".
+url = "https://github.com/bluescarni/tanuki/archive/797f7a24baeaaaea3bfe1ee72f7d39de909c06ea.tar.gz"
+checksum = "sha256:d2dc914530757b0a667d2ac63281056b475a99d930576e0d483d7a0ff13f7aaa"
+format = "tar.gz"
+strip-prefix = "tanuki-797f7a24baeaaaea3bfe1ee72f7d39de909c06ea"
+
+[package]
+name = "cabin-ports/bluescarni-tanuki"
+version = "1.0.0"
+# include/tanuki/tanuki.hpp:190-192 and :216-217 credit cppreference for
+# forward_like() and unreachable(); their copyright significance is uncertain.
+license = "MPL-2.0"
+include = ["COPYING", "include"]
+
+# C++20 is upstream's stated standard (CMakeLists.txt:162, cxx_std_20).  Not
+# ported: Boost.Serialization support (TANUKI_WITH_BOOST_S11N, off by default
+# upstream).
+[target.tanuki]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
