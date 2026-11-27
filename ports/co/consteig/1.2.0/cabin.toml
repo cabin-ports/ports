@@ -3,6 +3,9 @@ url = "https://github.com/MitchellThompkins/consteig/archive/refs/tags/1.2.0.tar
 checksum = "sha256:724ac0237d025d9f0e6813bae423d9a77ac431a2dea5dfb2f749ed34eb36002b"
 format = "tar.gz"
 strip-prefix = "consteig-1.2.0"
+# Patch 0001 divides two non-constant zeros under MSVC, which rejects the
+# constant 0.0 / 0.0 (measured, check-windows: C2124 at utilities.hpp:130).
+patches = ["patches/0001-msvc-constant-division-by-zero.patch"]
 
 [package]
 name = "cabin-ports/consteig"
@@ -11,7 +14,7 @@ version = "1.2.0"
 # (GPL-3.0-or-later with the GCC Runtime Library Exception) for short
 # numeric-limits and trait definitions; their copyright significance is uncertain.
 license = "Apache-2.0"
-include = ["LICENSE", "NOTICE", "include"]
+include = ["LICENSE", "NOTICE", "include", "patches"]
 
 # C++17 is the standard upstream states (README.md, CMakeLists.txt).
 # With CONSTEIG_USE_GCEM the vendored gcem fork shares the include guard
