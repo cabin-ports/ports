@@ -1,0 +1,99 @@
+[package.upstream]
+url = "https://github.com/fluent/chunkio/archive/refs/tags/v1.5.4.tar.gz"
+checksum = "sha256:70a863851682b19ff6823dd54f8c0d6dfb010864e57d0853e4bf80dd7d2a6d66"
+format = "tar.gz"
+strip-prefix = "chunkio-1.5.4"
+# The copy steps place the two headers CMakeLists.txt configures (:102-110),
+# and patch 0001 fills them in: the version, and the CIO_HAVE_* flags
+# cio_info.h records (cmake/macros.cmake) for the build's defaults and
+# probes (:60-100): the filesystem backend (CIO_BACKEND_FILESYSTEM, on by
+# default), getpagesize everywhere but Windows, and posix_fallocate on Linux
+# (other systems resize with ftruncate, as on macOS).  CIO_HAVE_FALLOCATE
+# stays unset: its probe calls fallocate undeclared, which GCC 14 and Clang 16
+# and later reject (measured: GCC 16, Apple Clang 21), so their builds also
+# take posix_fallocate.  Patch 0002 spells mk_list.h's typeof as __typeof__, which
+# GCC and Clang accept in ISO modes (see c-standard below); MSVC takes the
+# header's _WIN32 container_of, which has none.
+patches = [
+  "patches/0001-fill-in-the-configured-headers.patch",
+  "patches/0002-spell-typeof-as-gnu-keyword.patch",
+]
+
+[[package.upstream.copy]]
+from = "include/chunkio/cio_info.h.in"
+to = "include/chunkio/cio_info.h"
+
+[[package.upstream.copy]]
+from = "include/chunkio/cio_version.h.in"
+to = "include/chunkio/cio_version.h"
+
+[package]
+name = "cabin-ports/chunkio"
+version = "1.5.4"
+# LICENSE and the file headers are Apache-2.0.  CC-BY-SA-3.0: the Stack
+# Overflow code in src/cio_utils.c's cio_utils_recursive_delete (:38-94),
+# which every build but MSVC's compiles.
+license = "Apache-2.0 AND CC-BY-SA-3.0"
+# Not ported: the cio tool (tools/), the tests, and CMake's shared-library
+# and CIO_BACKEND_FILESYSTEM=Off options.  src/cio_sha1.c and
+# include/chunkio/cio_sha1.h ship unbuilt, as upstream leaves them: the
+# header includes sha1/sha1.h, which the archive lacks.
+include = [
+  "AUTHORS.md",
+  "LICENSE",
+  "deps/crc32/crc32.c",
+  "deps/crc32/crc32.h",
+  "deps/monkey/include/monkey/mk_core/mk_list.h",
+  "include",
+  "patches",
+  "src",
+]
+
+# Upstream's chunkio-static with the cio-crc32 library it links
+# (src/CMakeLists.txt, deps/crc32/CMakeLists.txt).  Upstream sets no C
+# standard, so it builds in the compilers' default GNU dialects.  Cabin
+# rejects gnu-extensions on MSVC, so this port builds in C11, the oldest ISO
+# mode MSVC accepts; GCC and Clang still take mk_list.h's statement
+# expression.
+[target.chunkio]
+type = "library"
+sources = [
+  "deps/crc32/crc32.c",
+  "src/chunkio.c",
+  "src/cio_chunk.c",
+  "src/cio_error.c",
+  "src/cio_file.c",
+  "src/cio_log.c",
+  "src/cio_memfs.c",
+  "src/cio_meta.c",
+  "src/cio_os.c",
+  "src/cio_scan.c",
+  "src/cio_stats.c",
+  "src/cio_stream.c",
+  "src/cio_utils.c",
+]
+include-dirs = ["include", "deps", "deps/monkey/include"]
+# CMakeLists.txt:18, for the cio_log.h macros the sources use.  Upstream
+# sets it for its own build only, so a consumer that calls those macros
+# defines __FILENAME__ itself (measured).
+defines = ["__FILENAME__=__FILE__"]
+c-standard = "c11"
+# mk_list.h, which chunkio.h includes, defines static inline functions,
+# which C89 lacks (measured).
+interface-c-standard = "c99"
+# cio_chunk.h, which chunkio.h includes, names a parameter delete (:56), so
+# the headers do not compile as C++ (measured).
+interface-cxx-standard = "none"
+links = "chunkio"
+
+[target.'cfg(os = "windows")'.sources]
+chunkio = ["src/cio_file_win32.c", "src/win32/dirent.c"]
+
+[target.'cfg(not(os = "windows"))'.sources]
+chunkio = ["src/cio_file_unix.c"]
+
+# src/CMakeLists.txt:24-26 links Shell32, chunkio_compat.h:33 asks for
+# ws2_32 (htonl), and cio_file_win32.c calls advapi32's account and ACL
+# functions, which CMake's build gets from MSVC's default libraries.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["advapi32", "shell32", "ws2_32"]

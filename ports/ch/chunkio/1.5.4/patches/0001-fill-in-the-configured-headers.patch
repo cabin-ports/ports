@@ -1,0 +1,43 @@
+--- a/include/chunkio/cio_info.h
++++ b/include/chunkio/cio_info.h
+@@ -21,6 +21,19 @@
+ #define CIO_INFO_H
+ 
+ /* General flags set by CMakeLists.txt */
+-@CIO_BUILD_FLAGS@
++/* Changed for cabin-ports on 2026-11-26: filled in with the flags CMakeLists.txt's defaults and probes set, per platform. */
++#ifndef CIO_HAVE_BACKEND_FILESYSTEM
++#define CIO_HAVE_BACKEND_FILESYSTEM
++#endif
++#ifndef _WIN32
++#ifndef CIO_HAVE_GETPAGESIZE
++#define CIO_HAVE_GETPAGESIZE
++#endif
++#endif
++#ifdef __linux__
++#ifndef CIO_HAVE_POSIX_FALLOCATE
++#define CIO_HAVE_POSIX_FALLOCATE
++#endif
++#endif
+ 
+ #endif
+--- a/include/chunkio/cio_version.h
++++ b/include/chunkio/cio_version.h
+@@ -25,12 +25,13 @@
+ #define STR(s)             STR_HELPER(s)
+ 
+ /* Chunk I/O Version */
+-#define CIO_VERSION_MAJOR   @CIO_VERSION_MAJOR@
+-#define CIO_VERSION_MINOR   @CIO_VERSION_MINOR@
+-#define CIO_VERSION_PATCH   @CIO_VERSION_PATCH@
++/* Changed for cabin-ports on 2026-11-26: filled in from cio_version.h.in as CMake's configure_file would. */
++#define CIO_VERSION_MAJOR   1
++#define CIO_VERSION_MINOR   5
++#define CIO_VERSION_PATCH   4
+ #define CIO_VERSION         (CIO_VERSION_MAJOR * 10000 \
+                              CIO_VERSION_MINOR * 100   \
+                              CIO_VERSION_PATCH)
+-#define CIO_VERSION_STR     "@CIO_VERSION_STR@"
++#define CIO_VERSION_STR     "1.5.4"
+ 
+ #endif
