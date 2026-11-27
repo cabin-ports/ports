@@ -1,0 +1,9 @@
+--- a/Include/SevenBit/Conf/Sources/Impl/EnvironmentVarsConfiguration.hpp
++++ b/Include/SevenBit/Conf/Sources/Impl/EnvironmentVarsConfiguration.hpp
+@@ -7,6 +7,5 @@
+ #include "SevenBit/Conf/Sources/EnvironmentVarsConfiguration.hpp"
+ 
+ #ifdef _WIN32
+-extern "C" __declspec(dllimport) char **_environ;
+ #define _7BIT_CONF_ENV_PTR _environ
+ #else
