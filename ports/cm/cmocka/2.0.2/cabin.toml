@@ -1,0 +1,90 @@
+[package.upstream]
+url = "https://gitlab.com/cmocka/cmocka/-/archive/cmocka-2.0.2/cmocka-cmocka-2.0.2.tar.gz"
+checksum = "sha256:bba20112c8293d938b24dd1ca701389a9cf0f2143e8f8e8365e55359637cd2a9"
+format = "tar.gz"
+strip-prefix = "cmocka-cmocka-2.0.2"
+# CMake configures cmocka_version.h from cmocka_version.h.cmake
+# (include/CMakeLists.txt:3-5).  The last copy step places the template
+# and patch 0001 fills in its three version numbers.
+patches = ["patches/0001-fill-in-cmocka-version-h.patch"]
+
+# The three headers upstream installs (include/CMakeLists.txt:7-14),
+# copied to public/ so that cmocka_private.h, which sits beside them in
+# include/, stays off the consumer include path.
+[[package.upstream.copy]]
+from = "include/cmocka.h"
+to = "public/cmocka.h"
+
+[[package.upstream.copy]]
+from = "include/cmocka_pbc.h"
+to = "public/cmocka_pbc.h"
+
+[[package.upstream.copy]]
+from = "include/cmocka_version.h.cmake"
+to = "public/cmocka_version.h"
+
+[package]
+name = "cabin-ports/cmocka"
+version = "2.0.2"
+license = "Apache-2.0"
+include = ["AUTHORS", "LICENSE", "include", "patches", "public", "src"]
+# Upstream builds C99 (src/CMakeLists.txt:52-55); C11 is the oldest
+# standard Cabin can lower for MSVC.
+c-standard = "c11"
+interface-c-standard = "c99"
+
+# The static library, for which CMake makes CMOCKA_STATIC public
+# (src/CMakeLists.txt:30-37).  Instead of HAVE_CONFIG_H and config.h, the
+# defines here and below are the results of ConfigureChecks.cmake that the
+# sources read, as its checks find them with GCC and Clang on Linux, Apple
+# Clang on macOS, MSVC, and MinGW-w64; with MSVC they find snprintf and
+# vsnprintf but not the _snprintf family.  HAVE_BUILTIN_ALIGN_DOWN stays
+# undefined, as config.h.cmake has no line for it.  Not ported: the shared
+# library, CMake's default.  Not reproduced: the warning and hardening
+# flags, librt, which CMake links where it finds one off Linux and Android,
+# and the CMOCKA_PLATFORM_INCLUDE hook.
+[target.cmocka]
+type = "library"
+sources = ["src/cmocka.c"]
+include-dirs = ["public"]
+defines = [
+  "CMOCKA_STATIC",
+  "HAVE_INTTYPES_H",
+  "HAVE_SIGNAL_H",
+  "HAVE_SNPRINTF",
+  "HAVE_STRUCT_TIMESPEC",
+  "HAVE_VSNPRINTF",
+  "_GNU_SOURCE",
+  "_XOPEN_SOURCE=700",
+]
+interface-defines = ["CMOCKA_STATIC"]
+links = "cmocka"
+
+# cmocka.c includes <cmocka_private.h>.
+[profile]
+include-dirs = ["include"]
+
+[target.'cfg(family = "unix")'.profile]
+defines = [
+  "HAVE_CLOCK_REALTIME",
+  "HAVE_SIGLONGJMP",
+  "HAVE_STRINGS_H",
+  "HAVE_STRSIGNAL",
+]
+
+# macOS has no <malloc.h>.
+[target.'cfg(any(os = "linux", os = "windows"))'.profile]
+defines = ["HAVE_MALLOC_H"]
+
+# The __thread check; on Windows the __declspec(thread) one too, which
+# cmocka.c uses only without __thread.
+[target.'cfg(any(cc = "gcc", cc = "clang", cc = "apple-clang"))'.profile]
+defines = ["HAVE_GCC_THREAD_LOCAL_STORAGE"]
+
+[target.'cfg(os = "windows")'.profile]
+defines = ["HAVE_MSVC_THREAD_LOCAL_STORAGE"]
+
+# MinGW-w64, where the checks also find these.  env reads "gnu" only under
+# a MinGW --target, so the cc condition covers GCC without one.
+[target.'cfg(all(os = "windows", any(cc = "gcc", env = "gnu")))'.profile]
+defines = ["HAVE_CLOCK_REALTIME", "HAVE_STRINGS_H"]
