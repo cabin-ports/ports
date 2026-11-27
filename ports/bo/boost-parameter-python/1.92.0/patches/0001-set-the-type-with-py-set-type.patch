@@ -1,0 +1,11 @@
+--- a/include/boost/parameter/python.hpp
++++ b/include/boost/parameter/python.hpp
+@@ -66,7 +66,7 @@
+       
+       if (Py_TYPE(&unspecified) == 0)
+       {
+-          Py_TYPE(&unspecified) = &PyType_Type;
++          Py_SET_TYPE(&unspecified, &PyType_Type);
+           PyType_Ready(&unspecified);
+       }
+       
