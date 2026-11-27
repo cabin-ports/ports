@@ -1,0 +1,37 @@
+[package.upstream]
+url = "https://github.com/jeremydumais/CPP-DateTime-library/archive/refs/tags/v1.0.2.tar.gz"
+checksum = "sha256:97ade0d8880fed2454e8c86cbb7fc01542287e1c6b82bc23cb43d621bf4facac"
+format = "tar.gz"
+strip-prefix = "CPP-DateTime-library-1.0.2"
+
+# The headers under include/datetime/, where upstream installs src/*.h
+# (CMakeLists.txt:213-216), so consumers write <datetime/datetime.h>.
+[[package.upstream.copy]]
+from = "src/datetime.h"
+to = "include/datetime/datetime.h"
+
+[[package.upstream.copy]]
+from = "src/timespan.h"
+to = "include/datetime/timespan.h"
+
+[package]
+name = "cabin-ports/cpp-datetime-library"
+version = "1.0.2"
+license = "MIT"
+include = ["LICENSE", "README.md", "src", "include"]
+
+# Upstream names the library `datetime`; the package takes Conan Center's name.
+# C++14 is upstream's floor (CMakeLists.txt:59).  Not ported: the shared (DLL)
+# build and the Windows version resource, nor the interface NOMINMAX that
+# upstream's MSVC build defines.
+[target.datetime]
+type = "library"
+links = "datetime"
+sources = ["src/datetime.cpp", "src/timespan.cpp"]
+include-dirs = ["include"]
+# Upstream's static mechanism (CMakeLists.txt:125,195-197): without it the
+# headers declare __declspec(dllimport) on Windows.
+defines = ["DATETIME_STATIC"]
+interface-defines = ["DATETIME_STATIC"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++14"
