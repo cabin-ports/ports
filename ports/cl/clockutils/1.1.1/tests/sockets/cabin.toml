@@ -1,0 +1,12 @@
+[package]
+name = "sockets"
+version = "0.0.0"
+cxx-standard = "c++14"
+
+[dependencies]
+"cabin-ports/clockutils" = "=1.1.1"
+
+[target.sockets]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/clockutils:clock_sockets"]

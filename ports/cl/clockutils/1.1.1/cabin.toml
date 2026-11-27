@@ -1,0 +1,108 @@
+[package.upstream]
+url = "https://github.com/ClockworkOrigins/clockUtils/archive/refs/tags/1.1.1.tar.gz"
+checksum = "sha256:bbdcd6a10a541f83a960c37e93477d9e86305889f673b13ace68755462411687"
+format = "tar.gz"
+strip-prefix = "clockUtils-1.1.1"
+# Patch 0001 fills in the Config.h the copy step places as CMake's
+# configure_file writes it for the static build, with the versions
+# CMakeLists.txt:85-87 sets.  It also replaces the declarations of
+# std::thread in TcpSocket.h and UdpSocket.h with #include <thread>
+# (measured with libc++: reference to 'thread' is ambiguous), and adds
+# <cstddef> to LockFreeQueue.h (measured with g++ 16: 'size_t' has not been
+# declared).  Each patched file gets a dated notice of the change, as
+# LGPL-2.1 section 2(b) asks.
+patches = ["patches/0001-fill-in-config-h-and-add-missing-includes.patch"]
+
+[[package.upstream.copy]]
+from = "config/clockUtilsConfig.h.in"
+to = "include/clockUtils/Config.h"
+
+[package]
+name = "cabin-ports/clockutils"
+version = "1.1.1"
+license = "LGPL-2.1-or-later"
+include = ["LICENSE", "include", "libs", "patches"]
+# Upstream compiles with -std=c++11 (CMakeLists.txt:53); cl has no
+# /std:c++11, so the build lowers to C++14.
+cxx-standard = "c++14"
+
+# The libraries libs/CMakeLists.txt builds, static as with
+# CLOCKUTILS_BUILD_SHARED=OFF (upstream defaults to shared, CMakeLists.txt:37).
+# A consumer names the one it uses, as in cabin-ports/clockutils:clock_sockets.
+# Each library's headers define BOOST_ALL_DYN_LINK and WIN32_LEAN_AND_MEAN in
+# the including translation unit (SystemParameters.h:28-29, measured).
+[target.clock_argParser]
+type = "library"
+sources = [
+  "libs/argParser/src/ArgumentList.cpp",
+  "libs/argParser/src/BasicVariable.cpp",
+  "libs/argParser/src/Parser.cpp",
+]
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+links = "clock_argParser"
+
+[target.clock_compression]
+type = "library"
+sources = [
+  "libs/compression/src/algorithm/HuffmanBase.cpp",
+  "libs/compression/src/algorithm/HuffmanFixed.cpp",
+  "libs/compression/src/algorithm/HuffmanGeneric.cpp",
+]
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+links = "clock_compression"
+
+[target.clock_container]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+
+[target.clock_iniParser]
+type = "library"
+sources = ["libs/iniParser/src/iniParser.cpp"]
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+links = "clock_iniParser"
+
+# libs/sockets/CMakeLists.txt:24-28 takes src/windows on WIN32, else src/linux.
+[target.clock_sockets]
+type = "library"
+sources = [
+  "libs/sockets/src/Commons.cpp",
+  "libs/sockets/src/TcpSocket.cpp",
+  "libs/sockets/src/UdpSocket.cpp",
+]
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+links = "clock_sockets"
+
+[target.'cfg(os = "windows")'.sources]
+clock_sockets = [
+  "libs/sockets/src/windows/TcpSocket.cpp",
+  "libs/sockets/src/windows/UdpSocket.cpp",
+]
+
+[target.'cfg(family = "unix")'.sources]
+clock_sockets = [
+  "libs/sockets/src/linux/TcpSocket.cpp",
+  "libs/sockets/src/linux/UdpSocket.cpp",
+]
+
+# Upstream's MSVC flags (CMakeLists.txt:75), for its own compiles only: it
+# exports no usage requirements.  REGISTER_VARIABLE (ArgumentParser.h:74) calls
+# std::max, so a consumer translation unit that has <windows.h>, which the
+# clock_sockets headers include through WinSock2.h, needs NOMINMAX (measured
+# with an equivalent max macro).
+[target.'cfg(cxx = "msvc")'.profile]
+defines = ["NOMINMAX", "_WINSOCK_DEPRECATED_NO_WARNINGS"]
+
+# Upstream links clock_sockets with ws2_32 on Windows and Threads elsewhere
+# (libs/sockets/CMakeLists.txt:45-53); Cabin's link-libs are package-wide, so
+# every target's consumers link them.  Upstream's build also targets Android
+# (CMakeLists.txt:112-117), whose libc holds pthread.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32"]
+
+[target.'cfg(all(family = "unix", not(os = "android")))'.profile]
+link-libs = ["pthread"]
