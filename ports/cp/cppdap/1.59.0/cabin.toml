@@ -1,0 +1,59 @@
+[package.upstream]
+url = "https://github.com/google/cppdap/archive/refs/tags/dap-1.58.0-a.tar.gz"
+checksum = "sha256:5d35ca5db78570b6bef698e3365f79bd82a4f78e8393546387f78d7bdb2a2a08"
+format = "tar.gz"
+strip-prefix = "cppdap-dap-1.58.0-a"
+
+# The dap-1.58.0-a tag, whose CMakeLists.txt:17 and include/dap/protocol.h:18
+# declare 1.59.0.
+[package]
+name = "cabin-ports/cppdap"
+version = "1.59.0"
+license = "Apache-2.0"
+include = ["LICENSE", "include", "src"]
+
+[dependencies]
+"cabin-ports/nlohmann_json" = "=3.12.0"
+
+# Not ported: the RapidJSON and JsonCpp alternatives to upstream's default
+# nlohmann/json backend, the examples, tests and fuzzer, and the CMake
+# package files.  Not reproduced: position-independent code
+# (CMakeLists.txt:230; Cabin drops a dependency's raw compiler flags), so the
+# archive is not built for linking into a shared object.  A message header
+# whose Content-Length line lacks a length or is not followed by a blank line
+# makes a session's reader re-scan it forever, at full CPU, and handle no
+# later message on that connection (measured over dap::pipe()).
+[target.cppdap]
+type = "library"
+sources = [
+  "src/content_stream.cpp",
+  "src/io.cpp",
+  "src/nlohmann_json_serializer.cpp",
+  "src/network.cpp",
+  "src/null_json_serializer.cpp",
+  "src/protocol_events.cpp",
+  "src/protocol_requests.cpp",
+  "src/protocol_response.cpp",
+  "src/protocol_types.cpp",
+  "src/session.cpp",
+  "src/socket.cpp",
+  "src/typeinfo.cpp",
+  "src/typeof.cpp",
+]
+include-dirs = ["include"]
+# Upstream requires C++11 (README.md:5, CMakeLists.txt:19); C++14 is the
+# oldest standard Cabin can request from MSVC.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+defines = ["CPPDAP_JSON_NLOHMANN=1"]
+links = "cppdap"
+deps = ["cabin-ports/nlohmann_json"]
+
+[target.'cfg(any(cxx = "msvc", cxx = "clang-cl"))'.profile]
+defines = ["_CRT_SECURE_NO_WARNINGS"]
+
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32"]
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
