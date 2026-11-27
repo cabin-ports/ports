@@ -1,0 +1,30 @@
+--- a/include/concurrencpp/runtime/runtime.h
++++ b/include/concurrencpp/runtime/runtime.h
+@@ -10,6 +10,7 @@
+ #include <vector>
+ #include <chrono>
+ #include <functional>
++#include <type_traits>
+ 
+ namespace concurrencpp::details {
+     class CRCPP_API executor_collection {
+--- a/include/concurrencpp/threads/thread.h
++++ b/include/concurrencpp/threads/thread.h
+@@ -4,6 +4,7 @@
+ #include "concurrencpp/platform_defs.h"
+ 
+ #include <functional>
++#include <string>
+ #include <string_view>
+ #include <thread>
+ 
+--- a/source/executors/thread_pool_executor.cpp
++++ b/source/executors/thread_pool_executor.cpp
+@@ -2,6 +2,7 @@
+ 
+ #include <semaphore>
+ #include <algorithm>
++#include <cstdlib>
+ 
+ using concurrencpp::thread_pool_executor;
+ using concurrencpp::details::idle_worker_set;
