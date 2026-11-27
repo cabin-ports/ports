@@ -1,0 +1,12 @@
+[package]
+name = "core"
+version = "0.0.0"
+c-standard = "c11"
+
+[dependencies]
+"cabin-ports/cmark-gfm" = "=0.29.14"
+
+[target.core]
+type = "executable"
+sources = ["src/main.c"]
+deps = ["cabin-ports/cmark-gfm:cmark-gfm"]
