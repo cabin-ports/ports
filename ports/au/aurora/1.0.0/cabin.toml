@@ -1,0 +1,25 @@
+[package.upstream]
+url = "https://github.com/Bromeon/Aurora/archive/906e90bc272a0b13b3c9435b28f374d52d2f455c.tar.gz"
+checksum = "sha256:9be26cc159a7deee8224ef6b2a2712057c7fbc47a161f0605cbee7fe53d46782"
+format = "tar.gz"
+strip-prefix = "Aurora-906e90bc272a0b13b3c9435b28f374d52d2f455c"
+
+# Upstream has no tags; this is the archived master head, whose
+# include/Aurora/Config.hpp declares version 1.0.
+[package]
+name = "cabin-ports/aurora"
+version = "1.0.0"
+# include/Aurora/Tools/Hash.hpp:66 credits Boost.Functional/Hash for the
+# hashCombine formula; its copyright significance is uncertain.
+license = "Zlib"
+include = ["License.txt", "ReadMe.md", "include"]
+
+# Optional<T> asserts when constructed from a value unless NDEBUG is defined:
+# construct() calls content(), which asserts mFilled before it is set
+# (Tools/Optional.hpp:254, :272; measured: macOS arm64 dev profile, "Assertion
+# failed: (mFilled), function content").  Not ported: doc/ (Doxygen input).
+[target.aurora]
+type = "header-only"
+include-dirs = ["include"]
+# ReadMe.md: "It requires partial C++11 support".
+interface-cxx-standard = "c++11"
