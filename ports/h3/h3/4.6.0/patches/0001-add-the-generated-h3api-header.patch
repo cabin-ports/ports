@@ -1,0 +1,22 @@
+diff --git a/include/h3/h3api.h b/include/h3/h3api.h
+index 7100565..165dff4 100644
+--- a/include/h3/h3api.h
++++ b/include/h3/h3api.h
+@@ -1,3 +1,4 @@
++/* Changed for cabin-ports on 2026-11-26: generated from h3api.h.in as CMake's configure_file would. */
+ /*
+  * Copyright 2016-2021 Uber Technologies, Inc.
+  *
+@@ -123,9 +124,9 @@ DECLSPEC const char *H3_EXPORT(describeH3Error)(H3Error err);
+ 
+ /* library version numbers generated from VERSION file */
+ // clang-format off
+-#define H3_VERSION_MAJOR @H3_VERSION_MAJOR@
+-#define H3_VERSION_MINOR @H3_VERSION_MINOR@
+-#define H3_VERSION_PATCH @H3_VERSION_PATCH@
++#define H3_VERSION_MAJOR 4
++#define H3_VERSION_MINOR 6
++#define H3_VERSION_PATCH 0
+ // clang-format on
+ 
+ /** Maximum number of cell boundary vertices; worst case is pentagon:

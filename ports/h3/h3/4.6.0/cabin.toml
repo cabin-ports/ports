@@ -1,0 +1,63 @@
+[package.upstream]
+url = "https://github.com/uber/h3/archive/refs/tags/v4.6.0.tar.gz"
+checksum = "sha256:071be536307b9d6c84e3c024ed9aa4b35f8af5a1eff7f1238c04831fa4a77e68"
+format = "tar.gz"
+strip-prefix = "h3-4.6.0"
+# The patch fills in h3api.h, which the copy step places at its installed
+# path (consumers write #include <h3/h3api.h>) as CMake's configure_file
+# would: the three version macros, from VERSION.  H3_PREFIX stays empty, as
+# upstream's default.
+patches = ["patches/0001-add-the-generated-h3api-header.patch"]
+
+[[package.upstream.copy]]
+from = "src/h3lib/include/h3api.h.in"
+to = "include/h3/h3api.h"
+
+[package]
+name = "cabin-ports/h3"
+version = "4.6.0"
+# src/h3lib/lib/polygon.c:236 credits jeffreythompson.org for lineCrossesLine
+# and mathExtensions.c:23 credits StackOverflow for _ipow; their copyright
+# significance is uncertain.
+license = "Apache-2.0"
+include = ["LICENSE", "NOTICE", "include", "patches", "src/h3lib"]
+# Upstream's CMake build (CMakeLists.txt:385) requires C99 of consumers and
+# sets no implementation standard; C11 is the oldest Cabin can lower for MSVC.
+c-standard = "c11"
+interface-c-standard = "c99"
+
+# The sources include "h3api.h" by bare name and the internal headers;
+# upstream installs only h3api.h, so these directories stay private.
+[profile]
+include-dirs = ["include/h3", "src/h3lib/include"]
+
+# Not ported: the command-line filters, tests, benchmarks and generators, the
+# shared library, and the H3_ALLOC_PREFIX and H3_PREFIX options.
+[target.h3]
+type = "library"
+sources = [
+  "src/h3lib/lib/algos.c",
+  "src/h3lib/lib/area.c",
+  "src/h3lib/lib/baseCells.c",
+  "src/h3lib/lib/bbox.c",
+  "src/h3lib/lib/cellsToMultiPoly.c",
+  "src/h3lib/lib/directedEdge.c",
+  "src/h3lib/lib/faceijk.c",
+  "src/h3lib/lib/h3Assert.c",
+  "src/h3lib/lib/h3Index.c",
+  "src/h3lib/lib/iterGosper.c",
+  "src/h3lib/lib/iterators.c",
+  "src/h3lib/lib/latLng.c",
+  "src/h3lib/lib/linkedGeo.c",
+  "src/h3lib/lib/localij.c",
+  "src/h3lib/lib/mathExtensions.c",
+  "src/h3lib/lib/polyfill.c",
+  "src/h3lib/lib/polygon.c",
+  "src/h3lib/lib/vec2d.c",
+  "src/h3lib/lib/vertex.c",
+]
+include-dirs = ["include"]
+links = "h3"
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
