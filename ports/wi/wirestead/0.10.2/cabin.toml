@@ -1,0 +1,105 @@
+[package.upstream]
+url = "https://github.com/wirestead/wirestead/archive/refs/tags/v0.10.2.tar.gz"
+checksum = "sha256:efc66037103f5572b0bdc9638a6e5726f43785c75bab48f439d55648c42f315e"
+format = "tar.gz"
+strip-prefix = "wirestead-0.10.2"
+# logger.cc uses LogLevel::ERROR and LogOutput::CALLBACK after spdlog's
+# <windows.h> defines both as macros; logger.hpp's #undef runs before it
+# (MSVC C2589 on check-windows).  Apache-2.0 notice: the patch adds a change
+# notice line to wirestead/diagnostics/logger.cc.
+patches = ["patches/0001-undef-windows-error-and-callback.patch"]
+
+[package]
+name = "cabin-ports/wirestead"
+version = "0.10.2"
+license = "Apache-2.0"
+# Not ported: the optional TLS support (WIRESTEAD_ENABLE_TLS, needs OpenSSL)
+# and memory tracking (WIRESTEAD_ENABLE_MEMORY_TRACKING); both are off by
+# default upstream.
+include = ["LICENSE", "NOTICE", "patches", "wirestead"]
+
+[dependencies]
+"cabin-ports/boost-asio" = "=1.92.0"
+"cabin-ports/boost-system" = "=1.92.0"
+"cabin-ports/spdlog" = "=1.17.0"
+
+# Upstream's static library from the sources in cmake/WiresteadSources.cmake,
+# with its default options.  C++20 is upstream's stated standard
+# (cmake/WiresteadOptions.cmake:125-134, README.md:72).  WIRESTEAD_ENABLE_CONFIG
+# is upstream's default-on public define that makes wirestead.hpp include the
+# config API.
+[target.wirestead]
+type = "library"
+links = "wirestead"
+sources = [
+  "wirestead/builder/auto_initializer.cc",
+  "wirestead/builder/serial_builder.cc",
+  "wirestead/builder/tcp_client_builder.cc",
+  "wirestead/builder/tcp_server_builder.cc",
+  "wirestead/builder/udp_builder.cc",
+  "wirestead/builder/uds_builder.cc",
+  "wirestead/builder/unified_builder.cc",
+  "wirestead/concurrency/io_context_manager.cc",
+  "wirestead/concurrency/io_thread_hook.cc",
+  "wirestead/config/config_factory.cc",
+  "wirestead/config/config_manager.cc",
+  "wirestead/diagnostics/error_handler.cc",
+  "wirestead/diagnostics/exceptions.cc",
+  "wirestead/diagnostics/logger.cc",
+  "wirestead/factory/channel_factory.cc",
+  "wirestead/framer/length_prefix_framer.cc",
+  "wirestead/framer/line_framer.cc",
+  "wirestead/framer/packet_framer.cc",
+  "wirestead/interface/channel.cc",
+  "wirestead/interface/itcp_acceptor.cc",
+  "wirestead/interface/itcp_socket.cc",
+  "wirestead/memory/memory_pool.cc",
+  "wirestead/memory/memory_tracker.cc",
+  "wirestead/memory/safe_data_buffer.cc",
+  "wirestead/transport/serial/serial.cc",
+  "wirestead/transport/tcp_client/tcp_client.cc",
+  "wirestead/transport/tcp_server/boost_tcp_acceptor.cc",
+  "wirestead/transport/tcp_server/boost_tcp_socket.cc",
+  "wirestead/transport/tcp_server/ssl_tcp_socket.cc",
+  "wirestead/transport/tcp_server/tcp_server.cc",
+  "wirestead/transport/tcp_server/tcp_server_session.cc",
+  "wirestead/transport/udp/udp.cc",
+  "wirestead/transport/uds/boost_uds_acceptor.cc",
+  "wirestead/transport/uds/boost_uds_socket.cc",
+  "wirestead/transport/uds/uds_client.cc",
+  "wirestead/transport/uds/uds_server.cc",
+  "wirestead/transport/uds/uds_server_session.cc",
+  "wirestead/util/input_validator.cc",
+  "wirestead/wrapper/serial/serial.cc",
+  "wirestead/wrapper/tcp_client/tcp_client.cc",
+  "wirestead/wrapper/tcp_server/tcp_server.cc",
+  "wirestead/wrapper/udp/udp.cc",
+  "wirestead/wrapper/udp/udp_server.cc",
+  "wirestead/wrapper/uds_client/uds_client.cc",
+  "wirestead/wrapper/uds_server/uds_server.cc",
+]
+include-dirs = ["."]
+cxx-standard = "c++20"
+interface-cxx-standard = "c++20"
+interface-defines = ["WIRESTEAD_ENABLE_CONFIG=1"]
+deps = [
+  { name = "cabin-ports/boost-asio", public = true },
+  { name = "cabin-ports/boost-system", public = true },
+  "cabin-ports/spdlog",
+]
+
+# The io threads are std::jthreads.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# Upstream's own-build defines (cmake/WiresteadCompiler.cmake) that
+# platform.hpp does not set itself.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_POSIX_C_SOURCE=200809L"]
+
+[target.'cfg(os = "macos")'.profile]
+defines = ["_DARWIN_C_SOURCE"]
+
+[target.'cfg(os = "windows")'.profile]
+defines = ["_WIN32_WINNT=0x0A00"]
+link-libs = ["iphlpapi", "mswsock", "ws2_32"]
