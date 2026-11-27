@@ -1,0 +1,67 @@
+[package.upstream]
+url = "https://github.com/testing-cabal/subunit/archive/refs/tags/1.4.6.tar.gz"
+checksum = "sha256:a0f986da26ec03599aa74b4782dfb5ebcd232ed615ec4aba67edec86c5fac2d2"
+format = "tar.gz"
+strip-prefix = "subunit-1.4.6"
+
+# SubunitTestProgressListener.cpp includes "config.h", which configure
+# generates but the file reads no macro from; upstream's empty m4/.exists
+# stands in for it.
+[[package.upstream.copy]]
+from = "m4/.exists"
+to = "c++/config.h"
+
+# Makefile.am installs both headers into one subunit/ directory; the C++
+# header goes beside child.h so that <subunit/...> finds both.
+[[package.upstream.copy]]
+from = "c++/SubunitTestProgressListener.h"
+to = "c/include/subunit/SubunitTestProgressListener.h"
+
+[package]
+name = "cabin-ports/subunit"
+version = "1.4.6"
+# COPYING offers the Apache License 2.0 or the 3-clause BSD license at the
+# user's choice for every source file; both texts ship.
+license = "Apache-2.0 OR BSD-3-Clause"
+include = [
+  "Apache-2.0",
+  "BSD",
+  "COPYING",
+  "c++/SubunitTestProgressListener.cpp",
+  "c++/SubunitTestProgressListener.h",
+  "c++/config.h",
+  "c/include",
+  "c/lib",
+]
+# Upstream sets no standard.  The trailing comma of the enumerator list in
+# child.h is C99 (measured: clang -std=c89 -pedantic-errors rejects it);
+# C11 is the oldest standard Cabin can lower for MSVC.
+c-standard = "c11"
+interface-c-standard = "c99"
+
+[dependencies]
+"cabin-ports/cppunit" = "^1.15"
+
+# libsubunit as Makefile.am builds it, static.  Not ported: the shared
+# library, the Python, shell and vim components, and c/tests/test_child,
+# which needs the check framework.
+[target.subunit]
+type = "library"
+sources = ["c/lib/child.c"]
+include-dirs = ["c/include"]
+interface-cxx-standard = "c++11"
+links = "subunit"
+
+# libcppunit_subunit, static.  Its header derives from cppunit's
+# TestListener, and the listener reports through libsubunit.
+[target.cppunit_subunit]
+type = "library"
+sources = ["c++/SubunitTestProgressListener.cpp"]
+include-dirs = ["c/include"]
+deps = ["subunit", { name = "cabin-ports/cppunit", public = true }]
+# cppunit's headers need C++11; c++14 is the lowest standard Cabin accepts
+# on MSVC.
+cxx-standard = "c++14"
+interface-c-standard = "none"
+interface-cxx-standard = "c++11"
+links = "cppunit_subunit"
