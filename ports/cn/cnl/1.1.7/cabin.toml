@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://github.com/johnmcfarlane/cnl/archive/refs/tags/v1.1.7.tar.gz"
+checksum = "sha256:41f9b94d71df315d7143866a06ec28b2481762ffce0ac42dfc8d53b27e7162c0"
+format = "tar.gz"
+strip-prefix = "cnl-1.1.7"
+
+[package]
+name = "cabin-ports/cnl"
+version = "1.1.7"
+# include/cnl/constant.h:144 credits a Code Review answer for the _c literal
+# wrapper; its copyright significance is uncertain.
+# GPL-2.0-only: include/cnl/_impl/duplex_integer/divide.h:59-111 states its
+# division routines are lifted from Linux lib/math/div64.c.
+license = "BSL-1.0 AND GPL-2.0-only"
+include = ["LICENSE_1_0.txt", "README.md", "include"]
+
+# include/cnl/auxiliary/boost.multiprecision.h and boost.simd.h need Boost
+# headers this port does not provide; they are not tested.
+[target.cnl]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:13, "CNL requires a C++11-compatible tool chain".
+interface-cxx-standard = "c++11"
