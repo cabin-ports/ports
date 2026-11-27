@@ -1,0 +1,62 @@
+--- a/llvm/include/llvm/Config/AsmParsers.def
++++ b/llvm/include/llvm/Config/AsmParsers.def
+@@ -24,6 +24,13 @@
+ #  error Please define the macro LLVM_ASM_PARSER(TargetName)
+ #endif
+ 
+-@LLVM_ENUM_ASM_PARSERS@
++LLVM_ASM_PARSER(AArch64)
++LLVM_ASM_PARSER(ARM)
++LLVM_ASM_PARSER(Hexagon)
++LLVM_ASM_PARSER(Mips)
++LLVM_ASM_PARSER(PowerPC)
++LLVM_ASM_PARSER(Sparc)
++LLVM_ASM_PARSER(SystemZ)
++LLVM_ASM_PARSER(X86)
+ 
+ #undef LLVM_ASM_PARSER
+--- a/llvm/include/llvm/Config/Targets.def
++++ b/llvm/include/llvm/Config/Targets.def
+@@ -23,6 +23,13 @@
+ #  error Please define the macro LLVM_TARGET(TargetName)
+ #endif
+ 
+-@LLVM_ENUM_TARGETS@
++LLVM_TARGET(AArch64)
++LLVM_TARGET(ARM)
++LLVM_TARGET(Hexagon)
++LLVM_TARGET(Mips)
++LLVM_TARGET(PowerPC)
++LLVM_TARGET(Sparc)
++LLVM_TARGET(SystemZ)
++LLVM_TARGET(X86)
+ 
+ #undef LLVM_TARGET
+--- /dev/null
++++ b/llvm/include/llvm/Config/config.h
+@@ -0,0 +1,2 @@
++/* Stands in for the config.h CMake configures: cabin.toml defines the
++   values the compiled sources read. */
+--- /dev/null
++++ b/llvm/include/llvm/Config/llvm-config.h
+@@ -0,0 +1,6 @@
++/* Stands in for the llvm-config.h CMake configures: cabin.toml defines the
++   values the compiled sources read, and assertions enable the ABI-breaking
++   checks, as LLVM_ABI_BREAKING_CHECKS=WITH_ASSERTS does by default. */
++#ifndef NDEBUG
++#define LLVM_ENABLE_ABI_BREAKING_CHECKS
++#endif
+--- a/llvm/include/llvm/Support/DataTypes.h
++++ b/llvm/include/llvm/Support/DataTypes.h
+@@ -24,11 +24,6 @@
+ #ifndef SUPPORT_DATATYPES_H
+ #define SUPPORT_DATATYPES_H
+ 
+-#cmakedefine HAVE_INTTYPES_H ${HAVE_INTTYPES_H}
+-#cmakedefine HAVE_STDINT_H ${HAVE_STDINT_H}
+-#cmakedefine HAVE_UINT64_T ${HAVE_UINT64_T}
+-#cmakedefine HAVE_U_INT64_T ${HAVE_U_INT64_T}
+-
+ #ifdef __cplusplus
+ #include <cmath>
+ #else

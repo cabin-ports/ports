@@ -1,0 +1,329 @@
+[package.upstream]
+url = "https://github.com/keystone-engine/keystone/archive/refs/tags/0.9.2.tar.gz"
+checksum = "sha256:c9b3a343ed3e05ee168d29daf89820aff9effb2c74c6803c2d9e21d55b5b7c24"
+format = "tar.gz"
+strip-prefix = "keystone-0.9.2"
+# CMake configures five headers (llvm/CMakeLists.txt:408-449).  The copy
+# steps place three of its templates, and patch 0001 fills them in for the
+# eight targets built by default (LLVM_ALL_TARGETS, :171-181) and adds
+# config.h and llvm-config.h without CMake's values: the profiles below
+# define the ones the compiled sources read.
+# NCSA notice of llvm/LICENSE.TXT, and the additional copyright that
+# llvm/include/llvm/Support/LICENSE.TXT states, for the templates whose lines
+# 0001 carries (the License's condition that redistributions of source code
+# retain it):
+# University of Illinois/NCSA
+# Open Source License
+#
+# Copyright (c) 2003-2015 University of Illinois at Urbana-Champaign.
+# All rights reserved.
+#
+# Developed by:
+#
+#     LLVM Team
+#
+#     University of Illinois at Urbana-Champaign
+#
+#     http://llvm.org
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of
+# this software and associated documentation files (the "Software"), to deal with
+# the Software without restriction, including without limitation the rights to
+# use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+# of the Software, and to permit persons to whom the Software is furnished to do
+# so, subject to the following conditions:
+#
+#     * Redistributions of source code must retain the above copyright notice,
+#       this list of conditions and the following disclaimers.
+#
+#     * Redistributions in binary form must reproduce the above copyright notice,
+#       this list of conditions and the following disclaimers in the
+#       documentation and/or other materials provided with the distribution.
+#
+#     * Neither the names of the LLVM Team, University of Illinois at
+#       Urbana-Champaign, nor the names of its contributors may be used to
+#       endorse or promote products derived from this Software without specific
+#       prior written permission.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.  IN NO EVENT SHALL THE
+# CONTRIBUTORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS WITH THE
+# SOFTWARE.
+#
+# LLVM System Interface Library
+# -------------------------------------------------------------------------------
+# The LLVM System Interface Library is licensed under the Illinois Open Source
+# License and has the following additional copyright:
+#
+# Copyright (C) 2004 eXtensible Systems, Inc.
+patches = ["patches/0001-configure-the-cmake-generated-headers.patch"]
+
+[[package.upstream.copy]]
+from = "llvm/include/llvm/Config/AsmParsers.def.in"
+to = "llvm/include/llvm/Config/AsmParsers.def"
+
+[[package.upstream.copy]]
+from = "llvm/include/llvm/Config/Targets.def.in"
+to = "llvm/include/llvm/Config/Targets.def"
+
+[[package.upstream.copy]]
+from = "llvm/include/llvm/Support/DataTypes.h.cmake"
+to = "llvm/include/llvm/Support/DataTypes.h"
+
+[package]
+name = "cabin-ports/keystone"
+version = "0.9.2"
+# LicenseRef-ARM-Software-Grant: llvm/lib/Target/ARM/LICENSE.TXT, ARM's grant
+# for its contributions to the ARM target.  LicenseRef-Hackers-Delight: the
+# Hacker's Delight website's terms for the book's magic-number routines, which
+# llvm/lib/Support/APInt.cpp:1415-1505 (magic, magicu) reproduces.
+license = "GPL-2.0-only AND NCSA AND BSD-3-Clause AND Spencer-94 AND ISC AND LicenseRef-ARM-Software-Grant AND LicenseRef-Hackers-Delight"
+include = [
+  "AUTHORS.TXT",
+  "COPYING",
+  "CREDITS.TXT",
+  "EXCEPTIONS-CLIENT",
+  "LICENSE-COM.TXT",
+  "README.md",
+  "SPONSORS.TXT",
+  "include",
+  "llvm/CREDITS.TXT",
+  "llvm/LICENSE.TXT",
+  "llvm/include",
+  "llvm/keystone",
+  "llvm/lib",
+  "patches",
+]
+
+# Not ported: kstool, the command-line assembler, and the suite/fuzz
+# executables, which upstream also builds by default (CMakeLists.txt:73-83,
+# :118).
+[target.keystone]
+type = "library"
+sources = [
+  "llvm/lib/MC/ConstantPools.cpp",
+  "llvm/lib/MC/ELFObjectWriter.cpp",
+  "llvm/lib/MC/MCAsmBackend.cpp",
+  "llvm/lib/MC/MCAsmInfo.cpp",
+  "llvm/lib/MC/MCAsmInfoCOFF.cpp",
+  "llvm/lib/MC/MCAsmInfoDarwin.cpp",
+  "llvm/lib/MC/MCAsmInfoELF.cpp",
+  "llvm/lib/MC/MCAssembler.cpp",
+  "llvm/lib/MC/MCCodeEmitter.cpp",
+  "llvm/lib/MC/MCContext.cpp",
+  "llvm/lib/MC/MCELFObjectTargetWriter.cpp",
+  "llvm/lib/MC/MCELFStreamer.cpp",
+  "llvm/lib/MC/MCExpr.cpp",
+  "llvm/lib/MC/MCFragment.cpp",
+  "llvm/lib/MC/MCInst.cpp",
+  "llvm/lib/MC/MCInstrDesc.cpp",
+  "llvm/lib/MC/MCLabel.cpp",
+  "llvm/lib/MC/MCObjectFileInfo.cpp",
+  "llvm/lib/MC/MCObjectStreamer.cpp",
+  "llvm/lib/MC/MCObjectWriter.cpp",
+  "llvm/lib/MC/MCParser/AsmLexer.cpp",
+  "llvm/lib/MC/MCParser/AsmParser.cpp",
+  "llvm/lib/MC/MCParser/COFFAsmParser.cpp",
+  "llvm/lib/MC/MCParser/DarwinAsmParser.cpp",
+  "llvm/lib/MC/MCParser/ELFAsmParser.cpp",
+  "llvm/lib/MC/MCParser/MCAsmLexer.cpp",
+  "llvm/lib/MC/MCParser/MCAsmParser.cpp",
+  "llvm/lib/MC/MCParser/MCAsmParserExtension.cpp",
+  "llvm/lib/MC/MCParser/MCTargetAsmParser.cpp",
+  "llvm/lib/MC/MCRegisterInfo.cpp",
+  "llvm/lib/MC/MCSection.cpp",
+  "llvm/lib/MC/MCSectionCOFF.cpp",
+  "llvm/lib/MC/MCSectionELF.cpp",
+  "llvm/lib/MC/MCSectionMachO.cpp",
+  "llvm/lib/MC/MCStreamer.cpp",
+  "llvm/lib/MC/MCSubtargetInfo.cpp",
+  "llvm/lib/MC/MCSymbol.cpp",
+  "llvm/lib/MC/MCSymbolELF.cpp",
+  "llvm/lib/MC/MCTargetOptions.cpp",
+  "llvm/lib/MC/MCValue.cpp",
+  "llvm/lib/MC/StringTableBuilder.cpp",
+  "llvm/lib/MC/SubtargetFeature.cpp",
+  "llvm/lib/Support/APFloat.cpp",
+  "llvm/lib/Support/APInt.cpp",
+  "llvm/lib/Support/APSInt.cpp",
+  "llvm/lib/Support/ARMBuildAttrs.cpp",
+  "llvm/lib/Support/ErrorHandling.cpp",
+  "llvm/lib/Support/Hashing.cpp",
+  "llvm/lib/Support/IntEqClasses.cpp",
+  "llvm/lib/Support/LEB128.cpp",
+  "llvm/lib/Support/Memory.cpp",
+  "llvm/lib/Support/MemoryBuffer.cpp",
+  "llvm/lib/Support/Path.cpp",
+  "llvm/lib/Support/Regex.cpp",
+  "llvm/lib/Support/ScaledNumber.cpp",
+  "llvm/lib/Support/SmallPtrSet.cpp",
+  "llvm/lib/Support/SmallVector.cpp",
+  "llvm/lib/Support/SourceMgr.cpp",
+  "llvm/lib/Support/StringExtras.cpp",
+  "llvm/lib/Support/StringMap.cpp",
+  "llvm/lib/Support/StringPool.cpp",
+  "llvm/lib/Support/StringRef.cpp",
+  "llvm/lib/Support/StringSaver.cpp",
+  "llvm/lib/Support/TargetParser.cpp",
+  "llvm/lib/Support/TargetRegistry.cpp",
+  "llvm/lib/Support/Triple.cpp",
+  "llvm/lib/Support/Twine.cpp",
+  "llvm/lib/Support/raw_ostream.cpp",
+  "llvm/lib/Support/regcomp.c",
+  "llvm/lib/Support/regerror.c",
+  "llvm/lib/Support/regexec.c",
+  "llvm/lib/Support/regfree.c",
+  "llvm/lib/Support/regstrlcpy.c",
+  "llvm/lib/Target/AArch64/AsmParser/AArch64AsmParser.cpp",
+  "llvm/lib/Target/AArch64/MCTargetDesc/AArch64AsmBackend.cpp",
+  "llvm/lib/Target/AArch64/MCTargetDesc/AArch64ELFObjectWriter.cpp",
+  "llvm/lib/Target/AArch64/MCTargetDesc/AArch64MCAsmInfo.cpp",
+  "llvm/lib/Target/AArch64/MCTargetDesc/AArch64MCCodeEmitter.cpp",
+  "llvm/lib/Target/AArch64/MCTargetDesc/AArch64MCExpr.cpp",
+  "llvm/lib/Target/AArch64/MCTargetDesc/AArch64MCTargetDesc.cpp",
+  "llvm/lib/Target/AArch64/MCTargetDesc/AArch64TargetStreamer.cpp",
+  "llvm/lib/Target/AArch64/TargetInfo/AArch64TargetInfo.cpp",
+  "llvm/lib/Target/AArch64/Utils/AArch64BaseInfo.cpp",
+  "llvm/lib/Target/ARM/AsmParser/ARMAsmParser.cpp",
+  "llvm/lib/Target/ARM/MCTargetDesc/ARMAsmBackend.cpp",
+  "llvm/lib/Target/ARM/MCTargetDesc/ARMELFObjectWriter.cpp",
+  "llvm/lib/Target/ARM/MCTargetDesc/ARMMCAsmInfo.cpp",
+  "llvm/lib/Target/ARM/MCTargetDesc/ARMMCCodeEmitter.cpp",
+  "llvm/lib/Target/ARM/MCTargetDesc/ARMMCExpr.cpp",
+  "llvm/lib/Target/ARM/MCTargetDesc/ARMMCTargetDesc.cpp",
+  "llvm/lib/Target/ARM/MCTargetDesc/ARMTargetStreamer.cpp",
+  "llvm/lib/Target/ARM/TargetInfo/ARMTargetInfo.cpp",
+  "llvm/lib/Target/Hexagon/AsmParser/HexagonAsmParser.cpp",
+  "llvm/lib/Target/Hexagon/MCTargetDesc/HexagonAsmBackend.cpp",
+  "llvm/lib/Target/Hexagon/MCTargetDesc/HexagonELFObjectWriter.cpp",
+  "llvm/lib/Target/Hexagon/MCTargetDesc/HexagonMCAsmInfo.cpp",
+  "llvm/lib/Target/Hexagon/MCTargetDesc/HexagonMCChecker.cpp",
+  "llvm/lib/Target/Hexagon/MCTargetDesc/HexagonMCCodeEmitter.cpp",
+  "llvm/lib/Target/Hexagon/MCTargetDesc/HexagonMCCompound.cpp",
+  "llvm/lib/Target/Hexagon/MCTargetDesc/HexagonMCDuplexInfo.cpp",
+  "llvm/lib/Target/Hexagon/MCTargetDesc/HexagonMCExpr.cpp",
+  "llvm/lib/Target/Hexagon/MCTargetDesc/HexagonMCInstrInfo.cpp",
+  "llvm/lib/Target/Hexagon/MCTargetDesc/HexagonMCShuffler.cpp",
+  "llvm/lib/Target/Hexagon/MCTargetDesc/HexagonMCTargetDesc.cpp",
+  "llvm/lib/Target/Hexagon/MCTargetDesc/HexagonShuffler.cpp",
+  "llvm/lib/Target/Hexagon/TargetInfo/HexagonTargetInfo.cpp",
+  "llvm/lib/Target/Mips/AsmParser/MipsAsmParser.cpp",
+  "llvm/lib/Target/Mips/MCTargetDesc/MipsABIInfo.cpp",
+  "llvm/lib/Target/Mips/MCTargetDesc/MipsAsmBackend.cpp",
+  "llvm/lib/Target/Mips/MCTargetDesc/MipsELFObjectWriter.cpp",
+  "llvm/lib/Target/Mips/MCTargetDesc/MipsMCAsmInfo.cpp",
+  "llvm/lib/Target/Mips/MCTargetDesc/MipsMCCodeEmitter.cpp",
+  "llvm/lib/Target/Mips/MCTargetDesc/MipsMCExpr.cpp",
+  "llvm/lib/Target/Mips/MCTargetDesc/MipsMCTargetDesc.cpp",
+  "llvm/lib/Target/Mips/TargetInfo/MipsTargetInfo.cpp",
+  "llvm/lib/Target/PowerPC/AsmParser/PPCAsmParser.cpp",
+  "llvm/lib/Target/PowerPC/MCTargetDesc/PPCAsmBackend.cpp",
+  "llvm/lib/Target/PowerPC/MCTargetDesc/PPCELFObjectWriter.cpp",
+  "llvm/lib/Target/PowerPC/MCTargetDesc/PPCMCAsmInfo.cpp",
+  "llvm/lib/Target/PowerPC/MCTargetDesc/PPCMCCodeEmitter.cpp",
+  "llvm/lib/Target/PowerPC/MCTargetDesc/PPCMCExpr.cpp",
+  "llvm/lib/Target/PowerPC/MCTargetDesc/PPCMCTargetDesc.cpp",
+  "llvm/lib/Target/PowerPC/MCTargetDesc/PPCPredicates.cpp",
+  "llvm/lib/Target/PowerPC/TargetInfo/PowerPCTargetInfo.cpp",
+  "llvm/lib/Target/Sparc/AsmParser/SparcAsmParser.cpp",
+  "llvm/lib/Target/Sparc/MCTargetDesc/SparcAsmBackend.cpp",
+  "llvm/lib/Target/Sparc/MCTargetDesc/SparcELFObjectWriter.cpp",
+  "llvm/lib/Target/Sparc/MCTargetDesc/SparcMCAsmInfo.cpp",
+  "llvm/lib/Target/Sparc/MCTargetDesc/SparcMCCodeEmitter.cpp",
+  "llvm/lib/Target/Sparc/MCTargetDesc/SparcMCExpr.cpp",
+  "llvm/lib/Target/Sparc/MCTargetDesc/SparcMCTargetDesc.cpp",
+  "llvm/lib/Target/Sparc/TargetInfo/SparcTargetInfo.cpp",
+  "llvm/lib/Target/SystemZ/AsmParser/SystemZAsmParser.cpp",
+  "llvm/lib/Target/SystemZ/MCTargetDesc/SystemZMCAsmBackend.cpp",
+  "llvm/lib/Target/SystemZ/MCTargetDesc/SystemZMCAsmInfo.cpp",
+  "llvm/lib/Target/SystemZ/MCTargetDesc/SystemZMCCodeEmitter.cpp",
+  "llvm/lib/Target/SystemZ/MCTargetDesc/SystemZMCObjectWriter.cpp",
+  "llvm/lib/Target/SystemZ/MCTargetDesc/SystemZMCTargetDesc.cpp",
+  "llvm/lib/Target/SystemZ/TargetInfo/SystemZTargetInfo.cpp",
+  "llvm/lib/Target/X86/AsmParser/X86AsmInstrumentation.cpp",
+  "llvm/lib/Target/X86/AsmParser/X86AsmParser.cpp",
+  "llvm/lib/Target/X86/MCTargetDesc/X86AsmBackend.cpp",
+  "llvm/lib/Target/X86/MCTargetDesc/X86ELFObjectWriter.cpp",
+  "llvm/lib/Target/X86/MCTargetDesc/X86MCAsmInfo.cpp",
+  "llvm/lib/Target/X86/MCTargetDesc/X86MCCodeEmitter.cpp",
+  "llvm/lib/Target/X86/MCTargetDesc/X86MCTargetDesc.cpp",
+  "llvm/lib/Target/X86/TargetInfo/X86TargetInfo.cpp",
+  "llvm/keystone/ks.cpp",
+  "llvm/keystone/EVMMapping.cpp",
+]
+include-dirs = ["include"]
+# Upstream sets no C standard; C11 is the oldest Cabin can lower for MSVC.
+c-standard = "c11"
+# HandleLLVMOptions.cmake:485-501 builds C++11; Cabin cannot lower C++11
+# for MSVC, so the library builds as C++14 everywhere.
+cxx-standard = "c++14"
+# Measured with clang -pedantic-errors: C89 fails at keystone.h's //
+# comments (:16) and C++98 at its trailing enumerator comma (:59); C99 and
+# C++11 pass.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "keystone"
+
+[profile]
+include-dirs = [
+  "llvm/include",
+  "llvm/lib/Target/AArch64",
+  "llvm/lib/Target/ARM",
+  "llvm/lib/Target/Hexagon",
+  "llvm/lib/Target/Mips",
+  "llvm/lib/Target/PowerPC",
+  "llvm/lib/Target/Sparc",
+  "llvm/lib/Target/SystemZ",
+  "llvm/lib/Target/X86",
+]
+defines = [
+  "HAVE_FCNTL_H",
+  "HAVE_INTTYPES_H",
+  "HAVE_STDINT_H",
+  "HAVE_SYS_STAT_H",
+  "HAVE_UINT64_T",
+  "LLVM_ENABLE_ARCH_AArch64",
+  "LLVM_ENABLE_ARCH_ARM",
+  "LLVM_ENABLE_ARCH_Hexagon",
+  "LLVM_ENABLE_ARCH_Mips",
+  "LLVM_ENABLE_ARCH_PowerPC",
+  "LLVM_ENABLE_ARCH_Sparc",
+  "LLVM_ENABLE_ARCH_SystemZ",
+  "LLVM_ENABLE_ARCH_X86",
+  "LLVM_ENABLE_THREADS",
+  "__STDC_CONSTANT_MACROS",
+  "__STDC_FORMAT_MACROS",
+  "__STDC_LIMIT_MACROS",
+]
+
+[target.'cfg(family = "unix")'.profile]
+defines = [
+  "HAVE_DIRENT_H",
+  "HAVE_DLFCN_H",
+  "HAVE_PREAD",
+  "HAVE_SYS_MMAN_H",
+  "HAVE_SYS_PARAM_H",
+  "HAVE_SYS_TIME_H",
+  "HAVE_SYS_UIO_H",
+  "HAVE_UNISTD_H",
+  "HAVE_U_INT64_T",
+  "HAVE_WRITEV",
+  "LLVM_ON_UNIX",
+]
+
+[target.'cfg(all(os = "linux", env = "gnu"))'.profile]
+defines = ["_GNU_SOURCE"]
+
+[target.'cfg(os = "windows")'.profile]
+defines = ["HAVE__CHSIZE_S", "LLVM_ON_WIN32"]
+# Upstream gets these from CMake's default Windows libraries:
+# lib/Support/Windows/Path.inc names advapi32 and ole32 for MSVC only
+# (:39-42), calls shell32's SHGetKnownFolderPath (:739) and uses uuid's
+# FOLDERID GUIDs (:748, :752).
+link-libs = ["advapi32", "ole32", "shell32", "uuid"]
+
+[target.'cfg(all(os = "windows", any(cc = "gcc", env = "gnu")))'.profile]
+defines = ["HAVE_UNISTD_H"]
