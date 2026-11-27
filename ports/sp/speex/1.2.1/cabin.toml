@@ -1,0 +1,146 @@
+[package.upstream]
+url = "https://downloads.xiph.org/releases/speex/speex-1.2.1.tar.gz"
+checksum = "sha256:4b44d4f2b38a370a2d98a78329fefc56a0cf93d1c1be70029217baae6628feea"
+format = "tar.gz"
+strip-prefix = "speex-1.2.1"
+# configure generates the public speex_config_types.h from its template
+# (configure.ac:260-323, 346).  The copy step below copies the template to
+# that name, and patch 0001 fills it in as configure does wherever
+# <stdint.h> provides the exact-width types (measured on macOS arm64 and
+# x86-64).  speex_types.h includes it outside Windows and Apple, which
+# typedef the types themselves.
+# BSD-3-Clause notice of speex_config_types.h.in (COPYING), whose lines
+# 0001 carries (the condition that redistributions of source code retain
+# it):
+# Copyright 2002-2008     Xiph.org Foundation
+# Copyright 2002-2008     Jean-Marc Valin
+# Copyright 2005-2007     Analog Devices Inc.
+# Copyright 2005-2008     Commonwealth Scientific and Industrial Research
+#                         Organisation (CSIRO)
+# Copyright 1993, 2002, 2006 David Rowe
+# Copyright 2003          EpicGames
+# Copyright 1992-1994     Jutta Degener, Carsten Bormann
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions
+# are met:
+#
+# - Redistributions of source code must retain the above copyright
+# notice, this list of conditions and the following disclaimer.
+#
+# - Redistributions in binary form must reproduce the above copyright
+# notice, this list of conditions and the following disclaimer in the
+# documentation and/or other materials provided with the distribution.
+#
+# - Neither the name of the Xiph.org Foundation nor the names of its
+# contributors may be used to endorse or promote products derived from
+# this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# ``AS IS'' AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE FOUNDATION OR
+# CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+# EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+# PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+# PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+# LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+# NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+patches = ["patches/0001-fill-in-speex-config-types-h.patch"]
+
+[[package.upstream.copy]]
+from = "include/speex/speex_config_types.h.in"
+to = "include/speex/speex_config_types.h"
+
+[package]
+name = "cabin-ports/speex"
+version = "1.2.1"
+license = "BSD-3-Clause AND TU-Berlin-1.0"
+# TU-Berlin-1.0: libspeex/lpc.c, from GSM 06.10; the rest is BSD-3-Clause
+# (COPYING).
+include = ["COPYING", "include", "libspeex", "patches"]
+# Upstream states no standard; C11 is the oldest Cabin can request from
+# MSVC.
+c-standard = "c11"
+# speex_config_types.h includes <stdint.h>.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# libspeex as configure builds it by default (libspeex/Makefile.am:22-30):
+# floating point, without the Vorbis psychoacoustic model and so without
+# an FFT; the bundled Kiss FFT and smallft are not compiled.  config.h is
+# not generated: the defines here are the values configure gives the
+# sources (configure.ac:39-47, 87-106, 125-129, 154-160), and HAVE_CONFIG_H
+# stays undefined.  Not ported: the testenc programs, the fixed-point
+# build and configure's other options.  Not reproduced: configure's
+# -fvisibility=hidden (configure.ac:88), since Cabin drops a registry
+# package's raw compiler flags.
+[target.speex]
+type = "library"
+sources = [
+  "libspeex/cb_search.c",
+  "libspeex/exc_10_32_table.c",
+  "libspeex/exc_8_128_table.c",
+  "libspeex/filters.c",
+  "libspeex/gain_table.c",
+  "libspeex/hexc_table.c",
+  "libspeex/high_lsp_tables.c",
+  "libspeex/lsp.c",
+  "libspeex/ltp.c",
+  "libspeex/speex.c",
+  "libspeex/stereo.c",
+  "libspeex/vbr.c",
+  "libspeex/vq.c",
+  "libspeex/bits.c",
+  "libspeex/exc_10_16_table.c",
+  "libspeex/exc_20_32_table.c",
+  "libspeex/exc_5_256_table.c",
+  "libspeex/exc_5_64_table.c",
+  "libspeex/gain_table_lbr.c",
+  "libspeex/hexc_10_32_table.c",
+  "libspeex/lpc.c",
+  "libspeex/lsp_tables_nb.c",
+  "libspeex/modes.c",
+  "libspeex/modes_wb.c",
+  "libspeex/nb_celp.c",
+  "libspeex/quant_lsp.c",
+  "libspeex/sb_celp.c",
+  "libspeex/speex_callbacks.c",
+  "libspeex/speex_header.c",
+  "libspeex/window.c",
+]
+include-dirs = ["include"]
+defines = [
+  "FLOATING_POINT",
+  'SPEEX_VERSION="1.2.1"',
+  "SPEEX_MAJOR_VERSION=1",
+  "SPEEX_MINOR_VERSION=2",
+  "SPEEX_MICRO_VERSION=1",
+  'SPEEX_EXTRA_VERSION=""',
+]
+links = "speex"
+
+# Variable-length arrays for the codec's scratch buffers, and the
+# visibility attribute on the API (measured: configure defines both on
+# macOS arm64 and x86-64).
+[target.'cfg(not(env = "msvc"))'.profile]
+defines = ["VAR_ARRAYS", 'EXPORT=__attribute__((visibility("default")))']
+
+# MSVC as upstream's win32/config.h configures it: no attribute, SSE where
+# cl targets it, and alloca() only without SSE; with SSE the codec uses its
+# own scratch stack.
+[target.'cfg(env = "msvc")'.profile]
+defines = ["EXPORT="]
+
+[target.'cfg(all(env = "msvc", not(any(arch = "x86_64", arch = "x86"))))'.profile]
+defines = ["USE_ALLOCA"]
+
+# configure enables SSE where the compiler builds SSE intrinsics without
+# extra flags (measured on x86-64, not on arm64).
+[target.'cfg(any(arch = "x86_64", all(env = "msvc", arch = "x86")))'.profile]
+defines = ["_USE_SSE"]
+
+# libm (libspeex/Makefile.am:43).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
