@@ -1,0 +1,85 @@
+[package.upstream]
+url = "https://github.com/microsoft/cppgraphqlgen/archive/refs/tags/v4.5.9.tar.gz"
+checksum = "sha256:65a7c80bbc98f913bf1fb0647262b696fdf53baa4f1b990fe741de29e07884ac"
+format = "tar.gz"
+strip-prefix = "cppgraphqlgen-4.5.9"
+
+# Upstream installs only include/graphqlservice (src/CMakeLists.txt:415-446,
+# src/introspection/CMakeLists.txt:24-27), so the package leaves out the
+# other headers in include/: the tools' and Validation.h, which
+# src/GraphQLService.cpp and src/Validation.cpp include from a copy in src/.
+[[package.upstream.copy]]
+from = "include/Validation.h"
+to = "src/Validation.h"
+
+[package]
+name = "cabin-ports/cppgraphqlgen"
+version = "4.5.9"
+license = "MIT"
+include = ["LICENSE", "include/graphqlservice", "src"]
+# Upstream requires C++20 (src/CMakeLists.txt:75, README.md:77).
+cxx-standard = "c++20"
+interface-cxx-standard = "c++20"
+
+[dependencies]
+"cabin-ports/pegtl" = "=3.2.8"
+"cabin-ports/rapidjson" = "=1.1.0"
+
+# graphqlservice starts threads; upstream links Threads::Threads to it
+# (CMakeLists.txt:113, src/CMakeLists.txt:332-335).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# The static libraries upstream builds (src/CMakeLists.txt:120-389);
+# consumers name cabin-ports/cppgraphqlgen:<target>.  Not ported: the
+# schemagen and clientgen executables, the shared libraries, the CMake
+# files, and the -fcoroutines flag and <experimental/coroutine> fallback
+# that src/CMakeLists.txt:106-117 selects for compilers that need them.
+[target.graphqlpeg]
+type = "library"
+sources = ["src/SyntaxTree.cpp"]
+include-dirs = ["include"]
+deps = [{ name = "cabin-ports/pegtl", public = true }]
+links = "graphqlpeg"
+
+[target.graphqlresponse]
+type = "library"
+sources = ["src/Base64.cpp", "src/GraphQLResponse.cpp"]
+include-dirs = ["include"]
+links = "graphqlresponse"
+
+[target.graphqlservice]
+type = "library"
+sources = [
+  "src/GraphQLService.cpp",
+  "src/Introspection.cpp",
+  "src/Schema.cpp",
+  "src/Validation.cpp",
+  "src/introspection/DirectiveObject.cpp",
+  "src/introspection/EnumValueObject.cpp",
+  "src/introspection/FieldObject.cpp",
+  "src/introspection/InputValueObject.cpp",
+  "src/introspection/IntrospectionSchema.cpp",
+  "src/introspection/SchemaObject.cpp",
+  "src/introspection/TypeObject.cpp",
+]
+deps = [
+  { name = "graphqlpeg", public = true },
+  { name = "graphqlresponse", public = true },
+]
+links = "graphqlservice"
+
+[target.graphqlclient]
+type = "library"
+sources = ["src/GraphQLClient.cpp"]
+deps = [
+  { name = "graphqlpeg", public = true },
+  { name = "graphqlresponse", public = true },
+]
+links = "graphqlclient"
+
+[target.graphqljson]
+type = "library"
+sources = ["src/JSONResponse.cpp"]
+deps = [{ name = "graphqlresponse", public = true }, "cabin-ports/rapidjson"]
+links = "graphqljson"
