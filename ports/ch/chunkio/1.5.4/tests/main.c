@@ -139,8 +139,13 @@ int main(void)
     if (tmp == NULL || *tmp == '\0') {
         tmp = "/tmp";
     }
-    snprintf(root, sizeof(root), "%s/chunkio-test-%lu", tmp,
-             (unsigned long) time(NULL));
+    /* A truncated root could name TMPDIR itself, which the cleanup deletes. */
+    i = snprintf(root, sizeof(root), "%s/chunkio-test-%lu", tmp,
+                 (unsigned long) time(NULL));
+    if (i < 0 || i >= (int) sizeof(root)) {
+        fprintf(stderr, "FAIL: temporary path too long\n");
+        return 1;
+    }
     snprintf(path, sizeof(path), "%s/logs/c1.flb", root);
 
     ctx = open_root(root);
