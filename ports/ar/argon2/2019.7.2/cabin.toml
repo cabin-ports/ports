@@ -1,0 +1,43 @@
+[package.upstream]
+url = "https://github.com/P-H-C/phc-winner-argon2/archive/refs/tags/20190702.tar.gz"
+checksum = "sha256:daf972a89577f8772602bf2eb38b6a3dd3d922bf5724d45e7f9589b5e830442c"
+format = "tar.gz"
+strip-prefix = "phc-winner-argon2-20190702"
+
+[package]
+name = "cabin-ports/argon2"
+# Upstream's release 20190702 (2019-07-02) as YYYY.M.D; it has no X.Y.Z.
+version = "2019.7.2"
+# README.md:282-295: the core is CC0-1.0 OR Apache-2.0; src/encoding.c and src/blake2/ are CC0-1.0,
+# so CC0-1.0 covers every compiled file.
+license = "CC0-1.0"
+c-standard = "c11"
+include = ["LICENSE", "README.md", "CHANGELOG.md", "include", "src"]
+
+# Upstream's Makefile builds src/opt.c (SSE2) when the compiler accepts
+# -march=native and src/ref.c otherwise; that flag tunes for the build machine,
+# so the baseline instruction set is used here.
+# Not ported: the argon2 CLI, the shared library and upstream's NO_THREADS=1 option (Makefile:42-46, 165).
+[target.argon2]
+type = "library"
+links = "argon2"
+sources = [
+  "src/argon2.c",
+  "src/core.c",
+  "src/blake2/blake2b.c",
+  "src/thread.c",
+  "src/encoding.c",
+]
+include-dirs = ["include"]
+interface-c-standard = "c89"
+
+[target.'cfg(arch = "x86_64")'.sources]
+argon2 = ["src/opt.c"]
+
+[target.'cfg(not(arch = "x86_64"))'.sources]
+argon2 = ["src/ref.c"]
+
+# Upstream builds with -std=c89 (Makefile:40).
+# Makefile:42-46 builds with -pthread unless NO_THREADS=1.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
