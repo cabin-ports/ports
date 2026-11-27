@@ -1,0 +1,48 @@
+[package.upstream]
+url = "https://github.com/wolfgitpr/cpp-kana/archive/refs/tags/2.0.0.tar.gz"
+checksum = "sha256:665ecdbed20c7bdd8b8a61ef53c7f24907d8066e4d3be5b074a729cedc44d3aa"
+format = "tar.gz"
+strip-prefix = "cpp-kana-2.0.0"
+
+# Upstream's 2.x line is the package cpp-kana2 (project, pkg-config file and the
+# <cpp-kana2/...> include prefix); the cpp-kana of vcpkg is the 1.x line, which
+# has other headers and is not ported.
+[package]
+name = "cabin-ports/cpp-kana2"
+version = "2.0.0"
+license = "Apache-2.0"
+include = ["LICENSE", "include", "src"]
+
+# Not ported: the Python and C# bindings, the tests, tools and docs, and the
+# data/ files upstream installs (the mora table is compiled in; none is read
+# at run time).  The sources of CMakeLists.txt:99-110, built static as
+# upstream's static build does (:136-144).  C++17 is upstream's stated standard (README.md:5,
+# CMakeLists.txt:8-10); the C header compiles as C99 in upstream's smoke test
+# (tests/CMakeLists.txt:30-32).
+[target.cpp-kana2]
+type = "library"
+sources = [
+  "src/c_api/c_api.cpp",
+  "src/core/Convert.cpp",
+  "src/core/Mora.cpp",
+  "src/data/Tables.cpp",
+  "src/infra/CodeText.cpp",
+  "src/infra/Unicode.cpp",
+  "src/infra/Utf8.cpp",
+  "src/mora/KanaToRomaji.cpp",
+  "src/mora/Normalize.cpp",
+  "src/mora/RomajiToKana.cpp",
+  "src/mora/Segment.cpp",
+]
+include-dirs = ["include"]
+defines = ["CPP_KANA2_LIBRARY", "CPP_KANA2_STATIC"]
+interface-defines = ["CPP_KANA2_STATIC"]
+cxx-standard = "c++17"
+links = "cpp-kana2"
+interface-cxx-standard = "c++17"
+interface-c-standard = "c99"
+
+# The sources include each other's private headers from src/
+# (CMakeLists.txt:295).
+[profile]
+include-dirs = ["src"]
