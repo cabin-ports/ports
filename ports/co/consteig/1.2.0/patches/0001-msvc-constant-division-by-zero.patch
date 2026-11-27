@@ -1,0 +1,16 @@
+--- a/include/consteig/math/functions/utilities.hpp
++++ b/include/consteig/math/functions/utilities.hpp
+@@ -127,7 +127,13 @@
+ {
+     if constexpr (is_float<T>())
+     {
++// Changed for cabin-ports on 2026-11-27: MSVC rejects a constant 0.0 / 0.0 (C2124).
++#if defined(_MSC_VER) && !defined(__clang__)
++        T zero = static_cast<T>(0.0);
++        return zero / zero;
++#else
+         return static_cast<T>(0.0) / static_cast<T>(0.0);
++#endif
+     }
+     else
+     {
