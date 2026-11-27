@@ -1,0 +1,37 @@
+[package.upstream]
+# asmtk has no tags or releases and no version in its sources, so the version
+# is the date (2025-12-28) of this master commit.  Earlier commits call the
+# camelCase asmjit API that cabin-ports/asmjit 1.21.0 no longer has.
+url = "https://github.com/asmjit/asmtk/archive/1261a46fabb0b353be1f52ff77b0245aa9c170f4.tar.gz"
+checksum = "sha256:f2761379e64a761f227be6e68a41257f0f39b09ab70e171ec09cca0525d9eab5"
+format = "tar.gz"
+strip-prefix = "asmtk-1261a46fabb0b353be1f52ff77b0245aa9c170f4"
+
+[package]
+name = "cabin-ports/asmtk"
+version = "2025.12.28"
+license = "Zlib"
+# test/ is left out: its cases credit XEDParse's tests (LGPL-3.0), a term this
+# package does not carry.
+include = ["LICENSE.md", "src"]
+
+[dependencies]
+"cabin-ports/asmjit" = "^1.21.0"
+
+# Upstream's asmtk library (CMakeLists.txt:164-188), static.  The private flags
+# at :68-91 are warnings and optimisations that no source needs, so they are
+# not reproduced.  Consumers write <asmtk/asmtk.h>.  Not ported:
+# tools/ and test/.
+[target.asmtk]
+type = "library"
+sources = ["src/asmtk/asmparser.cpp", "src/asmtk/asmtokenizer.cpp"]
+include-dirs = ["src"]
+# C++17 per CMakeLists.txt:165.
+cxx-standard = "c++17"
+# Upstream's static build defines ASMTK_STATIC for the library and its
+# consumers (CMakeLists.txt:101-104, :166); without it, src/asmtk/globals.h:25-41
+# marks the API dllimport on Windows.
+defines = ["ASMTK_STATIC"]
+interface-defines = ["ASMTK_STATIC"]
+links = "asmtk"
+deps = [{ name = "cabin-ports/asmjit", public = true }]
