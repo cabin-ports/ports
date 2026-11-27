@@ -1,0 +1,92 @@
+[package.upstream]
+url = "https://github.com/cginternals/cppfs/archive/refs/tags/v1.3.0.tar.gz"
+checksum = "sha256:6d1b84490d02b85473d627dcdbe491a615f3c75e25da9d7c32a7825e168242e5"
+format = "tar.gz"
+strip-prefix = "cppfs-1.3.0"
+# The public headers include cppfs/cppfs_api.h, which CMake's
+# generate_export_header writes (source/cppfs/CMakeLists.txt:173-176).  The
+# patch adds it as CMake writes it for the static library, with CPPFS_API and
+# CPPFS_NO_EXPORT empty under CPPFS_STATIC_DEFINE.
+patches = ["patches/0001-add-the-generated-export-header.patch"]
+
+[package]
+name = "cabin-ports/cppfs"
+version = "1.3.0"
+# LICENSE is the MIT text; source/cppfs/3rdparty/basen is MIT as well
+# (Copyright (C) 2012 Andrzej Zawadzki).
+license = "MIT"
+include = ["AUTHORS", "LICENSE", "patches", "source/cppfs"]
+# Upstream states C++11 (cmake/CompileOptions.cmake:22); cl has no
+# /std:c++11, so the build lowers to C++14.
+cxx-standard = "c++14"
+
+# The static library; upstream builds shared by default
+# (CMakeLists.txt:66).  Not ported: the ssh backend
+# (OPTION_BUILD_SSH_BACKEND, off by default), which needs libssh2 and
+# OpenSSL; without it ssh:// URLs open an empty handle and fs::sha1 returns
+# an empty string (measured by the consumer test).  Not reproduced: the
+# warning flags.
+[target.cppfs]
+type = "library"
+sources = [
+  "source/cppfs/source/AbstractFileHandleBackend.cpp",
+  "source/cppfs/source/AbstractFileIteratorBackend.cpp",
+  "source/cppfs/source/AbstractFileSystem.cpp",
+  "source/cppfs/source/AbstractFileWatcherBackend.cpp",
+  "source/cppfs/source/Change.cpp",
+  "source/cppfs/source/Diff.cpp",
+  "source/cppfs/source/FileEventHandler.cpp",
+  "source/cppfs/source/FileHandle.cpp",
+  "source/cppfs/source/FileIterator.cpp",
+  "source/cppfs/source/FilePath.cpp",
+  "source/cppfs/source/FileVisitor.cpp",
+  "source/cppfs/source/FileWatcher.cpp",
+  "source/cppfs/source/fs.cpp",
+  "source/cppfs/source/FunctionalFileEventHandler.cpp",
+  "source/cppfs/source/FunctionalFileVisitor.cpp",
+  "source/cppfs/source/InputStream.cpp",
+  "source/cppfs/source/LoginCredentials.cpp",
+  "source/cppfs/source/OutputStream.cpp",
+  "source/cppfs/source/system.cpp",
+  "source/cppfs/source/Tree.cpp",
+  "source/cppfs/source/Url.cpp",
+]
+include-dirs = ["source/cppfs/include"]
+defines = ["CPPFS_STATIC_DEFINE"]
+interface-defines = ["CPPFS_STATIC_DEFINE"]
+interface-cxx-standard = "c++11"
+links = "cppfs"
+
+# fs.cpp and FileHandle.cpp include <basen/basen.hpp>, which no public
+# header does.
+[profile]
+include-dirs = ["source/cppfs/3rdparty"]
+
+[target.'cfg(family = "unix")'.sources]
+cppfs = [
+  "source/cppfs/source/posix/LocalFileSystem.cpp",
+  "source/cppfs/source/posix/LocalFileHandle.cpp",
+  "source/cppfs/source/posix/LocalFileIterator.cpp",
+]
+
+[target.'cfg(os = "linux")'.sources]
+cppfs = ["source/cppfs/source/linux/LocalFileWatcher.cpp"]
+
+[target.'cfg(os = "windows")'.sources]
+cppfs = [
+  "source/cppfs/source/windows/LocalFileSystem.cpp",
+  "source/cppfs/source/windows/LocalFileHandle.cpp",
+  "source/cppfs/source/windows/LocalFileIterator.cpp",
+  "source/cppfs/source/windows/LocalFileWatcher.cpp",
+]
+
+# SYSTEM_<OS>, which upstream defines from the CMake system name
+# (cmake/CompileOptions.cmake:47-49) and the sources read.
+[target.'cfg(os = "linux")'.profile]
+defines = ["SYSTEM_LINUX"]
+
+[target.'cfg(os = "macos")'.profile]
+defines = ["SYSTEM_DARWIN"]
+
+[target.'cfg(os = "windows")'.profile]
+defines = ["SYSTEM_WINDOWS"]
