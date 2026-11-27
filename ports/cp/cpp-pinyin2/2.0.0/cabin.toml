@@ -1,0 +1,63 @@
+[package.upstream]
+url = "https://github.com/wolfgitpr/cpp-pinyin/archive/refs/tags/v2.0.0.tar.gz"
+checksum = "sha256:f2b96e5891f6c0626bb2bee532ddd02b21060b2e86b11f3db7169bf09abe053a"
+format = "tar.gz"
+strip-prefix = "cpp-pinyin-2.0.0"
+
+[package]
+name = "cabin-ports/cpp-pinyin2"
+version = "2.0.0"
+# Upstream's 2.x line is named cpp-pinyin2 (CMake project, pkg-config file, and
+# the <cpp-pinyin2/...> include prefix).
+# src/toneUtil/ManTone.cpp:262 credits pypinyin (MIT) for the tables it ports.
+license = "Apache-2.0 AND MIT"
+include = ["LICENSE", "README.md", "THIRD_PARTY_NOTICES.md", "include", "src"]
+cxx-standard = "c++17"
+
+# Not ported: the dictionaries under data/ (CC BY-SA, so not packaged).  The
+# library loads them at run time from the directory a consumer passes to
+# Engine::open or cppp2_open; upstream's static build has no default path, and
+# CPP_PINYIN2_EMBED_DICTS needs upstream's Python generator.
+[target.cpp-pinyin2]
+type = "library"
+links = "cpp-pinyin2"
+sources = [
+  "src/Cantonese.cpp",
+  "src/DictLocation.cpp",
+  "src/Engine.cpp",
+  "src/EngineImpl.cpp",
+  "src/EngineImplLoad.cpp",
+  "src/G2pglobal.cpp",
+  "src/Mandarin.cpp",
+  "src/Outcome.cpp",
+  "src/Result.cpp",
+  "src/ToneConverter.cpp",
+  "src/ToneSandhi.cpp",
+  "src/U16Str.cpp",
+  "src/c_api_lifecycle.cpp",
+  "src/c_api_query.cpp",
+  "src/dict/DictManifest.cpp",
+  "src/dict/DictUtil.cpp",
+  "src/dict/EmbeddedTables.cpp",
+  "src/dict/PhraseIndex.cpp",
+  "src/dict/PhraseLayers.cpp",
+  "src/toneUtil/CanTone.cpp",
+  "src/toneUtil/ManTone.cpp",
+  "src/toneUtil/ManToneUtil.cpp",
+  "src/toneUtil/ReadingCodec.cpp",
+]
+include-dirs = ["include"]
+defines = [
+  "CPP_PINYIN2_LIBRARY",
+  "CPP_PINYIN2_STATIC",
+  'CPP_PINYIN2_VERSION_STRING="2.0.0"',
+]
+interface-defines = ["CPP_PINYIN2_STATIC"]
+# README.md states C++17.  The C API's C standard is upstream's C99 smoke
+# test (tests/CMakeLists.txt).
+interface-c-standard = "c99"
+interface-cxx-standard = "c++17"
+
+# Private include directories of the library's own sources (CMakeLists.txt).
+[profile]
+include-dirs = ["src", "src/toneUtil"]
