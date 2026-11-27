@@ -1,0 +1,12 @@
+[package]
+name = "cxx20"
+version = "0.0.0"
+
+[dependencies]
+"cabin-ports/bento4" = "=1.6.0"
+
+[target.cxx20]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/bento4"]
+cxx-standard = "c++20"
