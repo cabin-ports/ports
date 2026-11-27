@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/likle/cargs/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:0b33379e3d3c8cb3e22f33d3e1a260adcd366970868bc9b7c47237f24188ff25"
+format = "tar.gz"
+strip-prefix = "cargs-1.2.0"
+
+[package]
+name = "cabin-ports/cargs"
+version = "1.2.0"
+license = "MIT"
+include = ["LICENSE.md", "README.md", "include", "src"]
+
+[target.cargs]
+type = "library"
+sources = ["src/cargs.c"]
+include-dirs = ["include"]
+# CMakeLists.txt sets CMAKE_C_STANDARD 11, the standard declared for both
+# the build and consumers; the header alone compiles as C++98 (measured).
+c-standard = "c11"
+interface-c-standard = "c11"
+interface-cxx-standard = "c++98"
+links = "cargs"
