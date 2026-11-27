@@ -9,7 +9,10 @@ strip-prefix = "box2d-3.2.0"
 # fuses multiply-adds on arm64 (measured).  GCC already keeps them apart
 # under the strict -std=c17 Cabin passes (measured), and MSVC's default
 # /fp:precise is upstream's setting.
-# MIT License notice of the src/*.c files, whose lines 0001 carries (the
+# 0002 removes only contact_solver_w8.c's #error demanding /arch:AVX2 on
+# MSVC, which Cabin does not pass to cl (measured, check-windows: "fatal
+# error C1189: #error:  MSVC must compile this file with /arch:AVX2, ...").
+# MIT License notice of the src/*.c files, whose lines 0001 and 0002 carry (the
 # License's condition that copies include it):
 # Copyright (c) 2022 Erin Catto
 # SPDX-FileCopyrightText: 2023 Erin Catto
@@ -33,7 +36,10 @@ strip-prefix = "box2d-3.2.0"
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
-patches = ["patches/0001-reproduce-upstream-fp-contract-off.patch"]
+patches = [
+  "patches/0001-reproduce-upstream-fp-contract-off.patch",
+  "patches/0002-drop-msvc-arch-avx2-error.patch",
+]
 
 [package]
 name = "cabin-ports/box2d"
@@ -52,7 +58,8 @@ interface-cxx-standard = "c++11"
 # only when box2d is the top-level CMake project.  Not reproduced:
 # upstream's hidden symbol visibility, so a shared library linking this
 # archive exports Box2D's symbols (measured), and its /arch:AVX2 for
-# src/contact_solver_w8.c on MSVC, which Cabin does not pass to cl.
+# src/contact_solver_w8.c on MSVC, which Cabin does not pass to cl: cl
+# compiles that file's intrinsics without it (measured, check-windows).
 [target.box2d]
 type = "library"
 sources = [
