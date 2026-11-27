@@ -1,0 +1,58 @@
+[package.upstream]
+url = "https://github.com/facontidavide/cloudini/archive/refs/tags/1.5.1.tar.gz"
+checksum = "sha256:87b61b4f563b730fe868cc1c5c9a781cd32f4f87999616070b79b46426cbf949"
+format = "tar.gz"
+strip-prefix = "cloudini-1.5.1"
+
+[package]
+name = "cabin-ports/cloudini"
+version = "1.5.1"
+# MIT for the vendored contrib/ankerl (unordered_dense); BSD-3-Clause for the
+# CompressedPointCloud2 definition in ros_message_definitions.hpp, as its
+# SPDX tag states.
+license = "Apache-2.0 AND BSD-3-Clause AND MIT"
+include = ["LICENSE", "cloudini_lib/include", "cloudini_lib/src"]
+
+[dependencies]
+"cabin-ports/lz4" = "=1.11.0"
+"cabin-ports/zstd" = "=1.5.7"
+
+# The cloudini_lib library of cloudini_lib/CMakeLists.txt.  Not ported: the
+# tools, benchmarks, and the ROS, Foxglove, Python and web trees.
+[target.cloudini_lib]
+type = "library"
+sources = [
+  "cloudini_lib/src/chunk_writer.cpp",
+  "cloudini_lib/src/cloudini.cpp",
+  "cloudini_lib/src/codec_common.cpp",
+  "cloudini_lib/src/field_decoder.cpp",
+  "cloudini_lib/src/field_encoder.cpp",
+  "cloudini_lib/src/ros_msg_utils.cpp",
+  "cloudini_lib/src/v4_codec.cpp",
+  "cloudini_lib/src/v5_codec.cpp",
+  "cloudini_lib/src/v6_codec.cpp",
+]
+include-dirs = ["cloudini_lib/include"]
+# cxx_std_20, PUBLIC (cloudini_lib/CMakeLists.txt:140).
+cxx-standard = "c++20"
+interface-cxx-standard = "c++20"
+links = "cloudini_lib"
+deps = ["cabin-ports/lz4", "cabin-ports/zstd"]
+
+# As upstream's build (-msse4.1 on x86, CMakeLists.txt:185-190), x86 builds
+# assume an SSE4.1 CPU.
+[target.cloudini_lib.instruction-sets]
+"cloudini_lib/src/chunk_writer.cpp" = ["sse4.1"]
+"cloudini_lib/src/cloudini.cpp" = ["sse4.1"]
+"cloudini_lib/src/codec_common.cpp" = ["sse4.1"]
+"cloudini_lib/src/field_decoder.cpp" = ["sse4.1"]
+"cloudini_lib/src/field_encoder.cpp" = ["sse4.1"]
+"cloudini_lib/src/ros_msg_utils.cpp" = ["sse4.1"]
+"cloudini_lib/src/v4_codec.cpp" = ["sse4.1"]
+"cloudini_lib/src/v5_codec.cpp" = ["sse4.1"]
+"cloudini_lib/src/v6_codec.cpp" = ["sse4.1"]
+
+# PointcloudEncoder runs a worker thread; upstream links Threads::Threads
+# PUBLIC (CMakeLists.txt:172-183).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
