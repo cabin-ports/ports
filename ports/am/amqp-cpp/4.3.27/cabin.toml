@@ -1,0 +1,57 @@
+[package.upstream]
+url = "https://github.com/CopernicaMarketingSoftware/AMQP-CPP/archive/refs/tags/v4.3.27.tar.gz"
+checksum = "sha256:af649ef8b14076325387e0a1d2d16dd8395ff3db75d79cc904eb6c179c1982fe"
+format = "tar.gz"
+strip-prefix = "AMQP-CPP-4.3.27"
+
+[package]
+name = "cabin-ports/amqp-cpp"
+version = "4.3.27"
+# Apache-2.0: LICENSE.  include/amqpcpp/endian.h:9-18 credits code copied from
+# Mathias Panzenböck's portable_endian.h, which he places in the public
+# domain; the same terms as cabin-ports/panzi-portable-endian.
+license = "Apache-2.0 AND LicenseRef-panzi-portable-endian-public-domain"
+include = ["LICENSE", "include", "src"]
+cxx-standard = "c++17"
+
+# The core library, upstream's CMake default (AMQP-CPP_LINUX_TCP off): the
+# src/*.cpp sources (CMakeLists.txt:58).  VERSION is the macro upstream passes
+# to its own compiles (:28).  Not ported: the Linux TCP module, src/linux_tcp
+# and its handlers and event-loop adapter headers (AMQP-CPP_LINUX_TCP,
+# CMakeLists.txt:24, :61), and the shared library.
+# Limitation (measured, UBSan): without /proc/self/exe (macOS), a connection whose
+# properties lack product or connection_name makes src/programname.h:72 write
+# one byte before its buffer; set both in onProperties.
+[target.amqpcpp]
+type = "library"
+sources = [
+  "src/array.cpp",
+  "src/channel.cpp",
+  "src/channelimpl.cpp",
+  "src/connectionimpl.cpp",
+  "src/deferredcancel.cpp",
+  "src/deferredconfirm.cpp",
+  "src/deferredconsumer.cpp",
+  "src/deferredextreceiver.cpp",
+  "src/deferredget.cpp",
+  "src/deferredrecall.cpp",
+  "src/deferredreceiver.cpp",
+  "src/field.cpp",
+  "src/flags.cpp",
+  "src/inbuffer.cpp",
+  "src/receivedframe.cpp",
+  "src/table.cpp",
+  "src/tagger.cpp",
+  "src/throttle.cpp",
+  "src/watchable.cpp",
+]
+include-dirs = ["include"]
+defines = ["VERSION=4.3.27", "NOMINMAX"]
+# README.md:119 requires it of Windows consumers; it is inert elsewhere.
+interface-defines = ["NOMINMAX"]
+# README.md:45-46 states C++17.
+interface-cxx-standard = "c++17"
+links = "amqpcpp"
+
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32"]
