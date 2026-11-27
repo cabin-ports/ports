@@ -1,0 +1,120 @@
+[package.upstream]
+url = "https://github.com/MediaArea/ZenLib/archive/refs/tags/v0.4.41.tar.gz"
+checksum = "sha256:45d5173fa0278f5264daa6836ae297aa303984482227d00b35c4f03929494c8f"
+format = "tar.gz"
+strip-prefix = "ZenLib-0.4.41"
+
+[package]
+name = "cabin-ports/libzen"
+version = "0.4.41"
+# Source/ZenLib/OS_Utils.cpp:251 credits TBffolder by Torsten Johann for the
+# directory-selection code; its copyright significance is uncertain.
+# Source/ZenLib/int128u.cpp:32, int128s.cpp:32 and the int128u.h and int128s.h
+# headers (:22) credit Jan Ringos (2005) for the 128-bit integer code; their
+# copyright significance is uncertain.
+license = "Zlib"
+# Source/ZenLib/HTTP_Client/ (third-party HTTP client code that no target
+# builds) stays out of the package.
+include = [
+  "License.txt",
+  "debian/copyright",
+  "Source/ZenLib/Format",
+  "Source/ZenLib/BitStream.h",
+  "Source/ZenLib/BitStream_Fast.h",
+  "Source/ZenLib/BitStream_LE.h",
+  "Source/ZenLib/Conf.cpp",
+  "Source/ZenLib/Conf.h",
+  "Source/ZenLib/Conf_Internal.h",
+  "Source/ZenLib/CriticalSection.cpp",
+  "Source/ZenLib/CriticalSection.h",
+  "Source/ZenLib/Dir.cpp",
+  "Source/ZenLib/Dir.h",
+  "Source/ZenLib/File.cpp",
+  "Source/ZenLib/File.h",
+  "Source/ZenLib/FileName.cpp",
+  "Source/ZenLib/FileName.h",
+  "Source/ZenLib/InfoMap.cpp",
+  "Source/ZenLib/InfoMap.h",
+  "Source/ZenLib/int128s.cpp",
+  "Source/ZenLib/int128s.h",
+  "Source/ZenLib/int128u.cpp",
+  "Source/ZenLib/int128u.h",
+  "Source/ZenLib/MemoryDebug.cpp",
+  "Source/ZenLib/MemoryDebug.h",
+  "Source/ZenLib/MemoryUtils.h",
+  "Source/ZenLib/OS_Utils.cpp",
+  "Source/ZenLib/OS_Utils.h",
+  "Source/ZenLib/PreComp.cpp",
+  "Source/ZenLib/PreComp.h",
+  "Source/ZenLib/Thread.cpp",
+  "Source/ZenLib/Thread.h",
+  "Source/ZenLib/Trace.h",
+  "Source/ZenLib/Translation.cpp",
+  "Source/ZenLib/Translation.h",
+  "Source/ZenLib/Utils.cpp",
+  "Source/ZenLib/Utils.h",
+  "Source/ZenLib/Ztring.cpp",
+  "Source/ZenLib/Ztring.h",
+  "Source/ZenLib/ZtringList.cpp",
+  "Source/ZenLib/ZtringList.h",
+  "Source/ZenLib/ZtringListList.cpp",
+  "Source/ZenLib/ZtringListList.h",
+  "Source/ZenLib/ZtringListListF.cpp",
+  "Source/ZenLib/ZtringListListF.h",
+]
+
+# The static library upstream's CMake builds from its 23 listed sources
+# (Project/CMake/CMakeLists.txt:84-108), with its default UNICODE definitions.
+# HTTP_Client.cpp and the HTTP_Client/ C files are not built there either.
+# The HAVE_*_R definitions are the results of upstream's check_symbol_exists
+# for gmtime_r and localtime_r, which hold on Unix.  Upstream's CMake standard
+# is C++11 (:165-167); C++14 is the oldest standard Cabin can request from MSVC.
+# Upstream's int128u division is wrong for large power-of-two divisors:
+# 2^100 / 2^98 yields 7 and 2^64 / 2^64 does not terminate (measured, clang -O0).
+[target.zen]
+type = "library"
+sources = [
+  "Source/ZenLib/Conf.cpp",
+  "Source/ZenLib/CriticalSection.cpp",
+  "Source/ZenLib/Dir.cpp",
+  "Source/ZenLib/File.cpp",
+  "Source/ZenLib/FileName.cpp",
+  "Source/ZenLib/Format/Html/Html_Handler.cpp",
+  "Source/ZenLib/Format/Html/Html_Request.cpp",
+  "Source/ZenLib/Format/Http/Http_Cookies.cpp",
+  "Source/ZenLib/Format/Http/Http_Handler.cpp",
+  "Source/ZenLib/Format/Http/Http_Request.cpp",
+  "Source/ZenLib/Format/Http/Http_Utils.cpp",
+  "Source/ZenLib/InfoMap.cpp",
+  "Source/ZenLib/Thread.cpp",
+  "Source/ZenLib/Translation.cpp",
+  "Source/ZenLib/Utils.cpp",
+  "Source/ZenLib/Ztring.cpp",
+  "Source/ZenLib/ZtringList.cpp",
+  "Source/ZenLib/ZtringListList.cpp",
+  "Source/ZenLib/ZtringListListF.cpp",
+  "Source/ZenLib/int128s.cpp",
+  "Source/ZenLib/int128u.cpp",
+  "Source/ZenLib/MemoryDebug.cpp",
+  "Source/ZenLib/OS_Utils.cpp",
+]
+include-dirs = ["Source"]
+defines = ["UNICODE", "_UNICODE"]
+interface-defines = ["UNICODE", "_UNICODE"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "zen"
+
+# Upstream's CMake links the Threads library (CMakeLists.txt:128-131); CMake
+# builds also get libm from the toolchain, which the fmod calls in int128u.cpp
+# and int128s.cpp need on Linux.  _FILE_OFFSET_BITS=64 is upstream's LARGE_FILES
+# default (CMakeLists.txt:133-137), which CMake adds only where the platform needs it.
+[target.'cfg(family = "unix")'.profile]
+defines = ["HAVE_GMTIME_R", "HAVE_LOCALTIME_R", "_FILE_OFFSET_BITS=64"]
+link-libs = ["pthread", "m"]
+
+# OS_Utils.cpp calls ShellExecute and the SHBrowseForFolder family (shell32)
+# and SetWindowText and SendMessage (user32), which CMake's default MSVC
+# link libraries supply to upstream's build.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["shell32", "user32"]
