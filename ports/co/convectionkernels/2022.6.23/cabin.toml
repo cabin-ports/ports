@@ -1,0 +1,78 @@
+[package.upstream]
+url = "https://github.com/elasota/ConvectionKernels/archive/350416daa4e98f1c17ffc273b134d0120a2ef230.tar.gz"
+checksum = "sha256:955df000fff2480962509bfbea767bb1c53b5b29883aba94ad832ad42f075803"
+format = "tar.gz"
+strip-prefix = "ConvectionKernels-350416daa4e98f1c17ffc273b134d0120a2ef230"
+
+# Consumers write <ConvectionKernels.h> as README.md does; the other headers stay private.
+[[package.upstream.copy]]
+from = "ConvectionKernels.h"
+to = "include/ConvectionKernels.h"
+
+[package]
+name = "cabin-ports/convectionkernels"
+# Upstream has no tags or declared version; the version is YYYY.M.D of the pinned commit (2022-06-23).
+version = "2022.6.23"
+# MIT: LICENSE.txt, and the file headers which credit DirectXTex, also MIT.
+license = "MIT"
+include = [
+  "LICENSE.txt",
+  "ConvectionKernels.h",
+  "ConvectionKernels_API.cpp",
+  "ConvectionKernels_BC67.cpp",
+  "ConvectionKernels_BC6H_IO.cpp",
+  "ConvectionKernels_BC7_PrioData.cpp",
+  "ConvectionKernels_BCCommon.cpp",
+  "ConvectionKernels_ETC.cpp",
+  "ConvectionKernels_IndexSelector.cpp",
+  "ConvectionKernels_S3TC.cpp",
+  "ConvectionKernels_Util.cpp",
+  "ConvectionKernels_AggregatedError.h",
+  "ConvectionKernels_BC67.h",
+  "ConvectionKernels_BC6H_IO.h",
+  "ConvectionKernels_BC7_Prio.h",
+  "ConvectionKernels_BC7_SingleColor.h",
+  "ConvectionKernels_BCCommon.h",
+  "ConvectionKernels_Config.h",
+  "ConvectionKernels_EndpointRefiner.h",
+  "ConvectionKernels_EndpointSelector.h",
+  "ConvectionKernels_ETC.h",
+  "ConvectionKernels_ETC1.h",
+  "ConvectionKernels_ETC2.h",
+  "ConvectionKernels_ETC2_Rounding.h",
+  "ConvectionKernels_FakeBT709_Rounding.h",
+  "ConvectionKernels_IndexSelector.h",
+  "ConvectionKernels_IndexSelectorHDR.h",
+  "ConvectionKernels_PackedCovarianceMatrix.h",
+  "ConvectionKernels_ParallelMath.h",
+  "ConvectionKernels_S3TC.h",
+  "ConvectionKernels_S3TC_SingleColor.h",
+  "ConvectionKernels_UnfinishedEndpoints.h",
+  "ConvectionKernels_Util.h",
+  "include",
+]
+
+# The nine code-bearing sources of ConvectionKernels.vcxproj; ConvectionKernels_SingleFile.cpp
+# is an empty translation unit unless CVTT_SINGLE_FILE is defined.  The SSE2 kernels are
+# selected by compiler-predefined macros (ConvectionKernels_Config.h).  Upstream states no
+# standard; c++14 is the oldest cl accepts.  The interface floor measured with clang
+# -pedantic-errors is C++11 (c++98 fails at ConvectionKernels.h:184, "long long").
+# Not ported: etc2packer and MakeTables.
+[target.convectionkernels]
+type = "library"
+links = "ConvectionKernels"
+sources = [
+  "ConvectionKernels_API.cpp",
+  "ConvectionKernels_BC67.cpp",
+  "ConvectionKernels_BC6H_IO.cpp",
+  "ConvectionKernels_BC7_PrioData.cpp",
+  "ConvectionKernels_BCCommon.cpp",
+  "ConvectionKernels_ETC.cpp",
+  "ConvectionKernels_IndexSelector.cpp",
+  "ConvectionKernels_S3TC.cpp",
+  "ConvectionKernels_Util.cpp",
+]
+include-dirs = ["include"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+interface-c-standard = "none"
