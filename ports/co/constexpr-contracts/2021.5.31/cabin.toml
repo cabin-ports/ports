@@ -11,7 +11,9 @@ version = "2021.5.31"
 license = "Apache-2.0 WITH LLVM-exception"
 include = ["LICENSE.md", "README.md", "include"]
 
-# C++20 (CMakeLists.txt:11).
+# C++20 (CMakeLists.txt:11).  With cl, a contract that fails in a constant
+# expression is not a compile error, unlike GCC and Clang (measured,
+# check-windows: "main.cc(34): error C2607: static assertion failed").
 [target.constexpr-contracts]
 type = "header-only"
 include-dirs = ["include"]
