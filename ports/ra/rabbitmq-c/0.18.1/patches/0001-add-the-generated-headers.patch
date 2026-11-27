@@ -1,0 +1,88 @@
+--- /dev/null
++++ b/include/rabbitmq-c/export.h
+@@ -0,0 +1,48 @@
++
++#ifndef RABBITMQ_C_EXPORT_H
++#define RABBITMQ_C_EXPORT_H
++
++#ifdef AMQP_STATIC
++#  define AMQP_EXPORT
++#  define AMQP_NO_EXPORT
++#else
++#  ifndef AMQP_EXPORT
++#    ifdef rabbitmq_EXPORTS
++        /* We are building this library */
++#      define AMQP_EXPORT 
++#    else
++        /* We are using this library */
++#      define AMQP_EXPORT 
++#    endif
++#  endif
++
++#  ifndef AMQP_NO_EXPORT
++#    define AMQP_NO_EXPORT 
++#  endif
++#endif
++
++/* CMake writes __declspec(deprecated) where WIN32 is set. */
++#ifndef AMQP_DEPRECATED
++#  ifdef _WIN32
++#    define AMQP_DEPRECATED __declspec(deprecated)
++#  else
++#    define AMQP_DEPRECATED __attribute__ ((__deprecated__))
++#  endif
++#endif
++
++#ifndef AMQP_DEPRECATED_EXPORT
++#  define AMQP_DEPRECATED_EXPORT AMQP_EXPORT AMQP_DEPRECATED
++#endif
++
++#ifndef AMQP_DEPRECATED_NO_EXPORT
++#  define AMQP_DEPRECATED_NO_EXPORT AMQP_NO_EXPORT AMQP_DEPRECATED
++#endif
++
++/* NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if) */
++#if 0 /* DEFINE_NO_DEPRECATED */
++#  ifndef AMQP_NO_DEPRECATED
++#    define AMQP_NO_DEPRECATED
++#  endif
++#endif
++
++#endif /* RABBITMQ_C_EXPORT_H */
+--- /dev/null
++++ b/librabbitmq/config.h
+@@ -0,0 +1,34 @@
++#ifndef CONFIG_H
++#define CONFIG_H
++
++/* Windows has no poll.h, so CMake selects select() there. */
++#ifdef _WIN32
++#define HAVE_SELECT
++#else
++#define HAVE_POLL
++#endif
++
++/* Upstream enables the ENGINE API when the OpenSSL it finds has it. */
++#include <openssl/configuration.h>
++#ifndef OPENSSL_NO_ENGINE
++#define ENABLE_SSL_ENGINE_API
++#endif
++
++/* CMake writes CMAKE_SYSTEM_NAME of the target. */
++#if defined(_WIN32)
++#define AMQ_PLATFORM "Windows"
++#elif defined(__APPLE__)
++#define AMQ_PLATFORM "Darwin"
++#elif defined(__ANDROID__)
++#define AMQ_PLATFORM "Android"
++#elif defined(__linux__)
++#define AMQ_PLATFORM "Linux"
++#elif defined(__FreeBSD__)
++#define AMQ_PLATFORM "FreeBSD"
++#elif defined(__NetBSD__)
++#define AMQ_PLATFORM "NetBSD"
++#elif defined(__OpenBSD__)
++#define AMQ_PLATFORM "OpenBSD"
++#endif
++
++#endif /* CONFIG_H */

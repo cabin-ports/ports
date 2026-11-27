@@ -1,0 +1,87 @@
+[package.upstream]
+url = "https://github.com/alanxz/rabbitmq-c/archive/refs/tags/v0.18.1.tar.gz"
+checksum = "sha256:0779bd4f00175ff2f722f9dc43b542bea3bc606ed079e7099fa8a18627c2ddc9"
+format = "tar.gz"
+strip-prefix = "rabbitmq-c-0.18.1"
+# Patch 0001 adds the two headers CMake generates, as it writes them for
+# the static library: include/rabbitmq-c/export.h, which every public
+# header includes (generate_export_header, librabbitmq/CMakeLists.txt), with
+# AMQP_EXPORT and AMQP_NO_EXPORT empty under AMQP_STATIC; and
+# librabbitmq/config.h from cmake/config.h.in, with HAVE_POLL off Windows,
+# HAVE_SELECT on Windows, and AMQ_PLATFORM, which CMake takes from the
+# target system name, chosen by the compiler's predefined macros.  The
+# compiler-dependent values are left to the preprocessor.
+# ENABLE_SSL_ENGINE_API follows OPENSSL_NO_ENGINE, which OpenSSL 4 defines
+# because it removed ENGINE; upstream turns it on when the OpenSSL it finds
+# has ENGINE_new.  Against OpenSSL 4, amqp_set_ssl_engine and
+# amqp_ssl_socket_set_key_engine return AMQP_STATUS_SSL_UNIMPLEMENTED.
+patches = ["patches/0001-add-the-generated-headers.patch"]
+
+[package]
+name = "cabin-ports/rabbitmq-c"
+version = "0.18.1"
+# LICENSE is the MIT License; the files under include/ and librabbitmq/
+# carry "SPDX-License-Identifier: mit".
+license = "MIT"
+include = ["AUTHORS", "LICENSE", "include", "librabbitmq", "patches"]
+
+# Requests the openssl port's own build of OpenSSL in place of the system's.
+[features]
+vendored-openssl = ["cabin-ports/openssl/vendored"]
+
+[dependencies]
+"cabin-ports/openssl" = "=4.1.0"
+
+# The static library CMake builds (librabbitmq/CMakeLists.txt) with its
+# default ENABLE_SSL_SUPPORT=ON, so amqp_openssl.c and amqp_openssl_bio.c are
+# built in and OpenSSL's ssl library is linked.  Consumers include
+# <rabbitmq-c/amqp.h>, <rabbitmq-c/tcp_socket.h> and <rabbitmq-c/ssl_socket.h>;
+# the deprecated <amqp.h> shims sit in include/ as upstream installs them.
+# Upstream's CMAKE_C_STANDARD is 99 with extensions; the build is strict C11,
+# the oldest standard Cabin can lower for MSVC.  Not ported: the shared
+# library, tools/, examples/, and the CMake and pkg-config files.
+[target.rabbitmq]
+type = "library"
+sources = [
+  "librabbitmq/amqp_api.c",
+  "librabbitmq/amqp_connection.c",
+  "librabbitmq/amqp_consumer.c",
+  "librabbitmq/amqp_framing.c",
+  "librabbitmq/amqp_mem.c",
+  "librabbitmq/amqp_openssl.c",
+  "librabbitmq/amqp_openssl_bio.c",
+  "librabbitmq/amqp_socket.c",
+  "librabbitmq/amqp_table.c",
+  "librabbitmq/amqp_tcp_socket.c",
+  "librabbitmq/amqp_time.c",
+  "librabbitmq/amqp_url.c",
+]
+include-dirs = ["include"]
+defines = ["HAVE_CONFIG_H", "AMQP_STATIC"]
+# Upstream makes it public (PUBLIC -DAMQP_STATIC).
+interface-defines = ["AMQP_STATIC"]
+c-standard = "c11"
+interface-c-standard = "c99"
+links = "rabbitmq"
+deps = [{ name = "cabin-ports/openssl:ssl" }]
+
+# amqp_openssl.c includes "threads.h", which upstream takes from win32/ or
+# unix/ (librabbitmq/CMakeLists.txt).
+[target.'cfg(os = "windows")'.sources]
+rabbitmq = ["librabbitmq/win32/threads.c"]
+
+[target.'cfg(os = "windows")'.profile]
+include-dirs = ["librabbitmq/win32"]
+link-libs = ["ws2_32"]
+
+[target.'cfg(family = "unix")'.profile]
+include-dirs = ["librabbitmq/unix"]
+link-libs = ["pthread"]
+
+# clock_gettime needs librt on older glibc (CLOCK_GETTIME_NEEDS_LIBRT).
+# Upstream builds a GNU dialect (CMakeLists.txt:31 CMAKE_C_EXTENSIONS ON), where
+# glibc declares addrinfo and strdup; _DEFAULT_SOURCE restores that under
+# -std=c11 (measured: check-linux, amqp_socket.c:368 'struct addrinfo' undefined).
+[target.'cfg(os = "linux")'.profile]
+defines = ["_DEFAULT_SOURCE"]
+link-libs = ["rt"]
