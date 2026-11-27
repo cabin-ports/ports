@@ -3,6 +3,37 @@ url = "https://github.com/slembcke/Chipmunk2D/archive/refs/tags/Chipmunk-7.0.3.t
 checksum = "sha256:1e6f093812d6130e45bdf4cb80280cb3c93d1e1833d8cf989d554d7963b7899a"
 format = "tar.gz"
 strip-prefix = "Chipmunk2D-Chipmunk-7.0.3"
+# Patch 0001 includes <sys/sysctl.h> only on Apple, as upstream 9a051e6f does
+# (measured, check-linux: "sys/sysctl.h: No such file or directory"; glibc
+# 2.32 removed it).  Patch 0002 gives the three empty pthread shim structs
+# for Windows one dummy member (measured, check-windows: C2016 "C requires
+# that a struct or union have at least one member"); upstream builds the
+# sources as C++ on MSVC.
+# MIT License notice of src/cpHastySpace.c, whose lines the patches carry (the
+# License's condition that copies include it), from upstream's LICENSE.txt:
+# Copyright (c) 2007-2015 Scott Lembcke and Howling Moon Software
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+patches = [
+  "patches/0001-include-sysctl-only-on-apple.patch",
+  "patches/0002-give-empty-structs-a-member.patch",
+]
 
 [package]
 name = "cabin-ports/chipmunk2d"
@@ -10,7 +41,7 @@ version = "7.0.3"
 # src/cpHastySpace.c:40 credits cs.wustl.edu/~schmidt/win32-cv-1.html for the
 # Windows condition variable; its copyright significance is uncertain.
 license = "MIT"
-include = ["LICENSE.txt", "include", "src"]
+include = ["LICENSE.txt", "include", "patches", "src"]
 
 # Named chipmunk2d as upstream and ConanCenter do; vcpkg calls it chipmunk.
 # Upstream builds with -std=gnu99 and, in Release, -ffast-math (CMakeLists.txt);
