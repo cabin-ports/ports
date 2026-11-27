@@ -1,0 +1,19 @@
+[package]
+name = "embed"
+version = "0.0.0"
+
+# The header, for main.cc and the source build.c generates.
+[dependencies]
+"cabin-ports/ankurvdev-embedresource" = "=0.0.12"
+
+# Built for the machine the build runs on; `build.c` runs the executable.
+[build-dependencies]
+"cabin-ports/ankurvdev-embedresource" = { version = "=0.0.12", targets = ["embedresource"] }
+
+[target.embed]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/ankurvdev-embedresource"]
+# C++20, so main.cc reaches the span API, which the header offers only
+# there; tests/main.cc covers the header at C++17.
+cxx-standard = "c++20"
