@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/moemoequte/rcon/archive/b7b76f82c2d3494ee1ec5ab9ee70bf21d85c9e44.tar.gz"
+checksum = "sha256:3eeaa095750d554682a039d9952f2ca7a7df219c887e573e813bc32ce50f9943"
+format = "tar.gz"
+strip-prefix = "rcon-b7b76f82c2d3494ee1ec5ab9ee70bf21d85c9e44"
+
+# Upstream has no tags: the version is RCON_VERSION in include/rcon.hpp at this
+# commit.
+[package]
+name = "cabin-ports/cialloo-rcon"
+version = "1.0.1"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+[dependencies]
+"cabin-ports/asio" = "=1.38.2"
+
+# Upstream states no standard (no build files); C++11 is measured.
+# The header defines its functions without inline, so a program that includes it
+# from two translation units fails to link with duplicate symbols (measured,
+# clang++ -std=c++14); include it from one.
+[target.cialloo-rcon]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+deps = [{ name = "cabin-ports/asio", public = true }]
