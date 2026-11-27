@@ -1,0 +1,68 @@
+[package.upstream]
+url = "https://github.com/jeremydumais/CPP-SMTPClient-library/archive/refs/tags/v1.1.14.tar.gz"
+checksum = "sha256:de525707607b45c74467aec81f729b7f00798fae904c9d03cd68be7b72034883"
+format = "tar.gz"
+strip-prefix = "CPP-SMTPClient-library-1.1.14"
+
+[package]
+# vcpkg's and ConanCenter's name for upstream's smtpclient library.
+name = "cabin-ports/cpp-smtpclient-library"
+version = "1.1.14"
+# LICENSE is MIT; src/base64.cpp is under the zlib license (lines 1-27).
+license = "MIT AND Zlib"
+include = ["CHANGELOG.md", "LICENSE", "README.md", "src"]
+# Upstream builds C++17 where the compiler offers it and requires C++14
+# (CMakeLists.txt:66-87).
+cxx-standard = "c++17"
+interface-cxx-standard = "c++14"
+
+[dependencies]
+"cabin-ports/openssl" = "=4.1.0"
+
+# Requests the openssl port's own build of OpenSSL in place of the system's;
+# that build is refused on Windows.
+[features]
+vendored-openssl = ["cabin-ports/openssl/vendored"]
+
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32", "crypt32", "cryptui"]
+
+# Not reproduced: the smtpclient/ directory upstream's install puts the
+# 31 headers in (CMakeLists.txt:305-308), which 16 copy steps cannot build.
+[target.smtpclient]
+type = "library"
+sources = [
+  "src/attachment.cpp",
+  "src/base64.cpp",
+  "src/cpp/attachment.cpp",
+  "src/cpp/credential.cpp",
+  "src/cpp/forcedsecuresmtpclient.cpp",
+  "src/cpp/htmlmessage.cpp",
+  "src/cpp/message.cpp",
+  "src/cpp/messageaddress.cpp",
+  "src/cpp/opportunisticsecuresmtpclient.cpp",
+  "src/cpp/plaintextmessage.cpp",
+  "src/cpp/smtpclient.cpp",
+  "src/credential.cpp",
+  "src/errorresolver.cpp",
+  "src/forcedsecuresmtpclient.cpp",
+  "src/htmlmessage.cpp",
+  "src/message.cpp",
+  "src/messageaddress.cpp",
+  "src/messageidutils.cpp",
+  "src/opportunisticsecuresmtpclient.cpp",
+  "src/plaintextmessage.cpp",
+  "src/securesmtpclientbase.cpp",
+  "src/serveroptionsanalyzer.cpp",
+  "src/smtpclient.cpp",
+  "src/smtpclientbase.cpp",
+  "src/stringutils.cpp",
+]
+include-dirs = ["src"]
+defines = ["SMTPCLIENT_STATIC"]
+interface-defines = ["SMTPCLIENT_STATIC"]
+links = "smtpclient"
+deps = [
+  { name = "cabin-ports/openssl:ssl", public = true },
+  { name = "cabin-ports/openssl:crypto", public = true },
+]
