@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/commschamp/cc.ublox.generated/archive/refs/tags/v3.0.8.tar.gz"
+checksum = "sha256:a020e16d99ee0703818f43c070eb2c0e4148a63ec22fbaba1e27506e08719363"
+format = "tar.gz"
+strip-prefix = "cc.ublox.generated-3.0.8"
+
+[package]
+name = "cabin-ports/comms-ublox"
+version = "3.0.8"
+license = "MPL-2.0"
+include = ["LICENSE", "include"]
+
+[dependencies]
+"cabin-ports/comms" = "=5.5.3"
+
+# cc_ublox sets no standard; C++11 is the floor of the comms library it requires.
+[target.comms-ublox]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++11"
+deps = [{ name = "cabin-ports/comms", public = true }]
