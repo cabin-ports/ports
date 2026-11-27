@@ -1,0 +1,34 @@
+--- a/include/bq_common/platform/macros.h
++++ b/include/bq_common/platform/macros.h
+@@ -272,14 +272,15 @@
+ #define BQ_ANONYMOUS_STRUCT_PACK(DECLARATION, NAME) struct DECLARATION __attribute__((__packed__)) NAME
+ #endif
+ 
+-#if defined(__cplusplus) && (__cplusplus >= 201402L)
++// Changed for cabin-ports on 2026-11-26: these C++ version checks also read _MSVC_LANG.
++#if defined(__cplusplus) && (__cplusplus >= 201402L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201402L))
+ #define BQ_CPP_14 1
+ #define BQ_FUNC_RETURN_CONSTEXPR constexpr
+ #else
+ #define BQ_FUNC_RETURN_CONSTEXPR
+ #endif
+ 
+-#if defined(__cplusplus) && (__cplusplus >= 201703L)
++#if defined(__cplusplus) && (__cplusplus >= 201703L || (defined(_MSVC_LANG) && _MSVC_LANG >= 201703L))
+ #define BQ_CPP_17 1
+ #define BQ_CONSTEXPR_IF if constexpr
+ // gives a namespace-scope constant external linkage, so a module entry can export it
+@@ -289,11 +290,11 @@
+ #define BQ_INLINE_CONSTEXPR constexpr
+ #endif
+ 
+-#if defined(__cplusplus) && (__cplusplus >= 202002L)
++#if defined(__cplusplus) && (__cplusplus >= 202002L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202002L))
+ #define BQ_CPP_20 1
+ #endif
+ 
+-#if defined(__cplusplus) && (__cplusplus >= 202302L)
++#if defined(__cplusplus) && (__cplusplus >= 202302L || (defined(_MSVC_LANG) && _MSVC_LANG >= 202302L))
+ #define BQ_CPP_23 1
+ #endif
+ 
