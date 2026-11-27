@@ -1,0 +1,14 @@
+--- a/src/cwlib/file.c
++++ b/src/cwlib/file.c
+@@ -27,6 +27,11 @@
+ #include <ctype.h>
+ #include <errno.h>
+ #include <limits.h>
++/* Changed for cabin-ports on 2026-11-26: define ssize_t for MSVC. */
++#ifdef _MSC_VER
++#include <BaseTsd.h>
++typedef SSIZE_T ssize_t;
++#endif
+ 
+ #include "file.h"
+ 

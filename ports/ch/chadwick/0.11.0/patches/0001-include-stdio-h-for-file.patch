@@ -1,0 +1,55 @@
+--- a/include/chadwick/book.h
++++ b/include/chadwick/book.h
+@@ -23,6 +23,8 @@
+ 
+ #ifndef CW_BOOK_H
+ #define CW_BOOK_H
++/* Changed for cabin-ports on 2026-11-26: include <stdio.h> for FILE. */
++#include <stdio.h>
+ 
+ /*
+  * Structures and functions for manipulating lists of games ("scorebooks")
+--- a/include/chadwick/file.h
++++ b/include/chadwick/file.h
+@@ -23,6 +23,8 @@
+ 
+ #ifndef CW_FILE_H
+ #define CW_FILE_H
++/* Changed for cabin-ports on 2026-11-26: include <stdio.h> for FILE. */
++#include <stdio.h>
+ 
+ /*
+  * Record reader: Encapsulates reading files one line at a time, normalising
+--- a/include/chadwick/game.h
++++ b/include/chadwick/game.h
+@@ -24,6 +24,8 @@
+ 
+ #ifndef CW_GAME_H
+ #define CW_GAME_H
++/* Changed for cabin-ports on 2026-11-26: include <stdio.h> for FILE. */
++#include <stdio.h>
+ 
+ /*
+  * Structures and functions for manipulating games
+--- a/include/chadwick/league.h
++++ b/include/chadwick/league.h
+@@ -24,6 +24,8 @@
+ 
+ #ifndef CW_LEAGUE_H
+ #define CW_LEAGUE_H
++/* Changed for cabin-ports on 2026-11-26: include <stdio.h> for FILE. */
++#include <stdio.h>
+ 
+ #include "roster.h"
+ 
+--- a/include/chadwick/roster.h
++++ b/include/chadwick/roster.h
+@@ -23,6 +23,8 @@
+ 
+ #ifndef CW_ROSTER_H
+ #define CW_ROSTER_H
++/* Changed for cabin-ports on 2026-11-26: include <stdio.h> for FILE. */
++#include <stdio.h>
+ 
+ typedef struct cw_player_struct {
+   char *player_id, *last_name, *first_name;

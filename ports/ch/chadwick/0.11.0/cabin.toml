@@ -1,0 +1,97 @@
+[package.upstream]
+url = "https://github.com/chadwickbureau/chadwick/archive/refs/tags/v0.11.0.tar.gz"
+checksum = "sha256:f3f88f9e84602e184bd9baeffcb27d62f4cb0bd6efd25500909da396df4f8781"
+format = "tar.gz"
+strip-prefix = "chadwick-0.11.0"
+# Patch 0001 includes <stdio.h> in the five installed headers that use FILE
+# without it (book.h, file.h, game.h, league.h, roster.h); <chadwick/chadwick.h>
+# included first failed with "unknown type name 'FILE'" (measured).
+# Patch 0002 defines ssize_t for cl in src/cwlib/file.c, which uses it without
+# a definition; check-windows failed with "file.c(36): error C2061: syntax
+# error: identifier 'cw_getline'" (measured).
+patches = [
+  "patches/0001-include-stdio-h-for-file.patch",
+  "patches/0002-define-ssize-t-for-msvc.patch",
+]
+
+# The headers have no extern "C" guards: a C++ consumer must wrap the include
+# in extern "C"; without it the link fails with undefined symbol
+# cw_event_is_batter(cw_parsed_event_struct*) (measured).
+
+# The ten headers upstream's cwlib/Makefile.am installs under include/chadwick/
+# (pkginclude_HEADERS), so consumers write <chadwick/chadwick.h>.
+[[package.upstream.copy]]
+from = "src/cwlib/chadwick.h"
+to = "include/chadwick/chadwick.h"
+
+[[package.upstream.copy]]
+from = "src/cwlib/book.h"
+to = "include/chadwick/book.h"
+
+[[package.upstream.copy]]
+from = "src/cwlib/box.h"
+to = "include/chadwick/box.h"
+
+[[package.upstream.copy]]
+from = "src/cwlib/file.h"
+to = "include/chadwick/file.h"
+
+[[package.upstream.copy]]
+from = "src/cwlib/game.h"
+to = "include/chadwick/game.h"
+
+[[package.upstream.copy]]
+from = "src/cwlib/gameiter.h"
+to = "include/chadwick/gameiter.h"
+
+[[package.upstream.copy]]
+from = "src/cwlib/league.h"
+to = "include/chadwick/league.h"
+
+[[package.upstream.copy]]
+from = "src/cwlib/parse.h"
+to = "include/chadwick/parse.h"
+
+[[package.upstream.copy]]
+from = "src/cwlib/roster.h"
+to = "include/chadwick/roster.h"
+
+[[package.upstream.copy]]
+from = "src/cwlib/util.h"
+to = "include/chadwick/util.h"
+
+[package]
+name = "cabin-ports/chadwick"
+version = "0.11.0"
+license = "GPL-2.0-or-later"
+include = ["AUTHORS", "COPYING", "include", "patches", "src/cwlib"]
+c-standard = "c11"
+interface-c-standard = "c89"
+interface-cxx-standard = "c++98"
+
+# libchadwick as upstream's cwlib/Makefile.am builds it.  Not ported: the
+# cwbox, cwcomment, cwdaily, cwevent, cwgame and cwsub tools (src/cwtools).
+# cw_parse_event copies an unbounded run of capital letters into a 20-byte
+# stack buffer (parse.c:303-312), so a longer event string overflows it
+# (measured: AddressSanitizer reports a stack-buffer-overflow at parse.c:308
+# for 150 letters).
+[target.chadwick]
+type = "library"
+sources = [
+  "src/cwlib/book.c",
+  "src/cwlib/box.c",
+  "src/cwlib/file.c",
+  "src/cwlib/game.c",
+  "src/cwlib/gameiter.c",
+  "src/cwlib/league.c",
+  "src/cwlib/lint.c",
+  "src/cwlib/parse.c",
+  "src/cwlib/roster.c",
+]
+include-dirs = ["include"]
+links = "chadwick"
+
+# Strict -std=c11 hides glibc's strdup, which game.c calls; upstream compiles
+# in the compiler's default GNU dialect.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_DEFAULT_SOURCE"]
