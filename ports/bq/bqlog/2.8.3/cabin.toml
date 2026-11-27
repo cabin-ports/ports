@@ -3,6 +3,14 @@ url = "https://github.com/Tencent/BqLog/archive/refs/tags/Release_2.8.3.tar.gz"
 checksum = "sha256:63b2f801f417e4fd21abc891b0c8cb78542d3bb54b09dbeca812400e81f4cd32"
 format = "tar.gz"
 strip-prefix = "BqLog-Release_2.8.3"
+# cl reports __cplusplus as 199711L without /Zc:__cplusplus, which upstream
+# adds only for Visual Studio builds (src/CMakeLists.txt:97-100) and Cabin
+# cannot pass to consumers; the patch lets the C++ version checks of
+# include/bq_common/platform/macros.h:275-298 also read _MSVC_LANG (measured:
+# check-windows, cxx20 probe, "main.cc(30): error C2039: 'fast_info': is not a
+# member of 'bq::log'").  Its comment line is the change notice Apache-2.0
+# section 4(b) requires.
+patches = ["patches/0001-test-msvc-lang-for-cxx-version.patch"]
 
 # Upstream compiles src/bq_common/platform/mac_misc.mm on macOS; it is plain
 # C++, and Cabin compiles no .mm source, so this places it under a .cpp name.
@@ -18,7 +26,7 @@ version = "2.8.3"
 # credits MSVC's C++ library for is_function; their copyright significance is
 # uncertain.
 license = "Apache-2.0"
-include = ["LICENSE.txt", "include", "src"]
+include = ["LICENSE.txt", "include", "patches", "src"]
 # Upstream builds C++17 (src/CMakeLists.txt:68-74) and states C++11 and later
 # for consumers (README.md:95); it states no C standard for its native C ABI,
 # include/bq_log/misc/bq_log_c_api.h, which compiles as C89 when included as
