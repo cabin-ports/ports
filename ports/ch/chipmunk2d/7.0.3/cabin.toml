@@ -1,0 +1,103 @@
+[package.upstream]
+url = "https://github.com/slembcke/Chipmunk2D/archive/refs/tags/Chipmunk-7.0.3.tar.gz"
+checksum = "sha256:1e6f093812d6130e45bdf4cb80280cb3c93d1e1833d8cf989d554d7963b7899a"
+format = "tar.gz"
+strip-prefix = "Chipmunk2D-Chipmunk-7.0.3"
+# Patch 0001 includes <sys/sysctl.h> only on Apple, as upstream 9a051e6f does
+# (measured, check-linux: "sys/sysctl.h: No such file or directory"; glibc
+# 2.32 removed it).  Patch 0002 gives the three empty pthread shim structs
+# for Windows one dummy member (measured, check-windows: C2016 "C requires
+# that a struct or union have at least one member"); upstream builds the
+# sources as C++ on MSVC.
+# MIT License notice of src/cpHastySpace.c, whose lines the patches carry (the
+# License's condition that copies include it), from upstream's LICENSE.txt:
+# Copyright (c) 2007-2015 Scott Lembcke and Howling Moon Software
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+patches = [
+  "patches/0001-include-sysctl-only-on-apple.patch",
+  "patches/0002-give-empty-structs-a-member.patch",
+]
+
+[package]
+name = "cabin-ports/chipmunk2d"
+version = "7.0.3"
+# src/cpHastySpace.c:40 credits cs.wustl.edu/~schmidt/win32-cv-1.html for the
+# Windows condition variable; its copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE.txt", "include", "patches", "src"]
+
+# Named chipmunk2d as upstream and ConanCenter do; vcpkg calls it chipmunk.
+# Upstream builds with -std=gnu99 and, in Release, -ffast-math (CMakeLists.txt);
+# c11 is cl's lowest C standard.  Not reproduced: -ffast-math and the GNU
+# dialect.  -fblocks, which upstream passes to Clang (CMakeLists.txt:56-58), is
+# not reproduced either; Apple Clang enables blocks itself, so the ten *_b
+# block-callback functions are built there (measured).
+# cpHastySpace.h declares no extern "C": a C++ consumer includes it inside
+# extern "C" (measured: undefined reference to cpHastySpaceNew()).
+# Not ported: the Objective-C wrapper, demo, the sample programs, and the CMake, Xcode and other IDE projects.
+[target.chipmunk]
+type = "library"
+sources = [
+  "src/chipmunk.c",
+  "src/cpArbiter.c",
+  "src/cpArray.c",
+  "src/cpBBTree.c",
+  "src/cpBody.c",
+  "src/cpCollision.c",
+  "src/cpConstraint.c",
+  "src/cpDampedRotarySpring.c",
+  "src/cpDampedSpring.c",
+  "src/cpGearJoint.c",
+  "src/cpGrooveJoint.c",
+  "src/cpHashSet.c",
+  "src/cpHastySpace.c",
+  "src/cpMarch.c",
+  "src/cpPinJoint.c",
+  "src/cpPivotJoint.c",
+  "src/cpPolyShape.c",
+  "src/cpPolyline.c",
+  "src/cpRatchetJoint.c",
+  "src/cpRobust.c",
+  "src/cpRotaryLimitJoint.c",
+  "src/cpShape.c",
+  "src/cpSimpleMotor.c",
+  "src/cpSlideJoint.c",
+  "src/cpSpace.c",
+  "src/cpSpaceComponent.c",
+  "src/cpSpaceDebug.c",
+  "src/cpSpaceHash.c",
+  "src/cpSpaceQuery.c",
+  "src/cpSpaceStep.c",
+  "src/cpSpatialIndex.c",
+  "src/cpSweep1D.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+# C99 is upstream's -std=gnu99; it states no C++ standard (c++98 measured).
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+links = "chipmunk"
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
+
+# cpHastySpace starts threads; Android's libc provides pthread.
+[target.'cfg(all(family = "unix", not(os = "android")))'.profile]
+link-libs = ["pthread"]
