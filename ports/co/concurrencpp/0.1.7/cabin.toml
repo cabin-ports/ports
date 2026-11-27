@@ -7,8 +7,10 @@ strip-prefix = "concurrencpp-v.0.1.7"
 # runtime/runtime.h and executors/thread_pool_executor.cpp use without
 # including them (measured: Homebrew clang 23 with its libc++ fails on each of
 # the three; first error: implicit instantiation of undefined template
-# 'std::basic_string<char>').
-# MIT License notice of the three files whose lines 0001 carries (the
+# 'std::basic_string<char>'), and <chrono> to
+# results/impl/shared_result_state.h (measured, check-windows: C2039
+# 'system_clock' at shared_result_state.h:47).
+# MIT License notice of the four files whose lines 0001 carries (the
 # License's condition that copies include it), from LICENSE.txt:
 # Copyright 2020 David Haim
 #
