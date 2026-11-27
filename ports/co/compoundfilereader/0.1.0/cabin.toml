@@ -1,0 +1,21 @@
+[package.upstream]
+url = "https://github.com/microsoft/compoundfilereader/archive/refs/tags/v0.1.0.tar.gz"
+checksum = "sha256:d89fca336206a21ba26ba7ceb2fc242e016825db37db79e7257589bcaf29f246"
+format = "tar.gz"
+strip-prefix = "compoundfilereader-0.1.0"
+
+[package]
+name = "cabin-ports/compoundfilereader"
+version = "0.1.0"
+license = "MIT"
+include = ["LICENSE", "src/include"]
+
+# Consumers write <compoundfilereader.h> and <utf.h> from src/include.  C++11
+# is upstream's own build standard (makefile:4).  The header assumes a
+# little-endian host (compoundfilereader.h:10).  compoundfilereader.h has no
+# include guard: including it twice in one translation unit fails to compile
+# (measured: redefinition of 'CFBException').
+[target.compoundfilereader]
+type = "header-only"
+include-dirs = ["src/include"]
+interface-cxx-standard = "c++11"
