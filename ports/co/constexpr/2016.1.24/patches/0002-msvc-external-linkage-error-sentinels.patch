@@ -1,0 +1,257 @@
+--- a/src/include/cx_algorithm.h
++++ b/src/include/cx_algorithm.h
+@@ -10,8 +10,10 @@
+ {
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* all_of_runtime_error;
+       extern const char* any_of_runtime_error;
+       extern const char* none_of_runtime_error;
+@@ -26,7 +28,9 @@
+       extern const char* adjacent_find_runtime_error;
+       extern const char* search_runtime_error;
+       extern const char* search_n_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+ 
+   template <typename It, typename T>
+--- a/src/include/cx_array.h
++++ b/src/include/cx_array.h
+@@ -14,14 +14,18 @@
+ {
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* array_runtime_error;
+       extern const char* transform_runtime_error;
+       extern const char* sort_runtime_error;
+       extern const char* partition_runtime_error;
+       extern const char* reverse_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+ 
+   template <typename T, size_t N>
+--- a/src/include/cx_counter.h
++++ b/src/include/cx_counter.h
+@@ -12,10 +12,14 @@
+ {
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* counter_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+   namespace
+   {
+--- a/src/include/cx_fnv1.h
++++ b/src/include/cx_fnv1.h
+@@ -9,11 +9,15 @@
+ {
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* fnv1_runtime_error;
+       extern const char* fnv1a_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+   namespace detail
+   {
+--- a/src/include/cx_guid.h
++++ b/src/include/cx_guid.h
+@@ -16,10 +16,14 @@
+ {
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* guidgen_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+ 
+   struct guid_t
+--- a/src/include/cx_math.h
++++ b/src/include/cx_math.h
+@@ -225,8 +225,10 @@
+ {
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* abs_runtime_error;
+       extern const char* fabs_runtime_error;
+       extern const char* sqrt_domain_error;
+@@ -252,7 +254,9 @@
+       extern const char* atanh_domain_error;
+       extern const char* pow_runtime_error;
+       extern const char* erf_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+ 
+   //----------------------------------------------------------------------------
+--- a/src/include/cx_md5.h
++++ b/src/include/cx_md5.h
+@@ -21,10 +21,14 @@
+ 
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* md5_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+ 
+   struct md5sum
+--- a/src/include/cx_murmur3.h
++++ b/src/include/cx_murmur3.h
+@@ -11,10 +11,14 @@
+ {
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* murmur3_32_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+ 
+   namespace detail
+--- a/src/include/cx_numeric.h
++++ b/src/include/cx_numeric.h
+@@ -10,11 +10,15 @@
+ {
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* accumulate_runtime_error;
+       extern const char* inner_product_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+ 
+   // accumulate
+--- a/src/include/cx_pcg32.h
++++ b/src/include/cx_pcg32.h
+@@ -11,10 +11,14 @@
+ {
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* pcg32_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+ 
+   namespace pcg
+--- a/src/include/cx_sha256.h
++++ b/src/include/cx_sha256.h
+@@ -19,10 +19,14 @@
+ 
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* sha256_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+ 
+   struct sha256sum
+--- a/src/include/cx_strenc.h
++++ b/src/include/cx_strenc.h
+@@ -14,10 +14,14 @@
+ {
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* strenc_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+ 
+   namespace detail
+--- a/src/include/cx_typeid.h
++++ b/src/include/cx_typeid.h
+@@ -9,10 +9,14 @@
+ {
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* typeid_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+ 
+   template <typename T>
+--- a/src/include/cx_utils.h
++++ b/src/include/cx_utils.h
+@@ -13,11 +13,15 @@
+   // have to use recursion in C++11 after all)
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* strlen_runtime_error;
+       extern const char* strcmp_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+   namespace detail_s
+   {

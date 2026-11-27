@@ -1,0 +1,12 @@
+[package]
+name = "cxx14"
+version = "0.0.0"
+cxx-standard = "c++14"
+
+[dependencies]
+"cabin-ports/constexpr" = "=2016.1.24"
+
+[target.cxx14]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/constexpr"]

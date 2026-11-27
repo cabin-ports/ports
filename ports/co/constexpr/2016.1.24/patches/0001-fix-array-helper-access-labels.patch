@@ -1,0 +1,18 @@
+--- a/src/include/cx_array.h
++++ b/src/include/cx_array.h
+@@ -209,6 +209,7 @@
+       return { m_data[Is]... };
+     }
+ 
++  public:
+     // inserter for at front, in the middle somewhere, at end
+     template <size_t I>
+     struct inserter<I, typename std::enable_if<(I == 0)>::type>
+@@ -320,6 +321,7 @@
+       }
+     };
+ 
++  private:
+     // make a predicate into a comparison function suitable for sort
+     template <typename P>
+     struct pred_to_less_t
