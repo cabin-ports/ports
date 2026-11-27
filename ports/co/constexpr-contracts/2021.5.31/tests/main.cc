@@ -27,16 +27,13 @@ static_assert(post(3) == 2);
 static_assert(mid(21) == 42);
 
 // A failing contract is undefined behaviour in optimised and MSVC builds, so
-// only constant evaluation tells a failure from a pass.  GCC and Clang reject
-// the failing call there; MSVC may accept __assume(false), so it skips these.
-#ifndef _MSC_VER
+// only constant evaluation tells a failure from a pass.
 template<auto F, int V>
 concept holds = requires { typename std::integral_constant<int, F(V)>; };
 
 static_assert(holds<pre, 1> and not holds<pre, 0> and not holds<pre, -5>);
 static_assert(holds<post, 1> and not holds<post, 0>);
 static_assert(holds<mid, 99> and not holds<mid, 0> and not holds<mid, 100>);
-#endif
 
 int main()
 {
