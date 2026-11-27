@@ -1,0 +1,60 @@
+[package.upstream]
+url = "https://github.com/google/cctz/archive/refs/tags/v2.5.tar.gz"
+checksum = "sha256:47d2d68e7cb5af3296dc7e69b0f4a765589f1b2f4af4b9c42e772414c428b421"
+format = "tar.gz"
+strip-prefix = "cctz-2.5"
+
+# Upstream's tag is v2.5, with no patch component.
+[package]
+name = "cabin-ports/cctz"
+version = "2.5.0"
+# src/tzfile.h is in the public domain (tzcode).
+license = "Apache-2.0"
+include = [
+  "LICENSE.txt",
+  "include",
+  "src/civil_time_detail.cc",
+  "src/time_zone_fixed.cc",
+  "src/time_zone_fixed.h",
+  "src/time_zone_format.cc",
+  "src/time_zone_if.cc",
+  "src/time_zone_if.h",
+  "src/time_zone_impl.cc",
+  "src/time_zone_impl.h",
+  "src/time_zone_info.cc",
+  "src/time_zone_info.h",
+  "src/time_zone_libc.cc",
+  "src/time_zone_libc.h",
+  "src/time_zone_lookup.cc",
+  "src/time_zone_posix.cc",
+  "src/time_zone_posix.h",
+  "src/tzfile.h",
+  "src/zone_info_source.cc",
+]
+
+# The library's source list in CMakeLists.txt.  The C++11 interface standard is
+# upstream's (CMakeLists.txt, cctz_target_set_cxx_standard); upstream's CI
+# builds at C++14 (.github/workflows/ci.yaml), which enables the headers' constexpr.
+# Not ported: the time_tool and example programs.
+[target.cctz]
+type = "library"
+sources = [
+  "src/civil_time_detail.cc",
+  "src/time_zone_fixed.cc",
+  "src/time_zone_format.cc",
+  "src/time_zone_if.cc",
+  "src/time_zone_impl.cc",
+  "src/time_zone_info.cc",
+  "src/time_zone_libc.cc",
+  "src/time_zone_lookup.cc",
+  "src/time_zone_posix.cc",
+  "src/zone_info_source.cc",
+]
+include-dirs = ["include"]
+links = "cctz"
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+
+# cctz reads the local time zone through CoreFoundation.
+[target.'cfg(any(os = "macos", os = "ios"))'.profile]
+frameworks = ["CoreFoundation"]
