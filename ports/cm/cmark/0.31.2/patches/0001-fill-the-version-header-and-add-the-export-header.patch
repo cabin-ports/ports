@@ -1,0 +1,63 @@
+--- a/include/cmark_version.h
++++ b/include/cmark_version.h
+@@ -1,7 +1,7 @@
+ #ifndef CMARK_VERSION_H
+ #define CMARK_VERSION_H
+ 
+-#define CMARK_VERSION ((@PROJECT_VERSION_MAJOR@ << 16) | (@PROJECT_VERSION_MINOR@ << 8)  | @PROJECT_VERSION_PATCH@)
+-#define CMARK_VERSION_STRING "@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@"
++#define CMARK_VERSION ((0 << 16) | (31 << 8)  | 2)
++#define CMARK_VERSION_STRING "0.31.2"
+ 
+ #endif
+--- /dev/null
++++ b/include/cmark_export.h
+@@ -0,0 +1,48 @@
++
++#ifndef CMARK_EXPORT_H
++#define CMARK_EXPORT_H
++
++#ifdef CMARK_STATIC_DEFINE
++#  define CMARK_EXPORT
++#  define CMARK_NO_EXPORT
++#else
++#  ifndef CMARK_EXPORT
++#    ifdef cmark_EXPORTS
++        /* We are building this library */
++#      define CMARK_EXPORT 
++#    else
++        /* We are using this library */
++#      define CMARK_EXPORT 
++#    endif
++#  endif
++
++#  ifndef CMARK_NO_EXPORT
++#    define CMARK_NO_EXPORT 
++#  endif
++#endif
++
++/* CMake writes __declspec(deprecated) where WIN32 is set. */
++#ifndef CMARK_DEPRECATED
++#  ifdef _WIN32
++#    define CMARK_DEPRECATED __declspec(deprecated)
++#  else
++#    define CMARK_DEPRECATED __attribute__ ((__deprecated__))
++#  endif
++#endif
++
++#ifndef CMARK_DEPRECATED_EXPORT
++#  define CMARK_DEPRECATED_EXPORT CMARK_EXPORT CMARK_DEPRECATED
++#endif
++
++#ifndef CMARK_DEPRECATED_NO_EXPORT
++#  define CMARK_DEPRECATED_NO_EXPORT CMARK_NO_EXPORT CMARK_DEPRECATED
++#endif
++
++/* NOLINTNEXTLINE(readability-avoid-unconditional-preprocessor-if) */
++#if 0 /* DEFINE_NO_DEPRECATED */
++#  ifndef CMARK_NO_DEPRECATED
++#    define CMARK_NO_DEPRECATED
++#  endif
++#endif
++
++#endif /* CMARK_EXPORT_H */
