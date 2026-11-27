@@ -1,0 +1,28 @@
+[package.upstream]
+url = "https://github.com/exander77/supertinycron/archive/refs/tags/v2.1.0.tar.gz"
+checksum = "sha256:ee6623e844707e2bd92b6aa3c63848466cb050d206d246ee93ebe7f8b709dea9"
+format = "tar.gz"
+strip-prefix = "supertinycron-2.1.0"
+
+[package]
+name = "cabin-ports/ccronexpr"
+version = "2.1.0"
+# ccronexpr.c:93 credits adobe/chromium for the Android timegm fallback; its
+# copyright significance is uncertain.
+license = "Apache-2.0"
+include = ["LICENSE.txt", "ccronexpr.c", "ccronexpr.h"]
+
+# Upstream's library (CMakeLists.txt:5-6): ccronexpr.c with the package root
+# as the include directory.  Not ported: the supertinycron tool
+# (supertinycron.c) and the tests.  Not reproduced: the opt-in
+# CRON_USE_LOCAL_TIME and CRON_COMPILE_AS_CXX (CMakeLists.txt:17-23) and
+# CRON_DISABLE_YEARS (ccronexpr.h); the defaults are kept.
+[target.ccronexpr]
+type = "library"
+sources = ["ccronexpr.c"]
+include-dirs = ["."]
+links = "ccronexpr"
+# C11 is the oldest standard Cabin can lower for MSVC; upstream states C89
+# for the interface (README.md:147, CMakeLists.txt:32 -ansi).
+c-standard = "c11"
+interface-c-standard = "c89"
