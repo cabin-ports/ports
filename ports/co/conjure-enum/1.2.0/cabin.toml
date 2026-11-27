@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/fix8mt/conjure_enum/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:f02a90737ce1431f1866aa3b0add87af43d041613808c9c24e89ff4f3cb44231"
+format = "tar.gz"
+strip-prefix = "conjure_enum-1.2.0"
+
+[package]
+name = "cabin-ports/conjure-enum"
+version = "1.2.0"
+license = "MIT"
+include = ["LICENSE", "include"]
+
+# Named after the vcpkg port; upstream's repository is conjure_enum.
+# Upstream requires C++20 (README.md:10; conjure_enum.hpp:39-41).
+[target.conjure-enum]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
