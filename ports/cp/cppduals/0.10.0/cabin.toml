@@ -1,0 +1,23 @@
+[package.upstream]
+url = "https://gitlab.com/tesch1/cppduals/-/archive/v0.10.0/cppduals-v0.10.0.tar.gz"
+checksum = "sha256:55718b42271ec7d7c5df1c6733a37c9167129187beb8d8dc8adb7dd13033e804"
+format = "tar.gz"
+strip-prefix = "cppduals-v0.10.0"
+
+[package]
+name = "cabin-ports/cppduals"
+version = "0.10.0"
+license = "MPL-2.0"
+include = ["LICENSE.txt", "duals"]
+
+# <duals/dual_eigen> needs Eigen 5 and the CPPDUALS_LIBFMT formatters need
+# fmt; the consumer supplies both, and the port's tests cover neither.
+[target.cppduals]
+type = "header-only"
+include-dirs = ["."]
+# README.md:5 states C++17.
+interface-cxx-standard = "c++17"
+# erf and erfc use M_PI (duals/dual:1130-1132), which MSVC declares only
+# under _USE_MATH_DEFINES; upstream's tests/CMakeLists.txt:15 sets it on
+# Windows.
+interface-defines = ["_USE_MATH_DEFINES"]
