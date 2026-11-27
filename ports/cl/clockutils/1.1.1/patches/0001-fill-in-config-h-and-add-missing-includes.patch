@@ -1,0 +1,57 @@
+--- a/include/clockUtils/Config.h
++++ b/include/clockUtils/Config.h
+@@ -20,10 +20,11 @@
+ #ifndef __CLOCKUTILS_CONFIG_H__
+ #define __CLOCKUTILS_CONFIG_H__
+ 
+-#cmakedefine CLOCKUTILS_BUILD_SHARED
++// Changed for cabin-ports on 2026-11-26: filled in as CMake's configure_file does for the static build.
++/* #undef CLOCKUTILS_BUILD_SHARED */
+ 
+-#define CLOCKUTILS_VERSION_MAJOR @VERSION_MAJOR@
+-#define CLOCKUTILS_VERSION_MINOR @VERSION_MINOR@
+-#define CLOCKUTILS_VERSION_PATCH @VERSION_PATCH@
++#define CLOCKUTILS_VERSION_MAJOR 1
++#define CLOCKUTILS_VERSION_MINOR 1
++#define CLOCKUTILS_VERSION_PATCH 1
+ 
+ #endif /* __CLOCKUTILS_CONFIG_H__ */
+--- a/include/clockUtils/container/LockFreeQueue.h
++++ b/include/clockUtils/container/LockFreeQueue.h
+@@ -28,6 +28,8 @@
+ #include <array>
+ #include <atomic>
+ #include <cassert>
++// Changed for cabin-ports on 2026-11-26: include <cstddef> for size_t.
++#include <cstddef>
+ 
+ #include "clockUtils/errors.h"
+ 
+--- a/include/clockUtils/sockets/TcpSocket.h
++++ b/include/clockUtils/sockets/TcpSocket.h
+@@ -57,9 +57,8 @@
+ 	#define INVALID_SOCKET -1
+ #endif
+ 
+-namespace std {
+-	class thread;
+-} /* namespace std */
++// Changed for cabin-ports on 2026-11-26: include <thread> in place of a declaration of std::thread.
++#include <thread>
+ namespace clockUtils {
+ 	enum class ClockError;
+ namespace sockets {
+--- a/include/clockUtils/sockets/UdpSocket.h
++++ b/include/clockUtils/sockets/UdpSocket.h
+@@ -60,9 +60,8 @@
+ 	#define INVALID_SOCKET -1
+ #endif
+ 
+-namespace std {
+-	class thread;
+-} /* namespace std */
++// Changed for cabin-ports on 2026-11-26: include <thread> in place of a declaration of std::thread.
++#include <thread>
+ 
+ namespace clockUtils {
+ 	enum class ClockError;
