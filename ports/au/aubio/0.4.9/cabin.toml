@@ -1,0 +1,141 @@
+[package.upstream]
+url = "https://github.com/aubio/aubio/archive/refs/tags/0.4.9.tar.gz"
+checksum = "sha256:0f09bee62f752d2be3a620966f020e72a027fed6838d7e9389e8305507f12455"
+format = "tar.gz"
+strip-prefix = "aubio-0.4.9"
+# Upstream installs src/**/*.h but aubio_priv.h and config.h under
+# include/aubio/ (src/wscript_build:49-52) and documents #include <aubio/aubio.h>
+# (src/aubio.h:148-155); patch 0001 adds a forwarder there for each of them.
+patches = ["patches/0001-add-aubio-include-forwarders.patch"]
+
+[package]
+name = "cabin-ports/aubio"
+version = "0.4.9"
+# LicenseRef-Ooura: src/spectral/ooura_fft8g.c, from Takuya Ooura's FFT package.
+license = "GPL-3.0-or-later AND LicenseRef-Ooura"
+include = ["AUTHORS", "COPYING", "README.md", "include", "patches", "src"]
+
+# Upstream's waf build compiles every src/**/*.c (src/wscript_build:16) with
+# the src/config.h its default configure writes when no optional library is
+# found; these defines replace that header, which aubio_priv.h:36-38 reads only
+# under HAVE_CONFIG_H.  They are the header checks (wscript:138-144), the C99
+# __VA_ARGS__ check (:297), and the memcpy, wavread and wavwrite options that
+# default to on (:434-438, :461).  Not ported: the optional fftw3, Intel IPP,
+# BLAS, libsndfile, libavcodec, libsamplerate and JACK backends, double
+# precision, the iOS configuration, the examples and the Python module.
+[target.aubio]
+type = "library"
+sources = [
+  "src/cvec.c",
+  "src/fmat.c",
+  "src/fvec.c",
+  "src/io/audio_unit.c",
+  "src/io/ioutils.c",
+  "src/io/sink.c",
+  "src/io/sink_apple_audio.c",
+  "src/io/sink_sndfile.c",
+  "src/io/sink_wavwrite.c",
+  "src/io/source.c",
+  "src/io/source_apple_audio.c",
+  "src/io/source_avcodec.c",
+  "src/io/source_sndfile.c",
+  "src/io/source_wavread.c",
+  "src/io/utils_apple_audio.c",
+  "src/lvec.c",
+  "src/mathutils.c",
+  "src/musicutils.c",
+  "src/notes/notes.c",
+  "src/onset/onset.c",
+  "src/onset/peakpicker.c",
+  "src/pitch/pitch.c",
+  "src/pitch/pitchfcomb.c",
+  "src/pitch/pitchmcomb.c",
+  "src/pitch/pitchschmitt.c",
+  "src/pitch/pitchspecacf.c",
+  "src/pitch/pitchyin.c",
+  "src/pitch/pitchyinfast.c",
+  "src/pitch/pitchyinfft.c",
+  "src/spectral/awhitening.c",
+  "src/spectral/dct.c",
+  "src/spectral/dct_accelerate.c",
+  "src/spectral/dct_fftw.c",
+  "src/spectral/dct_ipp.c",
+  "src/spectral/dct_ooura.c",
+  "src/spectral/dct_plain.c",
+  "src/spectral/fft.c",
+  "src/spectral/filterbank.c",
+  "src/spectral/filterbank_mel.c",
+  "src/spectral/mfcc.c",
+  "src/spectral/ooura_fft8g.c",
+  "src/spectral/phasevoc.c",
+  "src/spectral/specdesc.c",
+  "src/spectral/statistics.c",
+  "src/spectral/tss.c",
+  "src/synth/sampler.c",
+  "src/synth/wavetable.c",
+  "src/tempo/beattracking.c",
+  "src/tempo/tempo.c",
+  "src/temporal/a_weighting.c",
+  "src/temporal/biquad.c",
+  "src/temporal/c_weighting.c",
+  "src/temporal/filter.c",
+  "src/temporal/resampler.c",
+  "src/utils/hist.c",
+  "src/utils/log.c",
+  "src/utils/parameter.c",
+  "src/utils/scale.c",
+  "src/utils/windll.c",
+  "src/vecutils.c",
+]
+include-dirs = ["include"]
+# Upstream sets no standard; C11 is the oldest standard Cabin can request
+# from MSVC.
+c-standard = "c11"
+# Measured: src/utils/log.h:52 ends an enumerator list with a comma, which
+# C99 and C++11 allow.
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "aubio"
+# DEBUG is upstream's debug-build define (wscript:150-151); its only effect is
+# to turn AUBIO_ASSERT into assert() (aubio_priv.h:394-399), so always setting
+# it leaves assertions to Cabin's NDEBUG.
+defines = [
+  "DEBUG=1",
+  "HAVE_C99_VARARGS_MACROS=1",
+  "HAVE_ERRNO_H=1",
+  "HAVE_LIMITS_H=1",
+  "HAVE_MATH_H=1",
+  "HAVE_MEMCPY_HACKS=1",
+  "HAVE_STDARG_H=1",
+  "HAVE_STDIO_H=1",
+  "HAVE_STDLIB_H=1",
+  "HAVE_STRING_H=1",
+  "HAVE_WAVREAD=1",
+  "HAVE_WAVWRITE=1",
+]
+
+# The sources include one another from src/ (src/wscript_build:20).
+[profile]
+include-dirs = ["src"]
+
+# Upstream links libm where it finds one (wscript:189).
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
+
+# Strict -std=c11 hides glibc's strerror_r, which AUBIO_STRERROR calls
+# (aubio_priv.h:334); upstream's default GNU dialect declares the POSIX one.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_POSIX_C_SOURCE=200809L"]
+
+# wscript:191-195.
+[target.'cfg(os = "windows")'.profile]
+defines = ["HAVE_WIN_HACKS=1"]
+
+# wscript:204-219: the AudioToolbox source and sink, and Accelerate.
+[target.'cfg(os = "macos")'.profile]
+defines = [
+  "HAVE_ACCELERATE=1",
+  "HAVE_SINK_APPLE_AUDIO=1",
+  "HAVE_SOURCE_APPLE_AUDIO=1",
+]
+frameworks = ["Accelerate", "AudioToolbox", "CoreFoundation"]
