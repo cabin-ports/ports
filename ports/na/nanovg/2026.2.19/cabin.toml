@@ -1,0 +1,53 @@
+[package.upstream]
+# Upstream tags no releases.  This is master's last commit (2026-02-19); the
+# version is its commit date as YYYY.M.D.
+url = "https://github.com/memononen/nanovg/archive/ce3bf745eb2d2dbc14a50bf2446783f691ac4353.tar.gz"
+checksum = "sha256:655fe16920f1d2ec0895adf3a0eed1d3d0403cc4e2de247f3600d136f206a520"
+format = "tar.gz"
+strip-prefix = "nanovg-ce3bf745eb2d2dbc14a50bf2446783f691ac4353"
+
+[package]
+name = "cabin-ports/nanovg"
+version = "2026.2.19"
+# fontstash.h:492-529 is Bjoern Hoehrmann's UTF-8 decoder, under the MIT
+# license (see the page fontstash.h:493 cites).
+license = "Zlib AND MIT"
+# src/stb_image.h and src/stb_truetype.h (2016 and 2020 copies) are left out:
+# nanovg.c and fontstash.h include them by quoted name and take them from the
+# stb dependency instead, as vcpkg does.  Not packaged: example/ and
+# obsolete/.  The OpenGL back-ends nanovg_gl.h and nanovg_gl_utils.h are
+# single-header implementations the consumer compiles with its own GL headers.
+include = [
+  "LICENSE.txt",
+  "src/fontstash.h",
+  "src/nanovg.c",
+  "src/nanovg.h",
+  "src/nanovg_gl.h",
+  "src/nanovg_gl_utils.h",
+]
+
+[dependencies]
+"cabin-ports/stb" = "^2026.4.15"
+
+# nanovg.c compiles the stb_image and stb_truetype implementations, so a
+# consumer that defines STB_IMAGE_IMPLEMENTATION or STB_TRUETYPE_IMPLEMENTATION
+# itself gets duplicate symbols at link time (measured: "duplicate symbol
+# '_stbi_loadf'", "'_stbtt_PackFontRange'").  Not ported: fontstash's FreeType
+# back-end (FONS_USE_FREETYPE); the library always uses stb_truetype.
+[target.nanovg]
+type = "library"
+sources = ["src/nanovg.c"]
+include-dirs = ["src"]
+deps = ["cabin-ports/stb"]
+c-standard = "c11"
+# Upstream states no C standard; c11 is the measured floor of nanovg.h (c99
+# fails on "anonymous structs are a C11 extension", c89 on "// comments are
+# not allowed").  The same anonymous struct in NVGcolor fails -pedantic-errors
+# in every C++ mode ("a GNU extension"); without it c++98 passes, and Clang,
+# GCC and MSVC accept it, so c++98 is declared.
+interface-c-standard = "c11"
+interface-cxx-standard = "c++98"
+links = "nanovg"
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
