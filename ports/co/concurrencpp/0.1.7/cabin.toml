@@ -1,0 +1,77 @@
+[package.upstream]
+url = "https://github.com/David-Haim/concurrencpp/archive/refs/tags/v.0.1.7.tar.gz"
+checksum = "sha256:049f3e83ad1828e0b8b518652de1a3160d5849fdff03d521d0a5af0167338e89"
+format = "tar.gz"
+strip-prefix = "concurrencpp-v.0.1.7"
+# Patch 0001 adds the standard headers that threads/thread.h,
+# runtime/runtime.h and executors/thread_pool_executor.cpp use without
+# including them (measured: Homebrew clang 23 with its libc++ fails on each of
+# the three; first error: implicit instantiation of undefined template
+# 'std::basic_string<char>'), and <chrono> to
+# results/impl/shared_result_state.h (measured, check-windows: C2039
+# 'system_clock' at shared_result_state.h:47).
+# MIT License notice of the four files whose lines 0001 carries (the
+# License's condition that copies include it), from LICENSE.txt:
+# Copyright 2020 David Haim
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+patches = ["patches/0001-add-missing-standard-includes.patch"]
+
+[package]
+name = "cabin-ports/concurrencpp"
+version = "0.1.7"
+license = "MIT"
+include = ["LICENSE.txt", "include", "patches", "source"]
+# CMakeLists.txt:92 (cxx_std_20 PUBLIC).
+cxx-standard = "c++20"
+interface-cxx-standard = "c++20"
+
+# The static library from the sources of CMakeLists.txt:20-34.  Not ported:
+# the shared library (CRCPP_EXPORT_API), the tests, examples and sandbox.
+# Not reproduced: the hidden visibility preset (CMakeLists.txt:94-96), which
+# a static library keeps only if it is linked into a shared one.
+[target.concurrencpp]
+type = "library"
+sources = [
+  "source/executors/executor.cpp",
+  "source/executors/manual_executor.cpp",
+  "source/executors/thread_executor.cpp",
+  "source/executors/thread_pool_executor.cpp",
+  "source/executors/worker_thread_executor.cpp",
+  "source/results/impl/consumer_context.cpp",
+  "source/results/impl/result_state.cpp",
+  "source/results/impl/shared_result_state.cpp",
+  "source/runtime/runtime.cpp",
+  "source/task.cpp",
+  "source/threads/async_condition_variable.cpp",
+  "source/threads/async_lock.cpp",
+  "source/threads/thread.cpp",
+  "source/timers/timer.cpp",
+  "source/timers/timer_queue.cpp",
+]
+include-dirs = ["include"]
+links = "concurrencpp"
+
+# CMakeLists.txt:108-109 links Threads::Threads and names no Android exception.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# CMakeLists.txt:111-112 links librt where CMake finds one, as on Linux.
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["rt"]
