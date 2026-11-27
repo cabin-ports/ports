@@ -1,0 +1,70 @@
+[package.upstream]
+url = "https://github.com/microsoft/Trieste/archive/refs/tags/v1.1.0.tar.gz"
+checksum = "sha256:ca557461cff2462d1e19d5a53fd8fb8f03c481b8a6083a2303dd672fbae54b59"
+format = "tar.gz"
+strip-prefix = "Trieste-1.1.0"
+# trieste/json.h and trieste/yaml.h include json_export.h and yaml_export.h,
+# which CMake's generate_export_header writes (parsers/json/CMakeLists.txt:16-17,
+# parsers/yaml/CMakeLists.txt:18-19).  The patch adds headers that stand in for
+# them for the static build, defining JSON_EXPORT and YAML_EXPORT, the only
+# macros the sources use, empty.
+patches = ["patches/0001-add-the-static-build-export-headers.patch"]
+
+[package]
+name = "cabin-ports/trieste"
+version = "1.1.0"
+# Unicode-3.0: include/trieste/unicode_data.h, generated from Unicode 15.1's
+# UnicodeData.txt.
+license = "MIT AND Unicode-3.0"
+include = ["LICENSE", "include", "parsers/include", "parsers/json", "parsers/yaml", "patches"]
+# C++20 is stated by README.md:22 and CMakeLists.txt:186 (cxx_std_20).
+cxx-standard = "c++20"
+interface-cxx-standard = "c++20"
+
+[dependencies]
+# The floor is CLI11 2.5.0, the commit CMakeLists.txt:130-138 fetches.
+"cabin-ports/cli11" = "^2.5"
+
+# Not ported: snmalloc's global new/delete override (TRIESTE_USE_SNMALLOC), the
+# C++17 mode (TRIESTE_USE_CXX17), shared parser libraries, the yamlc tool, and
+# the configure-generated trieste/version.h, which nothing includes.
+[target.trieste]
+type = "header-only"
+include-dirs = ["include"]
+deps = [{ name = "cabin-ports/cli11", public = true }]
+
+[target.trieste-json]
+type = "library"
+sources = [
+  "parsers/json/json.cc",
+  "parsers/json/parse.cc",
+  "parsers/json/reader.cc",
+  "parsers/json/writer.cc",
+]
+include-dirs = ["parsers/include"]
+defines = ["JSON_STATIC_DEFINE"]
+interface-defines = ["JSON_STATIC_DEFINE"]
+links = "trieste-json"
+deps = [{ name = "trieste", public = true }]
+
+[target.trieste-yaml]
+type = "library"
+sources = [
+  "parsers/yaml/event_writer.cc",
+  "parsers/yaml/parse.cc",
+  "parsers/yaml/reader.cc",
+  "parsers/yaml/to_json.cc",
+  "parsers/yaml/writer.cc",
+  "parsers/yaml/yaml.cc",
+]
+include-dirs = ["parsers/include"]
+defines = ["YAML_STATIC_DEFINE"]
+interface-defines = ["YAML_STATIC_DEFINE"]
+links = "trieste-yaml"
+deps = [
+  { name = "trieste", public = true },
+  { name = "trieste-json", public = true },
+]
+
+[profile]
+include-dirs = ["parsers/include/trieste"]
