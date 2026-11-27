@@ -1,0 +1,53 @@
+[package.upstream]
+url = "https://github.com/cpp-redis/tacopie/archive/refs/tags/3.2.0.tar.gz"
+checksum = "sha256:762c33d14f5a708b48e27a0b3cd642eb697181f3bf31698282d2a69318e52644"
+format = "tar.gz"
+strip-prefix = "tacopie-3.2.0"
+
+[package]
+name = "cabin-ports/tacopie"
+version = "3.2.0"
+license = "MIT"
+include = ["LICENSE", "README.md", "CHANGELOG.md", "includes", "sources"]
+
+# Sources are CMakeLists.txt:92-111; the platform directories follow its WIN32 split.
+# Built as upstream defaults: the tuning macros its CMake options set (logging,
+# queue size, worker count, select timeout; CMakeLists.txt:136-158) stay unset.
+[target.tacopie]
+type = "library"
+links = "tacopie"
+sources = [
+  "sources/network/io_service.cpp",
+  "sources/network/tcp_client.cpp",
+  "sources/network/tcp_server.cpp",
+  "sources/network/common/tcp_socket.cpp",
+  "sources/utils/error.cpp",
+  "sources/utils/logger.cpp",
+  "sources/utils/thread_pool.cpp",
+]
+include-dirs = ["includes"]
+# README.md:9 states C++11 as the only requirement; the build itself uses c++14
+# because cl has no c++11 flag.
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+
+[target.'cfg(family = "unix")'.sources]
+tacopie = [
+  "sources/network/unix/unix_self_pipe.cpp",
+  "sources/network/unix/unix_tcp_socket.cpp",
+]
+
+[target.'cfg(os = "windows")'.sources]
+tacopie = [
+  "sources/network/windows/windows_self_pipe.cpp",
+  "sources/network/windows/windows_tcp_socket.cpp",
+]
+
+# CMakeLists.txt:130-134 links pthread, or ws2_32 on Windows.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# CMakeLists.txt:47-73, directory-scoped there, so not exported.
+[target.'cfg(os = "windows")'.profile]
+defines = ["UNICODE", "_UNICODE", "WIN32_LEAN_AND_MEAN"]
+link-libs = ["ws2_32"]
