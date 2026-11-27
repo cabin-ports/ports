@@ -1,0 +1,12 @@
+[package]
+name = "state"
+version = "0.0.0"
+c-standard = "c11"
+
+[dependencies]
+"cabin-ports/aws-kvs-pic" = "=1.3.3"
+
+[target.state]
+type = "executable"
+sources = ["src/main.c"]
+deps = ["cabin-ports/aws-kvs-pic:kvspicState"]

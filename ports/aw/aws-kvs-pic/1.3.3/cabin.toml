@@ -1,0 +1,220 @@
+[package.upstream]
+url = "https://github.com/awslabs/amazon-kinesis-video-streams-pic/archive/refs/tags/v1.3.3.tar.gz"
+checksum = "sha256:7d54be4b8956d25d9ee3042b4b4d4dfb31f6fe1b053915a54d5bc495c3589e6c"
+format = "tar.gz"
+strip-prefix = "amazon-kinesis-video-streams-pic-1.3.3"
+
+[package]
+name = "cabin-ports/aws-kvs-pic"
+version = "1.3.3"
+license = "Apache-2.0"
+include = ["LICENSE", "NOTICE", "src"]
+
+# The four static libraries CMakeLists.txt builds (:136-190): kvspic holds
+# every module and the other three are subsets of its sources.  Upstream
+# passes -DSDK_VERSION and -DDETECTED_GIT_HASH from git rev-parse, which is
+# empty in an archive; both are omitted here.  Not ported: tst/,
+# the .pc files, the shared-library build and the non-default options
+# (BUILD_DEBUG_HEAP, ALIGNED_MEMORY_MODEL, FIXUP_ANNEX_B_TRAILING_NALU_ZERO,
+# thread stack size).  Not reproduced: position-independent code
+# (CMakeLists.txt:114; Cabin drops a dependency's raw compiler flags), so the
+# archives are not built for linking into a shared object.  Upstream states no language standard: C99 is what the
+# headers' // comments and long long need, and C++11 is what its tests build
+# with (tst/CMakeLists.txt:6).
+[target.kvspic]
+type = "library"
+links = "kvspic"
+sources = [
+  "src/client/src/AckParser.c",
+  "src/client/src/AuthIntegration.c",
+  "src/client/src/Callbacks.c",
+  "src/client/src/Client.c",
+  "src/client/src/ClientEvent.c",
+  "src/client/src/ClientState.c",
+  "src/client/src/FrameOrderCoordinator.c",
+  "src/client/src/InputValidator.c",
+  "src/client/src/Stream.c",
+  "src/client/src/StreamEvent.c",
+  "src/client/src/StreamState.c",
+  "src/duration/src/Duration.c",
+  "src/heap/src/AivHeap.c",
+  "src/heap/src/Common.c",
+  "src/heap/src/Heap.c",
+  "src/heap/src/HybridFileHeap.c",
+  "src/heap/src/HybridHeap.c",
+  "src/heap/src/SystemHeap.c",
+  "src/mkvgen/src/MkvGenerator.c",
+  "src/mkvgen/src/MkvStatics.c",
+  "src/mkvgen/src/NalAdapter.c",
+  "src/mkvgen/src/SpsParser.c",
+  "src/state/src/State.c",
+  "src/trace/src/TraceProfiler.c",
+  "src/utils/src/Allocators.c",
+  "src/utils/src/Atomics.c",
+  "src/utils/src/Base64.c",
+  "src/utils/src/BitField.c",
+  "src/utils/src/BitReader.c",
+  "src/utils/src/Crc32.c",
+  "src/utils/src/CustomAssert.c",
+  "src/utils/src/Directory.c",
+  "src/utils/src/DoubleLinkedList.c",
+  "src/utils/src/DynamicLibrary.c",
+  "src/utils/src/Endianness.c",
+  "src/utils/src/Environment.c",
+  "src/utils/src/ExponentialBackoffRetryStrategy.c",
+  "src/utils/src/FileIo.c",
+  "src/utils/src/FileLogger.c",
+  "src/utils/src/HashTable.c",
+  "src/utils/src/Hex.c",
+  "src/utils/src/InstrumentedAllocators.c",
+  "src/utils/src/Logger.c",
+  "src/utils/src/Math.c",
+  "src/utils/src/Mutex.c",
+  "src/utils/src/Semaphore.c",
+  "src/utils/src/SingleLinkedList.c",
+  "src/utils/src/StackQueue.c",
+  "src/utils/src/String.c",
+  "src/utils/src/Tags.c",
+  "src/utils/src/Thread.c",
+  "src/utils/src/Threadpool.c",
+  "src/utils/src/ThreadsafeBlockingQueue.c",
+  "src/utils/src/Time.c",
+  "src/utils/src/TimerQueue.c",
+  "src/utils/src/Version.c",
+  "src/view/src/ContentView.c",
+]
+include-dirs = [
+  "src/client/include",
+  "src/common/include",
+  "src/heap/include",
+  "src/mkvgen/include",
+  "src/state/include",
+  "src/trace/include",
+  "src/utils/include",
+  "src/view/include",
+]
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+
+[target.kvspicClient]
+type = "library"
+links = "kvspicClient"
+# Upstream leaves the other modules to the consumer's link line.
+deps = [{ name = "kvspic", public = true }]
+sources = [
+  "src/client/src/AckParser.c",
+  "src/client/src/AuthIntegration.c",
+  "src/client/src/Callbacks.c",
+  "src/client/src/Client.c",
+  "src/client/src/ClientEvent.c",
+  "src/client/src/ClientState.c",
+  "src/client/src/FrameOrderCoordinator.c",
+  "src/client/src/InputValidator.c",
+  "src/client/src/Stream.c",
+  "src/client/src/StreamEvent.c",
+  "src/client/src/StreamState.c",
+]
+include-dirs = [
+  "src/client/include",
+  "src/common/include",
+  "src/heap/include",
+  "src/mkvgen/include",
+  "src/state/include",
+  "src/trace/include",
+  "src/utils/include",
+  "src/view/include",
+]
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+
+[target.kvspicState]
+type = "library"
+links = "kvspicState"
+# Upstream leaves the other modules to the consumer's link line.
+deps = [{ name = "kvspicUtils", public = true }]
+sources = [
+  "src/state/src/State.c",
+]
+include-dirs = [
+  "src/client/include",
+  "src/common/include",
+  "src/heap/include",
+  "src/mkvgen/include",
+  "src/state/include",
+  "src/trace/include",
+  "src/utils/include",
+  "src/view/include",
+]
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+
+[target.kvspicUtils]
+type = "library"
+links = "kvspicUtils"
+sources = [
+  "src/utils/src/Allocators.c",
+  "src/utils/src/Atomics.c",
+  "src/utils/src/Base64.c",
+  "src/utils/src/BitField.c",
+  "src/utils/src/BitReader.c",
+  "src/utils/src/Crc32.c",
+  "src/utils/src/CustomAssert.c",
+  "src/utils/src/Directory.c",
+  "src/utils/src/DoubleLinkedList.c",
+  "src/utils/src/DynamicLibrary.c",
+  "src/utils/src/Endianness.c",
+  "src/utils/src/Environment.c",
+  "src/utils/src/ExponentialBackoffRetryStrategy.c",
+  "src/utils/src/FileIo.c",
+  "src/utils/src/FileLogger.c",
+  "src/utils/src/HashTable.c",
+  "src/utils/src/Hex.c",
+  "src/utils/src/InstrumentedAllocators.c",
+  "src/utils/src/Logger.c",
+  "src/utils/src/Math.c",
+  "src/utils/src/Mutex.c",
+  "src/utils/src/Semaphore.c",
+  "src/utils/src/SingleLinkedList.c",
+  "src/utils/src/StackQueue.c",
+  "src/utils/src/String.c",
+  "src/utils/src/Tags.c",
+  "src/utils/src/Thread.c",
+  "src/utils/src/Threadpool.c",
+  "src/utils/src/ThreadsafeBlockingQueue.c",
+  "src/utils/src/Time.c",
+  "src/utils/src/TimerQueue.c",
+  "src/utils/src/Version.c",
+]
+include-dirs = [
+  "src/client/include",
+  "src/common/include",
+  "src/heap/include",
+  "src/mkvgen/include",
+  "src/state/include",
+  "src/trace/include",
+  "src/utils/include",
+  "src/view/include",
+]
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+
+# CommonDefs.h:237 defines _GNU_SOURCE only after <stdint.h>, too late
+# under the strict -std=c11 Cabin passes.  CMakeLists.txt links
+# ${CMAKE_DL_LIBS}, Threads::Threads, and rt where UNIX AND NOT APPLE
+# (:127-131); it names nothing for Android.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+[target.'cfg(os = "linux")'.profile]
+defines = ["_GNU_SOURCE"]
+link-libs = ["dl", "rt"]
+
+[target.'cfg(any(os = "freebsd", os = "netbsd"))'.profile]
+link-libs = ["rt"]
