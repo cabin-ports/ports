@@ -1,0 +1,34 @@
+[package.upstream]
+url = "https://github.com/rogersce/cnpy/archive/4e8810b1a8637695171ed346ce68f6984e585ef4.tar.gz"
+checksum = "sha256:5120abc54a564efa92c642cc0199cc4fd3f345901157de9fbbdcedbb34d28d8a"
+format = "tar.gz"
+strip-prefix = "cnpy-4e8810b1a8637695171ed346ce68f6984e585ef4"
+
+# Version 2018.6.1: upstream has no tags or releases; this is the commit date
+# of the pinned commit (4e8810b1).
+# The header goes to include/ so that only cnpy.h is on consumers' include path.
+[[package.upstream.copy]]
+from = "cnpy.h"
+to = "include/cnpy.h"
+
+[package]
+name = "cabin-ports/cnpy"
+version = "2018.6.1"
+license = "MIT"
+include = ["LICENSE", "cnpy.cpp", "include"]
+
+[dependencies]
+"cabin-ports/zlib" = "=1.3.1"
+
+# Standards: upstream builds and documents -std=c++11 (CMakeLists.txt:8,
+# README.md); the library compiles as C++14, the floor of Cabin's cl.
+# Not ported: the shared library, example1.cpp, and the Python converters
+# mat2npz, npy2mat and npz2mat.
+[target.cnpy]
+type = "library"
+sources = ["cnpy.cpp"]
+include-dirs = ["include"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+links = "cnpy"
+deps = [{ name = "cabin-ports/zlib", public = true }]
