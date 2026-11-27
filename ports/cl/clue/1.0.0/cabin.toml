@@ -1,0 +1,22 @@
+[package.upstream]
+url = "https://github.com/martinmoene/clue/archive/refs/tags/v1.0.0.tar.gz"
+checksum = "sha256:7b369288ff0ab98ef2d471dd007f3cf8778ad4e4bdf8a5dc3b5d9e2b9cb0439c"
+format = "tar.gz"
+strip-prefix = "clue-1.0.0"
+
+[package]
+name = "cabin-ports/clue"
+version = "1.0.0"
+license = "BSL-1.0"
+include = ["LICENSE_1_0.txt", "include"]
+
+# C++03 is upstream's stated standard (README.md:7).  A consumer selects one
+# log destination with a macro before the include; the event-log destination
+# (LOG_TO_EVENTLOG) calls Advapi32, which the consumer links itself.
+# The string destination's macros call the_log() unqualified, so the consumer
+# needs using clue::the_log (measured: "use of undeclared identifier").
+# Not ported: examples/ and tests/.
+[target.clue]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++03"
