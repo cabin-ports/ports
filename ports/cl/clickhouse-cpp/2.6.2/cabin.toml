@@ -1,0 +1,84 @@
+[package.upstream]
+url = "https://github.com/ClickHouse/clickhouse-cpp/archive/refs/tags/v2.6.2.tar.gz"
+checksum = "sha256:bac497857759e991fa4e1638bccf936cb36d10ad79273695a570272cc4891428"
+format = "tar.gz"
+strip-prefix = "clickhouse-cpp-2.6.2"
+
+[package]
+name = "cabin-ports/clickhouse-cpp"
+version = "2.6.2"
+# MIT: the bundled CityHash 1.0.2 (contrib/cityhash).
+# clickhouse/columns/decimal.cpp:50 and :66 credit the SEI CERT C wiki (INT32-C)
+# for their overflow checks; their copyright significance is uncertain.
+license = "Apache-2.0 AND MIT"
+include = ["LICENSE", "clickhouse", "contrib/cityhash"]
+
+[dependencies]
+"cabin-ports/abseil" = "=20260817.0.0"
+"cabin-ports/lz4" = "=1.11.0"
+"cabin-ports/zstd" = "=1.5.7"
+
+# Not ported: TLS (WITH_OPENSSL, off by default upstream).
+[target.clickhouse-cpp-lib]
+type = "library"
+sources = [
+  "clickhouse/base/compressed.cpp",
+  "clickhouse/base/endpoints_iterator.cpp",
+  "clickhouse/base/input.cpp",
+  "clickhouse/base/output.cpp",
+  "clickhouse/base/platform.cpp",
+  "clickhouse/base/socket.cpp",
+  "clickhouse/base/wire_format.cpp",
+  "clickhouse/block.cpp",
+  "clickhouse/client.cpp",
+  "clickhouse/columns/array.cpp",
+  "clickhouse/columns/bool.cpp",
+  "clickhouse/columns/column.cpp",
+  "clickhouse/columns/date.cpp",
+  "clickhouse/columns/decimal.cpp",
+  "clickhouse/columns/enum.cpp",
+  "clickhouse/columns/factory.cpp",
+  "clickhouse/columns/geo.cpp",
+  "clickhouse/columns/ip4.cpp",
+  "clickhouse/columns/ip6.cpp",
+  "clickhouse/columns/itemview.cpp",
+  "clickhouse/columns/json.cpp",
+  "clickhouse/columns/lowcardinality.cpp",
+  "clickhouse/columns/map.cpp",
+  "clickhouse/columns/nullable.cpp",
+  "clickhouse/columns/numeric.cpp",
+  "clickhouse/columns/string.cpp",
+  "clickhouse/columns/time.cpp",
+  "clickhouse/columns/tuple.cpp",
+  "clickhouse/columns/uuid.cpp",
+  "clickhouse/query.cpp",
+  "clickhouse/types/type_parser.cpp",
+  "clickhouse/types/types.cpp",
+  "contrib/cityhash/cityhash/city.cc",
+]
+include-dirs = ["."]
+defines = ["CH_MAP_BOOL_TO_UINT8=1"]
+interface-defines = ["CH_MAP_BOOL_TO_UINT8=1"]
+# The standard cmake/cpp17.cmake sets.
+cxx-standard = "c++17"
+# city.cc is CityHash 1.0.2, whose CityHash128 checks compressed blocks; it defines
+# cabin-ports/cityhash 1.1.1's global functions, with other results (measured).
+links = "cityhash"
+deps = [
+  { name = "cabin-ports/abseil", public = true },
+  "cabin-ports/lz4",
+  "cabin-ports/zstd",
+]
+
+[profile]
+include-dirs = ["contrib/cityhash/cityhash"]
+
+# contrib/cityhash/cityhash/config.h needs WIN32 on MSVC (BUILD.bazel:80-87).
+[target.'cfg(any(cxx = "msvc", cxx = "clang-cl"))'.profile]
+defines = ["WIN32", "_CRT_SECURE_NO_WARNINGS"]
+
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["wsock32", "ws2_32"]
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
