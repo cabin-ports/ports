@@ -1,0 +1,47 @@
+--- a/include/qdldl_types.h
++++ b/include/qdldl_types.h
+@@ -33,22 +33,23 @@
+ 
+ // QDLDL integer and float types
+ 
+-typedef @QDLDL_INT_TYPE@    QDLDL_int;   /* for indices */
+-typedef @QDLDL_FLOAT_TYPE@  QDLDL_float; /* for numerical values  */
+-typedef @QDLDL_BOOL_TYPE@   QDLDL_bool;  /* for boolean values  */
++// Changed for cabin-ports on 2026-11-26: configured from qdldl_types.h.in as CMake's default 64-bit build writes it.
++typedef long long    QDLDL_int;   /* for indices */
++typedef double  QDLDL_float; /* for numerical values  */
++typedef unsigned char   QDLDL_bool;  /* for boolean values  */
+ 
+ //Maximum value of the signed type QDLDL_int.
+-#define QDLDL_INT_MAX @QDLDL_INT_TYPE_MAX@
++#define QDLDL_INT_MAX LLONG_MAX
+ 
+ /*
+  * Configuration options
+  */
+ 
+ /* When defined, QDLDL is using floats instead of doubles */
+-#cmakedefine QDLDL_FLOAT
++/* #undef QDLDL_FLOAT */
+ 
+ /* When defined, QDLDL is using long long instead of int types */
+-#cmakedefine QDLDL_LONG
++#define QDLDL_LONG
+ 
+ #ifdef __cplusplus
+ }
+--- a/include/qdldl_version.h
++++ b/include/qdldl_version.h
+@@ -24,8 +24,9 @@
+ #ifndef QDLDL_VERSION_H_
+ #define QDLDL_VERSION_H_
+ 
+-#define QDLDL_VERSION_MAJOR     @QDLDL_VERSION_MAJOR@
+-#define QDLDL_VERSION_MINOR     @QDLDL_VERSION_MINOR@
+-#define QDLDL_VERSION_PATCH     @QDLDL_VERSION_PATCH@
++// Changed for cabin-ports on 2026-11-26: configured from qdldl_version.h.in as CMake writes it.
++#define QDLDL_VERSION_MAJOR     0
++#define QDLDL_VERSION_MINOR     1
++#define QDLDL_VERSION_PATCH     9
+ 
+ #endif // #ifndef QDLDL_VERSION_H_
