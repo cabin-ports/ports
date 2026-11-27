@@ -188,6 +188,11 @@ jobs:
           name: publish-tools
           path: ${{ runner.temp }}/tools
       - run: chmod +x "$RUNNER_TEMP/tools/cabin" "$RUNNER_TEMP/tools/port-publish"
+      # The image holds no MPI; pkg-config finds this one (`ompi-c`).
+      - name: Install Open MPI
+        run: |
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends libopenmpi-dev
       - name: Stage and build every port
         if: needs.gate.outputs.mode == 'all'
         run: |
