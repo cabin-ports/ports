@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/mattconte/tlsf/archive/deff9ab509341f264addbd3c8ada533678591905.tar.gz"
+checksum = "sha256:df67543d45ad5e67d96168b54022a0f4803f8d5ae9770d398e20dd9a0e2934d6"
+format = "tar.gz"
+strip-prefix = "tlsf-deff9ab509341f264addbd3c8ada533678591905"
+
+[package]
+name = "cabin-ports/tlsf"
+version = "2020.3.29"
+license = "BSD-3-Clause"
+include = ["README.md", "tlsf.c", "tlsf.h"]
+# Upstream has no tags or releases.  tlsf.h still says "version 3.1" (dated
+# 2016/04/10 in README.md), but tlsf.c changed after that on master, so the
+# version is the date of the pinned master commit deff9ab (2020-03-29).
+#
+# The sources are C89-style and upstream states no C standard; C11 is the
+# oldest standard Cabin can request from MSVC.
+c-standard = "c11"
+
+# The license text is the header of tlsf.h; README.md calls it BSD.
+[target.tlsf]
+type = "library"
+sources = ["tlsf.c"]
+include-dirs = ["."]
+# tlsf.h compiles as C89 (measured: -std=c89 -pedantic-errors).
+interface-c-standard = "c89"
+links = "tlsf"
