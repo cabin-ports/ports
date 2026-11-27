@@ -1,0 +1,64 @@
+[package.upstream]
+url = "https://github.com/coin-or/qpOASES/archive/refs/tags/releases/3.2.2.tar.gz"
+checksum = "sha256:e36d795a17b067ea333793d96f17a14fb2bfbd92a4ab86c7f6f513cd9e3e640d"
+format = "tar.gz"
+strip-prefix = "qpOASES-releases-3.2.2"
+
+[package]
+name = "cabin-ports/qpoases"
+version = "3.2.2"
+# LGPL-2.1-or-later: the file headers of include/ and src/.  A program that
+# links the static library carries the obligations of LGPL-2.1 section 6.
+# src/SparseSolver.cpp:1166-1412 adapts Ipopt's IpMumpsSolverInterface.cpp
+# (EPL-2.0, Ipopt's LICENSE); the code is compiled only with SOLVER_MUMPS.
+license = "LGPL-2.1-or-later AND EPL-2.0"
+include = ["AUTHORS", "LICENSE", "LICENSE.txt", "README", "VERSIONS", "include", "src"]
+# Upstream states no C++ standard (CMakeLists.txt:87 builds with -pedantic
+# only); C++14 is the oldest Cabin lowers for MSVC.
+cxx-standard = "c++14"
+# Upstream states no C++ standard; c++98 is the measured floor: including
+# qpOASES.hpp compiles with -pedantic-errors at -std=c++98 (clang 21).
+interface-cxx-standard = "c++98"
+
+# Upstream's CMake library, static: all of src/*.cpp, with its default
+# options.  As there, the library defines the unprefixed extern "C" BLAS and
+# LAPACK replacements (dgemm_, dpotrf_, dtrtrs_, dtrcon_ and the
+# single-precision ones); and SQProblemSchur gets only the dummy sparse
+# solver, as no HSL or MUMPS is configured.  Not ported: the shared library,
+# examples, tests, and the C wrapper and Matlab, Python and other interfaces.
+[target.qpoases]
+type = "library"
+sources = [
+  "src/BLASReplacement.cpp",
+  "src/Bounds.cpp",
+  "src/Constraints.cpp",
+  "src/Flipper.cpp",
+  "src/Indexlist.cpp",
+  "src/LAPACKReplacement.cpp",
+  "src/MessageHandling.cpp",
+  "src/Matrices.cpp",
+  "src/OQPinterface.cpp",
+  "src/Options.cpp",
+  "src/QProblem.cpp",
+  "src/QProblemB.cpp",
+  "src/SolutionAnalysis.cpp",
+  "src/SparseSolver.cpp",
+  "src/SQProblem.cpp",
+  "src/SQProblemSchur.cpp",
+  "src/SubjectTo.cpp",
+  "src/Utils.cpp",
+]
+include-dirs = ["include"]
+defines = ["__NO_COPYRIGHT__"]
+links = "qpOASES"
+
+# CMake's -DLINUX (every UNIX) and the /DWIN32 of MSVC's default flags select
+# the clock getCPUtime() reads (src/Utils.cpp:577-594).
+[target.'cfg(family = "unix")'.profile]
+defines = ["LINUX"]
+
+[target.'cfg(os = "windows")'.profile]
+defines = ["WIN32"]
+
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["m"]
