@@ -1,0 +1,32 @@
+[package.upstream]
+url = "https://github.com/artem-ogre/CDT/archive/refs/tags/2.1.0.tar.gz"
+checksum = "sha256:4b17289c589fbaf3a961f250809f55a9e6ceccc627fbc36ded3a151c81fa7d43"
+format = "tar.gz"
+strip-prefix = "CDT-2.1.0"
+
+[package]
+name = "cabin-ports/cdt"
+version = "2.1.0"
+license = "MPL-2.0 AND BSD-3-Clause AND Apache-2.0 WITH LLVM-exception"
+# CDT/LICENSE (MPL-2.0) covers the library; CDT/include/predicates.h is
+# BSD-3-Clause (CDT/LICENSE-predicates.txt) and portable_nth_element.hpp is
+# Apache-2.0 WITH LLVM-exception (CDT/LICENSE-LLVM.txt).
+include = [
+  "CDT/LICENSE",
+  "CDT/LICENSE-LLVM.txt",
+  "CDT/LICENSE-predicates.txt",
+  "CDT/extras",
+  "CDT/include",
+  "LICENSE",
+]
+
+# Header-only, upstream's default mode, with the headers at the include root
+# as upstream installs them (<CDT.h>).  Not ported: the compiled mode
+# (CDT_USE_AS_COMPILED_LIBRARY), whose cdt_export.h CMake generates, and the
+# Boost-dependent configurations: the fallback for compilers without C++11 and
+# CDT_USE_STRONG_TYPING.  Upstream's C++11 floor is from
+# docs/README.md ("Boost is used as a fall back" without C++11).
+[target.cdt]
+type = "header-only"
+include-dirs = ["CDT/include", "CDT/extras"]
+interface-cxx-standard = "c++11"
