@@ -1,0 +1,26 @@
+[package.upstream]
+# Upstream tags no releases; this is master on 2026-11-23.  The newest change to
+# plf_indiesort.h there has the subject "v1.4.16"; the later commits touch only
+# upstream's bundled plf_tools copies, which the plf-tools dependency replaces.
+url = "https://github.com/mattreecebentley/plf_indiesort/archive/e964caf20b4a0d35607104f2e427fb848c932f39.tar.gz"
+checksum = "sha256:92e548fcb8f7bbba3168b7f4c9b12c3a3b143939893c45bc57aa25d1d5e6376e"
+format = "tar.gz"
+strip-prefix = "plf_indiesort-e964caf20b4a0d35607104f2e427fb848c932f39"
+
+[package]
+name = "cabin-ports/plf-indiesort"
+version = "1.4.16"
+license = "Zlib"
+include = ["LICENSE.md", "plf_indiesort.h"]
+
+[dependencies]
+"cabin-ports/plf-tools" = "^1.0.18"
+
+# README.md: "C++98/03/11/14/etc-compatible".  plf-tools 1.0.18 is the version
+# upstream bundles at this commit; before 1.0.11 it lacks PLF_DECLTYPE_SUPPORT,
+# which selects the size()-based path in plf_indiesort.h.
+[target.plf-indiesort]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++98"
+deps = [{ name = "cabin-ports/plf-tools", public = true }]
