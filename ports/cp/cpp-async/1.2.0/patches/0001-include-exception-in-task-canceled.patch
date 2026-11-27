@@ -1,0 +1,11 @@
+--- a/include/async/task_canceled.h
++++ b/include/async/task_canceled.h
+@@ -2,6 +2,8 @@
+ 
+ #pragma once
+ 
++#include <exception>
++
+ namespace async
+ {
+     struct task_canceled : std::exception

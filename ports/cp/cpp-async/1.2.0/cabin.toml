@@ -1,0 +1,46 @@
+[package.upstream]
+url = "https://github.com/microsoft/cpp-async/archive/refs/tags/v1.2.0.tar.gz"
+checksum = "sha256:1f681a45fe73b8fa8b1aabcf980d2a2158d165224fe96893344fe3a5124b1baf"
+format = "tar.gz"
+strip-prefix = "cpp-async-1.2.0"
+# Patch 0001 includes <exception> in task_canceled.h, which derives from
+# std::exception without including it (measured with this header alone:
+# g++-16 "expected class-name", Apple Clang "use of undeclared identifier
+# 'std'").
+# MIT License notice of task_canceled.h, whose lines 0001 carries (the
+# License's condition that copies include it):
+# © Microsoft Corporation.
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED *AS IS*, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+patches = ["patches/0001-include-exception-in-task-canceled.patch"]
+
+[package]
+name = "cabin-ports/cpp-async"
+version = "1.2.0"
+license = "MIT"
+include = ["LICENSE", "include", "patches"]
+
+# C++20 is upstream's stated floor (README.md).  Limitation of upstream 1.2.0:
+# a task<T> coroutine that is awaited by another coroutine and completes after
+# suspending reads freed memory in symmetric_transfer::await_suspend (measured:
+# Apple Clang with AddressSanitizer, heap-use-after-free at task.h:158).
+[target.cpp-async]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
