@@ -50,7 +50,9 @@ include = ["LICENSE", "README.md", "patches", "src/include"]
 # remainder overloads exist only at exactly -std=c++14 (#if __cplusplus ==
 # 201402L in cx_math.h).  cx_guid.h defines operator<< without inline, so two
 # translation units that include it fail to link with a duplicate symbol
-# (measured with clang++ -std=c++14 on macOS arm64).
+# (measured with clang++ -std=c++14 on macOS arm64).  With cl, cx::partition is
+# not usable in a constant expression (measured, check-windows: C2131 at
+# main.cc(19)).
 [target.constexpr]
 type = "header-only"
 include-dirs = ["src/include"]
