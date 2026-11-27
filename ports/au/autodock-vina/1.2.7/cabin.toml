@@ -1,0 +1,81 @@
+[package.upstream]
+url = "https://github.com/ccsb-scripps/AutoDock-Vina/archive/refs/tags/v1.2.7.tar.gz"
+checksum = "sha256:038a2ade139eeb85b4bc7f5242fbc770f192427735e17bdc877b7420f39553d9"
+format = "tar.gz"
+strip-prefix = "AutoDock-Vina-1.2.7"
+
+[package]
+name = "cabin-ports/autodock-vina"
+version = "1.2.7"
+# Upstream builds C++14 on macOS (build/mac/release/Makefile:6) and C++11
+# elsewhere; the Boost 1.92 ports it requires take C++14.
+cxx-standard = "c++14"
+# src/lib/utils.cpp:27 and :83 and src/lib/random.cpp:86 credit Stack Overflow
+# questions 12971499, 18100097 and 22883840 for separator(), is_directory() and
+# auto_seed(); their copyright significance is uncertain.
+license = "Apache-2.0"
+include = ["LICENSE", "src/lib"]
+
+[dependencies]
+"cabin-ports/boost-algorithm" = "=1.92.0"
+"cabin-ports/boost-array" = "=1.92.0"
+"cabin-ports/boost-config" = "=1.92.0"
+"cabin-ports/boost-filesystem" = "=1.92.0"
+"cabin-ports/boost-lexical-cast" = "=1.92.0"
+"cabin-ports/boost-log" = "=1.92.0"
+"cabin-ports/boost-math" = "=1.92.0"
+"cabin-ports/boost-optional" = "=1.92.0"
+"cabin-ports/boost-program-options" = "=1.92.0"
+"cabin-ports/boost-ptr-container" = "=1.92.0"
+"cabin-ports/boost-random" = "=1.92.0"
+"cabin-ports/boost-serialization" = "=1.92.0"
+"cabin-ports/boost-static-assert" = "=1.92.0"
+"cabin-ports/boost-thread" = "=1.92.0"
+"cabin-ports/boost-timer" = "=1.92.0"
+"cabin-ports/boost-utility" = "=1.92.0"
+
+# The objects build/makefile_common links into vina (LIBOBJ).  Not ported:
+# the vina and vina_split programs (src/main, src/split) and the Python
+# bindings (build/python).
+[target.vina]
+type = "library"
+links = "vina"
+sources = [
+  "src/lib/ad4cache.cpp",
+  "src/lib/cache.cpp",
+  "src/lib/conf_independent.cpp",
+  "src/lib/coords.cpp",
+  "src/lib/grid.cpp",
+  "src/lib/model.cpp",
+  "src/lib/monte_carlo.cpp",
+  "src/lib/mutate.cpp",
+  "src/lib/non_cache.cpp",
+  "src/lib/parallel_mc.cpp",
+  "src/lib/parse_pdbqt.cpp",
+  "src/lib/quasi_newton.cpp",
+  "src/lib/quaternion.cpp",
+  "src/lib/random.cpp",
+  "src/lib/szv_grid.cpp",
+  "src/lib/utils.cpp",
+  "src/lib/vina.cpp",
+]
+include-dirs = ["src/lib"]
+interface-cxx-standard = "c++14"
+deps = [
+  { name = "cabin-ports/boost-algorithm", public = true },
+  { name = "cabin-ports/boost-array", public = true },
+  { name = "cabin-ports/boost-config", public = true },
+  { name = "cabin-ports/boost-filesystem", public = true },
+  { name = "cabin-ports/boost-lexical-cast", public = true },
+  { name = "cabin-ports/boost-log:boost_log", public = true },
+  { name = "cabin-ports/boost-math", public = true },
+  { name = "cabin-ports/boost-optional", public = true },
+  { name = "cabin-ports/boost-program-options", public = true },
+  { name = "cabin-ports/boost-ptr-container", public = true },
+  { name = "cabin-ports/boost-random", public = true },
+  { name = "cabin-ports/boost-serialization:boost_serialization", public = true },
+  { name = "cabin-ports/boost-static-assert", public = true },
+  { name = "cabin-ports/boost-thread", public = true },
+  { name = "cabin-ports/boost-timer", public = true },
+  "cabin-ports/boost-utility",
+]
