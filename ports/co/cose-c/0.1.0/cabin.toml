@@ -1,0 +1,107 @@
+[package.upstream]
+url = "https://github.com/cose-wg/COSE-C/archive/4432ae11f7a9711c46e8b4442fa2b35055c5cf98.tar.gz"
+checksum = "sha256:67bad9db62181dcf0a43cbf64278aece40c9082ad5b1b2a8f06fa5168f594a73"
+format = "tar.gz"
+strip-prefix = "COSE-C-4432ae11f7a9711c46e8b4442fa2b35055c5cf98"
+# A copy step places include/cose/cose_configure.h.in, which
+# src/CMakeLists.txt configures, as include/cose/cose_configure.h, and patch
+# 0001 fills in its three #cmakedefine lines as configure_file writes them
+# for the OpenSSL backend.
+# BSD-3-Clause notice of include/cose/cose_configure.h.in (LICENSE), whose
+# lines 0001 carries (the condition that redistributions of source code
+# retain it):
+# Copyright (c) 2015, cose-wg
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# * Redistributions of source code must retain the above copyright notice, this
+#   list of conditions and the following disclaimer.
+#
+# * Redistributions in binary form must reproduce the above copyright notice,
+#   this list of conditions and the following disclaimer in the documentation
+#   and/or other materials provided with the distribution.
+#
+# * Neither the name of COSE-C nor the names of its
+#   contributors may be used to endorse or promote products derived from
+#   this software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+# FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+# DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+# SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+# CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+# OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+patches = ["patches/0001-configure-cose-configure-h.patch"]
+
+[[package.upstream.copy]]
+from = "include/cose/cose_configure.h.in"
+to = "include/cose/cose_configure.h"
+
+[package]
+name = "cabin-ports/cose-c"
+# Upstream tags no release: CMakeLists.txt:3-15 declares 0.1.0, and this is
+# commit 4432ae11, the one conan-center pins.
+version = "0.1.0"
+# src/mbedtls.c:995 credits the Mbed TLS knowledge base for a commented-out
+# random-generator example; its copyright significance is uncertain.
+license = "BSD-3-Clause"
+include = ["LICENSE", "include", "patches", "src"]
+
+[dependencies]
+"cabin-ports/cn-cbor" = "=1.0.0"
+"cabin-ports/openssl" = "=4.1.0"
+
+# Requests the openssl port's own build of OpenSSL in place of the system's,
+# which that port does not offer on Windows.
+[features]
+vendored-openssl = ["cabin-ports/openssl/vendored"]
+
+# The library src/CMakeLists.txt builds with its default OpenSSL backend.
+# Upstream's CMAKE_C_STANDARD is 11 (CMakeLists.txt:54-56), though GCC and
+# Clang get -std=gnu99; the build is strict C11.  Upstream states no
+# interface standard: C99 is measured.
+# Not reproduced: COSE_C_USE_CONTEXT, on by default, which defines
+# USE_CBOR_CONTEXT and needs a cn-cbor built with it, as cabin-ports/cn-cbor
+# is not.  This is upstream's tested context-off build (.travis.yml), so the
+# cose.h functions take no cn_cbor_context allocator argument.
+# After an AES-GCM decryption, COSE_Encrypt_GetContent returns the whole
+# plaintext with a length of 0 (AES_GCM_Decrypt in src/openssl.c; measured).
+# Not ported: the mbedTLS backend (it needs mbedTLS 2), the shared library,
+# the dumper, and the tests.
+[target.cose-c]
+type = "library"
+links = "cose-c"
+sources = [
+  "src/Cose.c",
+  "src/CounterSign.c",
+  "src/CounterSign0.c",
+  "src/Encrypt.c",
+  "src/Encrypt0.c",
+  "src/MacMessage.c",
+  "src/MacMessage0.c",
+  "src/Recipient.c",
+  "src/Sign.c",
+  "src/Sign1.c",
+  "src/SignerInfo.c",
+  "src/cbor.c",
+  "src/openssl.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+interface-c-standard = "c99"
+# cose.h includes <cn-cbor/cn-cbor.h>, and cose_configure.h
+# <openssl/opensslv.h>.
+deps = [
+  { name = "cabin-ports/cn-cbor", public = true },
+  { name = "cabin-ports/openssl:crypto", public = true },
+]
+
+# src/CMakeLists.txt links ws2_32 under MSVC.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32"]

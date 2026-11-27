@@ -1,0 +1,15 @@
+--- a/include/cose/cose_configure.h
++++ b/include/cose/cose_configure.h
+@@ -4,9 +4,9 @@
+ 
+ #pragma once
+ 
+-#cmakedefine COSE_C_USE_MBEDTLS
+-#cmakedefine COSE_C_USE_OPENSSL
+-#cmakedefine COSE_C_USE_BCRYPT
++/* #undef COSE_C_USE_MBEDTLS */
++#define COSE_C_USE_OPENSSL
++/* #undef COSE_C_USE_BCRYPT */
+ 
+ // make sure we only use one crypto library
+ #if defined(COSE_C_USE_MBEDTLS)
