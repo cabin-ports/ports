@@ -1,0 +1,115 @@
+[package.upstream]
+url = "https://github.com/ampl/mp/archive/refs/tags/v4.2.1.tar.gz"
+checksum = "sha256:800c5f69a15f9e7bb543f429fcae02a917c1d9365e609a52ed80663b31a80cd9"
+format = "tar.gz"
+strip-prefix = "mp-4.2.1"
+
+[package]
+name = "cabin-ports/ampl-mp"
+version = "4.2.1"
+# include/mp/utils-templates.h:6-8 credits Stack Overflow answer 43526890
+# (CC BY-SA 3.0) for FirstArgument, utils-math.h:8 and utils-string.h:47
+# Stack Overflow questions 13094224 and 874134 for round_to_digits and
+# ends_with, and util-json-write.h:180 a C++ Stories article for the tuple
+# DoWrite; their copyright significance is uncertain.
+# LICENSE.rst, which covers the files without a header, holds Lucent's
+# SMLNJ grant and, from David M. Gay and AMPL Optimization, the same grant
+# without its name clause (LicenseRef-AMPL-SMLNJ-variant), which the AMPL
+# Optimization file headers (e.g. problem.h) carry too.  BSD-2-Clause: the
+# bundled fmt and rstparser (format.h, posix.h, rstparser.h, safeint.h and
+# their sources).  MIT: small_vector.hpp, and utils-matrix.h, based on
+# fylux/TriangularMatrix.
+license = "SMLNJ AND LicenseRef-AMPL-SMLNJ-variant AND BSD-2-Clause AND MIT"
+include = [
+  "LICENSE.rst",
+  "README.rst",
+  "include",
+  "src/expr-info.cc",
+  "src/expr-writer.h",
+  "src/expr.cc",
+  "src/format.cc",
+  "src/mp",
+  "src/nl-reader.cc",
+  "src/option.cc",
+  "src/os.cc",
+  "src/posix.cc",
+  "src/problem.cc",
+  "src/rstparser.cc",
+  "src/sol.cc",
+  "src/solver.cc",
+  "src/sp.cc",
+  "src/sp.h",
+  "src/utils_clock.cc",
+  "src/utils_file.cc",
+  "src/utils_string.cc",
+  "thirdparty/gharveymn",
+]
+# CMakeLists.txt:34-36 sets C++17 without GNU extensions.
+cxx-standard = "c++17"
+
+# Not ported: the asl module (aslmp, amplsig and cp; off by default),
+# nl-writer2, the solver drivers, and gen-expr-info, whose output the
+# library compiles as committed in src/expr-info.cc.
+# include/mp/format.h, a pre-5.0 {fmt} in namespace fmt, shares the include
+# guard FMT_FORMAT_H_ with cabin-ports/fmt (measured): after an mp header,
+# <fmt/format.h> is skipped and fmt::format calls mp's copy; before one, the
+# mp header does not compile.  Include them from separate translation units.
+[target.mp]
+type = "library"
+sources = [
+  "src/expr-info.cc",
+  "src/expr.cc",
+  "src/format.cc",
+  "src/mp/flat/encodings.cpp",
+  "src/mp/flat/piecewise_linear.cpp",
+  "src/mp/flat/std_constr.cc",
+  "src/nl-reader.cc",
+  "src/option.cc",
+  "src/os.cc",
+  "src/posix.cc",
+  "src/problem.cc",
+  "src/rstparser.cc",
+  "src/sol.cc",
+  "src/solver.cc",
+  "src/sp.cc",
+  "src/utils_clock.cc",
+  "src/utils_file.cc",
+  "src/utils_string.cc",
+]
+include-dirs = ["include"]
+# The PUBLIC definitions of CMakeLists.txt:239, 453 and 462-490, whose
+# probes every C++17 compiler passes.  Without MP_DATE, solver-io.h:262
+# runs a consumer's driver through CheckDemoVersion.
+defines = ["MP_DATE=20261029", "MP_USE_ATOMIC", "MP_USE_HASH", "MP_USE_UNIQUE_PTR"]
+interface-defines = ["MP_DATE=20261029", "MP_USE_ATOMIC", "MP_USE_HASH", "MP_USE_UNIQUE_PTR"]
+links = "mp"
+
+# CMakeLists.txt:181-183.
+[target.'cfg(any(cxx = "msvc", cxx = "clang-cl"))'.profile]
+defines = ["_CRT_SECURE_NO_WARNINGS", "_SILENCE_TR1_NAMESPACE_DEPRECATION_WARNING"]
+
+# MP_SYSINFO is CMake's "${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_PROCESSOR}"
+# (CMakeLists.txt:241, 453), which only solver.cc reads.  Other platforms
+# get none, and solver.cc does not compile there (measured without it:
+# "use of undeclared identifier 'MP_SYSINFO'").
+[target.'cfg(all(os = "linux", arch = "x86_64"))'.profile]
+defines = ["MP_SYSINFO=\"Linux x86_64\""]
+
+[target.'cfg(all(os = "linux", arch = "aarch64"))'.profile]
+defines = ["MP_SYSINFO=\"Linux aarch64\""]
+
+[target.'cfg(all(os = "macos", arch = "x86_64"))'.profile]
+defines = ["MP_SYSINFO=\"Darwin x86_64\""]
+
+[target.'cfg(all(os = "macos", arch = "aarch64"))'.profile]
+defines = ["MP_SYSINFO=\"Darwin arm64\""]
+
+[target.'cfg(all(os = "windows", arch = "x86_64"))'.profile]
+defines = ["MP_SYSINFO=\"Windows AMD64\""]
+
+[target.'cfg(all(os = "windows", arch = "aarch64"))'.profile]
+defines = ["MP_SYSINFO=\"Windows ARM64\""]
+
+# CMakeLists.txt:494-498 links librt for clock_gettime.
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["rt"]
