@@ -1,0 +1,46 @@
+[package.upstream]
+url = "https://github.com/tinyobjloader/tinyobjloader/archive/refs/tags/v2.0.0rc13.tar.gz"
+checksum = "sha256:0feb92b838f8ce4aa6eb0ccc32dff30cb64a891e0ec3bde837fca49c78d44334"
+format = "tar.gz"
+strip-prefix = "tinyobjloader-2.0.0rc13"
+
+[package]
+name = "cabin-ports/tinyobjloader"
+# Upstream's tag is v2.0.0rc13; CMakeLists.txt:7 declares 2.0.0-rc.13.
+version = "2.0.0-rc.13"
+# tiny_obj_loader.h:765-799 (safeGetline) is the Stack Overflow answer it links
+# (question 6089231), under CC-BY-SA-3.0.  LICENSE adds mapbox/earcut.hpp's ISC.
+# tiny_obj_loader.h:1438 credits Franklin's pnpoly and :2028 credits Rosetta Code for
+# SplitString; their copyright significance is uncertain.
+license = "MIT AND ISC AND CC-BY-SA-3.0"
+include = ["LICENSE", "mapbox", "tiny_obj_loader.cc", "tiny_obj_loader.h"]
+
+# README.md:13 says the header is written in C++03 and it compiles under
+# -std=c++98 -pedantic-errors, so the interface asks for c++98.  The library
+# itself builds as C++14 (CMakeLists.txt:58 asks C++11), the oldest standard
+# Cabin can request from MSVC.  The TINYOBJLOADER_USE_DOUBLE option builds a
+# second library under another name.
+# Not ported: the Python bindings, the example loader and stitcher applications,
+# and shared builds (CMakeLists.txt:12, :56, :89, :114).
+[features]
+default = []
+double = []
+
+[target.tinyobjloader]
+type = "library"
+sources = ["tiny_obj_loader.cc"]
+include-dirs = ["."]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++98"
+links = "tinyobjloader"
+
+[target.tinyobjloader-double]
+type = "library"
+sources = ["tiny_obj_loader.cc"]
+include-dirs = ["."]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++98"
+defines = ["TINYOBJLOADER_USE_DOUBLE"]
+interface-defines = ["TINYOBJLOADER_USE_DOUBLE"]
+links = "tinyobjloader_double"
+required-features = ["double"]

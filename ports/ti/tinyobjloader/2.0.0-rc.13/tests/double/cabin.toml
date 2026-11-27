@@ -1,0 +1,12 @@
+[package]
+name = "double"
+version = "0.0.0"
+cxx-standard = "c++14"
+
+[dependencies]
+"cabin-ports/tinyobjloader" = { version = "=2.0.0-rc.13", features = ["double"] }
+
+[target.double]
+type = "executable"
+sources = ["src/main.cc"]
+deps = ["cabin-ports/tinyobjloader:tinyobjloader-double"]
