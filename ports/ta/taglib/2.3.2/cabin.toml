@@ -1,0 +1,330 @@
+[package.upstream]
+url = "https://github.com/taglib/taglib/releases/download/v2.3.2/taglib-2.3.2.tar.gz"
+checksum = "sha256:3ca2d8afaa7f1cf7f6ed10e511ebc368bfacd6dcaa3dbfa690b89e502e8963dc"
+format = "tar.gz"
+strip-prefix = "taglib-2.3.2"
+# Upstream installs its headers flat in include/taglib
+# (taglib/CMakeLists.txt:588, bindings/c/CMakeLists.txt:140), with the
+# taglib_config.h CMake writes from taglib/taglib_config.h.cmake, which the
+# sources read to know which formats are built.  Patch 0001 adds
+# taglib_config.h there as CMake writes it with upstream's default options:
+# every format on.  The other 132 headers exceed Cabin's 16 copy steps, so
+# patch 0002 adds a forwarder for each there.
+patches = [
+  "patches/0001-add-taglib-config-h.patch",
+  "patches/0002-add-include-taglib-forwarders.patch",
+]
+
+[package]
+name = "cabin-ports/taglib"
+version = "2.3.2"
+# Most files are LGPL-2.1 or, alternatively, MPL-1.1; taglib/it/itfile.h,
+# taglib/mod/modfileprivate.h and bindings/c/tag_c.* offer only LGPL-2.1.
+license = "LGPL-2.1-only"
+# The ID3v2 and APE specifications beside the sources are left out: they are
+# not built, and they carry their own terms or none.
+include = [
+  "AUTHORS",
+  "COPYING.LGPL",
+  "COPYING.MPL",
+  "bindings/c",
+  "include",
+  "patches",
+  "taglib/ape/apefile.cpp",
+  "taglib/ape/apefile.h",
+  "taglib/ape/apefooter.cpp",
+  "taglib/ape/apefooter.h",
+  "taglib/ape/apeitem.cpp",
+  "taglib/ape/apeitem.h",
+  "taglib/ape/apeproperties.cpp",
+  "taglib/ape/apeproperties.h",
+  "taglib/ape/apetag.cpp",
+  "taglib/ape/apetag.h",
+  "taglib/asf",
+  "taglib/audioproperties.cpp",
+  "taglib/audioproperties.h",
+  "taglib/dsdiff",
+  "taglib/dsf",
+  "taglib/fileref.cpp",
+  "taglib/fileref.h",
+  "taglib/flac",
+  "taglib/it",
+  "taglib/matroska",
+  "taglib/mod",
+  "taglib/mp4",
+  "taglib/mpc",
+  "taglib/mpeg/id3v1",
+  "taglib/mpeg/id3v2/frames",
+  "taglib/mpeg/id3v2/id3v2.h",
+  "taglib/mpeg/id3v2/id3v2extendedheader.cpp",
+  "taglib/mpeg/id3v2/id3v2extendedheader.h",
+  "taglib/mpeg/id3v2/id3v2footer.cpp",
+  "taglib/mpeg/id3v2/id3v2footer.h",
+  "taglib/mpeg/id3v2/id3v2frame.cpp",
+  "taglib/mpeg/id3v2/id3v2frame.h",
+  "taglib/mpeg/id3v2/id3v2framefactory.cpp",
+  "taglib/mpeg/id3v2/id3v2framefactory.h",
+  "taglib/mpeg/id3v2/id3v2header.cpp",
+  "taglib/mpeg/id3v2/id3v2header.h",
+  "taglib/mpeg/id3v2/id3v2synchdata.cpp",
+  "taglib/mpeg/id3v2/id3v2synchdata.h",
+  "taglib/mpeg/id3v2/id3v2tag.cpp",
+  "taglib/mpeg/id3v2/id3v2tag.h",
+  "taglib/mpeg/mpegfile.cpp",
+  "taglib/mpeg/mpegfile.h",
+  "taglib/mpeg/mpegheader.cpp",
+  "taglib/mpeg/mpegheader.h",
+  "taglib/mpeg/mpegproperties.cpp",
+  "taglib/mpeg/mpegproperties.h",
+  "taglib/mpeg/mpegutils.h",
+  "taglib/mpeg/xingheader.cpp",
+  "taglib/mpeg/xingheader.h",
+  "taglib/ogg",
+  "taglib/riff",
+  "taglib/s3m",
+  "taglib/shorten",
+  "taglib/tag.cpp",
+  "taglib/tag.h",
+  "taglib/taglib_export.h",
+  "taglib/tagunion.cpp",
+  "taglib/tagunion.h",
+  "taglib/tagutils.cpp",
+  "taglib/tagutils.h",
+  "taglib/toolkit",
+  "taglib/trueaudio",
+  "taglib/wavpack",
+  "taglib/xm",
+]
+# C++17 for the library and its C++ consumers, per CMakeLists.txt:5
+# (CMAKE_CXX_STANDARD 17) and CHANGELOG.md:124.
+cxx-standard = "c++17"
+
+# Upstream links zlib when CMake finds it (WITH_ZLIB, on by default) to read
+# compressed ID3v2 frames; Cabin cannot gate a target's dependency on a
+# feature, so it is always on.  utfcpp stands in for the copy upstream
+# bundles in 3rdparty/utfcpp, which CMake uses only when it finds none
+# installed.
+[dependencies]
+"cabin-ports/utfcpp" = "^4.2"
+"cabin-ports/zlib" = "^1.3"
+
+# The source directories upstream's build compiles with
+# (taglib/CMakeLists.txt:1-73), for the package's own compiles only.
+[profile]
+include-dirs = [
+  "taglib",
+  "taglib/ape",
+  "taglib/asf",
+  "taglib/dsdiff",
+  "taglib/dsf",
+  "taglib/flac",
+  "taglib/it",
+  "taglib/matroska",
+  "taglib/matroska/ebml",
+  "taglib/mod",
+  "taglib/mp4",
+  "taglib/mpc",
+  "taglib/mpeg",
+  "taglib/mpeg/id3v1",
+  "taglib/mpeg/id3v2",
+  "taglib/mpeg/id3v2/frames",
+  "taglib/ogg",
+  "taglib/ogg/flac",
+  "taglib/ogg/opus",
+  "taglib/ogg/speex",
+  "taglib/ogg/vorbis",
+  "taglib/riff",
+  "taglib/riff/aiff",
+  "taglib/riff/wav",
+  "taglib/s3m",
+  "taglib/shorten",
+  "taglib/toolkit",
+  "taglib/trueaudio",
+  "taglib/wavpack",
+  "taglib/xm",
+]
+
+# config.h's values as ConfigureChecks.cmake finds them, passed as defines:
+# the sources read config.h only under HAVE_CONFIG_H, which stays undefined.
+[target.'cfg(cxx = "msvc")'.profile]
+defines = ["HAVE_MSC_BYTESWAP=1"]
+
+[target.'cfg(not(cxx = "msvc"))'.profile]
+defines = ["HAVE_GCC_BYTESWAP=1"]
+
+[target.'cfg(os = "windows")'.profile]
+defines = ["HAVE_ISO_STRDUP=1"]
+
+# Upstream's installed include directories (taglib/CMakeLists.txt:537-540).
+[target.tag]
+type = "library"
+sources = [
+  "taglib/ape/apefile.cpp",
+  "taglib/ape/apefooter.cpp",
+  "taglib/ape/apeitem.cpp",
+  "taglib/ape/apeproperties.cpp",
+  "taglib/ape/apetag.cpp",
+  "taglib/asf/asfattribute.cpp",
+  "taglib/asf/asffile.cpp",
+  "taglib/asf/asfpicture.cpp",
+  "taglib/asf/asfproperties.cpp",
+  "taglib/asf/asftag.cpp",
+  "taglib/audioproperties.cpp",
+  "taglib/dsdiff/dsdiffdiintag.cpp",
+  "taglib/dsdiff/dsdifffile.cpp",
+  "taglib/dsdiff/dsdiffproperties.cpp",
+  "taglib/dsf/dsffile.cpp",
+  "taglib/dsf/dsfproperties.cpp",
+  "taglib/fileref.cpp",
+  "taglib/flac/flacfile.cpp",
+  "taglib/flac/flacmetadatablock.cpp",
+  "taglib/flac/flacpicture.cpp",
+  "taglib/flac/flacproperties.cpp",
+  "taglib/flac/flacunknownmetadatablock.cpp",
+  "taglib/it/itfile.cpp",
+  "taglib/it/itproperties.cpp",
+  "taglib/matroska/ebml/ebmlbinaryelement.cpp",
+  "taglib/matroska/ebml/ebmldeferredbinaryelement.cpp",
+  "taglib/matroska/ebml/ebmlelement.cpp",
+  "taglib/matroska/ebml/ebmlfloatelement.cpp",
+  "taglib/matroska/ebml/ebmlmasterelement.cpp",
+  "taglib/matroska/ebml/ebmlmkattachments.cpp",
+  "taglib/matroska/ebml/ebmlmkchapters.cpp",
+  "taglib/matroska/ebml/ebmlmkcues.cpp",
+  "taglib/matroska/ebml/ebmlmkinfo.cpp",
+  "taglib/matroska/ebml/ebmlmkseekhead.cpp",
+  "taglib/matroska/ebml/ebmlmksegment.cpp",
+  "taglib/matroska/ebml/ebmlmktags.cpp",
+  "taglib/matroska/ebml/ebmlmktracks.cpp",
+  "taglib/matroska/ebml/ebmlstringelement.cpp",
+  "taglib/matroska/ebml/ebmluintelement.cpp",
+  "taglib/matroska/ebml/ebmlutils.cpp",
+  "taglib/matroska/ebml/ebmlvoidelement.cpp",
+  "taglib/matroska/matroskaattachedfile.cpp",
+  "taglib/matroska/matroskaattachments.cpp",
+  "taglib/matroska/matroskachapter.cpp",
+  "taglib/matroska/matroskachapteredition.cpp",
+  "taglib/matroska/matroskachapters.cpp",
+  "taglib/matroska/matroskacues.cpp",
+  "taglib/matroska/matroskaelement.cpp",
+  "taglib/matroska/matroskafile.cpp",
+  "taglib/matroska/matroskaproperties.cpp",
+  "taglib/matroska/matroskaseekhead.cpp",
+  "taglib/matroska/matroskasegment.cpp",
+  "taglib/matroska/matroskasimpletag.cpp",
+  "taglib/matroska/matroskatag.cpp",
+  "taglib/mod/modfile.cpp",
+  "taglib/mod/modfilebase.cpp",
+  "taglib/mod/modproperties.cpp",
+  "taglib/mod/modtag.cpp",
+  "taglib/mp4/mp4atom.cpp",
+  "taglib/mp4/mp4chapter.cpp",
+  "taglib/mp4/mp4coverart.cpp",
+  "taglib/mp4/mp4file.cpp",
+  "taglib/mp4/mp4item.cpp",
+  "taglib/mp4/mp4itemfactory.cpp",
+  "taglib/mp4/mp4nerochapterlist.cpp",
+  "taglib/mp4/mp4properties.cpp",
+  "taglib/mp4/mp4qtchapterlist.cpp",
+  "taglib/mp4/mp4stem.cpp",
+  "taglib/mp4/mp4tag.cpp",
+  "taglib/mpc/mpcfile.cpp",
+  "taglib/mpc/mpcproperties.cpp",
+  "taglib/mpeg/id3v1/id3v1genres.cpp",
+  "taglib/mpeg/id3v1/id3v1tag.cpp",
+  "taglib/mpeg/id3v2/frames/attachedpictureframe.cpp",
+  "taglib/mpeg/id3v2/frames/chapterframe.cpp",
+  "taglib/mpeg/id3v2/frames/commentsframe.cpp",
+  "taglib/mpeg/id3v2/frames/eventtimingcodesframe.cpp",
+  "taglib/mpeg/id3v2/frames/generalencapsulatedobjectframe.cpp",
+  "taglib/mpeg/id3v2/frames/ownershipframe.cpp",
+  "taglib/mpeg/id3v2/frames/podcastframe.cpp",
+  "taglib/mpeg/id3v2/frames/popularimeterframe.cpp",
+  "taglib/mpeg/id3v2/frames/privateframe.cpp",
+  "taglib/mpeg/id3v2/frames/relativevolumeframe.cpp",
+  "taglib/mpeg/id3v2/frames/synchronizedlyricsframe.cpp",
+  "taglib/mpeg/id3v2/frames/tableofcontentsframe.cpp",
+  "taglib/mpeg/id3v2/frames/textidentificationframe.cpp",
+  "taglib/mpeg/id3v2/frames/uniquefileidentifierframe.cpp",
+  "taglib/mpeg/id3v2/frames/unknownframe.cpp",
+  "taglib/mpeg/id3v2/frames/unsynchronizedlyricsframe.cpp",
+  "taglib/mpeg/id3v2/frames/urllinkframe.cpp",
+  "taglib/mpeg/id3v2/id3v2extendedheader.cpp",
+  "taglib/mpeg/id3v2/id3v2footer.cpp",
+  "taglib/mpeg/id3v2/id3v2frame.cpp",
+  "taglib/mpeg/id3v2/id3v2framefactory.cpp",
+  "taglib/mpeg/id3v2/id3v2header.cpp",
+  "taglib/mpeg/id3v2/id3v2synchdata.cpp",
+  "taglib/mpeg/id3v2/id3v2tag.cpp",
+  "taglib/mpeg/mpegfile.cpp",
+  "taglib/mpeg/mpegheader.cpp",
+  "taglib/mpeg/mpegproperties.cpp",
+  "taglib/mpeg/xingheader.cpp",
+  "taglib/ogg/flac/oggflacfile.cpp",
+  "taglib/ogg/oggfile.cpp",
+  "taglib/ogg/oggpage.cpp",
+  "taglib/ogg/oggpageheader.cpp",
+  "taglib/ogg/opus/opusfile.cpp",
+  "taglib/ogg/opus/opusproperties.cpp",
+  "taglib/ogg/speex/speexfile.cpp",
+  "taglib/ogg/speex/speexproperties.cpp",
+  "taglib/ogg/vorbis/vorbisfile.cpp",
+  "taglib/ogg/vorbis/vorbisproperties.cpp",
+  "taglib/ogg/xiphcomment.cpp",
+  "taglib/riff/aiff/aifffile.cpp",
+  "taglib/riff/aiff/aiffproperties.cpp",
+  "taglib/riff/rifffile.cpp",
+  "taglib/riff/wav/infotag.cpp",
+  "taglib/riff/wav/wavfile.cpp",
+  "taglib/riff/wav/wavproperties.cpp",
+  "taglib/s3m/s3mfile.cpp",
+  "taglib/s3m/s3mproperties.cpp",
+  "taglib/shorten/shortenfile.cpp",
+  "taglib/shorten/shortenproperties.cpp",
+  "taglib/shorten/shortentag.cpp",
+  "taglib/tag.cpp",
+  "taglib/tagunion.cpp",
+  "taglib/tagutils.cpp",
+  "taglib/toolkit/tbytevector.cpp",
+  "taglib/toolkit/tbytevectorlist.cpp",
+  "taglib/toolkit/tbytevectorstream.cpp",
+  "taglib/toolkit/tdebug.cpp",
+  "taglib/toolkit/tdebuglistener.cpp",
+  "taglib/toolkit/tfile.cpp",
+  "taglib/toolkit/tfilestream.cpp",
+  "taglib/toolkit/tiostream.cpp",
+  "taglib/toolkit/tpicturetype.cpp",
+  "taglib/toolkit/tpropertymap.cpp",
+  "taglib/toolkit/tstring.cpp",
+  "taglib/toolkit/tstringlist.cpp",
+  "taglib/toolkit/tvariant.cpp",
+  "taglib/toolkit/tversionnumber.cpp",
+  "taglib/toolkit/tzlib.cpp",
+  "taglib/trueaudio/trueaudiofile.cpp",
+  "taglib/trueaudio/trueaudioproperties.cpp",
+  "taglib/wavpack/wavpackfile.cpp",
+  "taglib/wavpack/wavpackproperties.cpp",
+  "taglib/xm/xmfile.cpp",
+  "taglib/xm/xmproperties.cpp",
+]
+include-dirs = ["include", "include/taglib"]
+# Upstream defines TAGLIB_STATIC for its static libraries and their
+# consumers.
+defines = ["HAVE_ZLIB=1", "TAGLIB_STATIC"]
+interface-defines = ["TAGLIB_STATIC"]
+interface-c-standard = "none"
+interface-cxx-standard = "c++17"
+links = "tag"
+deps = ["cabin-ports/utfcpp", "cabin-ports/zlib"]
+
+# Linked to tag privately, as upstream does: tag_c.h includes no TagLib
+# header.  Upstream states no standard for it; C99 and C++11 are measured.
+[target.tag_c]
+type = "library"
+sources = ["bindings/c/tag_c.cpp"]
+include-dirs = ["include/taglib"]
+interface-defines = ["TAGLIB_STATIC"]
+interface-c-standard = "c99"
+interface-cxx-standard = "c++11"
+links = "tag_c"
+deps = ["tag"]
