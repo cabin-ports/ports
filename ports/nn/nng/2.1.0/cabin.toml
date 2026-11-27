@@ -1,0 +1,293 @@
+[package.upstream]
+url = "https://github.com/nanomsg/nng/archive/refs/tags/v2.1.0.tar.gz"
+checksum = "sha256:e2fdcdf126b530e331b4727812b710629cdb5d90d230ce8f080e2eb520299d8d"
+format = "tar.gz"
+strip-prefix = "nng-2.1.0"
+
+[package]
+name = "cabin-ports/nng"
+version = "2.1.0"
+# src/supplemental/websocket/sha1.c is Paul E. Jones' SHA-1 code, as
+# modified by upstream, under his Freeware Public License.
+license = "MIT AND LicenseRef-Paul-E-Jones-FPL"
+include = ["LICENSE.txt", "include", "src"]
+
+# The static libnng of upstream's default CMake build: every protocol, the
+# inproc, ipc, tcp, socket, udp and ws transports, and the HTTP and
+# websocket support, without TLS.  Not ported: the TLS engines (mbedTLS,
+# wolfSSL, OpenSSL) and the tls, wss and dtls transports they enable; the
+# shared library; the nngcat and perf tools; the NNG_ELIDE_DEPRECATED and
+# NNG_SETSTACKSIZE options; and the platforms other than Linux with glibc,
+# macOS and Windows (musl, Android, the BSDs, illumos, QNX, and WSL 1's
+# NNG_PLATFORM_WSL).
+[target.nng]
+type = "library"
+sources = [
+  "src/core/aio.c",
+  "src/core/alloc.c",
+  "src/core/device.c",
+  "src/core/dialer.c",
+  "src/core/file.c",
+  "src/core/idhash.c",
+  "src/core/init.c",
+  "src/core/list.c",
+  "src/core/listener.c",
+  "src/core/lmq.c",
+  "src/core/log.c",
+  "src/core/message.c",
+  "src/core/msgqueue.c",
+  "src/core/options.c",
+  "src/core/panic.c",
+  "src/core/pipe.c",
+  "src/core/pollable.c",
+  "src/core/reap.c",
+  "src/core/refcnt.c",
+  "src/core/sockaddr.c",
+  "src/core/socket.c",
+  "src/core/sockfd.c",
+  "src/core/stats.c",
+  "src/core/stream.c",
+  "src/core/strs.c",
+  "src/core/taskq.c",
+  "src/core/tcp.c",
+  "src/core/thread.c",
+  "src/core/url.c",
+  "src/nng.c",
+  "src/nng_legacy.c",
+  "src/sp/protocol.c",
+  "src/sp/protocol/bus0/bus.c",
+  "src/sp/protocol/pair0/pair.c",
+  "src/sp/protocol/pair1/pair.c",
+  "src/sp/protocol/pair1/pair1_poly.c",
+  "src/sp/protocol/pipeline0/pull.c",
+  "src/sp/protocol/pipeline0/push.c",
+  "src/sp/protocol/pubsub0/pub.c",
+  "src/sp/protocol/pubsub0/sub.c",
+  "src/sp/protocol/pubsub0/xsub.c",
+  "src/sp/protocol/reqrep0/rep.c",
+  "src/sp/protocol/reqrep0/req.c",
+  "src/sp/protocol/reqrep0/xrep.c",
+  "src/sp/protocol/reqrep0/xreq.c",
+  "src/sp/protocol/survey0/respond.c",
+  "src/sp/protocol/survey0/survey.c",
+  "src/sp/protocol/survey0/xrespond.c",
+  "src/sp/protocol/survey0/xsurvey.c",
+  "src/sp/transport.c",
+  "src/sp/transport/inproc/inproc.c",
+  "src/sp/transport/ipc/ipc.c",
+  "src/sp/transport/socket/sockfd.c",
+  "src/sp/transport/tcp/tcp.c",
+  "src/sp/transport/udp/udp.c",
+  "src/sp/transport/ws/websocket.c",
+  "src/supplemental/http/http_chunk.c",
+  "src/supplemental/http/http_client.c",
+  "src/supplemental/http/http_conn.c",
+  "src/supplemental/http/http_msg.c",
+  "src/supplemental/http/http_public.c",
+  "src/supplemental/http/http_schemes.c",
+  "src/supplemental/http/http_server.c",
+  "src/supplemental/tls/tls_stubs.c",
+  "src/supplemental/websocket/base64.c",
+  "src/supplemental/websocket/sha1.c",
+  "src/supplemental/websocket/websocket.c",
+]
+include-dirs = ["include"]
+# Upstream compiles as C99 (CMakeLists.txt:39), in CMake's GNU dialect.
+# C11 is the oldest standard Cabin lowers for MSVC, and Cabin's
+# gnu-extensions cannot be limited to GCC and Clang, so the build is strict
+# C11 with upstream's _GNU_SOURCE (Unix profile below).
+c-standard = "c11"
+interface-c-standard = "c99"
+# Measured: nng.h's enumerator lists end in commas, which C++ accepts from
+# C++11.  Also measured: include/nng/args.h, which only the nngcat and perf
+# tools use, opens an extern "C" block it never closes, so it does not
+# compile as C++.
+interface-cxx-standard = "c++11"
+# Upstream's defaults (CMakeLists.txt, cmake/NNGOptions.cmake and the
+# src/sp CMake files).  nng.h declares the API dllimport on Windows unless
+# NNG_STATIC_LIB is defined, which upstream's static library exports.
+defines = [
+  "NNG_ENABLE_IPV6",
+  "NNG_ENABLE_STATS",
+  "NNG_HAVE_BUS0",
+  "NNG_HAVE_PAIR0",
+  "NNG_HAVE_PAIR1",
+  "NNG_HAVE_PUB0",
+  "NNG_HAVE_PULL0",
+  "NNG_HAVE_PUSH0",
+  "NNG_HAVE_REP0",
+  "NNG_HAVE_REQ0",
+  "NNG_HAVE_RESPONDENT0",
+  "NNG_HAVE_SUB0",
+  "NNG_HAVE_SURVEYOR0",
+  "NNG_MAX_EXPIRE_THREADS=8",
+  "NNG_MAX_POLLER_THREADS=8",
+  "NNG_MAX_TASKQ_THREADS=16",
+  "NNG_PRIVATE",
+  "NNG_RECVMAXSZ_DEFAULT=1073741824",
+  "NNG_RESOLV_CONCURRENCY=4",
+  "NNG_STATIC_LIB",
+  "NNG_SUPP_HTTP",
+  "NNG_TRANSPORT_FDC",
+  "NNG_TRANSPORT_INPROC",
+  "NNG_TRANSPORT_IPC",
+  "NNG_TRANSPORT_TCP",
+  "NNG_TRANSPORT_UDP",
+  "NNG_TRANSPORT_WS",
+]
+interface-defines = ["NNG_STATIC_LIB"]
+links = "nng"
+
+[profile]
+include-dirs = ["src"]
+
+[target.'cfg(any(os = "linux", os = "macos"))'.sources]
+nng = [
+  "src/platform/posix/posix_alloc.c",
+  "src/platform/posix/posix_atomic.c",
+  "src/platform/posix/posix_clock.c",
+  "src/platform/posix/posix_debug.c",
+  "src/platform/posix/posix_file.c",
+  "src/platform/posix/posix_ipcconn.c",
+  "src/platform/posix/posix_ipcdial.c",
+  "src/platform/posix/posix_ipclisten.c",
+  "src/platform/posix/posix_peerid.c",
+  "src/platform/posix/posix_pipe.c",
+  "src/platform/posix/posix_resolv_gai.c",
+  "src/platform/posix/posix_sockaddr.c",
+  "src/platform/posix/posix_socketpair.c",
+  "src/platform/posix/posix_sockfd.c",
+  "src/platform/posix/posix_tcpconn.c",
+  "src/platform/posix/posix_tcpdial.c",
+  "src/platform/posix/posix_tcplisten.c",
+  "src/platform/posix/posix_thread.c",
+  "src/platform/posix/posix_udp.c",
+]
+
+[target.'cfg(os = "linux")'.sources]
+nng = [
+  "src/platform/posix/posix_pollq_epoll.c",
+  "src/platform/posix/posix_rand_getentropy.c",
+]
+
+[target.'cfg(os = "macos")'.sources]
+nng = [
+  "src/platform/posix/posix_pollq_kqueue.c",
+  "src/platform/posix/posix_rand_arc4random.c",
+]
+
+[target.'cfg(os = "windows")'.sources]
+nng = [
+  "src/platform/windows/win_clock.c",
+  "src/platform/windows/win_debug.c",
+  "src/platform/windows/win_file.c",
+  "src/platform/windows/win_io.c",
+  "src/platform/windows/win_ipcconn.c",
+  "src/platform/windows/win_ipcdial.c",
+  "src/platform/windows/win_ipclisten.c",
+  "src/platform/windows/win_pipe.c",
+  "src/platform/windows/win_rand.c",
+  "src/platform/windows/win_resolv.c",
+  "src/platform/windows/win_sockaddr.c",
+  "src/platform/windows/win_socketpair.c",
+  "src/platform/windows/win_tcp.c",
+  "src/platform/windows/win_tcpconn.c",
+  "src/platform/windows/win_tcpdial.c",
+  "src/platform/windows/win_tcplisten.c",
+  "src/platform/windows/win_thread.c",
+  "src/platform/windows/win_udp.c",
+  "src/platform/windows/win_unix.c",
+]
+
+# The defines below are what the checks in upstream's CMake files find.
+# NNG_LITTLE_ENDIAN, which upstream always passes on little-endian hosts,
+# is left to core/defs.h, which derives it from __BYTE_ORDER__ on GCC and
+# Clang.  Upstream also links libnsl and libsocket where its checks find
+# them; nng calls no function of theirs.
+[target.'cfg(any(os = "linux", os = "macos"))'.profile]
+defines = [
+  "_GNU_SOURCE",
+  "_POSIX_PTHREAD_SEMANTICS",
+  "_REENTRANT",
+  "_THREAD_SAFE",
+  "NNG_HAVE_CLOCK_GETTIME",
+  "NNG_HAVE_CLOCK_GETTIME_LIBC=1",
+  "NNG_HAVE_FLOCK=1",
+  "NNG_HAVE_GETENTROPY=1",
+  "NNG_HAVE_INET6=1",
+  "NNG_HAVE_LOCALTIME_R=1",
+  "NNG_HAVE_LOCKF=1",
+  "NNG_HAVE_MSG_CONTROL=1",
+  "NNG_HAVE_POLL=1",
+  "NNG_HAVE_PTHREAD_ATFORK_PTHREAD=1",
+  "NNG_HAVE_PTHREAD_SETNAME_NP=1",
+  "NNG_HAVE_RECVMSG=1",
+  "NNG_HAVE_SELECT=1",
+  "NNG_HAVE_SEMAPHORE_PTHREAD=1",
+  "NNG_HAVE_SENDMSG=1",
+  "NNG_HAVE_SOCKETPAIR=1",
+  "NNG_HAVE_STDATOMIC=1",
+  "NNG_HAVE_STRCASECMP=1",
+  "NNG_HAVE_STRNCASECMP=1",
+  "NNG_HAVE_STRNLEN=1",
+  "NNG_HAVE_SYSLOG=1",
+  "NNG_HAVE_SYS_RANDOM=1",
+  "NNG_HAVE_UNIX_SOCKETS=1",
+  "NNG_HIDDEN_VISIBILITY",
+  "NNG_PLATFORM_POSIX",
+]
+link-libs = ["pthread"]
+
+# On glibc 2.25 to 2.35 with GCC's libatomic.  Newer glibc adds
+# arc4random_buf (2.36) and strlcpy (2.38), which upstream's checks would
+# then pick up; leaving them out keeps one define set that builds against
+# older glibc too.
+[target.'cfg(os = "linux")'.profile]
+defines = [
+  "NNG_HAVE_ABSTRACT_SOCKETS",
+  "NNG_HAVE_BACKTRACE=1",
+  "NNG_HAVE_EPOLL=1",
+  "NNG_HAVE_EPOLL_CREATE1=1",
+  "NNG_HAVE_EVENTFD=1",
+  "NNG_HAVE_GETRANDOM=1",
+  "NNG_HAVE_GNU_STRERROR_R",
+  "NNG_HAVE_LIBATOMIC=1",
+  "NNG_HAVE_SOPEERCRED=1",
+  "NNG_PLATFORM_LINUX",
+  "NNG_POLLQ_EPOLL",
+  "NNG_USE_EVENTFD",
+]
+link-libs = ["atomic"]
+
+[target.'cfg(os = "macos")'.profile]
+defines = [
+  "NNG_HAVE_ARC4RANDOM=1",
+  "NNG_HAVE_BACKTRACE=1",
+  "NNG_HAVE_GETPEEREID=1",
+  "NNG_HAVE_KQUEUE=1",
+  "NNG_HAVE_LOCALPEERCRED=1",
+  "NNG_HAVE_LOCALPEERPID=1",
+  "NNG_HAVE_STRLCPY=1",
+  "NNG_HAVE_TIMESPEC_GET=1",
+  "NNG_PLATFORM_DARWIN",
+  "NNG_POLLQ_KQUEUE",
+]
+
+# 2.1.0's AF_UNIX check (src/platform/windows/CMakeLists.txt:18) stores its
+# result in a variable named afunix.h, as nng_check_sym expands the header
+# list (measured with the same call), so upstream never defines
+# NNG_HAVE_UNIX_SOCKETS on Windows and ipc:// uses named pipes; this build
+# does the same.
+[target.'cfg(os = "windows")'.profile]
+defines = [
+  "_CRT_RAND_S",
+  "_CRT_SECURE_NO_WARNINGS",
+  "_WIN32_WINNT=0x0600",
+  "NNG_HAVE_CONDVAR=1",
+  "NNG_HAVE_SNPRINTF=1",
+  "NNG_HAVE_STRNLEN=1",
+  "NNG_HAVE_TIMESPEC_GET=1",
+  "NNG_LITTLE_ENDIAN=1",
+  "NNG_PLATFORM_WINDOWS",
+]
+link-libs = ["ws2_32", "mswsock", "advapi32"]
