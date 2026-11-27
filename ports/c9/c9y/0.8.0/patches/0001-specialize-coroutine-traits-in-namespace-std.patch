@@ -1,0 +1,36 @@
+--- a/c9y/coroutine.h
++++ b/c9y/coroutine.h
+@@ -34,10 +34,10 @@
+ #include "async.h"
+ #include "sync.h"
+ 
+-namespace c9y
++namespace std
+ {
+     template <typename T, typename ... Args>
+-    struct std::coroutine_traits<std::future<T>, Args...>
++    struct coroutine_traits<std::future<T>, Args...>
+     {
+         struct promise_type : std::promise<T>
+         {
+@@ -74,7 +74,7 @@
+     };
+ 
+     template <typename... Args>
+-    struct std::coroutine_traits<std::future<void>, Args...>
++    struct coroutine_traits<std::future<void>, Args...>
+     {
+         struct promise_type : std::promise<void>
+         {
+@@ -98,8 +98,10 @@
+             }
+         };
+     };
++}
+ 
+-
++namespace c9y
++{
+     namespace co_async
+     {
+         //! co_await operator implemented with async.
