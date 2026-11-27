@@ -1,0 +1,131 @@
+--- a/include/asock/asock_ipc_client.hpp
++++ b/include/asock/asock_ipc_client.hpp
+@@ -3,7 +3,7 @@
+ 
+ #if defined __APPLE__ || defined __linux__
+ #include "asock/internal/asock_nix_client.hpp"
+-#elif WIN32
++#elif _WIN32
+ #include "asock/internal/asock_win_client.hpp"
+ #endif
+ 
+@@ -35,7 +35,7 @@
+     void SetUsage() override {
+         sock_usage_ = SOCK_USAGE_IPC_CLIENT;
+     }
+-#elif WIN32
++#elif _WIN32
+     bool InitIpcClient(const char* sock_path,
+                        int connect_timeout_secs=10,
+                        size_t max_data_len=asock::DEFAULT_BUFFER_SIZE) {
+--- a/include/asock/asock_ipc_server.hpp
++++ b/include/asock/asock_ipc_server.hpp
+@@ -3,7 +3,7 @@
+ 
+ #if defined __APPLE__ || defined __linux__
+ #include "asock/internal/asock_nix_server.hpp"
+-#elif WIN32
++#elif _WIN32
+ #include "asock/internal/asock_win_server.hpp"
+ #endif
+ 
+--- a/include/asock/asock_tcp_client.hpp
++++ b/include/asock/asock_tcp_client.hpp
+@@ -3,7 +3,7 @@
+ 
+ #if defined __APPLE__ || defined __linux__
+ #include "asock/internal/asock_nix_client.hpp"
+-#elif WIN32
++#elif _WIN32
+ #include "asock/internal/asock_win_client.hpp"
+ #endif
+ 
+@@ -31,7 +31,7 @@
+         tcp_server_addr_.sin_addr.s_addr = inet_addr(server_ip);
+         tcp_server_addr_.sin_port = htons(server_port);
+         return ConnectToServer();
+-#elif WIN32
++#elif _WIN32
+         server_ip_   = server_ip ;
+         server_port_ = server_port;
+         is_connected_ = false;
+--- a/include/asock/asock_tcp_server.hpp
++++ b/include/asock/asock_tcp_server.hpp
+@@ -3,7 +3,7 @@
+ 
+ #if defined __APPLE__ || defined __linux__
+ #include "asock/internal/asock_nix_server.hpp"
+-#elif WIN32
++#elif _WIN32
+ #include "asock/internal/asock_win_server.hpp"
+ #endif
+ 
+--- a/include/asock/asock_udp_client.hpp
++++ b/include/asock/asock_udp_client.hpp
+@@ -3,7 +3,7 @@
+ 
+ #if defined __APPLE__ || defined __linux__
+ #include "asock/internal/asock_nix_client.hpp"
+-#elif WIN32
++#elif _WIN32
+ #include "asock/internal/asock_win_client.hpp"
+ #endif
+ 
+@@ -25,7 +25,7 @@
+         udp_server_addr_.sin_addr.s_addr = inet_addr(server_ip);
+         udp_server_addr_.sin_port = htons(server_port);
+         return ConnectToServer();
+-#elif WIN32
++#elif _WIN32
+         SetUsage();
+         server_ip_   = server_ip ;
+         server_port_ = server_port;
+--- a/include/asock/asock_udp_server.hpp
++++ b/include/asock/asock_udp_server.hpp
+@@ -3,7 +3,7 @@
+ 
+ #if defined __APPLE__ || defined __linux__
+ #include "asock/internal/asock_nix_server.hpp"
+-#elif WIN32
++#elif _WIN32
+ #include "asock/internal/asock_win_server.hpp"
+ #endif
+ 
+--- a/include/asock/internal/asock_comm.hpp
++++ b/include/asock/internal/asock_comm.hpp
+@@ -50,7 +50,7 @@
+ #endif //__APPLE__ , __linux__
+ 
+ //-----------------------------------------------------------------------------
+-#ifdef WIN32
++#ifdef _WIN32
+ #pragma comment(lib, "Ws2_32.lib")
+ #include <winsock2.h>
+ #include <ws2tcpip.h>
+@@ -112,7 +112,7 @@
+ #endif //__APPLE__ , __linux__
+ 
+ //-----------------------------------------------------------------------------
+-#ifdef WIN32
++#ifdef _WIN32
+ typedef int SOCKLEN_T ;
+ typedef     SOCKET SOCKET_T;
+ 
+@@ -174,7 +174,7 @@
+ #endif //__APPLE__ , __linux__
+ 
+ //windows --> no color support
+-#ifdef WIN32
++#ifdef _WIN32
+ #define  DBG_LOG(x)  std::cout<<LOG_WHERE << x << "\n"
+ #define  DBG_ELOG(x) std::cerr<<LOG_WHERE << x << "\n"
+ #define DBG_GREEN_LOG(x) std::cout<<LOG_WHERE << x << "\n"
+@@ -197,7 +197,7 @@
+ #define ELOG(x) std::cerr<<LOG_WHERE << "error : " << COLOR_RED<< x << COLOR_RESET << "\n"
+ #endif //__APPLE__ , __linux__
+ 
+-#ifdef WIN32
++#ifdef _WIN32
+ #define ELOG(x) std::cerr<<LOG_WHERE << x << "\n"
+ #endif //__APPLE__ , __linux__
+ 
