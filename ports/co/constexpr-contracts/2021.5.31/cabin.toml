@@ -1,0 +1,18 @@
+[package.upstream]
+# Upstream tags no releases; the version is the commit date, 2021-05-31.
+url = "https://github.com/cjdb/constexpr-contracts/archive/3654b88453ddcc52b7ea2b0534250d00aa57b8cc.tar.gz"
+checksum = "sha256:5629d33af59f45451236de3da767e20cc0495cdd635d0fba2690f4964603a1cb"
+format = "tar.gz"
+strip-prefix = "constexpr-contracts-3654b88453ddcc52b7ea2b0534250d00aa57b8cc"
+
+[package]
+name = "cabin-ports/constexpr-contracts"
+version = "2021.5.31"
+license = "Apache-2.0 WITH LLVM-exception"
+include = ["LICENSE.md", "README.md", "include"]
+
+# C++20 (CMakeLists.txt:11).
+[target.constexpr-contracts]
+type = "header-only"
+include-dirs = ["include"]
+interface-cxx-standard = "c++20"
