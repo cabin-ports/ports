@@ -1,0 +1,102 @@
+[package.upstream]
+url = "https://github.com/google/nsync/archive/refs/tags/1.30.0.tar.gz"
+checksum = "sha256:883a0b3f8ffc1950670425df3453c127c1a3f6ed997719ca1bbe7f474235b6cc"
+format = "tar.gz"
+strip-prefix = "nsync-1.30.0"
+
+[package]
+name = "cabin-ports/nsync"
+version = "1.30.0"
+license = "Apache-2.0"
+include = [
+  "LICENSE",
+  "internal",
+  "platform/clang",
+  "platform/gcc",
+  "platform/gcc_new",
+  "platform/gcc_old",
+  "platform/linux",
+  "platform/macos",
+  "platform/msvc",
+  "platform/posix",
+  "platform/win32",
+  "platform/x86_64",
+  "public",
+]
+# The code is C90 (README, "Portability"); C11 and C++14, for
+# platform/win32/src/pthread_key_win32.cc, are the oldest standards Cabin can
+# request from MSVC.
+c-standard = "c11"
+cxx-standard = "c++14"
+
+# interface-c-standard: nsync_time is struct timespec
+# (public/nsync_time_internal.h), which ISO C first declares in C11.
+# interface-cxx-standard: under C++ the headers declare the API in namespace
+# nsync (public/nsync_cpp.h), which only upstream's separate C++ build,
+# nsync_cpp, defines.
+# Not ported: nsync_cpp, the tests, and the platforms other than Linux, macOS
+# and Windows with MSVC that CMakeLists.txt and BUILD select.
+[target.nsync]
+type = "library"
+sources = [
+  "internal/common.c",
+  "internal/counter.c",
+  "internal/cv.c",
+  "internal/debug.c",
+  "internal/dll.c",
+  "internal/mu.c",
+  "internal/mu_wait.c",
+  "internal/note.c",
+  "internal/once.c",
+  "internal/sem_wait.c",
+  "internal/time_internal.c",
+  "internal/wait.c",
+  "platform/posix/src/nsync_panic.c",
+  "platform/posix/src/per_thread_waiter.c",
+  "platform/posix/src/time_rep.c",
+  "platform/posix/src/yield.c",
+]
+include-dirs = ["public"]
+interface-c-standard = "c11"
+interface-cxx-standard = "none"
+links = "nsync"
+
+[target.'cfg(os = "linux")'.sources]
+nsync = ["platform/linux/src/nsync_semaphore_futex.c"]
+
+[target.'cfg(os = "macos")'.sources]
+nsync = [
+  "platform/posix/src/clock_gettime.c",
+  "platform/posix/src/nsync_semaphore_mutex.c",
+]
+
+[target.'cfg(os = "windows")'.sources]
+nsync = [
+  "platform/win32/src/clock_gettime.c",
+  "platform/win32/src/init_callback_win32.c",
+  "platform/win32/src/nanosleep.c",
+  "platform/win32/src/nsync_semaphore_win32.c",
+  "platform/win32/src/pthread_cond_timedwait_win32.c",
+  "platform/win32/src/pthread_key_win32.cc",
+]
+
+[target.'cfg(os = "linux")'.profile]
+include-dirs = ["platform/linux", "platform/gcc", "platform/posix", "internal"]
+
+[target.'cfg(os = "macos")'.profile]
+include-dirs = ["platform/macos", "platform/clang", "platform/posix", "internal"]
+
+[target.'cfg(all(os = "windows", cc = "msvc", arch = "x86_64"))'.profile]
+include-dirs = [
+  "platform/win32",
+  "platform/msvc",
+  "platform/x86_64",
+  "platform/posix",
+  "internal",
+]
+
+[target.'cfg(all(os = "windows", cc = "msvc", not(arch = "x86_64")))'.profile]
+include-dirs = ["platform/win32", "platform/msvc", "platform/posix", "internal"]
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
