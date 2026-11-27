@@ -1,0 +1,158 @@
+[package.upstream]
+url = "https://github.com/github/cmark-gfm/archive/refs/tags/0.29.0.gfm.14.tar.gz"
+checksum = "sha256:1c1acf50c5e9939e170b6e017ec06fcf94abeb383670b819d091a285b7ba11fe"
+format = "tar.gz"
+strip-prefix = "cmark-gfm-0.29.0.gfm.14"
+# Patch 0001 fills the version and config templates as CMake's configure_file
+# does (src/CMakeLists.txt:70-71, 186-197), leaving HAVE___BUILTIN_EXPECT and
+# HAVE___ATTRIBUTE__ to the profiles below, and adds cmark-gfm_export.h as
+# generate_export_header writes it for the static library (:137-140):
+# CMARK_GFM_EXPORT and CMARK_GFM_NO_EXPORT are empty under
+# CMARK_GFM_STATIC_DEFINE, and CMARK_GFM_DEPRECATED, which nothing uses,
+# takes the value CMake writes for Windows or elsewhere.
+# BSD-2-Clause notice of src/cmark-gfm_version.h.in and src/config.h.in, whose
+# lines 0001 carries (the License's condition on source copies), from COPYING:
+# Copyright (c) 2014, John MacFarlane
+#
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+#     * Redistributions of source code must retain the above copyright
+#       notice, this list of conditions and the following disclaimer.
+#
+#     * Redistributions in binary form must reproduce the above
+#       copyright notice, this list of conditions and the following
+#       disclaimer in the documentation and/or other materials provided
+#       with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+patches = ["patches/0001-fill-the-version-and-config-headers-and-add-the-export-header.patch"]
+
+# Upstream installs cmark-gfm.h, cmark-gfm-extension_api.h, cmark-gfm_export.h,
+# cmark-gfm_version.h and cmark-gfm-core-extensions.h flat into include/
+# (src/CMakeLists.txt:170-176, extensions/CMakeLists.txt:76-80); copying them
+# to include/ keeps the private headers beside them off the include path.
+[[package.upstream.copy]]
+from = "src/cmark-gfm.h"
+to = "include/cmark-gfm.h"
+
+[[package.upstream.copy]]
+from = "src/cmark-gfm-extension_api.h"
+to = "include/cmark-gfm-extension_api.h"
+
+[[package.upstream.copy]]
+from = "extensions/cmark-gfm-core-extensions.h"
+to = "include/cmark-gfm-core-extensions.h"
+
+[[package.upstream.copy]]
+from = "src/cmark-gfm_version.h.in"
+to = "include/cmark-gfm_version.h"
+
+[[package.upstream.copy]]
+from = "src/config.h.in"
+to = "src/config.h"
+
+[package]
+name = "cabin-ports/cmark-gfm"
+# Upstream's 0.29.0.gfm.14, with the gfm revision as the patch component.
+version = "0.29.14"
+# COPYING: BSD-2-Clause for cmark-gfm, MIT for the houdini, buffer.[ch]/chunk.h
+# and utf8 parts.  Unicode-DFS-2016: src/case_fold_switch.inc, generated from
+# data/CaseFolding.txt (Unicode 9.0.0, 2016), whose header names the Unicode
+# terms of use.
+# src/config.h.in:34-35 credits Valentin Milea's Stack Overflow answer for the
+# snprintf fallback for MSVC before 2015; its copyright significance is uncertain.
+license = "BSD-2-Clause AND MIT AND Unicode-DFS-2016"
+include = ["COPYING", "data/CaseFolding.txt", "extensions", "include", "patches", "src"]
+# Upstream compiles C99 (src/CMakeLists.txt:209, extensions/CMakeLists.txt:109);
+# C11 is the oldest standard Cabin can lower for MSVC.
+c-standard = "c11"
+interface-c-standard = "c99"
+
+# The static libraries (src/CMakeLists.txt:121-143, extensions/CMakeLists.txt:
+# 45-64); consumers name cabin-ports/cmark-gfm:cmark-gfm or
+# cabin-ports/cmark-gfm:cmark-gfm-extensions.  Not ported: the cmark-gfm
+# program (src/main.c), the shared libraries, and the CMake and pkg-config
+# files.  Not reproduced: position-independent code (src/CMakeLists.txt:125,
+# extensions/CMakeLists.txt:51) and -fvisibility=hidden (src/CMakeLists.txt:
+# 97-99), which only narrows a shared object's exports.
+[target.cmark-gfm]
+type = "library"
+sources = [
+  "src/arena.c",
+  "src/blocks.c",
+  "src/buffer.c",
+  "src/cmark.c",
+  "src/cmark_ctype.c",
+  "src/commonmark.c",
+  "src/footnotes.c",
+  "src/houdini_href_e.c",
+  "src/houdini_html_e.c",
+  "src/houdini_html_u.c",
+  "src/html.c",
+  "src/inlines.c",
+  "src/iterator.c",
+  "src/latex.c",
+  "src/linked_list.c",
+  "src/man.c",
+  "src/map.c",
+  "src/node.c",
+  "src/plaintext.c",
+  "src/plugin.c",
+  "src/references.c",
+  "src/registry.c",
+  "src/render.c",
+  "src/scanners.c",
+  "src/syntax_extension.c",
+  "src/utf8.c",
+  "src/xml.c",
+]
+include-dirs = ["include"]
+defines = ["CMARK_GFM_STATIC_DEFINE"]
+interface-defines = ["CMARK_GFM_STATIC_DEFINE"]
+# cmark-gfm keeps cmark's C function names (cmark_parser_new,
+# cmark_markdown_to_html, ...), so Cabin refuses a graph that also holds
+# cabin-ports/cmark.
+links = "cmark"
+
+# Upstream also defines CMARK_GFM_EXTENSIONS_STATIC_DEFINE
+# (extensions/CMakeLists.txt:49), which no file reads.
+[target.cmark-gfm-extensions]
+type = "library"
+sources = [
+  "extensions/autolink.c",
+  "extensions/core-extensions.c",
+  "extensions/ext_scanners.c",
+  "extensions/strikethrough.c",
+  "extensions/table.c",
+  "extensions/tagfilter.c",
+  "extensions/tasklist.c",
+]
+deps = [{ name = "cmark-gfm", public = true }]
+links = "cmark-gfm-extensions"
+
+# src/, private as in CMake (extensions/CMakeLists.txt:15-18), for config.h
+# and the private headers the extensions include.
+[profile]
+include-dirs = ["src"]
+
+# What upstream's compile checks find everywhere but cl (src/CMakeLists.txt:
+# 186-193).
+[target.'cfg(any(cc = "gcc", cc = "clang", cc = "apple-clang", cc = "clang-cl"))'.profile]
+defines = ["HAVE___ATTRIBUTE__", "HAVE___BUILTIN_EXPECT"]
+
+# As upstream does for MSVC (src/CMakeLists.txt:200-207).
+[target.'cfg(any(cc = "msvc", cc = "clang-cl"))'.profile]
+defines = ["_CRT_SECURE_NO_WARNINGS"]
