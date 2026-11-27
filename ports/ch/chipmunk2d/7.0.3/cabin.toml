@@ -1,0 +1,70 @@
+[package.upstream]
+url = "https://github.com/slembcke/Chipmunk2D/archive/refs/tags/Chipmunk-7.0.3.tar.gz"
+checksum = "sha256:1e6f093812d6130e45bdf4cb80280cb3c93d1e1833d8cf989d554d7963b7899a"
+format = "tar.gz"
+strip-prefix = "Chipmunk2D-Chipmunk-7.0.3"
+
+[package]
+name = "cabin-ports/chipmunk2d"
+version = "7.0.3"
+# src/cpHastySpace.c:40 credits cs.wustl.edu/~schmidt/win32-cv-1.html for the
+# Windows condition variable; its copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE.txt", "include", "src"]
+
+# Named chipmunk2d as upstream and ConanCenter do; vcpkg calls it chipmunk.
+# Upstream builds with -std=gnu99 and, in Release, -ffast-math (CMakeLists.txt);
+# c11 is cl's lowest C standard.  Not reproduced: -ffast-math, the GNU dialect, and -fblocks (the cpSpace *_b
+# block-callback functions are compiled out).
+# cpHastySpace.h declares no extern "C": a C++ consumer includes it inside
+# extern "C" (measured: undefined reference to cpHastySpaceNew()).
+# Not ported: the Objective-C wrapper, demo, the sample programs, and the CMake, Xcode and other IDE projects.
+[target.chipmunk]
+type = "library"
+sources = [
+  "src/chipmunk.c",
+  "src/cpArbiter.c",
+  "src/cpArray.c",
+  "src/cpBBTree.c",
+  "src/cpBody.c",
+  "src/cpCollision.c",
+  "src/cpConstraint.c",
+  "src/cpDampedRotarySpring.c",
+  "src/cpDampedSpring.c",
+  "src/cpGearJoint.c",
+  "src/cpGrooveJoint.c",
+  "src/cpHashSet.c",
+  "src/cpHastySpace.c",
+  "src/cpMarch.c",
+  "src/cpPinJoint.c",
+  "src/cpPivotJoint.c",
+  "src/cpPolyShape.c",
+  "src/cpPolyline.c",
+  "src/cpRatchetJoint.c",
+  "src/cpRobust.c",
+  "src/cpRotaryLimitJoint.c",
+  "src/cpShape.c",
+  "src/cpSimpleMotor.c",
+  "src/cpSlideJoint.c",
+  "src/cpSpace.c",
+  "src/cpSpaceComponent.c",
+  "src/cpSpaceDebug.c",
+  "src/cpSpaceHash.c",
+  "src/cpSpaceQuery.c",
+  "src/cpSpaceStep.c",
+  "src/cpSpatialIndex.c",
+  "src/cpSweep1D.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+# C99 is upstream's -std=gnu99; it states no C++ standard (c++98 measured).
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+links = "chipmunk"
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
+
+# cpHastySpace starts threads; Android's libc provides pthread.
+[target.'cfg(all(family = "unix", not(os = "android")))'.profile]
+link-libs = ["pthread"]
