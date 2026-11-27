@@ -1,0 +1,102 @@
+[package.upstream]
+url = "https://github.com/sctplab/usrsctp/archive/refs/tags/0.9.5.0.tar.gz"
+checksum = "sha256:260107caf318650a57a8caa593550e39bca6943e93f970c80d6c17e59d62cd92"
+format = "tar.gz"
+strip-prefix = "usrsctp-0.9.5.0"
+
+# The one header upstream installs (usrsctplib/CMakeLists.txt:192);
+# usrsctplib/ also holds the private headers, so it is not the consumer
+# include root.
+[[package.upstream.copy]]
+from = "usrsctplib/usrsctp.h"
+to = "include/usrsctp.h"
+
+[package]
+name = "cabin-ports/usrsctp"
+# The 0.9.5.0 tag, without its trailing .0.
+version = "0.9.5"
+# BSD-2-Clause, in usrsctplib/: usrsctp.h, user_atomic.h, user_environment.[ch],
+# user_recv_thread.[ch], user_socket.c, user_uma.h and
+# netinet/sctp_{ss_functions,userspace}.c.  DOC: the condition variables of
+# netinet/sctp_userspace.c:242-405, after ACE's.
+license = "BSD-3-Clause AND BSD-2-Clause AND DOC"
+include = ["LICENSE.md", "include", "usrsctplib"]
+# Upstream builds C99 (CMakeLists.txt:196); C11 is the oldest standard Cabin
+# can lower for MSVC.
+c-standard = "c11"
+interface-c-standard = "c99"
+
+# The library of usrsctplib/CMakeLists.txt:149-177, with the defaults of
+# CMakeLists.txt:50-68.  usrsctp.h declares the debug sysctl only under
+# SCTP_DEBUG, which meson.build:154-157 also passes to consumers.
+# Not ported: the example programs and the fuzzers.
+[target.usrsctp]
+type = "library"
+sources = [
+  "usrsctplib/netinet/sctp_asconf.c",
+  "usrsctplib/netinet/sctp_auth.c",
+  "usrsctplib/netinet/sctp_bsd_addr.c",
+  "usrsctplib/netinet/sctp_callout.c",
+  "usrsctplib/netinet/sctp_cc_functions.c",
+  "usrsctplib/netinet/sctp_crc32.c",
+  "usrsctplib/netinet/sctp_indata.c",
+  "usrsctplib/netinet/sctp_input.c",
+  "usrsctplib/netinet/sctp_output.c",
+  "usrsctplib/netinet/sctp_pcb.c",
+  "usrsctplib/netinet/sctp_peeloff.c",
+  "usrsctplib/netinet/sctp_sha1.c",
+  "usrsctplib/netinet/sctp_ss_functions.c",
+  "usrsctplib/netinet/sctp_sysctl.c",
+  "usrsctplib/netinet/sctp_timer.c",
+  "usrsctplib/netinet/sctp_userspace.c",
+  "usrsctplib/netinet/sctp_usrreq.c",
+  "usrsctplib/netinet/sctputil.c",
+  "usrsctplib/netinet6/sctp6_usrreq.c",
+  "usrsctplib/user_environment.c",
+  "usrsctplib/user_mbuf.c",
+  "usrsctplib/user_recv_thread.c",
+  "usrsctplib/user_socket.c",
+]
+include-dirs = ["include"]
+defines = [
+  "__Userspace__",
+  "SCTP_SIMPLE_ALLOCATOR",
+  "SCTP_PROCESS_LEVEL_LOCKS",
+  "SCTP_DEBUG",
+  "INET",
+  "INET6",
+]
+interface-defines = ["SCTP_DEBUG"]
+links = "usrsctp"
+
+[profile]
+include-dirs = ["usrsctplib"]
+
+# CMake's results on these systems: the headers of CMakeLists.txt:91-109 and
+# the length fields of :128-150, which for sockaddr_conn follow
+# usrsctp.h:122-136.
+[target.'cfg(any(os = "macos", os = "ios", os = "freebsd", os = "dragonfly", os = "netbsd", os = "openbsd"))'.profile]
+defines = [
+  "HAVE_SYS_QUEUE_H",
+  "HAVE_NETINET_IP_ICMP_H",
+  "HAVE_SA_LEN",
+  "HAVE_SIN_LEN",
+  "HAVE_SIN6_LEN",
+  "HAVE_SCONN_LEN",
+]
+
+# usrsctplib/CMakeLists.txt:78-80.
+[target.'cfg(os = "macos")'.profile]
+defines = ["__APPLE_USE_RFC_2292"]
+
+# usrsctplib/CMakeLists.txt:74-76 and glibc's results of CMakeLists.txt:91-109.
+[target.'cfg(os = "linux")'.profile]
+defines = ["_GNU_SOURCE", "HAVE_SYS_QUEUE_H", "HAVE_NETINET_IP_ICMP_H"]
+
+# meson.build:48 and the -pthread of configure.ac:51-67.
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["pthread"]
+
+# usrsctplib/CMakeLists.txt:179-182.
+[target.'cfg(os = "windows")'.profile]
+link-libs = ["ws2_32", "iphlpapi"]
