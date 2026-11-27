@@ -1,0 +1,55 @@
+[package.upstream]
+url = "https://github.com/redboltz/async_mqtt/archive/refs/tags/10.3.1.tar.gz"
+checksum = "sha256:0d4796534d1db9fcf948393d46aae9aa636aab3a2eb44843868358623363ae1c"
+format = "tar.gz"
+strip-prefix = "async_mqtt-10.3.1"
+
+[package]
+name = "cabin-ports/async-mqtt"
+version = "10.3.1"
+# include/async_mqtt/util/utf8validate.hpp:15 credits Markus Kuhn's utf8_check.c
+# for utf8string_check; its copyright significance is uncertain.
+license = "BSL-1.0"
+include = ["CHANGELOG.adoc", "LICENSE", "README.md", "include"]
+
+[dependencies]
+"cabin-ports/boost-asio" = "=1.92.0"
+"cabin-ports/boost-assert" = "=1.92.0"
+"cabin-ports/boost-container" = "=1.92.0"
+"cabin-ports/boost-container-hash" = "=1.92.0"
+"cabin-ports/boost-endian" = "=1.92.0"
+"cabin-ports/boost-hana" = "=1.92.0"
+"cabin-ports/boost-lexical-cast" = "=1.92.0"
+"cabin-ports/boost-multi-index" = "=1.92.0"
+"cabin-ports/boost-numeric-conversion" = "=1.92.0"
+"cabin-ports/boost-preprocessor" = "=1.92.0"
+"cabin-ports/boost-system" = "=1.92.0"
+"cabin-ports/boost-utility" = "=1.92.0"
+"cabin-ports/boost-beast" = "=1.92.0"
+
+# Header-only, as upstream's default build.  Not ported: TLS (mqtts.hpp, wss.hpp;
+# upstream's ASYNC_MQTT_USE_TLS needs OpenSSL), Boost.Log logging
+# (ASYNC_MQTT_USE_LOG), and the separate-compilation library; all are off in
+# upstream's default build.  predefined_layer/ws.hpp needs boost-beast.
+# The buffer(first, last) constructor does not compile at C++17 (measured:
+# util/buffer.hpp:115, no matching constructor for std::string_view).
+[target.async_mqtt]
+type = "header-only"
+include-dirs = ["include"]
+# README.md:68 states C++17 or later.
+interface-cxx-standard = "c++17"
+deps = [
+  { name = "cabin-ports/boost-asio", public = true },
+  { name = "cabin-ports/boost-assert", public = true },
+  { name = "cabin-ports/boost-container", public = true },
+  { name = "cabin-ports/boost-container-hash", public = true },
+  { name = "cabin-ports/boost-endian", public = true },
+  { name = "cabin-ports/boost-hana", public = true },
+  { name = "cabin-ports/boost-lexical-cast", public = true },
+  { name = "cabin-ports/boost-multi-index", public = true },
+  { name = "cabin-ports/boost-numeric-conversion", public = true },
+  { name = "cabin-ports/boost-preprocessor", public = true },
+  { name = "cabin-ports/boost-system", public = true },
+  { name = "cabin-ports/boost-utility", public = true },
+  { name = "cabin-ports/boost-beast", public = true },
+]
