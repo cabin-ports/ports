@@ -1,0 +1,11 @@
+--- a/source/glbinding/include/glbinding/Function.h
++++ b/source/glbinding/include/glbinding/Function.h
+@@ -10,7 +10,7 @@
+ 
+ 
+ #ifndef WINAPI
+-#ifdef SYSTEM_WINDOWS
++#if defined(SYSTEM_WINDOWS) || defined(_WIN32)
+ #define WINAPI __stdcall
+ #else
+ #define WINAPI
