@@ -1,0 +1,101 @@
+[package.upstream]
+url = "https://github.com/opentracing/opentracing-cpp/archive/refs/tags/v1.6.0.tar.gz"
+checksum = "sha256:5b170042da4d1c4c231df6594da120875429d5231e9baa5179822ee8d1054ac3"
+format = "tar.gz"
+strip-prefix = "opentracing-cpp-1.6.0"
+# Patch 0001 fills in the CMake placeholders of the two copied headers
+# (version.h.in, config.h.in) that upstream's configure_file() would resolve,
+# with dynamic loading enabled as in upstream's default build.  Patch 0002 tests
+# _WIN32 in OPENTRACING_DECLARE_IMPL_FACTORY (include/opentracing/dynamic_load.h:47):
+# upstream tests WIN32, which CMake defines and MSVC does not, so cl would take
+# the GCC branch.
+patches = [
+  "patches/0001-fill-in-version-and-config.patch",
+  "patches/0002-test-_win32-in-the-factory-macro.patch",
+]
+
+[[package.upstream.copy]]
+from = "version.h.in"
+to = "include/opentracing/version.h"
+
+[[package.upstream.copy]]
+from = "config.h.in"
+to = "include/opentracing/config.h"
+
+[package]
+name = "cabin-ports/opentracing"
+version = "1.6.0"
+# src/dynamic_load_windows.cpp:12-31 (GetLastErrorAsString) and
+# mocktracer/src/json.cpp (WriteEscapedString) credit or follow
+# https://stackoverflow.com/a/17387176 and https://stackoverflow.com/a/33799784
+# (CC BY-SA 3.0).
+# mocktracer/src/utility.cpp:10 and :30, include/opentracing/util.h:44, the GCC
+# macro at src/dynamic_load_unix.cpp:28 and the table at
+# mocktracer/src/base64.cpp:20 credit outside sources; their copyright
+# significance is uncertain.
+license = "Apache-2.0 AND MIT AND BSD-3-Clause AND BSL-1.0 AND CC-BY-SA-3.0"
+include = [
+  "LICENSE",
+  "AUTHORS",
+  "include",
+  "src",
+  "patches",
+  "mocktracer/LICENSE.apache",
+  "mocktracer/include",
+  "mocktracer/src",
+  "3rd_party/include/opentracing/expected",
+  "3rd_party/include/opentracing/variant",
+]
+
+# Upstream sets CMAKE_CXX_STANDARD 11 (CMakeLists.txt:34); C++14 is the oldest
+# standard Cabin can request from MSVC for the implementation.
+[target.opentracing]
+type = "library"
+sources = [
+  "src/propagation.cpp",
+  "src/dynamic_load.cpp",
+  "src/noop.cpp",
+  "src/tracer.cpp",
+  "src/tracer_factory.cpp",
+  "src/ext/tags.cpp",
+]
+include-dirs = ["include", "3rd_party/include"]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+defines = ["OPENTRACING_STATIC"]
+interface-defines = ["OPENTRACING_STATIC"]
+links = "opentracing"
+
+[target.'cfg(family = "unix")'.sources]
+opentracing = ["src/dynamic_load_unix.cpp"]
+
+[target.'cfg(family = "windows")'.sources]
+opentracing = ["src/dynamic_load_windows.cpp"]
+
+[target.'cfg(os = "linux")'.profile]
+link-libs = ["dl"]
+
+# Not ported: the shared libraries, and the mocktracer plugin entry point
+# (mocktracer/src/dynamic_load.cpp), which upstream adds to its shared mocktracer
+# only.
+[target.opentracing_mocktracer]
+type = "library"
+sources = [
+  "mocktracer/src/mock_span_context.cpp",
+  "mocktracer/src/mock_span.cpp",
+  "mocktracer/src/in_memory_recorder.cpp",
+  "mocktracer/src/json_recorder.cpp",
+  "mocktracer/src/base64.cpp",
+  "mocktracer/src/propagation.cpp",
+  "mocktracer/src/utility.cpp",
+  "mocktracer/src/json.cpp",
+  "mocktracer/src/tracer.cpp",
+  "mocktracer/src/tracer_factory.cpp",
+]
+include-dirs = ["mocktracer/include"]
+deps = [{ name = "opentracing", public = true }]
+cxx-standard = "c++14"
+interface-cxx-standard = "c++11"
+defines = ["OPENTRACING_MOCK_TRACER_STATIC"]
+interface-defines = ["OPENTRACING_MOCK_TRACER_STATIC"]
+links = "opentracing_mocktracer"
