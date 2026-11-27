@@ -1,0 +1,38 @@
+[package.upstream]
+# Upstream tags no releases; the wscript's VERSION='0.3.3' only labels its
+# testbed build.  This is master's head at the time of porting, versioned
+# YYYY.M.D by its commit date (2024-01-30).
+url = "https://github.com/greenm01/poly2tri/archive/a922022da4c0d3a55b1d6b6d634219caea653053.tar.gz"
+checksum = "sha256:49fbff76622be6cc038a70139d79713c4e9e3da6b306abbd03b77d68ef9f96b7"
+format = "tar.gz"
+strip-prefix = "poly2tri-a922022da4c0d3a55b1d6b6d634219caea653053"
+
+[package]
+# The original repository (greenm01/poly2tri); jhasse's maintained fork is
+# the separate package jhasse-poly2tri.
+name = "cabin-ports/poly2tri"
+version = "2024.1.30"
+license = "BSD-3-Clause"
+include = ["AUTHORS", "LICENSE", "poly2tri"]
+
+# Every .cc under poly2tri/common and poly2tri/sweep, with the repository root
+# as the include directory, so consumers include <poly2tri/poly2tri.h>.  Not
+# ported: the testbed and its waf build.
+[target.poly2tri]
+type = "library"
+sources = [
+  "poly2tri/common/shapes.cc",
+  "poly2tri/sweep/advancing_front.cc",
+  "poly2tri/sweep/cdt.cc",
+  "poly2tri/sweep/sweep.cc",
+  "poly2tri/sweep/sweep_context.cc",
+]
+include-dirs = ["."]
+cxx-standard = "c++14"
+# Upstream states no standard; c++98 is measured (-std=c++98 -pedantic-errors
+# on the public headers).
+interface-cxx-standard = "c++98"
+links = "poly2tri"
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
