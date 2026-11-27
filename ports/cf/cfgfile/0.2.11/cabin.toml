@@ -1,0 +1,20 @@
+[package.upstream]
+url = "https://github.com/igormironchik/cfgfile/archive/refs/tags/0.2.11.tar.gz"
+checksum = "sha256:fdf76baf157f86acc048fdcaa7e3ed534817026710866265706978a76a8e8238"
+format = "tar.gz"
+strip-prefix = "cfgfile-0.2.11"
+
+[package]
+name = "cabin-ports/cfgfile"
+version = "0.2.11"
+license = "MIT"
+include = ["COPYING", "cfgfile"]
+
+# Consumers include <cfgfile/all.hpp>.  Not ported: the cfgfile.generator
+# tool, and the Qt modes (CFGFILE_QT_SUPPORT, CFGFILE_XML_SUPPORT), since Qt
+# is not a port.
+[target.cfgfile]
+type = "header-only"
+include-dirs = ["."]
+# CMakeLists.txt requires C++14.
+interface-cxx-standard = "c++14"
