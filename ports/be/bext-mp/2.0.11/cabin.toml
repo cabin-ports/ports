@@ -1,0 +1,18 @@
+[package.upstream]
+url = "https://github.com/qlibs/mp/archive/refs/tags/v2.0.11.tar.gz"
+checksum = "sha256:3e68ea2ee0eaf5bccbaee1850b950645d8036a68efde5fa5222f81991b5f8559"
+format = "tar.gz"
+strip-prefix = "mp-2.0.11"
+
+[package]
+name = "cabin-ports/bext-mp"
+version = "2.0.11"
+license = "MIT"
+include = [".github/LICENSE", "mp"]
+
+# The header is the extensionless file `mp`: write #include <mp>.
+# Interface standard: mp:48 ("C++20").
+[target.bext-mp]
+type = "header-only"
+include-dirs = ["."]
+interface-cxx-standard = "c++20"
