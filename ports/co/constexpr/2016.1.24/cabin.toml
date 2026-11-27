@@ -1,0 +1,27 @@
+[package.upstream]
+url = "https://github.com/elbeno/constexpr/archive/a98b1db39c909e0130d21d3910d4faf97035a625.tar.gz"
+checksum = "sha256:c8de3858896761b0511a10da707e1ee22cde93cc6aeb73e4728942bd9c2a0c8f"
+format = "tar.gz"
+strip-prefix = "constexpr-a98b1db39c909e0130d21d3910d4faf97035a625"
+
+[package]
+name = "cabin-ports/constexpr"
+# Upstream has no tags or releases and states no version (vcpkg's "1.0" is its
+# own label), so the version is the date of the archived master commit
+# a98b1db3 (2016-01-24).
+version = "2016.1.24"
+# cx_counter.h:5 credits b.atch.se (constexpr counter) and cx_pcg32.h:7 credits PCG32 for what they
+# adapt; their copyright significance is uncertain.
+license = "MIT"
+include = ["LICENSE", "README.md", "src/include"]
+
+# C++11 as stated in README.md:3-4.  cx_array.h and cx_strenc.h need C++14
+# (README.md:46,52), and the long double floor, ceil, trunc, round, fmod and
+# remainder overloads exist only at exactly -std=c++14 (#if __cplusplus ==
+# 201402L in cx_math.h).  cx_guid.h defines operator<< without inline, so two
+# translation units that include it fail to link with a duplicate symbol
+# (measured with clang++ -std=c++14 on macOS arm64).
+[target.constexpr]
+type = "header-only"
+include-dirs = ["src/include"]
+interface-cxx-standard = "c++11"
