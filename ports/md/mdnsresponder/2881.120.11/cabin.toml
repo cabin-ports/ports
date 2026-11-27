@@ -1,0 +1,136 @@
+[package.upstream]
+url = "https://github.com/apple-oss-distributions/mDNSResponder/archive/refs/tags/mDNSResponder-2881.120.11.tar.gz"
+checksum = "sha256:f665cf02b5c930f9b70fb39b7567f03dd821997594c56ce399098eaa0372fb15"
+format = "tar.gz"
+strip-prefix = "mDNSResponder-mDNSResponder-2881.120.11"
+# Patch 0001 fixes upstream's Windows build for MSVC: the Windows syslog shim
+# in dnssd_clientstub.c lacks the LOG_ERR level the file uses, and cl rejects
+# the C99 `static` array parameter that MDNS_STATIC_ARRAY_PARAM puts in
+# put_tlv_uuid (measured: check-windows, error C2065: 'LOG_ERR': undeclared
+# identifier; dnssd_ipc.h(245): error C2143: syntax error: missing ']').
+# BSD-3-Clause notice of dnssd_clientstub.c, dnssd_ipc.c and dnssd_ipc.h,
+# whose lines 0001 carries (the License's condition that redistributions of
+# source code retain it).  dnssd_clientstub.c:
+# Copyright (c) 2003-2026 Apple Inc. All rights reserved.
+# dnssd_ipc.c and dnssd_ipc.h:
+# Copyright (c) 2003-2024 Apple Inc. All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1.  Redistributions of source code must retain the above copyright notice,
+#     this list of conditions and the following disclaimer.
+# 2.  Redistributions in binary form must reproduce the above copyright notice,
+#     this list of conditions and the following disclaimer in the documentation
+#     and/or other materials provided with the distribution.
+# 3.  Neither the name of Apple Inc. ("Apple") nor the names of its
+#     contributors may be used to endorse or promote products derived from this
+#     software without specific prior written permission.
+#
+# THIS SOFTWARE IS PROVIDED BY APPLE AND ITS CONTRIBUTORS "AS IS" AND ANY
+# EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+# WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+# DISCLAIMED. IN NO EVENT SHALL APPLE OR ITS CONTRIBUTORS BE LIABLE FOR ANY
+# DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+# (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+# LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+# ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+# SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+patches = ["patches/0001-fix-msvc-build.patch"]
+
+# dns_sd.h is the one header upstream installs (mDNSPosix/Makefile:302);
+# mDNSShared also holds private headers such as general.h, so it stays off
+# the consumer include path.
+[[package.upstream.copy]]
+from = "mDNSShared/dns_sd.h"
+to = "include/dns_sd.h"
+
+[package]
+name = "cabin-ports/mdnsresponder"
+version = "2881.120.11"
+license = "BSD-3-Clause AND Apache-2.0"
+include = [
+  "LICENSE",
+  "include",
+  "mDNSCore/mdns_strict.h",
+  "mDNSShared/CommonServices.h",
+  "mDNSShared/DebugServices.c",
+  "mDNSShared/DebugServices.h",
+  "mDNSShared/GenLinkedList.c",
+  "mDNSShared/GenLinkedList.h",
+  "mDNSShared/SCCSVersioning.h",
+  "mDNSShared/dns_sd.h",
+  "mDNSShared/dns_sd_private.h",
+  "mDNSShared/dnssd_clientlib.c",
+  "mDNSShared/dnssd_clientstub.c",
+  "mDNSShared/dnssd_clientstub.h",
+  "mDNSShared/dnssd_errstring.c",
+  "mDNSShared/dnssd_ipc.c",
+  "mDNSShared/dnssd_ipc.h",
+  "mDNSShared/general.h",
+  "mDNSWindows/DLL/dllmain.c",
+  "mDNSWindows/VisualStudioSupport.h",
+  "patches",
+]
+
+# Only the client library is ported, as mDNSPosix/Makefile (libdns_sd) and
+# mDNSWindows/DLL/dnssd.vcxproj build it.  Not ported: the daemons, dns-sd
+# and the other clients, the NSS module, and the Java and .NET bindings.  On
+# macOS the library's DNSService* functions take the place of libSystem's
+# (measured).
+# Upstream states no C standard.  dns_sd.h needs C99 and compiles as C++98
+# (measured); C11 is the lowest Cabin accepts for MSVC.
+[target.dns_sd]
+type = "library"
+sources = [
+  "mDNSShared/dnssd_clientlib.c",
+  "mDNSShared/dnssd_clientstub.c",
+  "mDNSShared/dnssd_ipc.c",
+]
+include-dirs = ["include"]
+c-standard = "c11"
+interface-c-standard = "c99"
+interface-cxx-standard = "c++98"
+links = "dns_sd"
+
+[target.'cfg(family = "unix")'.sources]
+dns_sd = ["mDNSShared/dnssd_errstring.c"]
+
+[target.'cfg(os = "windows")'.sources]
+dns_sd = [
+  "mDNSShared/DebugServices.c",
+  "mDNSShared/GenLinkedList.c",
+  "mDNSWindows/DLL/dllmain.c",
+]
+
+[profile]
+include-dirs = ["mDNSCore", "mDNSShared"]
+
+[target.'cfg(family = "unix")'.profile]
+defines = ["MDNS_NO_STRICT=1"]
+
+# The socket of upstream's POSIX mdnsd (mDNSPosix/Makefile:65).  macOS and iOS
+# keep dnssd_ipc.h's default, the system mDNSResponder's /var/run/mDNSResponder.
+[target.'cfg(all(family = "unix", not(any(os = "macos", os = "ios"))))'.profile]
+defines = ["MDNS_UDS_SERVERPATH=\"/var/run/mdnsd\""]
+
+# _GNU_SOURCE (mDNSPosix/Makefile:112): without it glibc hides u_char under
+# strict -std=c11 (measured: check-linux, dnssd_clientstub.c:1563: error:
+# unknown type name 'u_char').
+[target.'cfg(os = "linux")'.profile]
+defines = ["NOT_HAVE_SA_LEN", "_GNU_SOURCE"]
+
+[target.'cfg(os = "windows")'.profile]
+defines = [
+  "MDNS_DEBUGMSGS=0",
+  "NOT_HAVE_SA_LEN",
+  "USE_TCP_LOOPBACK",
+  "WIN32",
+  "WIN32_CENTENNIAL",
+  "WIN32_LEAN_AND_MEAN",
+  "_CRT_SECURE_NO_DEPRECATE",
+  "_WINSOCK_DEPRECATED_NO_WARNINGS",
+]
+include-dirs = ["mDNSWindows"]
+link-libs = ["ws2_32", "iphlpapi", "advapi32"]
