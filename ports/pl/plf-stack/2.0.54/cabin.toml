@@ -1,0 +1,28 @@
+[package.upstream]
+# Upstream tags no releases; this is the last commit that changed plf_stack.h
+# (subject "v2.0.54"), with a later commit that updates only the bundled
+# plf_tools.h.  The bundled plf_tools.h and plf_tools_undef.h are not packaged:
+# plf-tools provides them.
+url = "https://github.com/mattreecebentley/plf_stack/archive/8922c525b5833ccd81ba2d2f0444e558139b2bc6.tar.gz"
+checksum = "sha256:e67cd4e0befee7338c002e8bbe716db2ba81b0c260c96174e1d0c8fff4ea5843"
+format = "tar.gz"
+strip-prefix = "plf_stack-8922c525b5833ccd81ba2d2f0444e558139b2bc6"
+
+[package]
+name = "cabin-ports/plf-stack"
+version = "2.0.54"
+license = "Zlib"
+include = [
+  "LICENSE.md",
+  "plf_stack.h",
+]
+
+[dependencies]
+"cabin-ports/plf-tools" = "^1.0.18"
+
+# Standard: C++98 per README.md.
+[target.plf-stack]
+type = "header-only"
+include-dirs = ["."]
+deps = [{ name = "cabin-ports/plf-tools", public = true }]
+interface-cxx-standard = "c++98"
