@@ -57,6 +57,14 @@ int main(void) {
   CHECK(cpSpaceContainsBody(space, ball));
   CHECK(cpSpaceContainsShape(space, floor_));
 
+#ifdef __BLOCKS__
+  { /* The one dynamic body this test added. */
+    __block int bodies = 0;
+    cpSpaceEachBody_b(space, ^(cpBody *body) { bodies++; });
+    CHECK(bodies == 1);
+  }
+#endif
+
   for (i = 0; i < 30; i++) cpSpaceStep(space, 1.0 / 60.0);
   CHECK(near(cpBodyGetVelocity(ball).y, -10.0 * 30 / 60.0));
   CHECK(near(cpBodyGetPosition(ball).y, 10.0 - 10.0 * (30 * 29 / 2) / 3600.0));

@@ -45,8 +45,10 @@ include = ["LICENSE.txt", "include", "patches", "src"]
 
 # Named chipmunk2d as upstream and ConanCenter do; vcpkg calls it chipmunk.
 # Upstream builds with -std=gnu99 and, in Release, -ffast-math (CMakeLists.txt);
-# c11 is cl's lowest C standard.  Not reproduced: -ffast-math, the GNU dialect, and -fblocks (the cpSpace *_b
-# block-callback functions are compiled out).
+# c11 is cl's lowest C standard.  Not reproduced: -ffast-math and the GNU
+# dialect.  -fblocks, which upstream passes to Clang (CMakeLists.txt:56-58), is
+# not reproduced either; Apple Clang enables blocks itself, so the ten *_b
+# block-callback functions are built there (measured).
 # cpHastySpace.h declares no extern "C": a C++ consumer includes it inside
 # extern "C" (measured: undefined reference to cpHastySpaceNew()).
 # Not ported: the Objective-C wrapper, demo, the sample programs, and the CMake, Xcode and other IDE projects.
