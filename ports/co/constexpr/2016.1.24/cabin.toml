@@ -3,6 +3,36 @@ url = "https://github.com/elbeno/constexpr/archive/a98b1db39c909e0130d21d3910d4f
 checksum = "sha256:c8de3858896761b0511a10da707e1ee22cde93cc6aeb73e4728942bd9c2a0c8f"
 format = "tar.gz"
 strip-prefix = "constexpr-a98b1db39c909e0130d21d3910d4faf97035a625"
+# Patch 0001 declares the inserter, sorter and merger specializations of cx_array.h under
+# the access of their primary templates (measured, check-linux, GCC: "redeclared with
+# different access").  Patch 0002 leaves out the unnamed namespace around the undefined
+# error sentinels of cx_math.h under cl (measured, check-windows: C7631 "variable with
+# internal linkage declared but not defined").
+# MIT License notice of cx_array.h and cx_math.h, whose lines the patches carry (the
+# License's condition that copies include it):
+# Copyright (c) 2015, 2016 Ben Deane
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+# THE SOFTWARE.
+patches = [
+  "patches/0001-fix-array-helper-access-labels.patch",
+  "patches/0002-msvc-external-linkage-error-sentinels.patch",
+]
 
 [package]
 name = "cabin-ports/constexpr"
@@ -13,7 +43,7 @@ version = "2016.1.24"
 # cx_counter.h:5 credits b.atch.se (constexpr counter) and cx_pcg32.h:7 credits PCG32 for what they
 # adapt; their copyright significance is uncertain.
 license = "MIT"
-include = ["LICENSE", "README.md", "src/include"]
+include = ["LICENSE", "README.md", "patches", "src/include"]
 
 # C++11 as stated in README.md:3-4.  cx_array.h and cx_strenc.h need C++14
 # (README.md:46,52), and the long double floor, ceil, trunc, round, fmod and

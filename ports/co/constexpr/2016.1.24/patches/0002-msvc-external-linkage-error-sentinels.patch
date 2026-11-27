@@ -1,0 +1,23 @@
+--- a/src/include/cx_math.h
++++ b/src/include/cx_math.h
+@@ -225,8 +225,10 @@
+ {
+   namespace err
+   {
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     namespace
+     {
++#endif
+       extern const char* abs_runtime_error;
+       extern const char* fabs_runtime_error;
+       extern const char* sqrt_domain_error;
+@@ -252,7 +254,9 @@
+       extern const char* atanh_domain_error;
+       extern const char* pow_runtime_error;
+       extern const char* erf_runtime_error;
++#if !(defined(_MSC_VER) && !defined(__clang__))
+     }
++#endif
+   }
+ 
+   //----------------------------------------------------------------------------
