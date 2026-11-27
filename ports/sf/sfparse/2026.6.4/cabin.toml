@@ -1,0 +1,26 @@
+[package.upstream]
+url = "https://github.com/ngtcp2/sfparse/archive/4b313cfd2e1b389ae632b36dcd50402307289af2.tar.gz"
+checksum = "sha256:cc8256a65a03577654941839e100b3d61fe7f7d69f2a08f9b2f17a123b580b4c"
+format = "tar.gz"
+strip-prefix = "sfparse-4b313cfd2e1b389ae632b36dcd50402307289af2"
+
+[package]
+name = "cabin-ports/sfparse"
+# Upstream has no release or tag; configure.ac's 0.0.0-DEV is a placeholder,
+# so the version is the commit date (2026-06-04) of the pinned commit
+# 4b313cfd2e1b389ae632b36dcd50402307289af2 as YYYY.M.D.
+version = "2026.6.4"
+license = "MIT"
+include = ["COPYING", "README.rst", "sfparse.c", "sfparse.h"]
+
+# Upstream states no standard; the interface standards are measured with
+# -pedantic-errors (sfparse.h: an anonymous union, a C11 feature, fails
+# -std=c99; C++98 passes).
+[target.sfparse]
+type = "library"
+sources = ["sfparse.c"]
+include-dirs = ["."]
+links = "sfparse"
+c-standard = "c11"
+interface-c-standard = "c11"
+interface-cxx-standard = "c++98"
