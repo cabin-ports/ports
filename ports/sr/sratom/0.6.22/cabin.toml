@@ -1,0 +1,49 @@
+[package.upstream]
+# GitLab generates this tag archive on request, so its bytes could change;
+# the checksum, whose archive vcpkg pins by SHA-512 too, would catch that.
+url = "https://gitlab.com/lv2/sratom/-/archive/v0.6.22/sratom-v0.6.22.tar.gz"
+checksum = "sha256:4a88bde345370584b279895c2cb8f7f8341d2b31b6ca50e128faea02f02d3e76"
+format = "tar.gz"
+strip-prefix = "sratom-v0.6.22"
+
+[package]
+name = "cabin-ports/sratom"
+version = "0.6.22"
+license = "ISC"
+# Licence: ISC (COPYING), under which every published file is available;
+# LICENSES/ also holds the other texts REUSE cites.
+include = ["COPYING", "LICENSES", "include", "src"]
+# Upstream builds C99 (meson.build:10); C11 is the oldest standard Cabin can
+# request from MSVC.
+c-standard = "c11"
+interface-c-standard = "c99"
+# sratom.h includes serd.h, whose enums end in trailing commas, which C++
+# allows from C++11.
+interface-cxx-standard = "c++11"
+
+[dependencies]
+"cabin-ports/lv2" = "=1.18.10"
+"cabin-ports/serd" = "=0.32.10"
+"cabin-ports/sord" = "=0.16.22"
+
+[profile]
+defines = ["SRATOM_INTERNAL", "SRATOM_STATIC"]
+
+[target.'cfg(family = "unix")'.profile]
+link-libs = ["m"]
+
+# Meson's default_library=static build; SRATOM_STATIC keeps sratom.h from
+# declaring the API dllimport on Windows.  Not ported: the shared library and
+# the documentation.  Not reproduced: hidden symbol visibility
+# (meson.build:164), since Cabin drops a dependency's raw compiler flags.
+[target.sratom]
+type = "library"
+sources = ["src/sratom.c"]
+include-dirs = ["include"]
+interface-defines = ["SRATOM_STATIC"]
+links = "sratom"
+deps = [
+  { name = "cabin-ports/lv2", public = true },
+  { name = "cabin-ports/serd", public = true },
+  { name = "cabin-ports/sord", public = true },
+]
